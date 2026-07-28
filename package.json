@@ -1,0 +1,20 @@
+{
+  "name": "@mcpdesc/specification",
+  "version": "0.0.0-private",
+  "private": true,
+  "description": "Development and validation tooling for the MCP Description specification",
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/validate-repository.mjs",
+    "validate": "node scripts/validate-repository.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "yaml": "^2.9.0"
+  },
+  "license": "Apache-2.0"
+}

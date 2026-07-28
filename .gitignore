@@ -1,0 +1,10 @@
+# Dependencies
+node_modules/
+
+# Logs and OS/editor cruft
+*.log
+.DS_Store
+
+# Local environment overrides
+.env
+.env.local

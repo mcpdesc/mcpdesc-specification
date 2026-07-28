@@ -1,0 +1,45 @@
+name: Proposal tracking
+description: Track a design proposal for the MCP Description specification.
+title: "[proposal] <short title>"
+labels: ["proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to track a proposal document under `proposals/`.
+        Follow `proposals/0000-template.md` and the proposal lifecycle in `GOVERNANCE.md`.
+  - type: input
+    id: proposal-file
+    attributes:
+      label: Proposal file
+      description: Path to the proposal document, e.g. `proposals/0003-example.md`.
+    validations:
+      required: false
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: One-paragraph summary of the proposal.
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Proposal status
+      options:
+        - Draft
+        - Review
+        - Accepted
+        - Rejected
+        - Withdrawn
+        - Implemented
+        - Superseded
+    validations:
+      required: true
+  - type: textarea
+    id: historical-input
+    attributes:
+      label: Historical inputs and references
+      description: Link any originating issues or primary sources, preserving their attribution and dates.
+    validations:
+      required: false

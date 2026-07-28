@@ -1,0 +1,65 @@
+name: Specification change
+description: Propose a change or clarification to the MCP Description specification.
+title: "[spec] <short summary>"
+labels: ["specification"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for changes to normative text, schemas, or examples.
+        Non-trivial or potentially breaking changes should also include a proposal
+        under `proposals/`. See `CONTRIBUTING.md` and `GOVERNANCE.md`.
+  - type: dropdown
+    id: target-version
+    attributes:
+      label: Target version
+      options:
+        - "0.8.0 (community working draft)"
+        - "Future / undecided"
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and use cases
+      description: What problem does this solve, and for whom?
+    validations:
+      required: true
+  - type: dropdown
+    id: compatibility
+    attributes:
+      label: Expected compatibility impact
+      options:
+        - "Editorial / non-normative"
+        - "Compatible clarification"
+        - "Compatible addition"
+        - "Potentially breaking"
+        - "Breaking"
+        - "Unknown / needs analysis"
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed change
+      description: Outline the intended normative text, schema, and example changes.
+    validations:
+      required: true
+  - type: textarea
+    id: primary-sources
+    attributes:
+      label: Primary MCP sources
+      description: Link the authoritative MCP specification sources relevant to this change, if any.
+    validations:
+      required: false
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Acknowledgements
+      options:
+        - label: I have searched existing issues and proposals.
+          required: true
+        - label: I understand that this repository requires no CLA, copyright assignment, or DCO sign-off, and that I retain copyright in my contribution.
+          required: true
+        - label: If AI assistance was used to prepare this issue, I will disclose the tool and extent of assistance.
+          required: true

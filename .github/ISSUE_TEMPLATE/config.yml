@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: MCP Description specification governance
+    url: https://github.com/mcpdesc/mcpdesc-specification/blob/main/GOVERNANCE.md
+    about: Read the governance and decision process before opening a normative change.
+  - name: Stable v0.7.0 (Cisco Open)
+    url: https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec
+    about: The canonical source for the current stable v0.7.0 release lives in Cisco Open.
