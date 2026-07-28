@@ -77,6 +77,13 @@ if (status && status.draft?.version !== '0.8.0') fail('draft status must identif
 if (status && status.draft?.released !== false) fail('v0.8.0 must remain unreleased during bootstrap');
 if (latest && latest['mcp-description'] !== '0.7.0') fail('schemas/latest.json must remain on 0.7.0 until release');
 
+if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
+  const draft = readJson('schemas/draft.json');
+  if (draft && draft['mcp-description'] !== '0.8.0') fail('schemas/draft.json must identify draft 0.8.0');
+  if (draft && draft.released !== false) fail('schemas/draft.json must remain unreleased while v0.8.0 is a draft');
+  if (draft && latest && draft['mcp-description'] === latest['mcp-description']) fail('schemas/draft.json must not equal the released schemas/latest.json version');
+}
+
 const schemaDir = path.join(root, 'schemas', 'mcp-description');
 const schemas = new Map();
 if (fs.existsSync(schemaDir)) {

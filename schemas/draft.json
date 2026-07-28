@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Identifies the in-progress MCP Description draft version. This is NOT a released-version pointer; released versions are tracked in latest.json.",
+  "mcp-description": "0.8.0",
+  "released": false,
+  "branch": "draft/0.8.0",
+  "note": "No schemas/mcp-description/0.8.0.json exists yet. The canonical community schema $id URI must be explicitly selected and recorded before the draft schema is created."
+}

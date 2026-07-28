@@ -8,6 +8,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 <!-- update with `markdown-toc -i CHANGELOG.md --maxdepth 2 -->
 <!-- toc -->
 
+- [[0.8.0] — Unreleased (community working draft)](#080--unreleased-community-working-draft)
 - [[0.7.0] — 2026-03-23](#070--2026-03-23)
 - [[0.6.0] — 2026-03-20](#060--2026-03-20)
 - [[0.5.2] — 2026-03-18](#052--2026-03-18)
@@ -18,6 +19,19 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 - [[0.1.0] — 2025-11-01](#010--2025-11-01)
 
 <!-- tocstop -->
+
+## [0.8.0] — Unreleased (community working draft)
+
+This section tracks changes for the MCP Description v0.8.0 community working draft.
+v0.8.0 is under active development on the `draft/0.8.0` branch and is **not** a
+released specification. The current stable release remains v0.7.0, whose canonical
+source is `cisco-open/mcptoolkit-contract`.
+
+### Planned / under discussion
+- Alignment with the MCP protocol release dated 2026-07-28 — see [`proposals/0001-mcp-2026-07-28-alignment.md`](../proposals/0001-mcp-2026-07-28-alignment.md) and [`planning/mcp-2026-07-28-impact-matrix.md`](../planning/mcp-2026-07-28-impact-matrix.md).
+- Support for documenting MCP `_meta` — see [`proposals/0002-meta-support.md`](../proposals/0002-meta-support.md).
+
+_No normative schema changes have been made yet; `schemas/latest.json` remains at 0.7.0 and no `schemas/mcp-description/0.8.0.json` exists until the canonical community schema `$id` is selected._
 
 ## [0.7.0] — 2026-03-23
 

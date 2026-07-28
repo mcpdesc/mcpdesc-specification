@@ -1,20 +1,26 @@
 ---
 title: MCP Description Specification
-version: 0.7.0
-status: Draft
-date: 2026-03-23
+version: 0.8.0
+status: Community working draft
+released: false
+baseline: 0.7.0
+date: 2026-07-28
 editors:
-  - name: Cisco DevNet
+  - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
+  - name: "{mcpdesc} community"
+    url: https://github.com/mcpdesc/mcpdesc-specification
 ---
 
 # MCP Description Specification
 
-**Version**: 0.7.0
+**Version**: 0.8.0 (community working draft)
 
-**Status**: Draft
+**Status**: Community working draft — not released
 
-**Date**: March 23, 2026
+**Baseline**: v0.7.0 (the normative content below currently tracks the v0.7.0 baseline pending v0.8.0 changes)
+
+**Date**: 2026-07-28
 
 ## Abstract
 
@@ -24,5 +30,5 @@ An MCP Description declares the tools, resources, prompts, transports, security 
 
 ## Status of This Document
 
-This document is a **Draft** specification. It is intended for review and feedback. The specification may change before reaching a stable release.
+This document is the **community working draft** for MCP Description v0.8.0. It is **not** a released specification. Its normative content currently tracks the stable v0.7.0 baseline and will change as v0.8.0 proposals are accepted. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
 
