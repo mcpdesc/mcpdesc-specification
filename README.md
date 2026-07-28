@@ -35,7 +35,6 @@ proposals/                    Specification change proposals
 planning/                     Release planning and protocol-impact analyses
 scripts/                      Repository validation and maintenance scripts
 ORIGIN.md                     Imported-source provenance
-MODIFICATIONS.md              Record of changes to imported material
 GOVERNANCE.md                 Current community governance
 CONTRIBUTING.md               Contribution process and licensing terms
 ```
@@ -50,4 +49,4 @@ There is no CLA, copyright assignment, or DCO sign-off requirement. By contribut
 
 Repository content is licensed under Apache License 2.0 unless explicitly stated otherwise. Cisco retains copyright in Cisco-originated contributions where applicable. Subsequent contributors or their employers retain copyright in their respective contributions.
 
-See [`LICENSE`](LICENSE), [`NOTICE`](NOTICE), [`ORIGIN.md`](ORIGIN.md), and [`MODIFICATIONS.md`](MODIFICATIONS.md).
+See [`LICENSE`](LICENSE), [`NOTICE`](NOTICE), and [`ORIGIN.md`](ORIGIN.md).

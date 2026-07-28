@@ -35,7 +35,6 @@ const requiredFiles = [
   'LICENSE',
   'NOTICE',
   'ORIGIN.md',
-  'MODIFICATIONS.md',
   'GOVERNANCE.md',
   'CONTRIBUTING.md',
   'specification-status.json',
