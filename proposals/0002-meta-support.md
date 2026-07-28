@@ -28,9 +28,38 @@ MCP uses `_meta` as an extensibility and metadata mechanism. MCP Description v0.
 - Treat `_meta` as a substitute for all missing first-class fields.
 - Standardize third-party metadata namespaces without their owners.
 
-## Design questions
+## Primary-source `_meta` inventory (MCP 2026-07-28)
 
-1. Should MCP Description permit literal `_meta` examples, a JSON Schema describing expected `_meta`, or both?
+From the [changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog)
+and [release notes](https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/),
+the stateless rework makes `_meta` central. Standard keys now include:
+
+- `io.modelcontextprotocol/protocolVersion`, `io.modelcontextprotocol/clientCapabilities`,
+  `io.modelcontextprotocol/clientInfo` (per-request), and
+  `io.modelcontextprotocol/serverInfo` (per-result) ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)).
+- `io.modelcontextprotocol/logLevel` (per-request log level, replacing `logging/setLevel`) ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)).
+- `io.modelcontextprotocol/subscriptionId` (tags subscription notifications) ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)).
+- W3C Trace Context keys `traceparent`, `tracestate`, `baggage` ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414)).
+
+The key observation for a **static** description: almost all of these are
+*runtime* values exchanged per request/result. A static MCP Description should
+document *which* `_meta` a server defines or expects and *how it is shaped*, not
+carry live values. Reverse-DNS namespacing (`io.modelcontextprotocol/…`,
+vendor `com.example/…`) is the MCP convention to represent and validate.
+
+## Design alternatives (to be expanded before acceptance)
+
+1. **Schema-only.** MCP Description declares a JSON Schema for expected `_meta`
+   at a given level (e.g. per tool), plus a namespace. Portable and safe; no live
+   values published. Weaker at showing concrete usage.
+2. **Schema + curated examples.** As above, plus explicit non-sensitive example
+   `_meta` objects. More illustrative; requires strict guidance to avoid leaking
+   credentials, identifiers, or trace context.
+
+A dedicated MCP Description construct (rather than raw `_meta`) should be
+evaluated for domain-error documentation, per the design-first input.
+
+## Design questions
 2. At which description levels is `_meta` meaningful: document, server, tool, resource, resource template, prompt, transport, security scheme, extension, or operation/result documentation?
 3. How are reverse-DNS or other namespaces represented and validated?
 4. Which metadata is safe to publish in a static artifact?
