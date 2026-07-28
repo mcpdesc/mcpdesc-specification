@@ -2,12 +2,14 @@
 
 A portable, machine-readable contract format for [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers.
 
-> This directory is the **canonical source of truth** for the MCP Description
-> (`mcpdesc`) format. It is maintained inside the
-> [`mcptoolkit-contract`](../README.md) repository, which also provides the
-> reference tooling (`mcpcontract`). Implementations vendor a single schema
-> version from [`../schemas/mcp-description/`](../schemas/mcp-description/) and
-> upgrade when the format advances.
+> This directory contains the MCP Description (`mcpdesc`) specification. Version
+> **0.7.0** is the current stable release; its canonical source remains the Cisco
+> Open [`mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec)
+> repository, which also provides the reference tooling (`mcpcontract`). This
+> repository, [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification),
+> is the development home for the **0.8.0** community working draft. Implementations
+> vendor a single schema version from [`../schemas/mcp-description/`](../schemas/mcp-description/)
+> and upgrade when the format advances.
 
 ## Overview
 
@@ -17,11 +19,12 @@ Think of it as **OpenAPI for MCP servers**: a static contract that enables disco
 
 ## Status
 
-| Field | Value |
-|-------|-------|
-| Current version | **0.7.0** |
-| Status | **Draft** |
-| Schema | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
+| Version | Status | Canonical source | Schema |
+|---------|--------|------------------|--------|
+| 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
+| 0.8.0 | Community working draft | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | Draft in progress on `draft/0.8.0` |
+
+The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
 
 ## Quick Example
 

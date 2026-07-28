@@ -1,0 +1,14 @@
+{
+  "stable": {
+    "version": "0.7.0",
+    "status": "current-stable-release",
+    "canonicalSource": "https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec"
+  },
+  "draft": {
+    "version": "0.8.0",
+    "status": "community-working-draft",
+    "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
+    "branch": "draft/0.8.0",
+    "released": false
+  }
+}
