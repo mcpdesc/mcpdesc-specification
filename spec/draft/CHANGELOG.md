@@ -23,13 +23,13 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 ## [0.8.0] — Unreleased (community working draft)
 
 This section tracks changes for the MCP Description v0.8.0 community working draft.
-v0.8.0 is under active development on the `draft/0.8.0` branch and is **not** a
+v0.8.0 is under active development in the `spec/draft/` folder on `main` and is **not** a
 released specification. The current stable release remains v0.7.0, whose canonical
 source is `cisco-open/mcptoolkit-contract`.
 
 ### Planned / under discussion
-- Alignment with the MCP protocol release dated 2026-07-28 — see [`proposals/0001-mcp-2026-07-28-alignment.md`](../proposals/0001-mcp-2026-07-28-alignment.md) and [`planning/mcp-2026-07-28-impact-matrix.md`](../planning/mcp-2026-07-28-impact-matrix.md).
-- Support for documenting MCP `_meta` — see [`proposals/0002-meta-support.md`](../proposals/0002-meta-support.md).
+- Alignment with the MCP protocol release dated 2026-07-28 — see [`proposals/0001-mcp-2026-07-28-alignment.md`](../../proposals/0001-mcp-2026-07-28-alignment.md).
+- Support for documenting MCP `_meta` — see [`proposals/0002-meta-support.md`](../../proposals/0002-meta-support.md).
 
 _No normative schema changes have been made yet; `schemas/latest.json` remains at 0.7.0 and no `schemas/mcp-description/0.8.0.json` exists until the canonical community schema `$id` is selected._
 
@@ -85,7 +85,7 @@ _No normative schema changes have been made yet; `schemas/latest.json` remains a
 ## [0.5.0] — 2026-03-17
 
 ### Changed
-- **Renamed `transport` field to `transports`** (plural) for consistency with `tools`, `resources`, `prompts` and OpenAPI's `servers` — see [DECISION-001](../docs/maintainers/design/mcp-description/DECISION-001-transports-array.md)
+- **Renamed `transport` field to `transports`** (plural) for consistency with `tools`, `resources`, `prompts` and OpenAPI's `servers` — see [DECISION-001](../../docs/maintainers/design/mcp-description/DECISION-001-transports-array.md)
 - **Added transport-scoped `security`** — each transport MAY include its own `security` array that overrides the root-level default (see Section 6.4)
 - Root-level `security` is now the default; transport-level `security` overrides it (OpenAPI-style inheritance)
 

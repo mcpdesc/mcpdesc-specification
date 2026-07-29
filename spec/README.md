@@ -22,7 +22,7 @@ Think of it as **OpenAPI for MCP servers**: a static contract that enables disco
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
-| 0.8.0 | Community working draft | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | Draft in progress on `draft/0.8.0` |
+| 0.8.0 | Community working draft | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | In progress in [`draft/`](draft/) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
 
@@ -54,16 +54,23 @@ tools:
 
 ## Directory Structure
 
+Each specification version lives in its own folder so earlier versions can be
+read directly, without consulting git history. The in-progress working draft
+lives in `draft/`; when it is released it is frozen into a version folder
+(e.g. `0.8.0/`) and `draft/` is re-initialized from that snapshot.
+
 ```
 spec/
-  mcp-description.md    Assembled normative specification text
-  sections/            Normative specification, section by section
-  guides/              Rationale, tutorials, and comparisons (non-normative)
-  examples/            Example MCP Description documents
-  extensions/          Vendor extension specifications
+  draft/               In-progress working draft (currently 0.8.0)
+    mcp-description.md  Assembled normative specification text
+    sections/          Normative specification, section by section
+    guides/            Rationale, tutorials, and comparisons (non-normative)
+    examples/          Example MCP Description documents
+    extensions/        Vendor extension specifications
+    CHANGELOG.md       Format version history
+  0.7.0/               Frozen release pointer (canonical source: Cisco Open)
+  README.md            Version index and status (this file)
   implementations.md   Known implementations and tooling
-  CHANGELOG.md         Format version history
-  GOVERNANCE.md        How the specification evolves
 ```
 
 Versioned JSON Schemas live at the repository root under
@@ -72,10 +79,10 @@ Versioned JSON Schemas live at the repository root under
 
 ## Getting Started
 
-- **Read the spec**: [mcp-description.md](mcp-description.md)
-- **Explore examples**: [examples/](examples/)
+- **Read the spec**: [draft/mcp-description.md](draft/mcp-description.md)
+- **Explore examples**: [draft/examples/](draft/examples/)
 - **Try the schema**: [../schemas/mcp-description/0.7.0.json](../schemas/mcp-description/0.7.0.json) (latest — see [../schemas/latest.json](../schemas/latest.json))
-- **Write your first description**: [guides/getting-started.md](guides/getting-started.md)
+- **Write your first description**: [draft/guides/getting-started.md](draft/guides/getting-started.md)
 
 ## Key Features
 
@@ -88,12 +95,12 @@ Versioned JSON Schemas live at the repository root under
 
 ## Specification Extensions
 
-Vendors can attach additional metadata using the `x-{vendor}-{feature}` convention. See [extensions/](extensions/) for registered extensions.
+Vendors can attach additional metadata using the `x-{vendor}-{feature}` convention. See [draft/extensions/](draft/extensions/) for registered extensions.
 
 ## Contributing
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for how to propose changes, and
-[GOVERNANCE.md](GOVERNANCE.md) for how the specification evolves.
+[GOVERNANCE.md](../GOVERNANCE.md) for how the specification evolves.
 
 ## License
 

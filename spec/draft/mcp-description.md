@@ -26,7 +26,7 @@ editors:
 
 This specification defines the **MCP Description** format — a portable, machine-readable document that describes the capabilities of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
 
-An MCP Description declares the tools, resources, prompts, transports, security requirements, and metadata of an MCP server in a static JSON document, enabling offline discovery, documentation generation, contract validation, and [interoperable tooling](implementations.md) across the MCP ecosystem.
+An MCP Description declares the tools, resources, prompts, transports, security requirements, and metadata of an MCP server in a static JSON document, enabling offline discovery, documentation generation, contract validation, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
 
 ## Status of This Document
 
@@ -1195,7 +1195,7 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 
 The normative JSON Schema for this specification version is available at:
 
-- [../schemas/mcp-description/0.7.0.json](../schemas/mcp-description/0.7.0.json)
+- [../../schemas/mcp-description/0.7.0.json](../../schemas/mcp-description/0.7.0.json)
 - `https://developer.cisco.com/mcp-description/schema/0.7.0`
 
 ---

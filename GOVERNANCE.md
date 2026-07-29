@@ -62,6 +62,11 @@ MCP Description v0.8.0 is targeted to preserve v0.7.0 documents wherever reasona
 
 ## Proposal lifecycle
 
+Proposals are working documents used to refine a major or otherwise non-trivial
+change and agree on its scope before it is written into the specification.
+Deliberation happens in a GitHub issue; the proposal document captures the design
+and the decision.
+
 Proposal statuses are:
 
 - **Draft** — under active authoring;
@@ -74,11 +79,21 @@ Proposal statuses are:
 
 Proposal numbers are assigned sequentially. Acceptance of a proposal does not itself publish a specification release.
 
+### How a proposal moves through the process
+
+1. **Open an issue** describing the problem and use cases. Discussion and deliberation happen there.
+2. **Author the proposal** on a `feature/<slug>-proposal` branch using [`proposals/0000-template.md`](proposals/0000-template.md), with status `Draft` then `Review`, and open a pull request.
+3. **Review** happens on that pull request. Only **Accepted** proposals are merged to `main`; the merged document is the durable decision record. A **Rejected** or **Withdrawn** proposal stays as its closed pull request and issue on GitHub, with the rationale recorded there — it is not stored in the repository.
+4. **Implement** the accepted proposal on a separate `feature/<topic>` branch that changes `spec/draft/` and the affected schema, examples, and `spec/draft/CHANGELOG.md`.
+5. When the implementation merges, set the proposal status to **Implemented** and link it from the changelog entry.
+
+Because only accepted proposals are merged, the `proposals/` directory holds only the changes that are approved for, or already in, the specification.
+
 ## Branch and release model
 
-- `main` carries the stable reference baseline and current repository governance.
-- `draft/0.8.0` is the v0.8.0 integration branch.
-- Feature work targets the active draft branch.
+- `main` is the integration branch and the default view of the project. Every released specification version lives in its own `spec/<version>/` folder, and the in-progress draft lives in `spec/draft/`, so all versions are readable without switching branches.
+- Feature branches target `main` via pull request and change `spec/draft/`.
+- Released versions are frozen into `spec/<version>/` and tagged; `spec/draft/` is then re-initialized from that snapshot.
 - `schemas/latest.json` identifies the latest stable schema, not the active draft.
 - Draft status may be represented separately in `schemas/draft.json` and `specification-status.json`.
 - Releases require passing validation, updated normative text and schemas, examples, changelog and migration guidance, an explicit maintainer decision, and an annotated version tag.

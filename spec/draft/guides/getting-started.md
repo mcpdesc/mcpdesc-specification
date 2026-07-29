@@ -163,7 +163,7 @@ prompts:
 
 ## Step 6: Validate
 
-To validate your document, use any JSON Schema validator against the [schema file](../../schemas/mcp-description/0.7.0.json) or the mcpcontract CLI. 
+To validate your document, use any JSON Schema validator against the [schema file](../../../schemas/mcp-description/0.7.0.json) or the mcpcontract CLI. 
 
 ```bash
 # Using the mcpcontract CLI

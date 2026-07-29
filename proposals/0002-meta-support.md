@@ -1,7 +1,7 @@
 # Proposal 0002: Support MCP `_meta` in MCP Description
 
 - Status: Draft
-- Author(s): `{mcpdesc}` contributors
+- Author(s): Stève Sfartz
 - Created: 2026-07-28
 - Target version: 0.8.0
 - Historical input: https://github.com/mcpdesc/mcpdesc.org/issues/5
@@ -12,14 +12,15 @@ Define whether and how MCP Description documents can describe MCP `_meta` values
 
 ## Problem
 
-MCP uses `_meta` as an extensibility and metadata mechanism. MCP Description v0.7.0 does not provide a documented model for it. Design-first work also identified a need to document domain-specific error information, for which `_meta` may be relevant, but this use case must be validated against the final MCP specification.
+MCP uses `_meta` as an extensibility and metadata mechanism. MCP Description v0.7.0 does not provide a documented model for it. Design-first work also identified a need to document domain-specific error information, for which `_meta` may be relevant, but this use case must be validated against the MCP specifications.
 
 ## Goals
 
-- Identify every MCP object or interaction where `_meta` is defined or permitted in MCP 2026-07-28.
+- Identify every MCP object or interaction where `_meta` is defined or permitted in the MCP specifications
 - Separate runtime `_meta` values from static declarations about supported metadata.
 - Define namespace, collision, portability, and security expectations.
 - Support useful documentation without turning MCP Description into an unrestricted duplicate payload.
+- Address latest MCP specifications: June 2025, November 2025 and July 2026.
 
 ## Non-goals
 
@@ -47,7 +48,7 @@ Static descriptions must not encourage publication of credentials, tokens, user 
 
 ## Required outputs before acceptance
 
-- Primary-source inventory of `_meta` positions and semantics in MCP 2026-07-28.
+- Primary-source inventory of `_meta` positions and semantics in the MCP specifications
 - At least two design alternatives with tradeoffs.
 - Normative text draft.
 - JSON Schema diff.

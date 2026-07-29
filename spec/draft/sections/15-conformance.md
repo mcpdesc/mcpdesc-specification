@@ -62,7 +62,7 @@ See [examples/full-featured.yaml](../examples/full-featured.yaml) for a complete
 
 The normative JSON Schema for this specification version is available at:
 
-- [../../schemas/mcp-description/0.7.0.json](../../schemas/mcp-description/0.7.0.json)
+- [../../../schemas/mcp-description/0.7.0.json](../../../schemas/mcp-description/0.7.0.json)
 - `https://developer.cisco.com/mcp-description/schema/0.7.0`
 
 ---

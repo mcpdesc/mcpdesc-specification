@@ -40,7 +40,7 @@ const requiredFiles = [
   'specification-status.json',
   'schemas/latest.json',
   'schemas/mcp-description/0.7.0.json',
-  'spec/mcp-description.md'
+  'spec/draft/mcp-description.md'
 ];
 
 function fail(message) {
@@ -110,8 +110,13 @@ function walk(dir) {
   });
 }
 
-const exampleRoot = path.join(root, 'spec', 'examples');
-for (const full of walk(exampleRoot).filter((file) => /\.(json|ya?ml)$/i.test(file))) {
+// Example documents live under any version folder's `examples/` directory,
+// e.g. `spec/draft/examples/` or a frozen `spec/<x.y.z>/examples/`.
+const specRoot = path.join(root, 'spec');
+const exampleFiles = walk(specRoot).filter(
+  (file) => /(^|[\\/])examples[\\/]/.test(path.relative(specRoot, file)) && /\.(json|ya?ml)$/i.test(file)
+);
+for (const full of exampleFiles) {
   const rel = path.relative(root, full);
   let document;
   try {

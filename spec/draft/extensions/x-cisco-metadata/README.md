@@ -14,8 +14,8 @@ This extension follows the MCP Description [specification extension mechanism](.
 
 | Version | Schema |
 |---------|--------|
-| 0.2.0 | [../../../schemas/dump-extension/0.2.0.json](../../../schemas/dump-extension/0.2.0.json) |
-| 0.1.0 | [../../../schemas/dump-extension/0.1.0.json](../../../schemas/dump-extension/0.1.0.json) |
+| 0.2.0 | [../../../../schemas/dump-extension/0.2.0.json](../../../../schemas/dump-extension/0.2.0.json) |
+| 0.1.0 | [../../../../schemas/dump-extension/0.1.0.json](../../../../schemas/dump-extension/0.1.0.json) |
 
 
 ## Properties

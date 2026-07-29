@@ -35,9 +35,11 @@ A non-trivial specification change should include:
 4. corresponding JSON Schema changes;
 5. positive and negative examples or fixtures;
 6. compatibility, migration, and security considerations;
-7. a `spec/CHANGELOG.md` entry.
+7. a `spec/draft/CHANGELOG.md` entry.
 
 A schema change without corresponding specification text and examples is incomplete.
+
+Proposals are merged to `main` only once accepted, then implemented as a separate `spec/draft/` change; see the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ## Compatibility classification
 
