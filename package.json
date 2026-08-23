@@ -5,7 +5,7 @@
   "description": "Development and validation tooling for the MCP Description specification",
   "type": "module",
   "scripts": {
-    "test": "node scripts/validate-repository.mjs",
+    "test": "node scripts/validate-repository.mjs && node scripts/test-views.mjs",
     "validate": "node scripts/validate-repository.mjs"
   },
   "engines": {

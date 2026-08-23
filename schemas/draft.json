@@ -3,6 +3,8 @@
   "description": "Identifies the in-progress MCP Description draft version. This is NOT a released-version pointer; released versions are tracked in latest.json.",
   "mcp-description": "0.8.0",
   "released": false,
-  "branch": "main",
-  "note": "No schemas/mcp-description/0.8.0.json exists yet. The canonical community schema $id URI must be explicitly selected and recorded before the draft schema is created."
+  "branch": "experiment/0.8.0-draft-implementation",
+  "schema": "schemas/mcp-description/0.8.0.json",
+  "$id": "https://mcpdesc.org/schema/0.8.0.json",
+  "note": "The 0.8.0 Community Working Draft schema is implemented on the experimental draft implementation branch. schemas/latest.json remains pinned to the stable 0.7.0 release."
 }

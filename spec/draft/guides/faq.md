@@ -18,7 +18,7 @@ OpenAPI is designed for HTTP REST APIs. MCP servers have different concepts (too
 
 ### What's the minimum valid document?
 
-A document needs `mcpdesc`, `info` (with `name` and `version`), `transports` (at least one), and at least one capability array (`tools`, `resources`, `resourceTemplates`, or `prompts`). See [examples/minimal.yaml](../examples/minimal.yaml).
+A document needs `mcpdesc`, `info` (with `name` and `version`), non-empty `protocolVersions`, and `transports` (at least one, collectively covering every root revision). Primitive collections are optional. See [examples/minimal.yaml](../examples/minimal.yaml).
 
 ### Do I have to write it by hand?
 
@@ -34,7 +34,7 @@ You may also use `.mcp-description.json`.
 
 ### How do I validate my document?
 
-Use the JSON Schema at `schemas/X.Y.Z/mcp-description.schema.json` with any JSON Schema validator. Add `"$schema": "https://spec.modelcontextprotocol.io/mcp-description/0.7.0"` for example to your document for IDE validation.
+Use the 0.8.0 JSON Schema with a JSON Schema 2020-12 validator and run semantic validation for cross-object rules. Add `"$schema": "https://mcpdesc.org/schema/0.8.0.json"` for IDE validation.
 
 ## Technical
 
@@ -52,7 +52,11 @@ Annotations are advisory hints, not guarantees. A tool marked `readOnlyHint: tru
 
 ### How does versioning work?
 
-The `mcpdesc` field declares which version of this specification the document conforms to. The `info.protocolVersion` field declares which MCP protocol version the server implements. These are independent.
+The `mcpdesc` field declares which version of this description specification the document conforms to. Root `protocolVersions` declares the MCP revisions described by the document; scoped declarations can narrow their applicability. These version dimensions are independent.
+
+### How does security inheritance work?
+
+Reusable schemes are declared under root `securitySchemes`. A primitive `security` value replaces a selected transport's value, which replaces root `security`. Omission inherits, `security: []` clears inherited requirements, and `security: [{}]` declares an explicit anonymous alternative.
 
 ## Extensions
 

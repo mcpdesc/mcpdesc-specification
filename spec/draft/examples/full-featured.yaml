@@ -1,11 +1,11 @@
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-coach
   title: Chess Coach MCP Server
   version: 2.1.0
   description: Comprehensive chess platform — game analysis, Elo ratings, game history,
     opening repertoire, and coaching prompts
-  protocolVersion: '2025-06-18'
   id: urn:mcp:chess-coach
   icons:
     - src: https://chess-coach.example.com/icons/icon-48.png
@@ -25,6 +25,9 @@ info:
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
+protocolVersions:
+- '2025-11-25'
+instructions: Analyze or search before modifying game and rating data.
 transports:
 - type: streamable-http
   url: https://chess-coach.example.com/mcp
@@ -37,22 +40,25 @@ transports:
   env:
     CHESS_ENGINE_PATH: "/usr/local/bin/stockfish"
     CHESS_DB_PATH: "/data/games.db"
+securitySchemes:
+  oauth:
+    type: oauth2
+    description: OAuth2 for cloud access — not required for stdio transport
+    flows:
+      authorizationCode:
+        authorizationUrl: https://auth.chess-coach.example.com/authorize
+        tokenUrl: https://auth.chess-coach.example.com/token
+        refreshUrl: https://auth.chess-coach.example.com/refresh
+        scopes:
+          games:read: Read game history and details
+          games:write: Record new games
+          ratings:read: View player ratings
+          ratings:write: Update player ratings
+          analysis:run: Run game analysis
 security:
-- type: oauth2
-  description: OAuth2 for cloud access — not required for stdio transport
-  flows:
-    authorizationCode:
-      authorizationUrl: https://auth.chess-coach.example.com/authorize
-      tokenUrl: https://auth.chess-coach.example.com/token
-      refreshUrl: https://auth.chess-coach.example.com/refresh
-      scopes:
-        games:read: Read game history and details
-        games:write: Record new games
-        ratings:read: View player ratings
-        ratings:write: Update player ratings
-        analysis:run: Run game analysis
+- oauth: []
 capabilities:
-  tools:
+- tools:
     listChanged: true
   resources:
     subscribe: true

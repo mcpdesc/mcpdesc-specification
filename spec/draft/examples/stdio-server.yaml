@@ -1,11 +1,13 @@
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-coach
   title: Chess Coach Local
   version: 2.1.0
   description: Analyze chess games, track player ratings, and review game history
     via stdio
-  protocolVersion: '2025-06-18'
+protocolVersions:
+- '2025-11-25'
 transports:
 - type: stdio
   command: chess-coach
@@ -16,7 +18,7 @@ transports:
   env:
     CHESS_ENGINE_PATH: "/usr/local/bin/stockfish"
 capabilities:
-  tools:
+- tools:
     listChanged: false
   resources:
     subscribe: false

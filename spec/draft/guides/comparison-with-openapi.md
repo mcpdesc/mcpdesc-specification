@@ -132,16 +132,19 @@ MCP tools are simpler — no HTTP verbs, path parameters, or content negotiation
 
 ### Security
 
-Both use the same security scheme structure (MCP Description adopted it from OpenAPI 3.1):
+MCP Description uses named scheme definitions and requirement arrays aligned with the familiar OpenAPI 3.1 model, without making OpenAPI a normative dependency:
 
 ```json
 {
-  "security": [
-    {
+  "securitySchemes": {
+    "bearer": {
       "type": "http",
       "scheme": "bearer",
       "bearerFormat": "JWT"
     }
+  },
+  "security": [
+    { "bearer": [] }
   ]
 }
 ```

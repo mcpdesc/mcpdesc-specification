@@ -11,16 +11,19 @@ An MCP Description document for a chess server that:
 
 ## Step 1: Start with the Minimum
 
-Every MCP Description needs three things: `mcpdesc`, `info`, and `transports`, plus at least one capability (tools, resources, prompts, or resourceTemplates).
+Every MCP Description needs `mcpdesc`, `info`, `protocolVersions`, and `transports`. Primitive collections are optional in 0.8.0, although this example adds a Tool.
 
 Create a file called `chess-coach.mcpdesc.yaml`:
 
 ```yaml
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-rating-server
   title: Chess Rating MCP Server
   version: 1.0.0
+protocolVersions:
+- '2025-11-25'
 transports:
 - type: stdio
   command: chess-rating
@@ -43,7 +46,7 @@ That's a valid MCP Description. It declares a server with one tool accessible vi
 
 ## Step 2: Add Richer Info
 
-Expand the `info` object with a human-readable title, description, and protocol version:
+Expand the `info` object with a human-readable title and description. Protocol coverage remains at the document root:
 
 ```yaml
 info:
@@ -51,7 +54,6 @@ info:
   title: Chess Coach MCP Server
   version: 1.0.0
   description: Analyze chess games, track ratings, and review game history
-  protocolVersion: "2025-06-18"
   contact:
     name: Your Team
     email: team@example.com
@@ -163,11 +165,11 @@ prompts:
 
 ## Step 6: Validate
 
-To validate your document, use any JSON Schema validator against the [schema file](../../../schemas/mcp-description/0.7.0.json) or the mcpcontract CLI. 
+To validate structure, use a JSON Schema 2020-12 validator against the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json). Complete conformance also requires semantic checks for protocol scopes, transport coverage, security and tag references, and revision-specific fields.
 
 ```bash
-# Using the mcpcontract CLI
-mcpcontract validate --schema mcpdesc chess-coach.mcpdesc.yaml
+# From a checkout of this specification repository
+npm test
 ```
 
 
@@ -175,6 +177,8 @@ mcpcontract validate --schema mcpdesc chess-coach.mcpdesc.yaml
 ## Next Steps
 
 - See [examples/](../examples/) for complete working examples at different complexity levels
+- See [examples/multi-version.yaml](../examples/multi-version.yaml) for shared declarations and protocol-scoped capability variants across MCP 2025-11-25 and MCP 2026-07-28
 - Read the [full specification](../mcp-description.md)
 - Learn about [vendor extensions](vendor-extensions-guide.md) for adding custom metadata
+- Read the [0.7.0 to 0.8.0 migration guide](migration-0.7-to-0.8.md)
 - Compare with [OpenAPI concepts](comparison-with-openapi.md) if you have API background

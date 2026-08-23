@@ -38,6 +38,8 @@ GOVERNANCE.md                 Current community governance
 CONTRIBUTING.md               Contribution process and licensing terms
 ```
 
+See [`scripts/README.md`](scripts/README.md) for the script execution map and links to the authoritative workflow documentation.
+
 ## Contributing
 
 Start with [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`GOVERNANCE.md`](GOVERNANCE.md). Non-trivial normative changes should begin with an issue and a proposal.

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "revision-inapplicable-tool-schema-dialect",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-06-18"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "revision-inapplicable-tool-schema-dialect"
+    }
+  ],
+  "tools": [
+    {
+      "name": "early_dialect_declaration",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # MCP Description Specification — Overview
 
-> **Current version**: 0.7.0 (Draft) — March 2026
+> **Current draft**: 0.8.0 Community Working Draft — unreleased
 
 ## Introduction
 
@@ -10,13 +10,13 @@ An MCP Description provides a **structured declaration of the tools, resources, 
 
 The specification borrows design principles from **OpenAPI** — the successful standard for describing HTTP APIs — while using **MCP-native structures** directly for tools, resources, and prompts.
 
-This means an MCP Description document can be generated from a live MCP server's responses without translation, and developers familiar with the API ecosystem can adopt the format quickly.
+This enables developers familiar with the API ecosystem to adopt the format quickly while preserving MCP-native semantics. Runtime observations can produce an Effective Protocol View, but tooling must not infer unobserved revisions, primitives, or authorization policy.
 
 ---
 
 # Problem Statement
 
-The MCP ecosystem currently relies on **runtime discovery** through protocol initialization and capability inspection.
+The MCP ecosystem supports **runtime discovery** and capability inspection.
 
 While this mechanism works for dynamic interactions, it presents several limitations:
 
@@ -36,15 +36,15 @@ Different MCP tools and platforms often implement their own ways of representing
 * limited compatibility between MCP tooling ecosystems
 * difficulty sharing MCP server metadata
 
-### 3. No standard contract for MCP servers
+### 3. No standard portable description for MCP servers
 
-Unlike REST APIs (OpenAPI) or event systems (AsyncAPI), the MCP ecosystem lacks a standard **contract document** that can represent an MCP server independently of a running instance.
+Unlike REST APIs (OpenAPI) or event systems (AsyncAPI), the MCP ecosystem lacks a standard **description document** that can represent an MCP server independently of a running instance.
 
 This makes it difficult to support:
 
 * governance
 * automated validation
-* contract-based development
+* description-driven development
 * static documentation
 * offline discovery
 
@@ -52,7 +52,7 @@ This makes it difficult to support:
 
 # Goals of the MCP Description Specification
 
-The MCP Description specification addresses these limitations by defining a **portable contract format for MCP servers**.
+The MCP Description specification addresses these limitations by defining a portable description format for MCP servers.
 
 The specification enables:
 
@@ -89,7 +89,7 @@ A standard description format enables consistent tooling across the MCP ecosyste
 * IDE integrations
 * governance platforms
 
-### Contract-driven development
+### Description-driven development
 
 Teams can define and validate MCP server capabilities before deployment, enabling workflows similar to **API-first development** used in modern API platforms.
 
@@ -104,7 +104,7 @@ Instead, it complements the protocol by providing a **static description format*
 | MCP Protocol          | MCP Description      |
 | --------------------- | -------------------- |
 | runtime communication | static declaration   |
-| initialize handshake  | server metadata      |
+| discovery and runtime metadata | server metadata and protocol coverage |
 | tool invocation       | tool definitions     |
 | resource fetching     | resource definitions |
 
@@ -112,7 +112,7 @@ In other words:
 
 ```
 MCP Protocol = runtime behavior
-MCP Description = server contract
+MCP Description = static server-surface description
 ```
 
 ---
@@ -126,7 +126,7 @@ The MCP Description specification follows several core design principles.
 The specification adopts structures familiar to API developers, including concepts inspired by OpenAPI:
 
 * `info` object for server metadata
-* `security` definitions
+* named `securitySchemes` and reusable requirements
 * reusable schema structures
 * declarative capability descriptions
 
@@ -141,9 +141,9 @@ While borrowing patterns from OpenAPI, the specification uses **MCP protocol str
 * Tools use MCP's `inputSchema` / `outputSchema` format (not OpenAPI's Operation Object)
 * Resources use MCP's `uri` / `mimeType` pattern
 * Prompts use MCP's `arguments` array format
-* Capabilities map directly to MCP's `InitializeResult.capabilities`
+* Capabilities preserve durable MCP server semantics across protocol revisions
 
-This means an MCP Description document can be generated from a live MCP server's responses without translation.
+A runtime observation can populate MCP-native declarations for the protocol revision and authorization context actually observed.
 
 ---
 
@@ -180,13 +180,13 @@ At the same time, vendor extensions remain flexible.
 
 ---
 
-### 6. Separation of contract and observation
+### 6. Separation of description and observation
 
 The specification distinguishes between:
 
 | Concept             | Example                                |
 | ------------------- | -------------------------------------- |
-| contract            | tools, resources, prompts, tags        |
+| described surface  | tools, resources, prompts, tags        |
 | runtime observation | latency, CORS support                  |
 | vendor metadata     | platform-specific extensions (`x-...`) |
 
@@ -210,7 +210,7 @@ AI agents can use MCP Description documents to identify available tools and reso
 
 Organizations can maintain registries of MCP servers similar to API catalogs.
 
-### Contract validation
+### Description validation
 
 CI pipelines can validate MCP server capabilities against a schema.
 
@@ -273,12 +273,12 @@ Organizations can define validation rules for MCP servers using a standard schem
 
 ### Ecosystem growth
 
-A standard contract format makes it easier for new tools and platforms to integrate with MCP servers.
+A standard description format makes it easier for new tools and platforms to integrate with MCP servers.
 
 ---
 
 # Summary
 
-The MCP Description specification (currently v0.6.0, Draft) provides a **portable, machine-readable contract format for MCP servers**, enabling consistent discovery, documentation, and integration across the MCP ecosystem.
+The MCP Description 0.8.0 Community Working Draft provides a portable, machine-readable description format for MCP servers, enabling consistent discovery, documentation, validation, and integration across the MCP ecosystem.
 
 By standardizing how MCP servers declare their capabilities — using MCP-native structures and OpenAPI-inspired design patterns — the specification helps establish a foundation for a **mature and interoperable MCP tooling ecosystem**, similar to the role that OpenAPI plays in the HTTP API ecosystem.

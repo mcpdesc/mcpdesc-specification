@@ -7,7 +7,7 @@ The MCP Description Specification follows several core design principles that gu
 The specification adopts structures familiar to API developers, drawing from [OpenAPI](https://www.openapis.org/):
 
 - **`info` object** with `name`, `version`, `contact`, and `license` — directly modeled after OpenAPI's Info Object
-- **`security` schemes** using OpenAPI 3.1 Security Scheme Object structure
+- **Named `securitySchemes` and requirement arrays** aligned with familiar OpenAPI 3.1 concepts
 - **Declarative capability descriptions** — the document describes *what* the server offers, not *how* it works internally
 
 This reduces the learning curve for developers already familiar with the API ecosystem.
@@ -19,9 +19,9 @@ While borrowing patterns from OpenAPI, the specification uses **MCP protocol str
 - Tools use MCP's `inputSchema` / `outputSchema` format (not OpenAPI's Operation Object)
 - Resources use MCP's `uri` / `mimeType` pattern
 - Prompts use MCP's `arguments` array format
-- Capabilities map directly to MCP's `InitializeResult.capabilities`
+- Capabilities preserve durable MCP server semantics across supported protocol revisions
 
-This means an MCP Description document can be generated from a live MCP server's responses without translation.
+Runtime observations can populate MCP-native declarations, but generators must not infer unobserved revisions, primitives, or authorization policy.
 
 ## 3. Explicit Capability Declarations
 
@@ -59,17 +59,17 @@ The core specification defines a strict schema ensuring:
 
 Extensions remain unrestricted in their value structure — they can be objects, arrays, strings, or any JSON value.
 
-## 6. Separation of Contract and Observation
+## 6. Separation of Description and Observation
 
 The specification distinguishes between:
 
 | Layer | Purpose | Example |
 |-------|---------|---------|
-| **Contract** | What the server offers | Tools, resources, prompts |
+| **Described surface** | Durable, externally relevant server semantics | Tools, resources, prompts |
 | **Metadata** | Who built it and how | Authors, generation provenance |
 | **Observation** | What was discovered at runtime | Latency, CORS support, session behavior |
 
-Contract declarations live in the core spec. Observations belong in vendor extensions (like `x-cisco-metadata`). This ensures MCP Description documents remain stable and portable.
+Server-surface declarations live in the core specification. Observation provenance and runtime diagnostics belong in vendor extensions such as `x-cisco-metadata`. An observed view need not claim a server's exhaustive surface.
 
 ## 7. Offline-First
 
@@ -89,7 +89,7 @@ The specification minimizes required fields:
 
 - `mcpdesc` — which specification version
 - `info.name` + `info.version` — identity
+- `protocolVersions` — which MCP revisions are described
 - `transports` — how to connect (at least one)
-- At least one of: `tools`, `resources`, `resourceTemplates`, `prompts`
 
-Everything else is optional. A valid MCP Description can be as short as 15 lines of JSON.
+Everything else is optional. Zero-primitive descriptions are valid, including descriptions of servers under development or authorization-scoped observations.

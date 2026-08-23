@@ -8,6 +8,8 @@ date: 2026-07-28
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
+  - name: Stève Sfartz (v0.8.0 draft)
+    url: https://github.com/stsfartz
   - name: "{mcpdesc} community"
     url: https://github.com/mcpdesc/mcpdesc-specification
 ---
@@ -18,19 +20,19 @@ editors:
 
 **Status**: Community working draft — not released
 
-**Baseline**: v0.7.0 (the normative content below currently tracks the v0.7.0 baseline pending v0.8.0 changes)
+**Baseline**: v0.7.0
 
 **Date**: 2026-07-28
 
 ## Abstract
 
-This specification defines the **MCP Description** format — a portable, machine-readable document that describes the capabilities of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
+This specification defines the **MCP Description** format — a portable, machine-readable document that describes the durable, externally relevant surface of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
 
-An MCP Description declares the tools, resources, prompts, transports, security requirements, and metadata of an MCP server in a static JSON document, enabling offline discovery, documentation generation, contract validation, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
+An MCP Description declares supported MCP protocol revisions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static JSON document. It enables offline discovery, documentation generation, description validation, change analysis, testing, governance, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
 
 ## Status of This Document
 
-This document is the **community working draft** for MCP Description v0.8.0. It is **not** a released specification. Its normative content currently tracks the stable v0.7.0 baseline and will change as v0.8.0 proposals are accepted. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
+This document is the **community working draft** for MCP Description v0.8.0. It is **not** a released specification and may change during implementation and interoperability testing. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
 
 ## 1. Introduction
 
@@ -38,9 +40,9 @@ This document is the **community working draft** for MCP Description v0.8.0. It 
 
 The MCP Description Specification defines a standard format for describing the capabilities of a Model Context Protocol (MCP) server as a static, curated document.
 
-The MCP ecosystem currently relies on runtime discovery through protocol initialization and capability inspection. While effective for dynamic interactions, this approach limits offline tooling, cross-platform interoperability, and contract-driven development workflows.
+The MCP ecosystem supports runtime discovery and capability inspection. While effective for dynamic interactions, runtime discovery alone limits offline tooling, cross-platform interoperability, design review, and governance workflows.
 
-This specification addresses these limitations by providing a **portable contract format** for MCP servers — analogous to the role OpenAPI plays for HTTP APIs.
+This specification addresses these limitations by providing a portable description format for MCP servers, analogous to the descriptive role OpenAPI plays for HTTP APIs.
 
 ### 1.2 Goals
 
@@ -49,7 +51,7 @@ An MCP Description document enables:
 - **Standardized server descriptions** — a consistent structure for declaring server metadata, transports, tools, resources, prompts, and capabilities.
 - **Offline discoverability** — platforms can index and display server capabilities without establishing a runtime connection.
 - **Tooling interoperability** — documentation generators, testing frameworks, agent discovery tools, IDE integrations, and governance platforms can operate on a common format.
-- **Contract-driven development** — teams can define and validate MCP server capabilities before deployment.
+- **Description-driven development** — teams can define, review, and validate MCP server surfaces before deployment.
 
 ### 1.3 Audience
 
@@ -67,11 +69,11 @@ The MCP Description Specification does **not** replace the MCP protocol. It comp
 | MCP Protocol | MCP Description |
 |---|---|
 | Runtime communication | Static declaration |
-| Initialize handshake | Server metadata |
+| Discovery and runtime metadata | Server metadata and declared protocol coverage |
 | Tool invocation | Tool definitions |
 | Resource fetching | Resource definitions |
 
-The MCP protocol defines **runtime behavior**. An MCP Description defines the **server contract**.
+The MCP protocol defines runtime communication and behavior. An MCP Description statically represents durable, externally relevant server semantics without reproducing MCP wire choreography.
 
 ### 1.5 Scope
 
@@ -96,7 +98,16 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ### 2.2 Definitions
 
 **MCP Description Document**
-A JSON document conforming to this specification that describes the capabilities of an MCP server.
+A JSON document conforming to this specification that describes an MCP server surface.
+
+**Server Surface**
+The durable, externally relevant characteristics and behavior of an MCP server that MCP Description can represent, including transports, instructions, security requirements, capabilities, primitives, schemas, and applicable extensions.
+
+**Described Server Surface**
+The server surface represented by an MCP Description Document. It is not necessarily exhaustive of everything implemented or available in every runtime context.
+
+**Effective Protocol View**
+The projection of an MCP Description Document containing the declarations applicable to one MCP protocol revision.
 
 **MCP Server**
 A server implementing the Model Context Protocol, exposing tools, resources, and/or prompts to MCP clients.
@@ -123,7 +134,13 @@ The communication mechanism used to connect to an MCP server (e.g., stdio, strea
 A property in an MCP Description document whose name begins with `x-` that provides vendor-specific metadata outside the core specification.
 
 **Capability**
-A feature or behavior supported by an MCP server, declared in the `capabilities` object.
+A feature or behavior supported by an MCP server, declared in a Capabilities Object.
+
+**Protocol Applicability**
+The MCP protocol revisions to which a declaration applies, determined from its effective protocol scope.
+
+**Security Requirement**
+A declaration of one or more named security schemes and, where applicable, authorization scopes that must be satisfied to access a transport or primitive.
 
 ## 3. Document Structure
 
@@ -142,27 +159,25 @@ The root of an MCP Description document is a JSON object with the following stru
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `$schema` | string | No | JSON Schema reference for IDE validation |
-| `mcpdesc` | string | **Yes** | Specification version (e.g., `"0.7.0"`) |
+| `mcpdesc` | string | **Yes** | Specification version (`"0.8.0"`) |
 | `info` | [Info Object](#5-info-object) | **Yes** | Server metadata |
+| `protocolVersions` | array\<string\> | **Yes** | MCP protocol revisions described by the document |
+| `instructions` | string | No | Durable natural-language guidance for using the server |
 | `transports` | array\<[Transport Object](#6-transports)\> | **Yes** | Supported transports (at least one) |
-| `security` | array\<[Security Object](#7-security)\> | No | Security schemes |
-| `capabilities` | [Capabilities Object](#8-capabilities) | No | Server capability flags |
-| `tools` | array\<[Tool Object](#9-tools)\> | Conditional | Tools exposed by the server |
-| `resources` | array\<[Resource Object](#10-resources)\> | Conditional | Resources exposed by the server |
-| `resourceTemplates` | array\<[Resource Template Object](#10-resources)\> | Conditional | Resource templates |
-| `prompts` | array\<[Prompt Object](#11-prompts)\> | Conditional | Prompts exposed by the server |
+| `securitySchemes` | map\<string, [Security Scheme Object](#72-security-scheme-object)\> | No | Reusable named security schemes |
+| `security` | [Security Requirement Array](#73-security-requirement-array) | No | Default security requirements |
+| `capabilities` | non-empty array\<[Capabilities Object](#8-capabilities)\> | No | Protocol-scoped server capability declarations |
+| `tools` | array\<[Tool Object](#9-tools)\> | No | Tools exposed by the server |
+| `resources` | array\<[Resource Object](#10-resources)\> | No | Resources exposed by the server |
+| `resourceTemplates` | array\<[Resource Template Object](#10-resources)\> | No | Resource templates |
+| `prompts` | array\<[Prompt Object](#11-prompts)\> | No | Prompts exposed by the server |
 | `tags` | array\<[Tag Object](#12-tags)\> | No | Flat tag list for categorization |
 
-### 3.3 Required Capabilities Constraint
+### 3.3 Zero-Primitive Descriptions
 
-An MCP Description document MUST include at least one of:
+A document MAY omit all of `tools`, `resources`, `resourceTemplates`, and `prompts`. Such a document can describe a server under development, a legitimately empty server, or an authorization-scoped observation.
 
-- `tools`
-- `resources`
-- `resourceTemplates`
-- `prompts`
-
-A document with none of these properties is invalid, as it describes a server with no discoverable capabilities.
+Absence of a primitive collection MUST NOT be interpreted as proof that no other runtime context exposes primitives of that kind.
 
 ### 3.4 Property Ordering
 
@@ -182,11 +197,13 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "mcpdesc": "0.7.0",
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-rating-server",
     "version": "1.0.0"
   },
+  "protocolVersions": ["2025-11-25"],
   "transports": [
     { "type": "stdio", "command": "chess-rating", "args": ["serve"] }
   ],
@@ -214,18 +231,18 @@ Every MCP Description document MUST include a `mcpdesc` property at the root lev
 
 ```json
 {
-  "mcpdesc": "0.7.0"
+  "mcpdesc": "0.8.0"
 }
 ```
 
 ### 4.2 Version Format
 
-The `mcpdesc` value MUST be a string matching a published version of this specification. The current version is `"0.7.0"`.
+The `mcpdesc` value MUST identify the specification version against which conformance is assessed. This Community Working Draft uses `"0.8.0"` and is not a stable release.
 
-The specification uses [Semantic Versioning](https://semver.org/) for its own version numbers:
+The specification uses [Semantic Versioning](https://semver.org/) for its own version numbers. Before 1.0.0, a minor release MAY contain breaking changes; after 1.0.0, ordinary Semantic Versioning compatibility rules apply.
 
 - **Major** version changes indicate breaking changes to the document structure
-- **Minor** version changes add new optional features in a backward-compatible manner
+- **Minor** version changes add features and, before 1.0.0, MAY include breaking changes
 - **Patch** version changes address errata or clarifications without structural changes
 
 ### 4.3 Version Compatibility
@@ -237,21 +254,72 @@ When processing a document, implementations MUST check the `mcpdesc` value and:
 - Accept documents with a recognized `mcpdesc` version
 - Reject documents with an unrecognized `mcpdesc` version or provide a clear warning
 
-### 4.4 Forward Compatibility
+### 4.4 MCP Protocol Coverage
 
-Implementations SHOULD ignore unknown properties within known objects. This allows documents authored against a newer minor version to be partially processed by implementations supporting an older minor version of the same major version.
+The root `protocolVersions` array identifies the MCP protocol revisions described by the document. It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
-### 4.5 Relationship to MCP Protocol Versions
+- `2024-11-05`
+- `2025-03-26`
+- `2025-06-18`
+- `2025-11-25`
+- `2026-07-28`
 
-The `mcpdesc` version is independent of the MCP protocol version. The MCP protocol version implemented by a server is declared in `info.protocolVersion`.
+An unknown or later MCP revision is invalid under mcpdesc 0.8.0 because this specification cannot validate its semantics. Supporting a later revision requires a later mcpdesc specification version.
 
-A single MCP Description specification version MAY support documents describing servers implementing different MCP protocol versions.
+Root coverage states which revisions the document describes. It does not prove that the server supports no other revisions.
+
+### 4.5 Protocol Scopes and Inheritance
+
+Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts MAY declare `protocolVersions`.
+
+For root version set `R`, a top-level declaration's effective scope is its explicit `protocolVersions` when present and `R` otherwise. An explicit scope MUST be a non-empty subset of `R`.
+
+For a nested scoped declaration, the effective scope is its explicit `protocolVersions` when present and its parent's effective scope otherwise. An explicit child scope MUST be a non-empty subset of its parent's effective scope.
+
+Omission therefore means the complete effective parent scope; it does not mean unknown applicability.
+
+### 4.6 Relationship Between Version Fields
+
+The `mcpdesc` version identifies this description format. Root and declaration-level `protocolVersions` identify MCP protocol applicability. These version dimensions are independent.
+
+### 4.7 Effective Protocol Views and Projection
+
+For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration.
+
+A conforming single-version projection tool MUST:
+
+1. validate the source document;
+2. require `V` to occur in root `protocolVersions`;
+3. set root `protocolVersions` to `[V]`;
+4. retain applicable transports, capabilities, primitives, and nested declarations;
+5. remove `protocolVersions` from retained declarations because applicability is unambiguous;
+6. preserve semantically significant empty values and inheritance, including security declarations;
+7. optionally omit empty primitive collections; and
+8. validate the projected document structurally and semantically for `V`.
+
+Projection produces an ordinary conforming MCP Description document, not a second format. It MUST NOT materialize transport-dependent inherited values onto a primitive unless the operation also selects a transport and defines that resolution.
+
+### 4.8 Merge
+
+A merge tool MAY construct an aggregate from single-version or multi-version descriptions. It MUST validate every input and MUST report a conflict rather than guess when inputs cannot be represented faithfully.
+
+A conforming merge algorithm SHOULD project inputs into individual protocol views, require compatible logical server identity and unscoped metadata, union root protocol sets, collapse equivalent declarations by unioning their scopes, retain differing declarations as disjoint scoped variants, and validate the aggregate result.
+
+When inputs cover the same revision, their Effective Protocol Views MUST be semantically equivalent or merge MUST fail. Conflicting `info`, `instructions`, root extension values, security declarations, or other unscoped values also cause failure.
+
+For every merged source view `D_V`, this round-trip invariant applies:
+
+```text
+P_V(merge(D_1, ..., D_n)) is semantically equivalent to D_V
+```
+
+Semantic equivalence need not preserve property order, redundant scopes, array order where semantically insignificant, or the original choice between an omitted scope and an explicit full-parent scope. Merge tools MUST preserve the distinction among omitted `security`, `security: []`, and `security: [{}]`.
 
 ## 5. Info Object
 
 The `info` object provides metadata about the MCP server. It is REQUIRED.
 
-The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fields from the MCP `Implementation` type returned in the `initialize` response (`serverInfo`). The MCP-sourced fields — `name`, `title`, `description`, `version`, `icons`, and `websiteUrl` — allow an MCP Description document to faithfully represent the same information a server would advertise at runtime.
+The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fields from the MCP `Implementation` type used for server identity. The MCP-sourced fields — `name`, `title`, `description`, `version`, `icons`, and `websiteUrl` — allow an MCP Description document to represent server identity metadata that may also be advertised at runtime.
 
 ### 5.1 Properties
 
@@ -260,26 +328,14 @@ The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fi
 | `name` | string | **Yes** | Programmatic server name (identifier). MUST be non-empty. Maps to `Implementation.name` (MCP `BaseMetadata`). |
 | `version` | string | **Yes** | Server version. Semver RECOMMENDED. MUST be non-empty. Maps to `Implementation.version`. |
 | `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Maps to `Implementation.title` (MCP `BaseMetadata`, since 2025-06-18). |
-| `description` | string | No | Brief description of what the server does. Maps to `Implementation.description` (MCP, since 2025-06-18). |
-| `protocolVersion` | string | No | MCP protocol version implemented by this server. |
+| `description` | string | No | Brief description of what the server does. Maps to `Implementation.description` (MCP, since 2025-11-25). |
 | `id` | string | No | Unique server identifier (URI, DID, or URN). |
 | `icons` | array\<[Icon](#icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
 | `websiteUrl` | string (URI) | No | URL of the server's website. Maps to `Implementation.websiteUrl` (MCP, since 2025-11-25). |
 | `contact` | [Contact Object](#53-contact-object) | No | Contact information (OpenAPI-style, not part of MCP `Implementation`). |
 | `license` | [License Object](#54-license-object) | No | License information (OpenAPI-style, not part of MCP `Implementation`). |
 
-### 5.2 Protocol Version
-
-The `protocolVersion` property, when present, MUST be one of the following recognized MCP protocol versions:
-
-- `"2024-11-05"`
-- `"2025-03-26"`
-- `"2025-06-18"`
-- `"2025-11-25"`
-
-This value indicates which version of the MCP protocol the server implements. It is independent of the MCP Description specification version (`mcpdesc`).
-
-### 5.3 Contact Object
+### 5.2 Contact Object
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -287,14 +343,14 @@ This value indicates which version of the MCP protocol the server implements. It
 | `url` | string (URI) | Contact URL |
 | `email` | string (email) | Contact email address |
 
-### 5.4 License Object
+### 5.3 License Object
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | License name (e.g., `"Apache-2.0"`, `"MIT"`) |
 | `url` | string (URI) | No | URL to the license text |
 
-### 5.5 Example
+### 5.4 Example
 
 ```json
 {
@@ -303,7 +359,6 @@ This value indicates which version of the MCP protocol the server implements. It
     "title": "Chess Coach MCP Server",
     "version": "2.1.0",
     "description": "Analyze chess games, track player ratings, and review game history",
-    "protocolVersion": "2025-06-18",
     "id": "urn:mcp:chess-coach",
     "icons": [
       {
@@ -344,6 +399,8 @@ MCP servers can be accessed through different transport mechanisms. The `transpo
 
 Each transport object MUST include a `type` property. The following transport types are defined:
 
+Every Transport Object MAY contain `protocolVersions` and `security`. `protocolVersions` follows Section 4.5. A transport's `security` value is a Security Requirement Array and follows Sections 6.4 and 7.
+
 #### 6.2.1 Streamable HTTP Transport
 
 | Property | Type | Required | Description |
@@ -351,7 +408,7 @@ Each transport object MUST include a `type` property. The following transport ty
 | `type` | `"streamable-http"` | **Yes** | Transport type identifier |
 | `url` | string (URI) | **Yes** | MCP endpoint URL |
 
-The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. This is the RECOMMENDED transport for remote MCP servers.
+The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. It is defined for MCP 2025-03-26 and later and is the RECOMMENDED transport for remote MCP servers in those revisions.
 
 ```json
 {
@@ -389,7 +446,7 @@ The stdio transport launches the MCP server as a subprocess and communicates ove
 | `type` | `"sse"` | **Yes** | Transport type identifier |
 | `url` | string (URI) | **Yes** | SSE endpoint URL |
 
-The Server-Sent Events transport is a legacy transport type retained for backward compatibility. New implementations SHOULD use `streamable-http` instead.
+The Server-Sent Events transport is a legacy transport type retained for backward compatibility. It is the remote transport defined by MCP 2024-11-05. Validators SHOULD warn when it is associated with MCP 2025-03-26 or later, where Streamable HTTP is the standard remote transport. New implementations SHOULD use `streamable-http` instead.
 
 ```json
 {
@@ -413,7 +470,7 @@ A server MAY support multiple transports. Clients SHOULD select the most appropr
 
 ### 6.4 Transport-Scoped Security
 
-Each transport object MAY include a `security` property containing an array of security scheme objects (see Section 7). When present, this transport-level security overrides the root-level `security` for that transport.
+Each transport object MAY include a `security` property containing a Security Requirement Array (see Section 7). When present, transport security replaces root security for that transport.
 
 | Scenario | Effective security |
 |----------|-------------------|
@@ -431,7 +488,7 @@ This mechanism allows a single MCP Description document to declare different sec
       "type": "streamable-http",
       "url": "https://chess-coach.example.com/mcp",
       "security": [
-        { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+        { "bearer": [] }
       ]
     },
     {
@@ -444,122 +501,129 @@ This mechanism allows a single MCP Description document to declare different sec
 }
 ```
 
-### 6.5 Extensibility
+The `bearer` name in this example MUST identify a root `securitySchemes` entry.
 
-Transport objects MUST NOT contain additional properties beyond those defined for their type (plus the optional `security` property). Vendor-specific transport metadata SHOULD be placed in specification extensions at the root level.
+### 6.5 Protocol Coverage
+
+The union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one revision.
+
+A document is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage.
+
+### 6.6 Extensibility
+
+Transport objects MUST NOT contain additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties. Vendor-specific transport metadata SHOULD be placed in specification extensions at the root level.
 
 ## 7. Security
 
-The `security` property declares the authentication and authorization schemes supported by the server. It is OPTIONAL.
+MCP Description represents statically known authentication and authorization through reusable named Security Scheme Objects and Security Requirement Arrays. Both `securitySchemes` and `security` are OPTIONAL.
 
-### 7.1 Overview
+These declarations describe access requirements. They do not define token acquisition, authorization-server discovery, runtime access-control policy, or authorization-filtered discovery behavior.
 
-The security array describes how clients authenticate with the MCP server. The structure is aligned with [OpenAPI 3.1 Security Scheme Objects](https://spec.openapis.org/oas/v3.1.0#security-scheme-object), enabling reuse of existing security tooling and patterns.
+### 7.1 Named Security Schemes
 
-When `security` is omitted or an empty array, the server does not require authentication.
-
-Root-level `security` acts as the default for all transports. Individual transports MAY override this default by including their own `security` property (see Section 6.4).
-
-### 7.2 Security Scheme Object
-
-Each security scheme object MUST include a `type` property.
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `type` | string | **Yes** | Scheme type: `"http"`, `"apiKey"`, `"oauth2"`, or `"openIdConnect"` |
-| `scheme` | string | Conditional | HTTP auth scheme (e.g., `"bearer"`, `"basic"`). REQUIRED when `type` is `"http"`. |
-| `bearerFormat` | string | No | Bearer token format hint (e.g., `"JWT"`). |
-| `name` | string | Conditional | API key name. REQUIRED when `type` is `"apiKey"`. |
-| `in` | string | Conditional | API key location: `"header"`, `"query"`, or `"cookie"`. REQUIRED when `type` is `"apiKey"`. |
-| `flows` | [OAuth Flows Object](#73-oauth-flows-object) | Conditional | OAuth2 flows. REQUIRED when `type` is `"oauth2"`. |
-| `openIdConnectUrl` | string (URI) | Conditional | OpenID Connect discovery URL. REQUIRED when `type` is `"openIdConnect"`. |
-| `description` | string | No | Human-readable description of the security scheme. |
-
-### 7.3 OAuth Flows Object
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `implicit` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the OAuth2 implicit flow |
-| `password` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the resource owner password flow |
-| `clientCredentials` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the client credentials flow |
-| `authorizationCode` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the authorization code flow |
-
-### 7.4 OAuth Flow Object
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `authorizationUrl` | string (URI) | Authorization endpoint URL |
-| `tokenUrl` | string (URI) | Token endpoint URL |
-| `refreshUrl` | string (URI) | Refresh token endpoint URL |
-| `scopes` | object | Available scopes (key: scope name, value: description) |
-
-### 7.5 Examples
-
-**Bearer token authentication:**
+Root `securitySchemes` is a map from a local name to a Security Scheme Object. Every local name MUST match `^[A-Za-z0-9._-]+$`.
 
 ```json
 {
-  "security": [
-    {
-      "type": "http",
-      "scheme": "bearer",
-      "bearerFormat": "JWT",
-      "description": "JWT token issued by the chess platform"
-    }
-  ]
-}
-```
-
-**API key authentication:**
-
-```json
-{
-  "security": [
-    {
-      "type": "apiKey",
-      "name": "X-Chess-API-Key",
-      "in": "header",
-      "description": "API key for accessing the chess rating service"
-    }
-  ]
-}
-```
-
-**OAuth2 with authorization code flow:**
-
-```json
-{
-  "security": [
-    {
+  "securitySchemes": {
+    "oauth": {
       "type": "oauth2",
       "flows": {
         "authorizationCode": {
           "authorizationUrl": "https://auth.example.com/authorize",
           "tokenUrl": "https://auth.example.com/token",
-          "scopes": {
-            "games:read": "Read game history",
-            "games:write": "Submit new games",
-            "ratings:read": "View player ratings"
-          }
+          "scopes": { "games:read": "Read games" }
         }
       }
+    },
+    "api-key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
     }
+  }
+}
+```
+
+### 7.2 Security Scheme Object
+
+Each Security Scheme Object MUST include `type`.
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `type` | string | **Yes** | `"http"`, `"apiKey"`, `"oauth2"`, or `"openIdConnect"` |
+| `scheme` | string | For `http` | HTTP authentication scheme |
+| `bearerFormat` | string | No | Bearer-token format hint |
+| `name` | string | For `apiKey` | API-key parameter name |
+| `in` | string | For `apiKey` | `"header"`, `"query"`, or `"cookie"` |
+| `flows` | OAuth Flows Object | For `oauth2` | One or more OAuth2 flows |
+| `openIdConnectUrl` | string (URI) | For `openIdConnect` | OpenID Connect discovery URL |
+| `description` | string | No | Human-readable description |
+
+An OAuth Flows Object MAY contain `implicit`, `password`, `clientCredentials`, and `authorizationCode`. At least one flow MUST be present. Every flow MUST contain a `scopes` map and MAY contain `refreshUrl`. An implicit flow MUST contain `authorizationUrl`; password and client-credentials flows MUST contain `tokenUrl`; an authorization-code flow MUST contain both `authorizationUrl` and `tokenUrl`.
+
+### 7.3 Security Requirement Array
+
+A `security` value is an array of Security Requirement Objects. Each object maps local security-scheme names to arrays of scope strings.
+
+```json
+{
+  "security": [
+    { "oauth": ["games:read"] },
+    { "api-key": [] }
   ]
 }
 ```
 
+Entries in the outer array are alternatives (**OR**). Multiple scheme names in one object are jointly required (**AND**). Every listed OAuth2 or OpenID Connect scope is required.
+
+Every referenced name MUST exist in root `securitySchemes`. Scope arrays MUST contain unique strings. HTTP and API-key schemes MUST use an empty scope array. An OAuth2 or OpenID Connect requirement MAY use a scope absent from a static scope catalogue; validators MAY warn but MUST NOT reject solely for that reason.
+
+Array order, scheme-key order, and scope order are not semantically significant.
+
+### 7.4 Omission, Clearing, and Anonymous Access
+
+The following forms are distinct:
+
+- omitted `security`: inherit at a nested level, or make no declaration at root;
+- `security: []`: explicitly clear any inherited mcpdesc security requirement;
+- `security: [{}]`: explicitly allow anonymous access as an alternative;
+- `security: [{}, {"oauth": ["games:read"]}]`: allow anonymous access or the named OAuth requirement.
+
+Implementations MUST preserve the distinction between `[]` and `[{}]` and MUST NOT normalize one into the other.
+
+### 7.5 Placement and Precedence
+
+`security` MAY appear at the document root, a Transport Object, or any Tool, Resource, Resource Template, or Prompt Object.
+
+For a primitive used through a selected transport, the effective requirement is the first present value in this order:
+
+1. primitive `security`;
+2. selected transport `security`;
+3. root `security`;
+4. no mcpdesc-declared requirement.
+
+This is replacement, not merging. Protocol projection MUST preserve security declarations and MUST NOT copy one transport's inherited security onto a primitive unless a separate operation also selects that transport.
+
+### 7.6 Interpretation Limits
+
+Primitive requirements describe access conditions, not identities, roles, ownership, or exact discovery visibility. A requirement neither guarantees that a primitive is hidden before authorization nor guarantees that it is visible.
+
+A primitive-level override applies regardless of selected transport. If transport inheritance cannot faithfully represent materially different per-transport primitive requirements, authors SHOULD publish separate descriptions or use a specification extension. Tools MUST NOT invent a combined requirement.
+
 ## 8. Capabilities
 
-The `capabilities` object declares the server's supported features as reported during MCP initialization. It is OPTIONAL.
+The optional `capabilities` array declares protocol-scoped, durable server features. When present, it MUST contain at least one Capabilities Object.
 
 ### 8.1 Overview
 
-Capabilities provide hints about the server's feature set beyond the tools, resources, and prompts it exposes. These correspond to the capabilities returned in the MCP `InitializeResult`.
+Capabilities represent externally relevant server behavior beyond primitive inventories. They describe semantics, not the RPC or notification mechanism used to expose them.
 
 ### 8.2 Properties
 
 | Property | Type | Description |
 |----------|------|-------------|
+| `protocolVersions` | array\<string\> | MCP revisions to which this object applies; inherits root coverage when omitted |
 | `tools` | object | Tool-related capabilities |
 | `tools.listChanged` | boolean | Whether the server sends `notifications/tools/list_changed` |
 | `resources` | object | Resource-related capabilities |
@@ -569,7 +633,8 @@ Capabilities provide hints about the server's feature set beyond the tools, reso
 | `prompts.listChanged` | boolean | Whether the server sends `notifications/prompts/list_changed` |
 | `completions` | object | Present if the server supports argument autocompletion (MCP 2025-03-26+) |
 | `logging` | object | Present if the server supports sending log messages to the client |
-| `tasks` | object | Present if the server supports task-augmented requests (MCP 2025-11-25+) |
+| `tasks` | object | Present if the server supports core task-augmented requests (MCP 2025-11-25 only) |
+| `extensions` | map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28) |
 | `experimental` | object | Experimental, non-standard capabilities |
 
 ### 8.3 Tasks Capability
@@ -584,19 +649,36 @@ The `tasks` object, when present, indicates the server supports long-running tas
 
 ### 8.4 Extensibility
 
-The `capabilities` object allows additional properties beyond those defined here. Implementations SHOULD preserve unknown capability properties when processing documents.
+`extensions` keys MUST use the MCP mandatory-prefix metadata form `prefix/name`. A prefix whose second label is `modelcontextprotocol` or `mcp` is reserved for MCP use. Unknown syntactically valid extension identifiers are accepted and MUST be preserved. A validator SHOULD warn about an unrecognized identifier under a reserved prefix and MUST NOT treat absence from its local catalogue alone as proof of namespace misuse. Use known to be unauthorized is a semantic error.
+
+Core `tasks` in MCP 2025-11-25 and a Tasks extension in MCP 2026-07-28 are distinct declarations and MUST NOT be automatically reinterpreted as one another. `logging` remains representable for revisions that define it; validators SHOULD warn when it applies to MCP 2026-07-28, where it is deprecated.
+
+Unknown capability properties SHOULD be preserved. Root `x-*` specification extensions and MCP capability `extensions` are distinct namespaces.
+
+### 8.5 Scope Uniqueness
+
+Effective Capabilities Object scopes MUST be pairwise disjoint. At most one Capabilities Object may apply to a protocol revision.
 
 ### 8.5 Example
 
 ```json
 {
-  "capabilities": {
-    "tools": { "listChanged": true },
-    "resources": { "subscribe": true, "listChanged": true },
-    "prompts": { "listChanged": false },
-    "completions": {},
-    "logging": {}
-  }
+  "capabilities": [
+    {
+      "protocolVersions": ["2025-11-25"],
+      "tools": { "listChanged": true },
+      "resources": { "subscribe": true, "listChanged": true },
+      "prompts": { "listChanged": false },
+      "completions": {},
+      "logging": {},
+      "tasks": { "requests": { "tools": { "call": {} } } }
+    },
+    {
+      "protocolVersions": ["2026-07-28"],
+      "tools": { "listChanged": true },
+      "extensions": { "io.example/tasks": {} }
+    }
+  ]
 }
 ```
 
@@ -608,27 +690,47 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
+| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 | `name` | string | **Yes** | Programmatic tool name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable tool description. |
-| `inputSchema` | object | No | JSON Schema for tool input parameters. |
+| `inputSchema` | object | **Yes** | JSON Schema whose root describes an object containing tool input parameters. |
 | `outputSchema` | object | No | JSON Schema for structured tool output. Since MCP 2025-06-18. |
 | `annotations` | [Tool Annotations Object](#93-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
-| `execution` | [Execution Object](#94-execution-object) | No | Execution properties. Since MCP 2025-11-25. |
+| `execution` | [Execution Object](#94-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
 | `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `security` | Security Requirement Array | No | Primitive security override. |
 
 ### 9.2 Input and Output Schemas
 
-The `inputSchema` property, when present, MUST be a valid JSON Schema object describing the tool's input parameters. It typically has `"type": "object"` with `properties` and `required` fields.
+Every Tool MUST contain `inputSchema`. Absence MUST NOT be interpreted as evidence that the Tool accepts no arguments. The schema root MUST describe an object.
 
-The `outputSchema` property, when present, MUST be a valid JSON Schema object describing the tool's structured output. It defaults to JSON Schema 2020-12 dialect when no explicit `$schema` is provided.
+A closed no-parameter Tool SHOULD use `{ "type": "object", "additionalProperties": false }`. An open unspecified-parameter Tool may use `{ "type": "object" }`, but this is NOT RECOMMENDED because it gives little validation or guidance. A declared-parameter schema uses `properties` and, when undeclared properties must be rejected, `additionalProperties: false`.
 
-Both schemas MAY include an explicit `$schema` property to declare the JSON Schema dialect (since MCP 2025-11-25).
+The `outputSchema` property, when present, MUST be a valid JSON Schema object describing the tool's structured output. For MCP 2025-11-25 and MCP 2026-07-28, it defaults to JSON Schema 2020-12 when no explicit `$schema` is provided.
 
-### 9.3 Tool Annotations
+For MCP 2025-11-25 and MCP 2026-07-28, both schemas MAY include an explicit `$schema` property to declare the JSON Schema dialect. Earlier revisions do not define that property on Tool schemas. For MCP 2026-07-28, validators MUST accept the applicable JSON Schema 2020-12 vocabulary, including references, composition, and conditionals, plus MCP-defined annotations where valid. Earlier views MUST be checked according to their applicable MCP schema rules.
+
+For MCP 2025-11-25 and MCP 2026-07-28, every embedded Tool schema MUST be valid under its declared or default dialect. Both revisions default to JSON Schema 2020-12. A validator MUST reject a schema whose declared dialect it does not support.
+
+The supported revisions before MCP 2025-11-25 define an object-rooted Tool schema shape but do not state an embedded-schema dialect default. For those revisions, validators MUST enforce the applicable shape without inferring a dialect solely from the enclosing generated MCP schema. `properties`, when present, MUST be an object whose values are objects, and `required`, when present, MUST be an array of strings. Other keywords MUST be preserved and MUST NOT be rejected solely by applying an inferred meta-schema.
+
+An mcpdesc validator MUST NOT automatically retrieve an external `$ref` target from a network. It MAY resolve external references from an explicitly supplied trusted local catalogue or an explicitly enabled resolver that follows the applicable MCP security guidance. If a target remains unavailable, the `$ref` MUST be preserved and its presence alone MUST NOT make the containing MCP Description invalid. The validator SHOULD warn that complete embedded-schema validation was not possible and MUST NOT report a weakened or partial validation as complete. Consumers that require executable schema certainty SHOULD require resolution or treat this warning as an error. Authors SHOULD prefer self-contained Tool schemas using local `$defs`.
+
+Before MCP 2026-07-28, `outputSchema` MUST declare an object root. MCP 2026-07-28 permits any valid JSON Schema root for `outputSchema`.
+
+MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input to an HTTP header. The annotation value MUST be a non-empty HTTP field-name token and MUST be unique case-insensitively within that `inputSchema`. It is valid only on a `string`, `integer`, or `boolean` property that is statically reachable from the schema root through `properties` chains. It MUST NOT be used on a property reached through arrays, composition, conditionals, or `$ref`.
+
+### 9.3 Protocol Variants and Security
+
+Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root revisions and overlaps every scoped Tool with the same name.
+
+Tool `security` describes statically known authorization required to call the Tool and replaces inherited transport or root security in full.
+
+### 9.4 Tool Annotations
 
 Tool annotations provide hints about tool behavior. These are advisory — implementations MUST NOT rely on annotations being accurate.
 
@@ -642,13 +744,13 @@ Tool annotations provide hints about tool behavior. These are advisory — imple
 
 The annotations object allows additional properties for forward compatibility.
 
-### 9.4 Execution Object
+### 9.5 Execution Object
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `taskSupport` | string | `"forbidden"` | Whether the tool supports task-augmented execution: `"forbidden"`, `"optional"`, or `"required"` |
 
-### 9.5 Example
+### 9.6 Example
 
 ```json
 {
@@ -763,6 +865,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
+| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 | `uri` | string | **Yes** | Resource URI. |
 | `name` | string | **Yes** | Programmatic resource name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
@@ -774,6 +877,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
 | `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `security` | Security Requirement Array | No | Primitive security override. |
 
 #### 10.1.2 Resource URI
 
@@ -787,6 +891,7 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
+| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 | `uriTemplate` | string | **Yes** | URI template (RFC 6570). |
 | `name` | string | **Yes** | Programmatic template name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
@@ -797,8 +902,15 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the template is deprecated. |
 | `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `security` | Security Requirement Array | No | Primitive security override. |
 
-### 10.3 Examples
+### 10.3 Protocol Variants and Security
+
+Resources with the same `uri` MUST have pairwise-disjoint effective protocol scopes. Resource Templates with the same `uriTemplate` MUST likewise have pairwise-disjoint effective protocol scopes.
+
+Resource `security` describes statically known authorization required to access it. Resource Template `security` describes authorization required to use the template to access matching resources. Each replaces inherited transport or root security in full.
+
+### 10.4 Examples
 
 **Static resources for chess game history:**
 
@@ -874,6 +986,7 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
+| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 | `name` | string | **Yes** | Programmatic prompt name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable prompt description. |
@@ -882,6 +995,9 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the prompt is deprecated. |
 | `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `security` | Security Requirement Array | No | Primitive security override. |
+
+Prompt declarations with the same `name` MUST have pairwise-disjoint effective protocol scopes. Prompt `security` describes statically known authorization required to retrieve the Prompt and replaces inherited transport or root security in full.
 
 ### 11.2 Prompt Argument Object
 
@@ -1065,18 +1181,26 @@ Extension authors SHOULD publish a specification for their extension, including:
 
 ```json
 {
-  "mcpdesc": "0.7.0",
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-coach",
     "version": "2.1.0"
   },
+  "protocolVersions": ["2025-11-25"],
   "transports": [
     { "type": "stdio", "command": "chess-coach", "args": ["mcp"] }
   ],
   "tools": [
     {
       "name": "analyze_game",
-      "description": "Analyze a chess game from PGN notation"
+      "description": "Analyze a chess game from PGN notation",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "pgn": { "type": "string" } },
+        "required": ["pgn"],
+        "additionalProperties": false
+      }
     }
   ],
   "x-cisco-metadata": {
@@ -1114,7 +1238,7 @@ Properties with `null` values SHOULD be omitted from the document rather than in
 
 ### 14.5 Empty Arrays and Objects
 
-Properties whose values are empty arrays or empty objects MAY be omitted. Implementations MUST treat an omitted array property as equivalent to an empty array, and an omitted object property as equivalent to an empty object, unless the property is required.
+Empty arrays and objects MAY be omitted only when the property's semantics explicitly make omission equivalent. Implementations MUST preserve semantically significant empty values. In particular, `security: []` clears inherited security while omission inherits it, and `security: [{}]` declares an anonymous alternative; these forms are not interchangeable.
 
 ### 14.6 String Values
 
@@ -1126,8 +1250,8 @@ MCP Description documents SHOULD include a `$schema` property referencing the ap
 
 ```json
 {
-  "$schema": "https://developer.cisco.com/mcp-description/schema/0.7.0",
-  "mcpdesc": "0.7.0"
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0"
 }
 ```
 
@@ -1140,10 +1264,11 @@ A conforming MCP Description document MUST:
 1. Be a valid JSON document (Section 14).
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
-4. Include the `transports` array with at least one transport object (Section 6).
-5. Include at least one of: `tools`, `resources`, `resourceTemplates`, or `prompts` (Section 3.3).
+4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.8.0 (Section 4).
+5. Include the `transports` array with at least one transport object and complete root protocol coverage (Section 6).
 6. Validate against the JSON Schema for the declared `mcpdesc` version.
-7. Not contain unknown properties at the root level except specification extensions matching `^x-`.
+7. Satisfy semantic scope, identifier, security-reference, tag-reference, revision-applicability, embedded Tool schema, and `x-mcp-header` constraints.
+8. Not contain unknown properties at the root level except specification extensions matching `^x-`.
 
 ### 15.2 Implementation Conformance
 
@@ -1153,6 +1278,11 @@ A conforming implementation (tool, validator, or platform) MUST:
 2. Reject documents that fail the requirements in Section 15.1.
 3. Ignore unrecognized specification extensions without error (Section 13.4).
 4. Preserve specification extensions when processing and re-serializing documents (Section 13.4).
+5. Apply structural JSON Schema validation and the cross-object semantic requirements of this specification.
+
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, security references, embedded Tool schemas, extension namespace diagnostics, and other cross-object rules require semantic validation.
+
+A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
 A conforming implementation SHOULD:
 
@@ -1187,7 +1317,7 @@ Clients MUST support `image/png` and `image/jpeg`. Clients SHOULD also support `
 
 ## Appendix B: Complete Example
 
-See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MCP Description document demonstrating all features of this specification.
+See [examples/full-featured.yaml](../examples/full-featured.yaml) for a complete MCP Description document demonstrating all features of this specification.
 
 ---
 
@@ -1195,8 +1325,8 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 
 The normative JSON Schema for this specification version is available at:
 
-- [../../schemas/mcp-description/0.7.0.json](../../schemas/mcp-description/0.7.0.json)
-- `https://developer.cisco.com/mcp-description/schema/0.7.0`
+- [../../../schemas/mcp-description/0.8.0.json](../../../schemas/mcp-description/0.8.0.json)
+- `https://mcpdesc.org/schema/0.8.0.json`
 
 ---
 

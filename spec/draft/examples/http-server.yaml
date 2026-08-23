@@ -1,10 +1,10 @@
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-coach
   title: Chess Coach Cloud
   version: 2.1.0
   description: Cloud-hosted chess analysis, ratings, and game history service
-  protocolVersion: '2025-06-18'
   contact:
     name: Chess Coach Team
     url: https://chess-coach.example.com
@@ -12,16 +12,21 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+protocolVersions:
+- '2025-11-25'
 transports:
 - type: streamable-http
   url: https://chess-coach.example.com/mcp
+securitySchemes:
+  bearer:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
+    description: JWT token from chess-coach.example.com/auth
 security:
-- type: http
-  scheme: bearer
-  bearerFormat: JWT
-  description: JWT token from chess-coach.example.com/auth
+- bearer: []
 capabilities:
-  tools:
+- tools:
     listChanged: false
   resources:
     subscribe: true

@@ -22,7 +22,7 @@ Think of it as **OpenAPI for MCP servers**: a static contract that enables disco
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
-| 0.8.0 | Community working draft | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | In progress in [`draft/`](draft/) |
+| 0.8.0 | Community working draft (unreleased) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) (experimental) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
 

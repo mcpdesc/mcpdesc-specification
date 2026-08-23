@@ -1,79 +1,45 @@
 # Relationship to the MCP Protocol
 
-## Overview
+## Complementary Roles
 
-The MCP Description Specification and the MCP Protocol serve complementary roles in the MCP ecosystem.
+The [Model Context Protocol](https://modelcontextprotocol.io) defines runtime communication and behavior between clients and servers: discovery, tool invocation, resource access, prompt retrieval, notifications, authorization, and other protocol interactions.
 
-## The MCP Protocol
-
-The [Model Context Protocol (MCP)](https://modelcontextprotocol.io) defines **runtime communication** between clients and servers:
-
-- **Initialize handshake** — client and server negotiate capabilities
-- **Tool invocation** — clients call server-side tools with parameters
-- **Resource fetching** — clients read server-side data sources
-- **Prompt execution** — clients invoke server-side prompt templates
-- **Notifications** — servers notify clients of changes
-
-The protocol is inherently **dynamic** — it requires a running server and an active connection.
-
-## The MCP Description
-
-The MCP Description Specification defines a **static contract** for an MCP server:
-
-- **Server metadata** — name, version, contact, license
-- **Transport configuration** — how to connect
-- **Tool definitions** — what tools exist and their schemas
-- **Resource catalog** — what data is available
-- **Prompt catalog** — what prompts are available
-- **Security requirements** — how to authenticate
-
-The description is a **document** — it exists independently of any running server.
-
-## Side-by-Side Comparison
+MCP Description defines a static representation of a server surface: identity metadata, described protocol revisions, durable instructions, transports, security requirements, semantic capabilities, and primitive declarations. A description exists independently of a running server and does not reproduce MCP wire choreography.
 
 | Aspect | MCP Protocol | MCP Description |
-|--------|-------------|-----------------|
-| Nature | Wire protocol | Document format |
-| When used | Runtime | Design time, build time, documentation |
+|--------|--------------|-----------------|
+| Nature | Runtime protocol | Static document format |
 | Server required | Yes | No |
-| Connection required | Yes | No |
-| Capabilities | Discovered dynamically | Declared statically |
-| Tools | Invoked | Described |
-| Resources | Fetched | Cataloged |
-| Format | JSON-RPC over transport | JSON document |
+| Protocol revisions | Selected and used at runtime | Declared and scoped statically |
+| Capabilities | Advertised or discovered dynamically | Described as durable semantics |
+| Tools | Invoked | Described with input and output schemas |
+| Resources | Read or subscribed to | Catalogued |
+| Prompts | Retrieved | Catalogued |
+| Authorization | Enforced at runtime | Statically known requirements described |
 
-## How They Work Together
+## MCP Description Does Not Replace Runtime Behavior
 
+A description does not execute Tools, contain Resource content, retrieve Prompts, enforce authorization, manage sessions, or define runtime error handling. Servers and clients continue to follow the applicable MCP revision.
+
+Static security requirements do not predict whether an unauthorized primitive is visible during runtime discovery. Likewise, an observed description reflects only the protocol revision and authorization context actually observed unless authoritative design metadata supplies a broader surface.
+
+## Protocol Revisions
+
+The `mcpdesc` field and MCP protocol coverage are independent dimensions:
+
+```json
+{
+  "mcpdesc": "0.8.0",
+  "protocolVersions": ["2025-11-25", "2026-07-28"]
+}
 ```
-┌─────────────────────────────────────────────────┐
-│              Developer Workflow                   │
-│                                                   │
-│  1. Author MCP Description      (design time)    │
-│  2. Validate against schema     (build time)     │
-│  3. Generate documentation      (build time)     │
-│  4. Publish to registry         (release time)   │
-│  5. Client discovers server     (discovery time)  │
-│  6. Client connects via MCP     (runtime)         │
-│  7. Client uses tools/resources (runtime)         │
-│                                                   │
-│  Steps 1-5: MCP Description                      │
-│  Steps 6-7: MCP Protocol                         │
-└─────────────────────────────────────────────────┘
-```
 
-## What the Description Does NOT Replace
+`mcpdesc` selects this document format. Root `protocolVersions` lists the MCP revisions described by the document. Applicable transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts may narrow that root set with their own `protocolVersions`.
 
-- **Runtime discovery** — servers still respond to `initialize` with capabilities
-- **Tool execution** — the description says what tools exist, not what they return
-- **Resource content** — the description catalogs resources, not their data
-- **Error handling** — runtime errors are protocol concerns
-- **Session management** — sessions are protocol concerns
+A single-version Effective Protocol View is produced by retaining declarations applicable to one root revision and removing their now-redundant scopes. The applicable MCP revision determines how the represented behavior is exercised on the wire.
 
-## Protocol Version Independence
+## Durable Semantics Across Wire Changes
 
-The MCP Description specification version (`mcpdesc`) is independent of the MCP protocol version (`info.protocolVersion`):
+MCP Description retains fields such as `tools.listChanged`, `prompts.listChanged`, `resources.listChanged`, and `resources.subscribe` because they describe observable server behavior. It does not add message catalogues for the different notification or subscription mechanisms used by different MCP revisions.
 
-- `mcpdesc: "0.6.0"` — the document format version
-- `protocolVersion: "2025-06-18"` — the MCP protocol the server implements
-
-A single MCP Description specification version can describe servers implementing different MCP protocol versions.
+Where semantics materially differ, declarations are split by protocol scope. For example, core Tasks in MCP 2025-11-25 and a formal Tasks extension in MCP 2026-07-28 are represented separately and are not automatically converted into one another.

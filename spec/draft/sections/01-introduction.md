@@ -4,9 +4,9 @@
 
 The MCP Description Specification defines a standard format for describing the capabilities of a Model Context Protocol (MCP) server as a static, curated document.
 
-The MCP ecosystem currently relies on runtime discovery through protocol initialization and capability inspection. While effective for dynamic interactions, this approach limits offline tooling, cross-platform interoperability, and contract-driven development workflows.
+The MCP ecosystem supports runtime discovery and capability inspection. While effective for dynamic interactions, runtime discovery alone limits offline tooling, cross-platform interoperability, design review, and governance workflows.
 
-This specification addresses these limitations by providing a **portable contract format** for MCP servers — analogous to the role OpenAPI plays for HTTP APIs.
+This specification addresses these limitations by providing a portable description format for MCP servers, analogous to the descriptive role OpenAPI plays for HTTP APIs.
 
 ### 1.2 Goals
 
@@ -15,7 +15,7 @@ An MCP Description document enables:
 - **Standardized server descriptions** — a consistent structure for declaring server metadata, transports, tools, resources, prompts, and capabilities.
 - **Offline discoverability** — platforms can index and display server capabilities without establishing a runtime connection.
 - **Tooling interoperability** — documentation generators, testing frameworks, agent discovery tools, IDE integrations, and governance platforms can operate on a common format.
-- **Contract-driven development** — teams can define and validate MCP server capabilities before deployment.
+- **Description-driven development** — teams can define, review, and validate MCP server surfaces before deployment.
 
 ### 1.3 Audience
 
@@ -33,11 +33,11 @@ The MCP Description Specification does **not** replace the MCP protocol. It comp
 | MCP Protocol | MCP Description |
 |---|---|
 | Runtime communication | Static declaration |
-| Initialize handshake | Server metadata |
+| Discovery and runtime metadata | Server metadata and declared protocol coverage |
 | Tool invocation | Tool definitions |
 | Resource fetching | Resource definitions |
 
-The MCP protocol defines **runtime behavior**. An MCP Description defines the **server contract**.
+The MCP protocol defines runtime communication and behavior. An MCP Description statically represents durable, externally relevant server semantics without reproducing MCP wire choreography.
 
 ### 1.5 Scope
 

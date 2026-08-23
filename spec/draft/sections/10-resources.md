@@ -8,6 +8,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
+| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 | `uri` | string | **Yes** | Resource URI. |
 | `name` | string | **Yes** | Programmatic resource name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
@@ -19,6 +20,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
 | `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `security` | Security Requirement Array | No | Primitive security override. |
 
 #### 10.1.2 Resource URI
 
@@ -32,6 +34,7 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
+| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 | `uriTemplate` | string | **Yes** | URI template (RFC 6570). |
 | `name` | string | **Yes** | Programmatic template name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
@@ -42,8 +45,15 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the template is deprecated. |
 | `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `security` | Security Requirement Array | No | Primitive security override. |
 
-### 10.3 Examples
+### 10.3 Protocol Variants and Security
+
+Resources with the same `uri` MUST have pairwise-disjoint effective protocol scopes. Resource Templates with the same `uriTemplate` MUST likewise have pairwise-disjoint effective protocol scopes.
+
+Resource `security` describes statically known authorization required to access it. Resource Template `security` describes authorization required to use the template to access matching resources. Each replaces inherited transport or root security in full.
+
+### 10.4 Examples
 
 **Static resources for chess game history:**
 

@@ -1,31 +1,29 @@
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-coach
   title: Chess Coach (Multi-Transport)
   version: 2.1.0
   description: Chess analysis and rating server available via both cloud and local
     transports
-  protocolVersion: '2025-06-18'
+protocolVersions:
+- '2025-11-25'
+securitySchemes:
+  bearer:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
+    description: Required for cloud transports
 transports:
 - type: streamable-http
   url: https://chess-coach.example.com/mcp
   security:
-  - type: http
-    scheme: bearer
-    bearerFormat: JWT
-    description: Required for cloud transports
+  - bearer: []
 - type: stdio
   command: chess-coach
   args:
   - mcp
   security: []
-- type: sse
-  url: https://chess-coach.example.com/sse
-  security:
-  - type: http
-    scheme: bearer
-    bearerFormat: JWT
-    description: Required for cloud transports
 tools:
 - name: analyze_game
   title: Analyze Chess Game

@@ -42,18 +42,26 @@ Extension authors SHOULD publish a specification for their extension, including:
 
 ```json
 {
-  "mcpdesc": "0.7.0",
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-coach",
     "version": "2.1.0"
   },
+  "protocolVersions": ["2025-11-25"],
   "transports": [
     { "type": "stdio", "command": "chess-coach", "args": ["mcp"] }
   ],
   "tools": [
     {
       "name": "analyze_game",
-      "description": "Analyze a chess game from PGN notation"
+      "description": "Analyze a chess game from PGN notation",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "pgn": { "type": "string" } },
+        "required": ["pgn"],
+        "additionalProperties": false
+      }
     }
   ],
   "x-cisco-metadata": {

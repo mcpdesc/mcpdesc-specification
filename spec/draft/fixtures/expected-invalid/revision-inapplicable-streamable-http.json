@@ -1,0 +1,17 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "revision-inapplicable-streamable-http",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2024-11-05"
+  ],
+  "transports": [
+    {
+      "type": "streamable-http",
+      "url": "https://example.com/mcp"
+    }
+  ]
+}

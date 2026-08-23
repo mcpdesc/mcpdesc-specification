@@ -65,10 +65,16 @@ This extension follows the MCP Description [specification extension mechanism](.
 
 ```json
 {
-  "mcpdesc": "0.7.0",
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
   "info": { "name": "my-server", "version": "1.0.0" },
+  "protocolVersions": ["2025-06-18"],
   "transports": [{ "type": "streamable-http", "url": "https://example.com/mcp" }],
-  "tools": [{ "name": "my_tool", "description": "A tool" }],
+  "tools": [{
+    "name": "my_tool",
+    "description": "A tool",
+    "inputSchema": { "type": "object", "additionalProperties": false }
+  }],
 
   "x-cisco-metadata": {
     "version": "0.2.0",

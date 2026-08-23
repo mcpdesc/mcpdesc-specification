@@ -1,0 +1,31 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-mcp-header-value",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-mcp-header-value"
+    }
+  ],
+  "tools": [
+    {
+      "name": "invalid_header",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "number",
+            "x-mcp-header": "Invalid Header"
+          }
+        }
+      }
+    }
+  ]
+}

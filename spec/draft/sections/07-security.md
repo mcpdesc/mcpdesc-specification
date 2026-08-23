@@ -1,100 +1,97 @@
 ## 7. Security
 
-The `security` property declares the authentication and authorization schemes supported by the server. It is OPTIONAL.
+MCP Description represents statically known authentication and authorization through reusable named Security Scheme Objects and Security Requirement Arrays. Both `securitySchemes` and `security` are OPTIONAL.
 
-### 7.1 Overview
+These declarations describe access requirements. They do not define token acquisition, authorization-server discovery, runtime access-control policy, or authorization-filtered discovery behavior.
 
-The security array describes how clients authenticate with the MCP server. The structure is aligned with [OpenAPI 3.1 Security Scheme Objects](https://spec.openapis.org/oas/v3.1.0#security-scheme-object), enabling reuse of existing security tooling and patterns.
+### 7.1 Named Security Schemes
 
-When `security` is omitted or an empty array, the server does not require authentication.
-
-Root-level `security` acts as the default for all transports. Individual transports MAY override this default by including their own `security` property (see Section 6.4).
-
-### 7.2 Security Scheme Object
-
-Each security scheme object MUST include a `type` property.
-
-| Property | Type | Required | Description |
-|----------|------|----------|-------------|
-| `type` | string | **Yes** | Scheme type: `"http"`, `"apiKey"`, `"oauth2"`, or `"openIdConnect"` |
-| `scheme` | string | Conditional | HTTP auth scheme (e.g., `"bearer"`, `"basic"`). REQUIRED when `type` is `"http"`. |
-| `bearerFormat` | string | No | Bearer token format hint (e.g., `"JWT"`). |
-| `name` | string | Conditional | API key name. REQUIRED when `type` is `"apiKey"`. |
-| `in` | string | Conditional | API key location: `"header"`, `"query"`, or `"cookie"`. REQUIRED when `type` is `"apiKey"`. |
-| `flows` | [OAuth Flows Object](#73-oauth-flows-object) | Conditional | OAuth2 flows. REQUIRED when `type` is `"oauth2"`. |
-| `openIdConnectUrl` | string (URI) | Conditional | OpenID Connect discovery URL. REQUIRED when `type` is `"openIdConnect"`. |
-| `description` | string | No | Human-readable description of the security scheme. |
-
-### 7.3 OAuth Flows Object
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `implicit` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the OAuth2 implicit flow |
-| `password` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the resource owner password flow |
-| `clientCredentials` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the client credentials flow |
-| `authorizationCode` | [OAuth Flow Object](#74-oauth-flow-object) | Configuration for the authorization code flow |
-
-### 7.4 OAuth Flow Object
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `authorizationUrl` | string (URI) | Authorization endpoint URL |
-| `tokenUrl` | string (URI) | Token endpoint URL |
-| `refreshUrl` | string (URI) | Refresh token endpoint URL |
-| `scopes` | object | Available scopes (key: scope name, value: description) |
-
-### 7.5 Examples
-
-**Bearer token authentication:**
+Root `securitySchemes` is a map from a local name to a Security Scheme Object. Every local name MUST match `^[A-Za-z0-9._-]+$`.
 
 ```json
 {
-  "security": [
-    {
-      "type": "http",
-      "scheme": "bearer",
-      "bearerFormat": "JWT",
-      "description": "JWT token issued by the chess platform"
-    }
-  ]
-}
-```
-
-**API key authentication:**
-
-```json
-{
-  "security": [
-    {
-      "type": "apiKey",
-      "name": "X-Chess-API-Key",
-      "in": "header",
-      "description": "API key for accessing the chess rating service"
-    }
-  ]
-}
-```
-
-**OAuth2 with authorization code flow:**
-
-```json
-{
-  "security": [
-    {
+  "securitySchemes": {
+    "oauth": {
       "type": "oauth2",
       "flows": {
         "authorizationCode": {
           "authorizationUrl": "https://auth.example.com/authorize",
           "tokenUrl": "https://auth.example.com/token",
-          "scopes": {
-            "games:read": "Read game history",
-            "games:write": "Submit new games",
-            "ratings:read": "View player ratings"
-          }
+          "scopes": { "games:read": "Read games" }
         }
       }
+    },
+    "api-key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
     }
+  }
+}
+```
+
+### 7.2 Security Scheme Object
+
+Each Security Scheme Object MUST include `type`.
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `type` | string | **Yes** | `"http"`, `"apiKey"`, `"oauth2"`, or `"openIdConnect"` |
+| `scheme` | string | For `http` | HTTP authentication scheme |
+| `bearerFormat` | string | No | Bearer-token format hint |
+| `name` | string | For `apiKey` | API-key parameter name |
+| `in` | string | For `apiKey` | `"header"`, `"query"`, or `"cookie"` |
+| `flows` | OAuth Flows Object | For `oauth2` | One or more OAuth2 flows |
+| `openIdConnectUrl` | string (URI) | For `openIdConnect` | OpenID Connect discovery URL |
+| `description` | string | No | Human-readable description |
+
+An OAuth Flows Object MAY contain `implicit`, `password`, `clientCredentials`, and `authorizationCode`. At least one flow MUST be present. Every flow MUST contain a `scopes` map and MAY contain `refreshUrl`. An implicit flow MUST contain `authorizationUrl`; password and client-credentials flows MUST contain `tokenUrl`; an authorization-code flow MUST contain both `authorizationUrl` and `tokenUrl`.
+
+### 7.3 Security Requirement Array
+
+A `security` value is an array of Security Requirement Objects. Each object maps local security-scheme names to arrays of scope strings.
+
+```json
+{
+  "security": [
+    { "oauth": ["games:read"] },
+    { "api-key": [] }
   ]
 }
 ```
 
+Entries in the outer array are alternatives (**OR**). Multiple scheme names in one object are jointly required (**AND**). Every listed OAuth2 or OpenID Connect scope is required.
+
+Every referenced name MUST exist in root `securitySchemes`. Scope arrays MUST contain unique strings. HTTP and API-key schemes MUST use an empty scope array. An OAuth2 or OpenID Connect requirement MAY use a scope absent from a static scope catalogue; validators MAY warn but MUST NOT reject solely for that reason.
+
+Array order, scheme-key order, and scope order are not semantically significant.
+
+### 7.4 Omission, Clearing, and Anonymous Access
+
+The following forms are distinct:
+
+- omitted `security`: inherit at a nested level, or make no declaration at root;
+- `security: []`: explicitly clear any inherited mcpdesc security requirement;
+- `security: [{}]`: explicitly allow anonymous access as an alternative;
+- `security: [{}, {"oauth": ["games:read"]}]`: allow anonymous access or the named OAuth requirement.
+
+Implementations MUST preserve the distinction between `[]` and `[{}]` and MUST NOT normalize one into the other.
+
+### 7.5 Placement and Precedence
+
+`security` MAY appear at the document root, a Transport Object, or any Tool, Resource, Resource Template, or Prompt Object.
+
+For a primitive used through a selected transport, the effective requirement is the first present value in this order:
+
+1. primitive `security`;
+2. selected transport `security`;
+3. root `security`;
+4. no mcpdesc-declared requirement.
+
+This is replacement, not merging. Protocol projection MUST preserve security declarations and MUST NOT copy one transport's inherited security onto a primitive unless a separate operation also selects that transport.
+
+### 7.6 Interpretation Limits
+
+Primitive requirements describe access conditions, not identities, roles, ownership, or exact discovery visibility. A requirement neither guarantees that a primitive is hidden before authorization nor guarantees that it is visible.
+
+A primitive-level override applies regardless of selected transport. If transport inheritance cannot faithfully represent materially different per-transport primitive requirements, authors SHOULD publish separate descriptions or use a specification extension. Tools MUST NOT invent a combined requirement.

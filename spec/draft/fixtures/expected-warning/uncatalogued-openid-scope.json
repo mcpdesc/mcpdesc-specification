@@ -1,0 +1,30 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "openid-scope-warning",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "streamable-http",
+      "url": "https://openid-scope-warning.example.com/mcp"
+    }
+  ],
+  "securitySchemes": {
+    "oidc": {
+      "type": "openIdConnect",
+      "openIdConnectUrl": "https://id.example.com/.well-known/openid-configuration"
+    }
+  },
+  "security": [
+    {
+      "oidc": [
+        "profile:read"
+      ]
+    }
+  ]
+}

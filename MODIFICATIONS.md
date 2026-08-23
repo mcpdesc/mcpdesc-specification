@@ -52,3 +52,15 @@ Adopted a folder-versioned layout (each specification version is a folder under 
 | `scripts/validate-repository.mjs` | Requires `spec/draft/mcp-description.md`; validates examples under any `spec/**/examples/` | Match the folder-versioned layout |
 | `GOVERNANCE.md`, `CONTRIBUTING.md`, `AGENTS.md`, `README.md`, `spec/README.md`, `.github/PULL_REQUEST_TEMPLATE.md`, `specification-status.json`, `schemas/draft.json` | Updated to the `main`-integration, folder-versioned layout and the merge-on-accept proposal workflow | Reflect the current repository model |
 | `spec/GOVERNANCE.md`, `spec/GOVERNANCE-0.7.0.md` | Removed | The repository has a single governance document (`GOVERNANCE.md`); the v0.7.0 specification and its historical governance remain at the canonical Cisco Open source |
+
+## Experimental v0.8.0 draft implementation — 2026-08-22
+
+This work is an unreleased experiment on `experiment/0.8.0-draft-implementation`. It does not modify or supersede the stable v0.7.0 artifacts, and the associated proposals remain under review.
+
+| File or path | Change | Reason |
+|---|---|---|
+| `spec/draft/sections/**`, `spec/draft/mcp-description.md` | Revised the imported v0.7.0 baseline into the experimental v0.8.0 normative draft | Implement protocol-revision scoping, named security requirements, revision-aware Tool schemas, Effective Protocol Views, and related conformance rules for interoperability testing |
+| `spec/draft/guides/**`, `spec/draft/examples/**`, `spec/draft/extensions/**`, `spec/draft/CHANGELOG.md` | Updated supporting material and examples for the experimental draft | Keep non-normative guidance and examples synchronized with the normative changes while preserving origin attribution |
+| `schemas/mcp-description/0.8.0.json`, `schemas/draft.json` | Added the unreleased v0.8.0 schema and pointed the draft metadata at it | Provide a testable draft without changing the stable `schemas/latest.json` pointer |
+| `scripts/validate-0.8.mjs`, `scripts/mcpdesc-views.mjs`, `scripts/test-views.mjs`, `scripts/validate-repository.mjs`, `spec/draft/fixtures/**`, `package.json` | Added semantic validation, projection/merge behavior, fixtures, and dependencies | Exercise cross-object requirements that the structural JSON Schema cannot express |
+| `spec/README.md` | Linked the experimental v0.8.0 schema and retained its unreleased status | Keep the specification index synchronized with the available draft artifacts |

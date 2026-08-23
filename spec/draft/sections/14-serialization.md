@@ -18,7 +18,7 @@ Properties with `null` values SHOULD be omitted from the document rather than in
 
 ### 14.5 Empty Arrays and Objects
 
-Properties whose values are empty arrays or empty objects MAY be omitted. Implementations MUST treat an omitted array property as equivalent to an empty array, and an omitted object property as equivalent to an empty object, unless the property is required.
+Empty arrays and objects MAY be omitted only when the property's semantics explicitly make omission equivalent. Implementations MUST preserve semantically significant empty values. In particular, `security: []` clears inherited security while omission inherits it, and `security: [{}]` declares an anonymous alternative; these forms are not interchangeable.
 
 ### 14.6 String Values
 
@@ -30,8 +30,8 @@ MCP Description documents SHOULD include a `$schema` property referencing the ap
 
 ```json
 {
-  "$schema": "https://developer.cisco.com/mcp-description/schema/0.7.0",
-  "mcpdesc": "0.7.0"
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0"
 }
 ```
 
