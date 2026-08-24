@@ -467,7 +467,7 @@ Acceptance criteria:
 
 ## Decision record
 
-Pending review.
+Accepted for implementation in MCP Description 0.8.0.
 
 Review decisions recorded in this draft:
 
