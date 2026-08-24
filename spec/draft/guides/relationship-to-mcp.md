@@ -6,6 +6,8 @@ The [Model Context Protocol](https://modelcontextprotocol.io) defines runtime co
 
 MCP Description defines a static representation of a server surface: identity metadata, described protocol revisions, durable instructions, transports, security requirements, semantic capabilities, and primitive declarations. A description exists independently of a running server and does not reproduce MCP wire choreography.
 
+For each declared protocol revision, that revision's normative MCP specification remains authoritative for MCP types and runtime behavior. MCP Description neither overrides nor amends those requirements. It defines the description document, adds supplemental static metadata, and provides protocol-scoped projection and merge rules for servers described across multiple MCP revisions.
+
 | Aspect | MCP Protocol | MCP Description |
 |--------|--------------|-----------------|
 | Nature | Runtime protocol | Static document format |

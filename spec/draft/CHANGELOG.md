@@ -64,6 +64,7 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - Defined shape-only Tool schema validation before MCP 2025-11-25 rather than inferring a dialect from the enclosing generated MCP schema.
 - Defined warning-and-preserve handling for unrecognized extension identifiers under MCP-reserved prefixes.
 - Distinguished MCP Tool Annotations from Resource Annotations, defined Resource Annotation fields and revision applicability, and aligned Resource, Resource Template, and embedded content schemas with the applicable MCP types.
+- Refocused the FAQ on MCP Description authority, multi-revision coverage, Effective Protocol Views, merge behavior, validation, and supplemental metadata; clarified that normative MCP specifications remain authoritative for runtime behavior.
 
 ### Deferred
 

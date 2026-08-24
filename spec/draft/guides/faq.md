@@ -1,77 +1,87 @@
 # Frequently Asked Questions
 
-## General
+This FAQ explains MCP Description. It does not restate or modify MCP runtime requirements. For runtime behavior, use the normative MCP specification for the applicable protocol revision. MCP Description complements those specifications with a static, portable description format.
+
+## Purpose and Authority
 
 ### What is an MCP Description?
 
-An MCP Description is a JSON document that describes what an MCP server offers — its tools, resources, prompts, transports, and security requirements — without requiring a connection to the server.
+An MCP Description is a JSON or YAML document that statically describes an MCP server surface: identity, protocol coverage, transports, capabilities, Tools, Resources, Resource Templates, Prompts, security requirements, and related documentation metadata.
 
-### How is this different from the MCP protocol?
+It supports offline discovery, documentation, design review, governance, testing, and description-driven development without requiring a live server connection.
 
-The MCP protocol defines runtime communication (connecting, calling tools, fetching resources). An MCP Description is a static document that describes the server's capabilities. They're complementary — see [Relationship to MCP](relationship-to-mcp.md).
+### Does MCP Description override the MCP specification?
 
-### Why not just use OpenAPI?
+No. The normative MCP specification for each declared protocol revision defines MCP types, runtime behavior, negotiation, requests, responses, and security requirements. MCP Description governs only the description document and its projection, merge, validation, and supplemental static metadata.
 
-OpenAPI is designed for HTTP REST APIs. MCP servers have different concepts (tools instead of operations, multiple transport types, prompts, resources). The MCP Description borrows OpenAPI patterns where they fit (info, security) but uses MCP-native structures for capabilities. See [Comparison with OpenAPI](comparison-with-openapi.md).
+When MCP Description reuses an MCP field or type, that field retains the semantics and revision applicability defined by MCP. If a description conflicts with the applicable MCP specification or with observed runtime behavior, the description does not change the protocol or the server; it is inaccurate and should be corrected.
 
-## Creating Documents
+See [Relationship to MCP](relationship-to-mcp.md).
 
-### What's the minimum valid document?
+### Is an MCP Description guaranteed to be complete or current?
 
-A document needs `mcpdesc`, `info` (with `name` and `version`), non-empty `protocolVersions`, and `transports` (at least one, collectively covering every root revision). Primitive collections are optional. See [examples/minimal.yaml](../examples/minimal.yaml).
+No. A description represents its declared server surface and may be authored from design metadata, generated from a runtime observation, or assembled from both. An observation can cover only the protocol revision, authorization context, and server state that were actually observed.
 
-### Do I have to write it by hand?
+Omitted primitives do not prove that no other revision or runtime context exposes them. Producers should record provenance in surrounding tooling or a documented extension when consumers need to assess freshness or authority.
 
-No. MCP Description documents can be:
-- Generated from a running server using tools like the [mcpcontract CLI](https://github.com/cisco-open/mcptoolkit-contract)
-- Hand-authored in any JSON or YAML editor (with validation via the `$schema` property or an IDE such as [mcpeditor](https://www.npmjs.com/package/@cisco_open/mcptoolkit-editor))
-- Generated from code annotations or configuration files
+## Versions and Views
 
-### What file extension should I use?
+### What is the difference between `mcpdesc` and `protocolVersions`?
 
-The recommended extension is `.mcpdesc.json`. 
-You may also use `.mcp-description.json`.
+`mcpdesc` selects the MCP Description specification used to validate the document. `protocolVersions` lists the MCP protocol revisions described by the document. These are independent version dimensions.
 
-### How do I validate my document?
+For example, one document conforming to MCP Description 0.8.0 can describe both MCP 2025-11-25 and MCP 2026-07-28.
 
-Use the 0.8.0 JSON Schema with a JSON Schema 2020-12 validator and run semantic validation for cross-object rules. Add `"$schema": "https://mcpdesc.org/schema/0.8.0.json"` for IDE validation.
+### How can one document describe multiple MCP revisions?
 
-## Technical
+The root `protocolVersions` declares total coverage. Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts can narrow their applicability with their own `protocolVersions`.
 
-### Can a server have multiple transports?
+Omitting a declaration-level scope means that the declaration applies to its complete parent scope; it does not mean that applicability is unknown. When a field or primitive differs between MCP revisions, use separate declarations with disjoint scopes rather than combining incompatible shapes.
 
-Yes. The `transports` array can contain multiple entries (e.g., both `streamable-http` and `stdio`). Clients choose the most appropriate one.
+### How should a consumer use a multi-version description?
 
-### What about SSE transport?
+Select one declared MCP revision and produce its Effective Protocol View. The view retains only declarations applicable to that revision, removes redundant declaration scopes, and is validated as an ordinary single-version MCP Description.
 
-SSE (`"type": "sse"`) is supported for backward compatibility but is considered legacy. New implementations should use `streamable-http`.
+An Effective Protocol View is still a static description. It does not perform MCP runtime version negotiation and does not replace the selected revision's MCP rules.
 
-### Are tool annotations reliable?
+### Can descriptions from different revisions be merged?
 
-Tool Annotations are advisory hints, not guarantees. A tool marked `readOnlyHint: true` **should** be read-only, but clients must not make Tool-use decisions from annotations received from an untrusted server. Resource Annotations are a separate type used for audience, priority, and modification-time display hints.
+Yes, when they describe compatible views of the same logical server. Merge tooling should compare per-revision Effective Protocol Views, preserve differing declarations as disjoint variants, and report conflicts rather than guess. Inputs covering the same revision must be semantically equivalent for that revision.
 
-### Do Resource examples guarantee live contents?
+## Authoring and Validation
 
-No. Resource examples are illustrative snapshots for documentation, tests, and deterministic mocks. They do not guarantee freshness, immutability, or equality with a live read. Consumers must not automatically dereference their untrusted URIs, and authors must redact sensitive or proprietary data.
+### What is the minimum valid document?
 
-### How do Resource Template examples identify variables?
+A document needs `mcpdesc`, `info` with `name` and `version`, a non-empty `protocolVersions` array, and one or more transports that collectively cover every declared revision. Tool, Resource, Resource Template, and Prompt collections are optional. See [the minimal example](../examples/minimal.yaml).
 
-They record the exact concrete `resources/read.params.uri`, not a reverse-inferred variable map. The URI must be a valid RFC 6570 expansion of the containing `uriTemplate`.
+### How should a document be created?
 
-### How does versioning work?
+It may be hand-authored, generated from implementation metadata, captured from a running server, or assembled from multiple authoritative sources. Generators must not infer unobserved protocol revisions, primitives, authorization policy, or behavior.
 
-The `mcpdesc` field declares which version of this description specification the document conforms to. Root `protocolVersions` declares the MCP revisions described by the document; scoped declarations can narrow their applicability. These version dimensions are independent.
+### How is an MCP Description validated?
 
-### How does security inheritance work?
+Use the schema for the declared `mcpdesc` version and apply that version's semantic validation rules. Schema validation alone cannot enforce cross-object rules such as protocol coverage, scoped uniqueness, revision-specific fields, security references, or example consistency.
 
-Reusable schemes are declared under root `securitySchemes`. A primitive `security` value replaces a selected transport's value, which replaces root `security`. Omission inherits, `security: []` clears inherited requirements, and `security: [{}]` declares an explicit anonymous alternative.
+For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/0.8.0.json"` for editor support and use the repository validation workflow for complete validation.
 
-## Extensions
+### What file extension should be used?
 
-### Can I add custom fields?
+The recommended JSON extension is `.mcpdesc.json`; `.mcp-description.json` is also recognized by existing tooling. YAML may be used where tooling supports it.
 
-Yes, using specification extensions. Any root-level property starting with `x-` is an extension. See [Vendor Extensions Guide](vendor-extensions-guide.md).
+## Supplemental MCP Description Metadata
 
-### Will my extension break other tools?
+### What do static security requirements mean?
 
-No. Conforming implementations must ignore unknown extensions. Your custom metadata passes through safely.
+They describe authorization requirements known to the document author. They do not acquire tokens, enforce access, predict authorization-filtered discovery, or override the applicable MCP authorization specification.
+
+Within MCP Description, a primitive `security` value replaces a selected transport's value, which replaces root `security`. Omission inherits, `security: []` clears inherited requirements, and `security: [{}]` includes an explicit anonymous alternative.
+
+### Do Tool or Resource examples define runtime behavior?
+
+No. Named examples are MCP Description metadata for documentation, contract tests, and deterministic mocks. They do not alter MCP schemas, guarantee live results, establish freshness, or define a default runtime response.
+
+Tool examples pair one complete input with a completed Tool Result. Static Resource examples use the Resource URI as the implicit read input; Resource Template examples record the exact concrete RFC 6570 expansion. Consumers must not execute Tools or dereference Resource URIs merely because an example exists.
+
+### Can custom metadata be added?
+
+Yes. Root properties beginning with `x-` are specification extensions. Unrecognized extensions are ignored for interpretation and should be preserved when round-tripping. Extensions cannot override MCP or MCP Description requirements, and their authors should publish their schema, semantics, and versioning policy. See the [Vendor Extensions Guide](vendor-extensions-guide.md).
