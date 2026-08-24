@@ -18,6 +18,12 @@ When MCP Description reuses an MCP field or type, that field retains the semanti
 
 See [Relationship to MCP](relationship-to-mcp.md).
 
+### Why not just use OpenAPI?
+
+OpenAPI describes HTTP APIs. MCP Description describes MCP servers using MCP-native concepts such as Tools, Resources, Resource Templates, Prompts, capabilities, and protocol-revision scopes. It also supports MCP transports that are not HTTP APIs.
+
+MCP Description adopts familiar description patterns where they fit, including server identity, reusable security schemes, and extensions, but it is not an OpenAPI replacement or profile. Use the format that describes the interface being documented; a service exposing both HTTP APIs and MCP may publish both. See [Comparison with OpenAPI](comparison-with-openapi.md).
+
 ### Is an MCP Description guaranteed to be complete or current?
 
 No. A description represents its declared server surface and may be authored from design metadata, generated from a runtime observation, or assembled from both. An observation can cover only the protocol revision, authorization context, and server state that were actually observed.
@@ -48,15 +54,22 @@ An Effective Protocol View is still a static description. It does not perform MC
 
 Yes, when they describe compatible views of the same logical server. Merge tooling should compare per-revision Effective Protocol Views, preserve differing declarations as disjoint variants, and report conflicts rather than guess. Inputs covering the same revision must be semantically equivalent for that revision.
 
-## Authoring and Validation
+## Creating Documents
 
 ### What is the minimum valid document?
 
 A document needs `mcpdesc`, `info` with `name` and `version`, a non-empty `protocolVersions` array, and one or more transports that collectively cover every declared revision. Tool, Resource, Resource Template, and Prompt collections are optional. See [the minimal example](../examples/minimal.yaml).
 
-### How should a document be created?
+### Do I have to write it by hand?
 
-It may be hand-authored, generated from implementation metadata, captured from a running server, or assembled from multiple authoritative sources. Generators must not infer unobserved protocol revisions, primitives, authorization policy, or behavior.
+No. An MCP Description may be:
+
+- hand-authored in a JSON or YAML editor;
+- generated from implementation metadata, code annotations, or configuration;
+- captured from a running server; or
+- assembled from multiple authoritative sources.
+
+Generation does not make a description complete or authoritative. Generators must not infer unobserved protocol revisions, primitives, authorization policy, or behavior.
 
 ### How is an MCP Description validated?
 
