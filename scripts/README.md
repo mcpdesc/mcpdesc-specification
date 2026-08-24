@@ -23,3 +23,9 @@ When those sources disagree, the workflow controls CI triggering, `package.json`
 | [`freeze-version.mjs`](freeze-version.mjs) | Maintainer-invoked during an explicitly approved release; it is not part of `npm test` or CI. | See the script header for usage and its printed post-freeze checklist; release authority and prerequisites remain in [`GOVERNANCE.md`](../GOVERNANCE.md#branch-and-release-model). |
 
 The validation scripts report failures but do not modify specification artifacts. The freeze script performs only the mechanical snapshot step and deliberately leaves release-status and schema-pointer decisions to maintainers.
+
+## Draft snapshot publication
+
+Public draft snapshots use annotated tags named `v<version>-draft.<iteration>`, such as `v0.8.0-draft.1`. They identify an immutable review and interoperability baseline but do not create a new `mcpdesc` conformance version or a stable release.
+
+Before tagging, maintainers update the draft status metadata, front matter, changelog, public status pages, and `spec/draft/PROPOSALS.md`; capture and verify every proposal revision required by governance; run `npm test`; and confirm that `schemas/latest.json` and frozen specification versions are unchanged. Draft snapshots are tagged directly from the reviewed integration commit. Do not run `freeze-version.mjs` for a draft snapshot.

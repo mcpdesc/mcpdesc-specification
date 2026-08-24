@@ -9,9 +9,11 @@ A portable, machine-readable contract format for describing Model Context Protoc
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
-| 0.8.0 | Community working draft | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
+| 0.8.0 | Community Working Draft 1 (`v0.8.0-draft.1`; unreleased) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
+
+Draft 1 is the first public interoperability snapshot of v0.8.0. It remains subject to proposal review and incompatible change; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact design-input revisions represented.
 
 ## Repository roles
 

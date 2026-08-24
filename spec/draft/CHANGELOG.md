@@ -22,7 +22,15 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.8.0] — Unreleased (community working draft)
 
-This section tracks changes for the MCP Description v0.8.0 Community Working Draft. It is under active implementation and interoperability testing on the experimental draft branch and is **not** a released specification. The current stable release remains v0.7.0, whose canonical source is `cisco-open/mcptoolkit-contract`. `schemas/latest.json` remains pinned to 0.7.0.
+This section tracks changes for the MCP Description v0.8.0 Community Working Draft. It is under active proposal review, implementation, and interoperability testing and is **not** a released specification. The current stable release remains v0.7.0, whose canonical source is `cisco-open/mcptoolkit-contract`. `schemas/latest.json` remains pinned to 0.7.0.
+
+### Draft snapshots
+
+#### Community Working Draft 1 — 2026-08-24 (`v0.8.0-draft.1`)
+
+Draft 1 is the first public interoperability snapshot of v0.8.0. The tag identifies an immutable snapshot, not a distinct `mcpdesc` conformance version, stable release, feature freeze, or claim of community consensus. Review-stage features may change incompatibly or be removed before a later draft or stable release.
+
+The [proposal revision manifest](PROPOSALS.md) records the exact proposal contents represented in this snapshot, including immutable source commit IDs and SHA-256 digests. Proposals 0001, 0002, 0003, 0004, 0005, and 0007 remain in **Review**; Draft 1 implements their captured revisions experimentally. Proposal 0006 is not represented.
 
 ### Breaking
 

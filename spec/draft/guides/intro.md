@@ -1,6 +1,6 @@
 # MCP Description Specification — Overview
 
-> **Current draft**: 0.8.0 Community Working Draft — unreleased
+> **Current draft**: 0.8.0 Community Working Draft 1 (`v0.8.0-draft.1`) — unreleased
 
 ## Introduction
 
@@ -279,6 +279,6 @@ A standard description format makes it easier for new tools and platforms to int
 
 # Summary
 
-The MCP Description 0.8.0 Community Working Draft provides a portable, machine-readable description format for MCP servers, enabling consistent discovery, documentation, validation, and integration across the MCP ecosystem.
+The MCP Description 0.8.0 Community Working Draft 1 provides a portable, machine-readable description format for MCP servers, enabling consistent discovery, documentation, validation, and integration across the MCP ecosystem.
 
 By standardizing how MCP servers declare their capabilities — using MCP-native structures and OpenAPI-inspired design patterns — the specification helps establish a foundation for a **mature and interoperable MCP tooling ecosystem**, similar to the role that OpenAPI plays in the HTTP API ecosystem.

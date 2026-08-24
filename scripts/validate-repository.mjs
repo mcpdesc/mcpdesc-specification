@@ -6,6 +6,7 @@
 // It is the repository-validation half of `npm test`; projection and merge
 // behavior is exercised separately by `scripts/test-views.mjs`.
 
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -117,16 +118,46 @@ const status = readJson('specification-status.json');
 const latest = readJson('schemas/latest.json');
 if (status && status.stable?.version !== '0.7.0') fail('stable status must remain 0.7.0 during bootstrap');
 if (status && status.draft?.version !== '0.8.0') fail('draft status must identify 0.8.0');
+if (status && status.draft?.iteration !== 1) fail('draft status must identify iteration 1');
+if (status && status.draft?.snapshotTag !== 'v0.8.0-draft.1') fail('draft status must identify snapshot tag v0.8.0-draft.1');
+if (status && status.draft?.snapshotDate !== '2026-08-24') fail('draft status must identify snapshot date 2026-08-24');
 if (status && status.draft?.released !== false) fail('v0.8.0 must remain unreleased during bootstrap');
 if (latest && latest['mcp-description'] !== '0.7.0') fail('schemas/latest.json must remain on 0.7.0 until release');
 
 if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
   const draft = readJson('schemas/draft.json');
   if (draft && draft['mcp-description'] !== '0.8.0') fail('schemas/draft.json must identify draft 0.8.0');
+  if (draft && draft.iteration !== status?.draft?.iteration) fail('schemas/draft.json iteration must match specification-status.json');
+  if (draft && draft.snapshotTag !== status?.draft?.snapshotTag) fail('schemas/draft.json snapshotTag must match specification-status.json');
+  if (draft && draft.snapshotDate !== status?.draft?.snapshotDate) fail('schemas/draft.json snapshotDate must match specification-status.json');
   if (draft && draft.released !== false) fail('schemas/draft.json must remain unreleased while v0.8.0 is a draft');
-  if (draft && draft.branch !== 'experiment/0.8.0-draft-implementation') fail('schemas/draft.json must record the current experimental implementation branch');
+  if (draft && draft.branch !== status?.draft?.branch) fail('schemas/draft.json branch must match specification-status.json');
   if (draft && draft.$id !== 'https://mcpdesc.org/schema/0.8.0.json') fail('schemas/draft.json must record the canonical 0.8.0 schema $id');
   if (draft && latest && draft['mcp-description'] === latest['mcp-description']) fail('schemas/draft.json must not equal the released schemas/latest.json version');
+}
+
+const proposalSnapshots = [
+  ['0001-mcp-2026-07-28-alignment.md', '88227a55202f76f2c8d226d98cb208f377999ed8', 'proposals/0001-mcp-2026-07-28-alignment.md', '9713db4d1c8583c9480a5597c8f4500b804f00ddb4c957c2a710821b4d83a02a'],
+  ['0002-meta-support.md', 'c1301cb60f7edc740a937b551e9c0c4e6467d943', 'proposals/0002-meta-support.md', '42b39d056019d26a304929fc5bca68d8c72f01d2340ee3aebbc4d1a041a35adc'],
+  ['0003-security-requirements.md', '199555ade2b13eb179c0a473712027582441158b', 'proposals/0003-security-requirements.md', 'fcba623df2b345d8a060ab9a265949dbcf795f0b17651e8fccd4cb7c0d17150d'],
+  ['0004-tool-input-output-examples.md', 'efa6130a4818d16f8d4034264ae4641e51cfaf3b', 'proposals/0004-tool-input-output-examples.md', '769451ad9a5bbb6b3c2b1ef87855d8f66daa5a1962f3c6dd57a94c1d5a470f56'],
+  ['0005-resource-examples.md', '88227a55202f76f2c8d226d98cb208f377999ed8', 'proposals/0005-resource-examples.md', 'bc7ddbc27fc316821a6f993fafd07b1fa16dd006aa4acc350c3161fa30d4f3c6'],
+  ['0007-elicitation.md', 'bea999a5ec537ed6ebb68e9681f0f4a48d812f20', 'proposals/0007-elicitation.md', '32bbb63c5fe04539414bf46af42023f870f230b738f40278af28592e5d2e9efc']
+];
+const proposalManifest = fs.existsSync(path.join(root, 'spec/draft/PROPOSALS.md')) ? readText('spec/draft/PROPOSALS.md') : '';
+if (!proposalManifest) fail('missing required file: spec/draft/PROPOSALS.md');
+for (const [filename, commit, sourcePath, expectedDigest] of proposalSnapshots) {
+  const rel = `spec/draft/proposal-snapshots/${filename}`;
+  const full = path.join(root, rel);
+  if (!fs.existsSync(full)) {
+    fail(`missing proposal snapshot: ${rel}`);
+    continue;
+  }
+  const digest = createHash('sha256').update(fs.readFileSync(full)).digest('hex');
+  if (digest !== expectedDigest) fail(`${rel}: SHA-256 differs from recorded proposal revision`);
+  for (const provenanceValue of [filename, commit, sourcePath, expectedDigest]) {
+    if (!proposalManifest.includes(provenanceValue)) fail(`spec/draft/PROPOSALS.md: missing provenance value ${provenanceValue}`);
+  }
 }
 
 const schemaDir = path.join(root, 'schemas', 'mcp-description');

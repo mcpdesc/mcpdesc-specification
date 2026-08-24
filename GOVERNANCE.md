@@ -19,9 +19,9 @@ The MCP Toolkit and `mcpcontract` implementation remain in `cisco-open/mcptoolki
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | `cisco-open/mcptoolkit-contract` |
-| 0.8.0 | Community working draft | `mcpdesc/mcpdesc-specification` |
+| 0.8.0 | Community Working Draft 1 (`v0.8.0-draft.1`) | `mcpdesc/mcpdesc-specification` |
 
-The v0.8.0 draft is not a released specification until explicitly approved, tagged, and published.
+The v0.8.0 draft is not a stable specification release. Draft snapshot tags publish specific review and interoperability baselines without satisfying the stable-release approval requirements.
 
 ## Roles
 
@@ -116,7 +116,7 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 - Released versions are frozen into `spec/<version>/` and tagged; `spec/draft/` is then re-initialized from that snapshot.
 - `schemas/latest.json` identifies the latest stable schema, not the active draft.
 - Draft status may be represented separately in `schemas/draft.json` and `specification-status.json`.
-- Maintainers may publish annotated draft snapshot tags for community feedback. A draft snapshot does not freeze `spec/draft/`, update `schemas/latest.json`, or satisfy the approval requirements for a stable release.
+- Maintainers may publish annotated draft snapshot tags named `v<version>-draft.<iteration>` for community feedback. A draft snapshot does not change the `mcpdesc` conformance version, freeze `spec/draft/`, update `schemas/latest.json`, or satisfy the approval requirements for a stable release.
 - Releases require passing validation, updated normative text and schemas, examples, changelog and migration guidance, an explicit maintainer decision, and an annotated version tag.
 
 ## Intellectual property and contributions
