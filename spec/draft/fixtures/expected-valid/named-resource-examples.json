@@ -64,6 +64,8 @@
         "two-files": {
           "result": {
             "resultType": "complete",
+            "ttlMs": 60000,
+            "cacheScope": "private",
             "contents": [
               {
                 "uri": "file:///project/src/",
@@ -121,6 +123,8 @@
           "uri": "chess://games/example-1234",
           "result": {
             "resultType": "complete",
+            "ttlMs": 300000,
+            "cacheScope": "public",
             "contents": [
               {
                 "uri": "chess://games/example-1234",

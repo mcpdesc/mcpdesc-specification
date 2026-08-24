@@ -1110,6 +1110,16 @@
         "resultType": {
           "const": "complete"
         },
+        "ttlMs": {
+          "type": "number",
+          "minimum": 0
+        },
+        "cacheScope": {
+          "enum": [
+            "public",
+            "private"
+          ]
+        },
         "contents": {
           "type": "array",
           "minItems": 1,

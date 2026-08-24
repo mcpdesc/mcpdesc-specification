@@ -60,6 +60,8 @@
         "current": {
           "result": {
             "resultType": "complete",
+            "ttlMs": 0,
+            "cacheScope": "private",
             "contents": [
               {
                 "uri": "example:///status",

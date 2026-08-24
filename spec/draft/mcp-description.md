@@ -1006,7 +1006,7 @@ No additional properties are allowed. `uri` MUST be a valid RFC 6570 expansion o
 
 #### 10.4.4 Completed Resource Read Result
 
-The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; for earlier supported revisions it MUST NOT contain `resultType`. Result `_meta` and Resource Contents `_meta` are available from MCP 2025-06-18 and are literal illustrative values governed by [Section 3.4](#34-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
+The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. For MCP 2026-07-28 it MUST contain `resultType: "complete"`, non-negative numeric `ttlMs`, and `cacheScope` equal to `"public"` or `"private"`; these are required fields of the MCP `CacheableResult` extended by `ReadResourceResult`. For earlier supported revisions it MUST NOT contain `resultType`, `ttlMs`, or `cacheScope`. A declaration whose examples would span MCP 2026-07-28 and an earlier revision therefore MUST be split into disjoint protocol-scoped variants with revision-compatible example maps. Result `_meta` and Resource Contents `_meta` are available from MCP 2025-06-18 and are literal illustrative values governed by [Section 3.4](#34-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
 
 Every `contents` entry MUST contain `uri` and exactly one of `text` or `blob`. A `blob` value MUST be valid base64. An example MAY contain multiple entries; consumers MUST preserve their order and MUST NOT assume every returned URI equals the requested URI.
 
@@ -1018,7 +1018,7 @@ Resource read errors are JSON-RPC errors and are not Resource Examples in 0.8.0.
 
 #### 10.4.5 Use, Projection, and Security
 
-Resource examples are illustrative, non-exhaustive snapshots. They do not assert live equality, freshness, immutability, cache validity, or complete coverage. Revision-supported metadata is part of the example and is not a guarantee about a live server.
+Resource examples are illustrative, non-exhaustive snapshots. They do not assert live equality, freshness, immutability, cache validity, or complete coverage. Revision-supported metadata is part of the example and is not a guarantee about a live server. In particular, `ttlMs` and `cacheScope` reproduce the illustrated MCP 2026-07-28 result; they do not govern caching of the MCP Description document or authorize sharing captured or live content across authorization contexts.
 
 Documentation tooling SHOULD preserve names, concrete template URIs, result fields, and content order. Mock and contract-test tooling MAY select an exact named example. It MUST NOT dereference example URIs or fetch a live Resource while loading or serving an inline example. This specification defines no default example, wildcard match, template fallback, dynamic behavior, external value, or reusable root component.
 
@@ -1055,6 +1055,8 @@ Resource `security` describes statically known authorization required to access 
         "top-two": {
           "result": {
             "resultType": "complete",
+            "ttlMs": 60000,
+            "cacheScope": "public",
             "contents": [
               {
                 "uri": "chess://leaderboard/classical",
@@ -1108,6 +1110,8 @@ Resource `security` describes statically known authorization required to access 
           "uri": "chess://games/example-1234",
           "result": {
             "resultType": "complete",
+            "ttlMs": 60000,
+            "cacheScope": "private",
             "contents": [
               {
                 "uri": "chess://games/example-1234",

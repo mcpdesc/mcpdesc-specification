@@ -12,6 +12,7 @@ import path from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
+import { semanticValidateDocument } from './validate-0.8.mjs';
 
 const root = process.cwd();
 
@@ -164,9 +165,20 @@ const resourceExampleSource = fixture('spec/draft/fixtures/expected-valid/named-
 const resourceExampleView = projectProtocolView(resourceExampleSource, '2026-07-28');
 assert.deepEqual(resourceExampleView.resources[0].examples, resourceExampleSource.resources[1].examples);
 assert.deepEqual(resourceExampleView.resourceTemplates[0].examples, resourceExampleSource.resourceTemplates[0].examples);
+assert.equal(resourceExampleView.resources[0].examples['two-files'].result.ttlMs, 60000);
+assert.equal(resourceExampleView.resources[0].examples['two-files'].result.cacheScope, 'private');
+assert.equal(resourceExampleView.resourceTemplates[0].examples['sample-game'].result.ttlMs, 300000);
+assert.equal(resourceExampleView.resourceTemplates[0].examples['sample-game'].result.cacheScope, 'public');
 const mergedResourceExamples = mergeProtocolDescriptions([resourceExampleView]);
 assert.deepEqual(mergedResourceExamples.resources[0].examples, resourceExampleView.resources[0].examples);
 assert.deepEqual(mergedResourceExamples.resourceTemplates[0].examples, resourceExampleView.resourceTemplates[0].examples);
+
+const invalidResourceCacheFields = fixture('spec/draft/fixtures/expected-invalid/resource-example-cache-fields.json');
+const invalidResourceCacheDiagnostics = semanticValidateDocument(invalidResourceCacheFields, 'resource-example-cache-fields.json');
+assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.ttlMs is required')));
+assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is required')));
+assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.ttlMs is not defined')));
+assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is not defined')));
 
 const elicitationSource = fixture('spec/draft/fixtures/expected-valid/elicitation-declarations.json');
 const elicitationView0618 = projectProtocolView(elicitationSource, '2025-06-18');

@@ -50,6 +50,7 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - Structural and semantic validation for Tool-example names, revision-specific result/content shapes, execution-error constraints, and input/output schema compatibility.
 - Optional named Resource and Resource Template `examples` containing completed MCP Resource read results for documentation, contract tests, and deterministic mocks.
 - Structural and semantic validation for Resource-example names, RFC 6570 expansions, completed result revisions, content URIs, base64 data, MIME-type consistency, and raw-size diagnostics.
+- Revision-aware MCP `CacheableResult` fidelity for Resource examples: MCP 2026-07-28 completed read results require non-negative `ttlMs` and `public` or `private` `cacheScope`, while earlier revision examples reject those fields.
 - Literal MCP `_meta` semantics for supported declarations and named Tool and Resource result/content examples, including structural key grammar, revision-aware reserved-key context and value checks, warning-and-preserve handling for unknown reserved keys, and security guidance.
 - Experimental operation-level Elicitation Declarations for Tools, Resources, Resource Templates, and Prompts, with form and URL modes, nested protocol scopes, revision-aware restricted form schemas, and Effective Protocol View support, implementing Proposal 0007 while it remains under review.
 

@@ -179,6 +179,8 @@ resourceTemplates:
 
 Resource `examples` use the declaration URI as their implicit read input. Resource Template examples add the exact concrete expanded `uri`. In both cases, copy only a completed `resources/read` result payload, preserve content order, and use exactly one of `text` or base64 `blob` per content entry. Examples are snapshots and do not guarantee live contents or freshness. Never dereference example URIs automatically or publish sensitive captured data.
 
+For MCP 2026-07-28, the copied result also requires `resultType: complete`, non-negative `ttlMs`, and `cacheScope: public` or `private`. Earlier revisions omit those fields. Use disjoint protocol-scoped Resource variants when one logical Resource needs examples for both shapes.
+
 ## Step 5: Add Prompts
 
 Prompts are server-side templates that generate messages:

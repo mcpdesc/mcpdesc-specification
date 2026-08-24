@@ -1177,8 +1177,19 @@ function validateCompletedResourceResult(result, scope, location, rel, diagnosti
     if (version === '2026-07-28' && result.resultType !== 'complete') {
       diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${rel}: ${location}.resultType must be "complete" for MCP ${version}`));
     }
+    if (version === '2026-07-28' && !Object.hasOwn(result, 'ttlMs')) {
+      diagnostics.push(makeDiagnostic('resource-example-cache-fields-version-mismatch', 'error', `${rel}: ${location}.ttlMs is required for MCP ${version}`));
+    }
+    if (version === '2026-07-28' && !Object.hasOwn(result, 'cacheScope')) {
+      diagnostics.push(makeDiagnostic('resource-example-cache-fields-version-mismatch', 'error', `${rel}: ${location}.cacheScope is required for MCP ${version}`));
+    }
     if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
       diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${rel}: ${location}.resultType is not defined for MCP ${version}`));
+    }
+    for (const cacheField of ['ttlMs', 'cacheScope']) {
+      if (version !== '2026-07-28' && Object.hasOwn(result, cacheField)) {
+        diagnostics.push(makeDiagnostic('resource-example-cache-fields-version-mismatch', 'error', `${rel}: ${location}.${cacheField} is not defined for MCP ${version}`));
+      }
     }
     if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
       diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${rel}: ${location}._meta is not defined for MCP ${version}`));

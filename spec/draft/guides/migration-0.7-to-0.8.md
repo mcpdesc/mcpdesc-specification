@@ -61,9 +61,9 @@ Do not pair independently observed inputs and results without authoritative evid
 
 No migration is required because Resource and Resource Template `examples` are optional. For a static Resource, create a named example and copy the completed payload inside a correlated `resources/read` response's `result` member to `result`; the declaration's `uri` is the implicit request URI. For a Resource Template, also copy the exact concrete `resources/read.params.uri` to the example's `uri` and verify that it is an RFC 6570 expansion of `uriTemplate`.
 
-Preserve content order, URIs, text, base64 binary data, MIME types, and applicable result metadata. Do not copy the JSON-RPC envelope or errors. Verify each content entry has exactly one of `text` or `blob`, and redact credentials, personal data, internal paths, and proprietary content. Examples are illustrative snapshots, not statements of freshness or live equality.
+Preserve content order, URIs, text, base64 binary data, MIME types, and applicable result metadata. MCP 2026-07-28 Resource read results require non-negative `ttlMs` and `cacheScope` equal to `public` or `private`; retain both in an example for that revision. Earlier revisions do not define these fields. Do not copy the JSON-RPC envelope or errors. Verify each content entry has exactly one of `text` or `blob`, and redact credentials, personal data, internal paths, and proprietary content. Examples are illustrative snapshots, not statements of freshness or live equality.
 
-A capture tool MUST NOT associate independently observed Resource requests and results without authoritative correlation. Protocol-scoped Resource variants may need different example maps because MCP 2026-07-28 completed results require `resultType: "complete"`, while earlier revisions do not define that field.
+A capture tool MUST NOT associate independently observed Resource requests and results without authoritative correlation. Protocol-scoped Resource variants need different example maps when they span MCP 2026-07-28 and an earlier revision: 2026 completed read results require `resultType: "complete"`, `ttlMs`, and `cacheScope`, while earlier revisions do not define those fields.
 
 ## MCP `_meta`
 
