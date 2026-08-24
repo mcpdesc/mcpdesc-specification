@@ -451,7 +451,7 @@ Acceptance criteria:
 
 ## Decision record
 
-Pending review.
+Accepted for implementation in MCP Description 0.8.0.
 
 This proposal is intentionally independent from Proposal 0004. If both are accepted, their implementations may share a feature branch and infrastructure but should remain separated into reviewable commits so either change can progress independently.
 
