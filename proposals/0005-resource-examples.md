@@ -1,6 +1,6 @@
 # Proposal 0005: Named Resource and Resource Template Examples
 
-- Status: Review
+- Status: Accepted
 - Author: Stève Sfartz
 - Created: 2026-08-23
 - Target version: 0.8.0
