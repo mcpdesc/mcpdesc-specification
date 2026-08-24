@@ -1,0 +1,38 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "external-example-ref",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "external-example-ref"
+    }
+  ],
+  "tools": [
+    {
+      "name": "lookup",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "identifier": { "$ref": "https://schemas.example.invalid/identifier.json" }
+        },
+        "required": ["identifier"]
+      },
+      "examples": {
+        "external-identifier": {
+          "input": { "identifier": "example-123" },
+          "result": {
+            "resultType": "complete",
+            "content": [
+              { "type": "text", "text": "Found example-123." }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

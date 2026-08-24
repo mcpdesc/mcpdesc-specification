@@ -2,7 +2,8 @@
 //
 // This executable uses repository fixtures to verify revision filtering,
 // scope removal and union, security semantics, conflict detection, extension
-// preservation, unresolved-reference preservation, and round trips. It is the
+// preservation, Tool-example preservation, unresolved-reference preservation,
+// and round trips. It is the
 // Effective Protocol View test half of `npm test`.
 
 import assert from 'node:assert/strict';
@@ -148,6 +149,12 @@ assert.equal(
   mergedExternalReference.tools[0].inputSchema.properties.identifier.$ref,
   'https://schemas.example.com/common.json#/$defs/identifier'
 );
+
+const toolExampleSource = fixture('spec/draft/fixtures/expected-valid/named-tool-examples.json');
+const toolExampleView = projectProtocolView(toolExampleSource, '2026-07-28');
+assert.deepEqual(toolExampleView.tools[0].examples, toolExampleSource.tools[0].examples);
+const mergedToolExamples = mergeProtocolDescriptions([toolExampleView]);
+assert.deepEqual(mergedToolExamples.tools[0].examples, toolExampleSource.tools[0].examples);
 
 const changedInstructions = structuredClone(view2026);
 changedInstructions.instructions = 'Different durable guidance.';

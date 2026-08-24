@@ -49,6 +49,14 @@ Preserve external `$ref` values without automatically retrieving network targets
 
 Likewise, `info.description` requires MCP 2025-11-25 or later, and Streamable HTTP requires MCP 2025-03-26 or later. Associate legacy SSE with modern revisions only when that compatibility surface is intentional; validators warn about that association.
 
+## Tool examples
+
+No migration is required because Tool `examples` is optional. Keep JSON Schema `examples` annotations for anonymous schema-level values. Use a named Tool Example when complete invocation arguments must be paired with a completed Tool Result.
+
+Copy the exact `tools/call` `arguments` object to `input`, using `{}` explicitly for a no-argument Tool. Copy the completed payload inside the JSON-RPC response's `result` member to `result`; do not copy the JSON-RPC envelope. Preserve unstructured `content` for every result. Successful results with an `outputSchema` require matching `structuredContent`. Tool execution-error examples use `isError: true` and unstructured content only.
+
+Do not pair independently observed inputs and results without authoritative evidence that they came from the same invocation. Do not infer complete Tool Examples by combining unrelated schema annotations. Redact credentials, tokens, personal or customer data, internal hostnames, and production identifiers. Protocol-scoped Tool variants may need different example maps because their completed-result and content-block shapes differ.
+
 ## Security
 
 Move each distinct inline Security Scheme Object to a deterministic local name under root `securitySchemes`. Replace each former root or transport occurrence with a Security Requirement Object referencing that name.
@@ -94,7 +102,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 7. Generate and deduplicate named security schemes, preserving override placement.
 8. Add only authoritatively known instructions, scopes, revisions, and protocol variants.
 9. Validate against the 0.8.0 JSON Schema.
-10. Run semantic validation for protocol scopes, transport coverage, primitive uniqueness, security references, tags, revision applicability, embedded Tool schemas, unresolved external-reference warnings, and extension namespace warnings.
+10. Run semantic validation for protocol scopes, transport coverage, primitive uniqueness, security references, tags, revision applicability, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
 
 A migration tool MUST report unresolved ambiguity instead of guessing.
 

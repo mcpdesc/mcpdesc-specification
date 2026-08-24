@@ -2,9 +2,9 @@
 //
 // The exported helpers complement the published JSON Schema with cross-object
 // rules for protocol scopes, revision applicability, security, tags, embedded
-// Tool schemas, transports, and extension namespaces. Diagnostics distinguish
-// fatal errors from nonfatal warnings. External schema references are never
-// fetched automatically; unresolved targets are preserved and reported.
+// Tool schemas and examples, transports, and extension namespaces. Diagnostics
+// distinguish fatal errors from nonfatal warnings. External schema references
+// are never fetched automatically; unresolved targets are preserved and reported.
 
 import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -697,6 +697,153 @@ function validateToolSchemas(document, rel, diagnostics) {
   });
 }
 
+function validateLegacyExampleValue(schema, value, location, rel, diagnostics) {
+  if (schema.type === 'object' && (!value || typeof value !== 'object' || Array.isArray(value))) {
+    diagnostics.push(makeDiagnostic('tool-example-schema-mismatch', 'error', `${rel}: ${location} must be an object`));
+    return;
+  }
+  for (const name of schema.required ?? []) {
+    if (!Object.hasOwn(value, name)) {
+      diagnostics.push(makeDiagnostic('tool-example-schema-mismatch', 'error', `${rel}: ${location} is missing required property ${JSON.stringify(name)}`));
+    }
+  }
+  if (schema.additionalProperties === false && schema.properties && typeof schema.properties === 'object') {
+    for (const name of Object.keys(value)) {
+      if (!Object.hasOwn(schema.properties, name)) {
+        diagnostics.push(makeDiagnostic('tool-example-schema-mismatch', 'error', `${rel}: ${location} contains undeclared property ${JSON.stringify(name)}`));
+      }
+    }
+  }
+}
+
+function validateExampleValue(schema, value, location, rel, diagnostics) {
+  const dialect = embeddedSchemaDialect(schema);
+  if (!dialect) return;
+  const partial = schemaForPartialOfflineCompilation(schema);
+  if (partial.externalReferences.length) {
+    const references = [...new Set(partial.externalReferences)].sort();
+    diagnostics.push(
+      makeDiagnostic(
+        'incomplete-tool-example-validation',
+        'warning',
+        `${rel}: ${location} could not be validated completely because its associated Tool schema contains unresolved external $ref values (${references.map((reference) => JSON.stringify(reference)).join(', ')})`
+      )
+    );
+    return;
+  }
+  try {
+    const validate = createValidatorForDialect(dialect).compile(schema);
+    if (!validate(value)) {
+      const details = validate.errors?.map((error) => `${error.instancePath || '/'} ${error.message}`).join('; ') ?? 'unknown validation error';
+      diagnostics.push(makeDiagnostic('tool-example-schema-mismatch', 'error', `${rel}: ${location} does not validate against its associated Tool schema: ${details}`));
+    }
+  } catch {
+    // validateToolSchemas reports the malformed or unsupported schema itself.
+  }
+}
+
+function validateToolExamples(document, rel, diagnostics) {
+  const rootScope = normalizeScope(document.protocolVersions ?? []);
+
+  (document.tools ?? []).forEach((tool, toolIndex) => {
+    if (!tool.examples || typeof tool.examples !== 'object' || Array.isArray(tool.examples)) return;
+    const scope = effectiveScope(document, tool, rootScope);
+    const legacyVersions = scope.filter((version) => protocolOrder.get(version) < protocolOrder.get(toolSchemaDialectVersion));
+    const modernVersions = scope.filter((version) => protocolOrder.get(version) >= protocolOrder.get(toolSchemaDialectVersion));
+
+    for (const [exampleName, example] of Object.entries(tool.examples)) {
+      if (!example || typeof example !== 'object') continue;
+      const exampleLocation = `tools[${toolIndex}].examples[${JSON.stringify(exampleName)}]`;
+      const result = example.result ?? {};
+      const successful = result.isError !== true;
+
+      for (const envelopeField of ['jsonrpc', 'id', 'error']) {
+        if (Object.hasOwn(result, envelopeField)) {
+          diagnostics.push(makeDiagnostic('tool-example-json-rpc-envelope', 'error', `${rel}: ${exampleLocation}.result must not contain JSON-RPC envelope field ${JSON.stringify(envelopeField)}`));
+        }
+      }
+      for (const incompleteField of ['task', 'inputRequests', 'requestState']) {
+        if (Object.hasOwn(result, incompleteField)) {
+          diagnostics.push(makeDiagnostic('incomplete-tool-example-result', 'error', `${rel}: ${exampleLocation}.result must not contain non-completed workflow field ${JSON.stringify(incompleteField)}`));
+        }
+      }
+
+      for (const version of scope) {
+        const resultLocation = `${exampleLocation}.result`;
+        if (version === '2026-07-28' && result.resultType !== 'complete') {
+          diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${rel}: ${resultLocation}.resultType must be "complete" for MCP ${version}`));
+        }
+        if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
+          diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${rel}: ${resultLocation}.resultType is not defined for MCP ${version}`));
+        }
+        if (Object.hasOwn(result, 'structuredContent') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+          diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${rel}: ${resultLocation}.structuredContent is not defined for MCP ${version}`));
+        }
+        if (Object.hasOwn(result, 'structuredContent') && version !== '2026-07-28' && (!result.structuredContent || typeof result.structuredContent !== 'object' || Array.isArray(result.structuredContent))) {
+          diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${rel}: ${resultLocation}.structuredContent must be an object for MCP ${version}`));
+        }
+        (result.content ?? []).forEach((content, contentIndex) => {
+          const contentLocation = `${resultLocation}.content[${contentIndex}]`;
+          if (content.type === 'audio' && protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${rel}: ${contentLocation} uses audio content, which is not defined for MCP ${version}`));
+          }
+          if (content.type === 'resource_link' && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${rel}: ${contentLocation} uses resource-link content, which is not defined for MCP ${version}`));
+          }
+          if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${rel}: ${contentLocation}._meta is not defined for MCP ${version}`));
+          }
+          if (content.type === 'resource' && Object.hasOwn(content.resource ?? {}, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${rel}: ${contentLocation}.resource._meta is not defined for MCP ${version}`));
+          }
+          if (content.type === 'resource_link' && Array.isArray(content.icons) && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${rel}: ${contentLocation}.icons is not defined for MCP ${version}`));
+          }
+          if (content.annotations?.lastModified !== undefined && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${rel}: ${contentLocation}.annotations.lastModified is not defined for MCP ${version}`));
+          }
+        });
+      }
+
+      if (!successful && Object.hasOwn(result, 'structuredContent')) {
+        diagnostics.push(makeDiagnostic('structured-tool-error-example', 'error', `${rel}: ${exampleLocation}.result must not contain structuredContent when isError is true`));
+      }
+      if (successful && tool.outputSchema && !Object.hasOwn(result, 'structuredContent')) {
+        diagnostics.push(makeDiagnostic('missing-tool-example-structured-content', 'error', `${rel}: ${exampleLocation}.result must contain structuredContent because the Tool declares outputSchema`));
+      }
+
+      if (legacyVersions.length) {
+        validateLegacyExampleValue(tool.inputSchema, example.input, `${exampleLocation}.input`, rel, diagnostics);
+        diagnostics.push(
+          makeDiagnostic(
+            'incomplete-tool-example-validation',
+            'warning',
+            `${rel}: ${exampleLocation}.input compatibility could not be validated completely for MCP ${legacyVersions.join(', ')} because those revisions do not define an embedded Tool-schema dialect`
+          )
+        );
+      }
+      if (modernVersions.length) {
+        validateExampleValue(tool.inputSchema, example.input, `${exampleLocation}.input`, rel, diagnostics);
+      }
+      if (successful && Object.hasOwn(result, 'structuredContent') && tool.outputSchema) {
+        if (legacyVersions.length) {
+          validateLegacyExampleValue(tool.outputSchema, result.structuredContent, `${exampleLocation}.result.structuredContent`, rel, diagnostics);
+          diagnostics.push(
+            makeDiagnostic(
+              'incomplete-tool-example-validation',
+              'warning',
+              `${rel}: ${exampleLocation}.result.structuredContent compatibility could not be validated completely for MCP ${legacyVersions.join(', ')} because those revisions do not define an embedded Tool-schema dialect`
+            )
+          );
+        }
+        if (modernVersions.length) {
+          validateExampleValue(tool.outputSchema, result.structuredContent, `${exampleLocation}.result.structuredContent`, rel, diagnostics);
+        }
+      }
+    }
+  });
+}
+
 export function semanticValidateDocument(document, rel = 'document') {
   const diagnostics = [];
   validateProtocolScopes(document, rel, diagnostics);
@@ -704,6 +851,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   validateTagReferences(document, rel, diagnostics);
   validateVersionSpecificSemantics(document, rel, diagnostics);
   validateToolSchemas(document, rel, diagnostics);
+  validateToolExamples(document, rel, diagnostics);
   diagnostics.sort((left, right) => left.code.localeCompare(right.code) || left.message.localeCompare(right.message));
   return diagnostics;
 }

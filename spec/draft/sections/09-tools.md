@@ -12,8 +12,9 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `description` | string | No | Human-readable tool description. |
 | `inputSchema` | object | **Yes** | JSON Schema whose root describes an object containing tool input parameters. |
 | `outputSchema` | object | No | JSON Schema for structured tool output. Since MCP 2025-06-18. |
-| `annotations` | [Tool Annotations Object](#93-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
-| `execution` | [Execution Object](#94-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
+| `annotations` | [Tool Annotations Object](#95-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
+| `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
+| `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
@@ -40,13 +41,44 @@ Before MCP 2026-07-28, `outputSchema` MUST declare an object root. MCP 2026-07-2
 
 MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input to an HTTP header. The annotation value MUST be a non-empty HTTP field-name token and MUST be unique case-insensitively within that `inputSchema`. It is valid only on a `string`, `integer`, or `boolean` property that is statically reachable from the schema root through `properties` chains. It MUST NOT be used on a property reached through arrays, composition, conditionals, or `$ref`.
 
-### 9.3 Protocol Variants and Security
+### 9.3 Named Tool Examples
+
+A Tool Object MAY contain `examples`, a map from a local example name to a Tool Example Object. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant.
+
+A Tool Example Object contains exactly these properties:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `input` | object | **Yes** | Complete `params.arguments` value from a `tools/call` request. |
+| `result` | object | **Yes** | Complete applicable completed Tool Result payload, excluding the JSON-RPC envelope. |
+
+The Tool Example Object MUST NOT contain additional properties. In particular, 0.8.0 does not define `summary`, `description`, `externalValue`, or references to reusable examples.
+
+`input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
+
+`result` MUST contain `content` and MUST have the completed Tool Result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. Task, input-required, streaming, progress, JSON-RPC envelope, and JSON-RPC protocol-error forms are not Tool Examples. Content blocks MAY use any text, image, audio, embedded-resource, or resource-link form supported by every applicable revision.
+
+A successful result MUST omit `isError` or set it to `false`. It MAY contain `structuredContent` only in revisions that support that field. If the Tool declares `outputSchema`, a successful result MUST contain `structuredContent`, which MUST validate against that schema under the applicable schema rules. Unstructured `content` remains required when `structuredContent` is present. If the Tool has no `outputSchema`, a successful result MAY contain revision-supported `structuredContent`, but mcpdesc makes no schema-compatibility claim for that value.
+
+A Tool execution-error result MUST set `isError` to `true`, MUST contain unstructured `content`, and MUST NOT contain `structuredContent`. `outputSchema` does not validate error content. JSON-RPC protocol errors and transport or intermediary failures that prevent a Tool Result are outside this model.
+
+Example compatibility is a semantic conformance requirement. For revisions before MCP 2025-11-25, validators MUST enforce constraints they can interpret without inventing an embedded-schema dialect, SHOULD warn when complete compatibility validation is impossible, and MUST NOT report incomplete validation as complete. An unresolved external `$ref` follows the policy in Section 9.2: validators preserve the schema and example, do not retrieve the target automatically, and warn that compatibility validation is incomplete. A schema-incompatible example is an error whenever complete evaluation is possible.
+
+Tool `examples` and JSON Schema `examples` annotations are independent. Schema annotations remain suitable for anonymous values at an instance location; Tool Examples pair named complete invocations with completed results. Producers MUST NOT infer an author-supplied Tool Example by combining unrelated schema annotations.
+
+Tool Examples are illustrative and non-exhaustive. They do not alter schemas, annotations, security requirements, side effects, or runtime behavior, and they do not guarantee that a live server returns a shown result. Documentation tooling SHOULD preserve names and input/result pairing. Mock or contract-test tooling MAY permit explicit selection by name but MUST NOT execute a live Tool or reproduce declared side effects merely because an example exists. Selection without an explicit name MUST use a deterministic documented policy and MUST NOT be presented as a prediction of live behavior.
+
+Examples are untrusted descriptive content. Authors MUST NOT include secrets and SHOULD use conspicuously fictitious values. Consumers MUST validate values, render content as data, and apply appropriate size and evaluation limits. They MUST NOT treat examples as authorization, proof of behavior, or safe executable instructions.
+
+Tool Examples are MCP Description metadata, not fields of the MCP Tool type. Projection to an MCP `tools/list` Tool value MUST omit `examples` unless an independently specified MCP extension defines a destination. MCP Description round-tripping and protocol-version projection MUST preserve each selected Tool declaration's example map and MUST NOT merge maps from disjoint variants with the same Tool name.
+
+### 9.4 Protocol Variants and Security
 
 Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root revisions and overlaps every scoped Tool with the same name.
 
 Tool `security` describes statically known authorization required to call the Tool and replaces inherited transport or root security in full.
 
-### 9.4 Tool Annotations
+### 9.5 Tool Annotations
 
 Tool annotations provide hints about tool behavior. These are advisory — implementations MUST NOT rely on annotations being accurate.
 
@@ -60,13 +92,13 @@ Tool annotations provide hints about tool behavior. These are advisory — imple
 
 The annotations object allows additional properties for forward compatibility.
 
-### 9.5 Execution Object
+### 9.6 Execution Object
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `taskSupport` | string | `"forbidden"` | Whether the tool supports task-augmented execution: `"forbidden"`, `"optional"`, or `"required"` |
 
-### 9.6 Example
+### 9.7 Example
 
 ```json
 {

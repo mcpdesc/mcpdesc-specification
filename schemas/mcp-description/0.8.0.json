@@ -498,6 +498,263 @@
       },
       "additionalProperties": false
     },
+    "annotations": {
+      "type": "object",
+      "properties": {
+        "audience": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "priority": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lastModified": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "resourceContents": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "uri",
+            "text"
+          ],
+          "properties": {
+            "uri": {
+              "type": "string",
+              "format": "uri"
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "text": {
+              "type": "string"
+            },
+            "_meta": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "uri",
+            "blob"
+          ],
+          "properties": {
+            "uri": {
+              "type": "string",
+              "format": "uri"
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "blob": {
+              "type": "string"
+            },
+            "_meta": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "toolResultContent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "text"
+          ],
+          "properties": {
+            "type": {
+              "const": "text"
+            },
+            "text": {
+              "type": "string"
+            },
+            "annotations": {
+              "$ref": "#/$defs/annotations"
+            },
+            "_meta": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "data",
+            "mimeType"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "image",
+                "audio"
+              ]
+            },
+            "data": {
+              "type": "string"
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "annotations": {
+              "$ref": "#/$defs/annotations"
+            },
+            "_meta": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "resource"
+          ],
+          "properties": {
+            "type": {
+              "const": "resource"
+            },
+            "resource": {
+              "$ref": "#/$defs/resourceContents"
+            },
+            "annotations": {
+              "$ref": "#/$defs/annotations"
+            },
+            "_meta": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "uri",
+            "name"
+          ],
+          "properties": {
+            "type": {
+              "const": "resource_link"
+            },
+            "uri": {
+              "type": "string",
+              "format": "uri"
+            },
+            "name": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "size": {
+              "type": "number"
+            },
+            "icons": {
+              "$ref": "#/$defs/icons"
+            },
+            "annotations": {
+              "$ref": "#/$defs/annotations"
+            },
+            "_meta": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "completedToolResultExample": {
+      "type": "object",
+      "required": [
+        "content"
+      ],
+      "properties": {
+        "resultType": {
+          "const": "complete"
+        },
+        "content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/toolResultContent"
+          }
+        },
+        "structuredContent": {
+          "$ref": "#/$defs/jsonValue"
+        },
+        "isError": {
+          "type": "boolean"
+        },
+        "_meta": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "toolExample": {
+      "type": "object",
+      "required": [
+        "input",
+        "result"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/completedToolResultExample"
+        }
+      },
+      "additionalProperties": false
+    },
+    "toolExamples": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9._-]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/toolExample"
+      }
+    },
     "promptArgument": {
       "type": "object",
       "required": [
@@ -584,6 +841,9 @@
         },
         "execution": {
           "$ref": "#/$defs/execution"
+        },
+        "examples": {
+          "$ref": "#/$defs/toolExamples"
         }
       },
       "additionalProperties": false

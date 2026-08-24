@@ -46,6 +46,8 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - Explicit support for zero-primitive descriptions.
 - Runtime-observation versus curated-aggregate guidance.
 - A concise multi-version example showing common declarations and protocol-scoped capability variants across MCP 2025-11-25 and MCP 2026-07-28.
+- Optional named Tool `examples` that pair complete invocation arguments with completed MCP Tool Results for documentation, contract tests, and deterministic mocks.
+- Structural and semantic validation for Tool-example names, revision-specific result/content shapes, execution-error constraints, and input/output schema compatibility.
 
 ### Changed
 

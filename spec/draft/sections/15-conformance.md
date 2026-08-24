@@ -10,7 +10,7 @@ A conforming MCP Description document MUST:
 4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.8.0 (Section 4).
 5. Include the `transports` array with at least one transport object and complete root protocol coverage (Section 6).
 6. Validate against the JSON Schema for the declared `mcpdesc` version.
-7. Satisfy semantic scope, identifier, security-reference, tag-reference, revision-applicability, embedded Tool schema, and `x-mcp-header` constraints.
+7. Satisfy semantic scope, identifier, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 8. Not contain unknown properties at the root level except specification extensions matching `^x-`.
 
 ### 15.2 Implementation Conformance
@@ -23,7 +23,7 @@ A conforming implementation (tool, validator, or platform) MUST:
 4. Preserve specification extensions when processing and re-serializing documents (Section 13.4).
 5. Apply structural JSON Schema validation and the cross-object semantic requirements of this specification.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, security references, embedded Tool schemas, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, security references, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 

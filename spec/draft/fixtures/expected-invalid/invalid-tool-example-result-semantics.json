@@ -1,0 +1,67 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-tool-example-results", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [{ "type": "stdio", "command": "fixture" }],
+  "tools": [
+    {
+      "name": "missing_structured_success",
+      "inputSchema": { "type": "object" },
+      "outputSchema": { "type": "object" },
+      "examples": {
+        "missing": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [{ "type": "text", "text": "Missing structured value" }]
+          }
+        }
+      }
+    },
+    {
+      "name": "structured_error",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "business-error": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [{ "type": "text", "text": "Rejected" }],
+            "structuredContent": { "code": "rejected" },
+            "isError": true
+          }
+        }
+      }
+    },
+    {
+      "name": "json_rpc_envelope",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "enveloped": {
+          "input": {},
+          "result": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "resultType": "complete",
+            "content": []
+          }
+        }
+      }
+    },
+    {
+      "name": "incomplete_workflow",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "task-result": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [],
+            "task": { "taskId": "task-example" }
+          }
+        }
+      }
+    }
+  ]
+}

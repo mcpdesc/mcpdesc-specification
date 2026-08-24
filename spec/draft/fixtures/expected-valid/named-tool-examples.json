@@ -1,0 +1,105 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "tool-example-fixture",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "tool-example-fixture"
+    }
+  ],
+  "tools": [
+    {
+      "name": "weather",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string" }
+        },
+        "required": ["city"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "temperature": { "type": "number" }
+        },
+        "required": ["temperature"],
+        "additionalProperties": false
+      },
+      "examples": {
+        "paris.complete": {
+          "input": { "city": "Paris" },
+          "result": {
+            "resultType": "complete",
+            "content": [
+              { "type": "text", "text": "Paris: 21.5 C" },
+              { "type": "image", "data": "aW1hZ2U=", "mimeType": "image/png" },
+              { "type": "audio", "data": "YXVkaW8=", "mimeType": "audio/wav" },
+              {
+                "type": "resource",
+                "resource": {
+                  "uri": "weather://paris/report",
+                  "mimeType": "text/plain",
+                  "text": "Clear"
+                }
+              },
+              {
+                "type": "resource_link",
+                "uri": "weather://paris/map",
+                "name": "Paris map",
+                "mimeType": "image/png"
+              }
+            ],
+            "structuredContent": { "temperature": 21.5 },
+            "isError": false
+          }
+        }
+      }
+    },
+    {
+      "name": "current_time",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "examples": {
+        "utc": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [
+              { "type": "text", "text": "2026-08-24T12:00:00Z" }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "quota_limited_search",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" }
+        },
+        "required": ["query"]
+      },
+      "examples": {
+        "tool-rate-limit": {
+          "input": { "query": "example" },
+          "result": {
+            "resultType": "complete",
+            "content": [
+              { "type": "text", "text": "Tool quota exhausted; retry later." }
+            ],
+            "isError": true
+          }
+        }
+      }
+    }
+  ]
+}

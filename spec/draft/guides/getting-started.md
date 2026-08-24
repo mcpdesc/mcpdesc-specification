@@ -82,6 +82,28 @@ tools:
         maximum: 40
     required:
     - pgn
+  outputSchema:
+    type: object
+    properties:
+      evaluation:
+        type: number
+      best_move:
+        type: string
+    required:
+    - evaluation
+    - best_move
+  examples:
+    short-opening:
+      input:
+        pgn: 1. e4 e5 2. Nf3 Nc6
+        depth: 12
+      result:
+        content:
+        - type: text
+          text: White has a small opening advantage.
+        structuredContent:
+          evaluation: 18
+          best_move: Bb5
   annotations:
     readOnlyHint: true
     destructiveHint: false
@@ -120,6 +142,8 @@ tools:
 - `readOnlyHint: true` — the tool only reads data
 - `destructiveHint: false` — the tool doesn't delete anything
 - `idempotentHint: true` — same input always gives same result
+
+Tool `examples` pair a named complete `tools/call` argument object with a completed Tool Result. Keep `content` even when `structuredContent` is present. Successful structured content must match `outputSchema`; execution errors use `isError: true` and omit `structuredContent`. For a no-argument Tool, write `input: {}` explicitly. Examples are untrusted, non-exhaustive documentation, not guarantees of live behavior; never include credentials or production data.
 
 ## Step 4: Add Resources
 
@@ -165,7 +189,7 @@ prompts:
 
 ## Step 6: Validate
 
-To validate structure, use a JSON Schema 2020-12 validator against the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json). Complete conformance also requires semantic checks for protocol scopes, transport coverage, security and tag references, and revision-specific fields.
+To validate structure, use a JSON Schema 2020-12 validator against the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json). Complete conformance also requires semantic checks for protocol scopes, transport coverage, security and tag references, revision-specific fields, and Tool-example compatibility with embedded schemas.
 
 ```bash
 # From a checkout of this specification repository
