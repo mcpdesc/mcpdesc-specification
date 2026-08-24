@@ -1,6 +1,6 @@
 # Proposal 0004: Named Tool Invocation and Result Examples
 
-- Status: Review
+- Status: Accepted
 - Author: Stève Sfartz
 - Created: 2026-08-23
 - Target version: 0.8.0
