@@ -80,7 +80,9 @@ Tool `security` describes statically known authorization required to call the To
 
 ### 9.5 Tool Annotations
 
-Tool annotations provide hints about tool behavior. These are advisory — implementations MUST NOT rely on annotations being accurate.
+Tool Annotations provide hints about Tool behavior. They are distinct from the Resource Annotations used by Resources, Resource Templates, and content blocks (see [Section 10.3](#103-resource-annotations)). A Tool `annotations` object MUST use the fields and semantics in this section; Resource Annotation fields such as `audience`, `priority`, and `lastModified` do not acquire those semantics when placed on a Tool.
+
+All Tool Annotation properties are advisory. They are not guaranteed to describe Tool behavior faithfully, including `title`. Clients MUST treat Tool Annotations from untrusted servers as untrusted and MUST NOT make Tool-use decisions based on them.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -90,7 +92,7 @@ Tool annotations provide hints about tool behavior. These are advisory — imple
 | `idempotentHint` | boolean | `false` | Repeated calls with same arguments have no additional effect |
 | `openWorldHint` | boolean | `true` | Tool may interact with external entities |
 
-The annotations object allows additional properties for forward compatibility.
+The Tool Annotations object allows additional properties for forward compatibility. Consumers MUST preserve unrecognized properties where round-tripping is required and MUST NOT assign them the semantics of Resource Annotations.
 
 ### 9.6 Execution Object
 

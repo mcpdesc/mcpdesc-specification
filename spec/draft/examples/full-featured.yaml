@@ -289,6 +289,12 @@ resources:
   description: Current top-100 classical chess ratings leaderboard with player names,
     ratings, and recent form
   mimeType: application/json
+  annotations:
+    audience:
+    - user
+    - assistant
+    priority: 0.9
+    lastModified: '2026-08-24T10:00:00Z'
   tags:
   - games
 - uri: chess://leaderboard/rapid
@@ -327,6 +333,10 @@ resourceTemplates:
   description: Full details of a specific chess game — PGN, moves, clock times, and
     engine analysis
   mimeType: application/json
+  annotations:
+    audience:
+    - assistant
+    priority: 0.7
   tags:
   - games
 - uriTemplate: chess://players/{player_id}/games

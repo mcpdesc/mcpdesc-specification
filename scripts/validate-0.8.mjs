@@ -380,6 +380,18 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
       checkMinimumVersion(`${kind}[${index}]`, item, 'title', '2025-06-18', scope);
       checkMinimumVersion(`${kind}[${index}]`, item, '_meta', '2025-06-18', scope);
       checkMinimumVersion(`${kind}[${index}]`, item, 'icons', '2025-11-25', scope);
+      if (kind !== 'prompts' && item.annotations?.lastModified !== undefined) {
+        for (const version of scope) {
+          if (protocolOrder.get(version) >= protocolOrder.get('2025-06-18')) continue;
+          diagnostics.push(
+            makeDiagnostic(
+              'resource-annotation-not-supported-by-version',
+              'error',
+              `${rel}: ${kind}[${index}].annotations.lastModified is not defined for MCP ${version}`
+            )
+          );
+        }
+      }
       if (kind === 'prompts') {
         (item.arguments ?? []).forEach((argument, argumentIndex) => {
           checkMinimumVersion(`${kind}[${index}].arguments[${argumentIndex}]`, argument, 'title', '2025-06-18', scope);

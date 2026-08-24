@@ -15,7 +15,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `description` | string | No | Human-readable resource description. |
 | `mimeType` | string | No | MIME type of the resource content. |
 | `size` | number | No | Size of the raw resource content in bytes. |
-| `annotations` | object | No | Resource annotations. |
+| `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
@@ -40,20 +40,36 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable template description. |
 | `mimeType` | string | No | MIME type of the resource content. |
-| `annotations` | object | No | Resource template annotations. |
+| `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the template is deprecated. |
 | `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
-### 10.3 Protocol Variants and Security
+### 10.3 Resource Annotations
+
+Resource Annotations provide optional client hints about how a Resource, Resource Template, or content block may be used or displayed. They are distinct from the behavioral [Tool Annotations](#95-tool-annotations) on a Tool Object.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `audience` | array\<string\> | Intended audiences. Each value is `"user"` or `"assistant"`. |
+| `priority` | number | Relative importance from `0` (least important) through `1` (most important). |
+| `lastModified` | string | Resource modification time in ISO 8601 form. Since MCP 2025-06-18. |
+
+Resource Annotations have been available throughout the MCP revisions supported by this specification. MCP 2024-11-05 and MCP 2025-03-26 define `audience` and `priority`; `lastModified` MUST NOT be used in an Effective Protocol View before MCP 2025-06-18.
+
+Resource Annotations are hints rather than access controls or integrity claims. Consumers MUST NOT treat `audience` as authorization, `priority` as a mandatory processing order, or `lastModified` as proof of freshness. The object allows additional properties for forward compatibility. Consumers MUST preserve unrecognized properties where round-tripping is required and MUST NOT interpret Tool Annotation field names as Tool behavior when they occur here.
+
+In MCP protocol values, the same Resource Annotations type also applies to supported content blocks, including text, image, audio, embedded-resource, and resource-link content where those block types are available in the applicable revision. MCP Description fields that embed such protocol content MUST retain the distinction between Resource Annotations and Tool Annotations.
+
+### 10.4 Protocol Variants and Security
 
 Resources with the same `uri` MUST have pairwise-disjoint effective protocol scopes. Resource Templates with the same `uriTemplate` MUST likewise have pairwise-disjoint effective protocol scopes.
 
 Resource `security` describes statically known authorization required to access it. Resource Template `security` describes authorization required to use the template to access matching resources. Each replaces inherited transport or root security in full.
 
-### 10.4 Examples
+### 10.5 Examples
 
 **Static resources for chess game history:**
 
@@ -66,6 +82,11 @@ Resource `security` describes statically known authorization required to access 
       "title": "Classical Leaderboard",
       "description": "Current top-100 classical chess ratings leaderboard",
       "mimeType": "application/json",
+      "annotations": {
+        "audience": ["user", "assistant"],
+        "priority": 0.9,
+        "lastModified": "2026-08-24T10:00:00Z"
+      },
       "tags": ["leaderboard", "rating"]
     },
     {
@@ -99,6 +120,10 @@ Resource `security` describes statically known authorization required to access 
       "title": "Game Detail",
       "description": "Full details of a specific chess game including PGN, moves, and analysis",
       "mimeType": "application/json",
+      "annotations": {
+        "audience": ["assistant"],
+        "priority": 0.7
+      },
       "tags": ["game", "history"]
     },
     {

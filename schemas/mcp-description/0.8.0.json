@@ -498,7 +498,7 @@
       },
       "additionalProperties": false
     },
-    "annotations": {
+    "resourceAnnotations": {
       "type": "object",
       "properties": {
         "audience": {
@@ -509,8 +509,7 @@
               "user",
               "assistant"
             ]
-          },
-          "uniqueItems": true
+          }
         },
         "priority": {
           "type": "number",
@@ -521,7 +520,7 @@
           "type": "string"
         }
       },
-      "additionalProperties": false
+      "additionalProperties": true
     },
     "resourceContents": {
       "oneOf": [
@@ -591,7 +590,7 @@
               "type": "string"
             },
             "annotations": {
-              "$ref": "#/$defs/annotations"
+              "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
               "type": "object",
@@ -621,7 +620,7 @@
               "type": "string"
             },
             "annotations": {
-              "$ref": "#/$defs/annotations"
+              "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
               "type": "object",
@@ -644,7 +643,7 @@
               "$ref": "#/$defs/resourceContents"
             },
             "annotations": {
-              "$ref": "#/$defs/annotations"
+              "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
               "type": "object",
@@ -687,7 +686,7 @@
               "$ref": "#/$defs/icons"
             },
             "annotations": {
-              "$ref": "#/$defs/annotations"
+              "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
               "type": "object",
@@ -897,8 +896,7 @@
           "type": "number"
         },
         "annotations": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/resourceAnnotations"
         }
       },
       "additionalProperties": false
@@ -949,8 +947,7 @@
           "type": "string"
         },
         "annotations": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/resourceAnnotations"
         }
       },
       "additionalProperties": false
