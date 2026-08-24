@@ -1,6 +1,6 @@
 # Proposal 0005: Named Resource and Resource Template Examples
 
-- Status: Accepted
+- Status: Review
 - Author: Stève Sfartz
 - Created: 2026-08-23
 - Target version: 0.8.0
@@ -451,7 +451,7 @@ Acceptance criteria:
 
 ## Decision record
 
-Accepted for implementation in MCP Description 0.8.0.
+Pending review.
 
 This proposal is intentionally independent from Proposal 0004. If both are accepted, their implementations may share a feature branch and infrastructure but should remain separated into reviewable commits so either change can progress independently.
 

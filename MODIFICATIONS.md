@@ -55,7 +55,7 @@ Adopted a folder-versioned layout (each specification version is a folder under 
 
 ## Experimental v0.8.0 draft implementation — 2026-08-22
 
-This work is an unreleased experiment on `experiment/0.8.0-draft-implementation`. It does not modify or supersede the stable v0.7.0 artifacts, and the associated proposals remain under review.
+This work is an unreleased experiment on `experiment/0.8.0-draft-implementation`. It does not modify or supersede the stable v0.7.0 artifacts. It contains candidate implementations based on snapshots of proposals that remain under review; implementation on this branch does not accept a proposal or alter its authoritative design and decision record. Proposal changes belong on the corresponding `feature/<slug>-proposal` branch and are copied here without modification when needed for implementation.
 
 | File or path | Change | Reason |
 |---|---|---|

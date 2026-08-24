@@ -1,6 +1,6 @@
 # Proposal 0004: Named Tool Invocation and Result Examples
 
-- Status: Accepted
+- Status: Review
 - Author: Stève Sfartz
 - Created: 2026-08-23
 - Target version: 0.8.0
@@ -467,7 +467,7 @@ Acceptance criteria:
 
 ## Decision record
 
-Accepted for implementation in MCP Description 0.8.0.
+Pending review.
 
 Review decisions recorded in this draft:
 
