@@ -38,6 +38,12 @@ Extensions appear at the **root level** of the MCP Description document:
 }
 ```
 
+## Do Not Confuse Extension Mechanisms
+
+Root `x-*` properties extend the MCP Description document format. Literal `_meta` belongs to a particular MCP declaration, result, or content object and follows the applicable MCP revision's key and context rules. `capabilities.extensions` advertises negotiated MCP protocol extensions. These mechanisms are independent: tooling must preserve each one and must not automatically copy, project, or reinterpret data between them.
+
+Use a root `x-*` property for static description-format metadata that is not part of MCP. Use `_meta` only where MCP defines it on the represented object. Use `capabilities.extensions` only to advertise an MCP protocol extension supported in that Effective Protocol View.
+
 ## Creating Your Own Extension
 
 ### Step 1: Define the Schema

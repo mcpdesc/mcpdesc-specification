@@ -20,7 +20,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
-| `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 #### 10.1.2 Resource URI
@@ -46,7 +46,7 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the template is deprecated. |
-| `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Resource Template declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 ### 10.3 Resource Annotations
@@ -94,7 +94,7 @@ No additional properties are allowed. `uri` MUST be a valid RFC 6570 expansion o
 
 #### 10.4.4 Completed Resource Read Result
 
-The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; for earlier supported revisions it MUST NOT contain `resultType`. Result `_meta` and Resource Contents `_meta` are available from MCP 2025-06-18. JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
+The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; for earlier supported revisions it MUST NOT contain `resultType`. Result `_meta` and Resource Contents `_meta` are available from MCP 2025-06-18 and are literal illustrative values governed by [Section 3.4](#34-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
 
 Every `contents` entry MUST contain `uri` and exactly one of `text` or `blob`. A `blob` value MUST be valid base64. An example MAY contain multiple entries; consumers MUST preserve their order and MUST NOT assume every returned URI equals the requested URI.
 

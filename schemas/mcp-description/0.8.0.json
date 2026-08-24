@@ -498,6 +498,13 @@
       },
       "additionalProperties": false
     },
+    "metaObject": {
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^(?:(?:[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)(?:\\.[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\\/)?(?:[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)?$"
+      },
+      "additionalProperties": true
+    },
     "resourceAnnotations": {
       "type": "object",
       "properties": {
@@ -542,8 +549,7 @@
               "type": "string"
             },
             "_meta": {
-              "type": "object",
-              "additionalProperties": true
+              "$ref": "#/$defs/metaObject"
             }
           },
           "additionalProperties": false
@@ -566,8 +572,7 @@
               "type": "string"
             },
             "_meta": {
-              "type": "object",
-              "additionalProperties": true
+              "$ref": "#/$defs/metaObject"
             }
           },
           "additionalProperties": false
@@ -593,8 +598,7 @@
               "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
-              "type": "object",
-              "additionalProperties": true
+              "$ref": "#/$defs/metaObject"
             }
           },
           "additionalProperties": false
@@ -623,8 +627,7 @@
               "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
-              "type": "object",
-              "additionalProperties": true
+              "$ref": "#/$defs/metaObject"
             }
           },
           "additionalProperties": false
@@ -646,8 +649,7 @@
               "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
-              "type": "object",
-              "additionalProperties": true
+              "$ref": "#/$defs/metaObject"
             }
           },
           "additionalProperties": false
@@ -689,8 +691,7 @@
               "$ref": "#/$defs/resourceAnnotations"
             },
             "_meta": {
-              "type": "object",
-              "additionalProperties": true
+              "$ref": "#/$defs/metaObject"
             }
           },
           "additionalProperties": false
@@ -719,8 +720,7 @@
           "type": "boolean"
         },
         "_meta": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/metaObject"
         }
       },
       "additionalProperties": true
@@ -771,8 +771,7 @@
           }
         },
         "_meta": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/metaObject"
         }
       },
       "additionalProperties": true
@@ -877,8 +876,7 @@
           "type": "boolean"
         },
         "_meta": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/metaObject"
         },
         "security": {
           "$ref": "#/$defs/securityRequirementArray"
@@ -949,8 +947,7 @@
           "type": "boolean"
         },
         "_meta": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/metaObject"
         },
         "security": {
           "$ref": "#/$defs/securityRequirementArray"
@@ -1006,8 +1003,7 @@
           "type": "boolean"
         },
         "_meta": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/metaObject"
         },
         "security": {
           "$ref": "#/$defs/securityRequirementArray"
@@ -1059,8 +1055,7 @@
           "type": "boolean"
         },
         "_meta": {
-          "type": "object",
-          "additionalProperties": true
+          "$ref": "#/$defs/metaObject"
         },
         "security": {
           "$ref": "#/$defs/securityRequirementArray"

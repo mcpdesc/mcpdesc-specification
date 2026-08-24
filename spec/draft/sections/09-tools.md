@@ -18,7 +18,7 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
-| `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 ### 9.2 Input and Output Schemas
@@ -57,6 +57,8 @@ The Tool Example Object MUST NOT contain additional properties. In particular, 0
 `input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
 
 `result` MUST contain `content` and MUST have the completed Tool Result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. Task, input-required, streaming, progress, JSON-RPC envelope, and JSON-RPC protocol-error forms are not Tool Examples. Content blocks MAY use any text, image, audio, embedded-resource, or resource-link form supported by every applicable revision.
+
+Revision-supported `_meta` on the completed result, content blocks, and embedded Resource Contents is literal illustrative metadata governed by [Section 3.4](#34-mcp-_meta). It is not a schema or a request-metadata declaration. In MCP 2026-07-28, a result example MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid in these represented contexts.
 
 A successful result MUST omit `isError` or set it to `false`. It MAY contain `structuredContent` only in revisions that support that field. If the Tool declares `outputSchema`, a successful result MUST contain `structuredContent`, which MUST validate against that schema under the applicable schema rules. Unstructured `content` remains required when `structuredContent` is present. If the Tool has no `outputSchema`, a successful result MAY contain revision-supported `structuredContent`, but mcpdesc makes no schema-compatibility claim for that value.
 

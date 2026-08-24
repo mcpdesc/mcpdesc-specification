@@ -164,6 +164,18 @@ const mergedResourceExamples = mergeProtocolDescriptions([resourceExampleView]);
 assert.deepEqual(mergedResourceExamples.resources[0].examples, resourceExampleView.resources[0].examples);
 assert.deepEqual(mergedResourceExamples.resourceTemplates[0].examples, resourceExampleView.resourceTemplates[0].examples);
 
+const metaSource = fixture('spec/draft/fixtures/expected-valid/meta-literal-values.json');
+const metaView = projectProtocolView(metaSource, '2026-07-28');
+assert.deepEqual(metaView.tools[0]._meta, metaSource.tools[0]._meta);
+assert.deepEqual(metaView.tools[0].examples.complete.result._meta, metaSource.tools[0].examples.complete.result._meta);
+assert.deepEqual(metaView.resources[0]._meta, metaSource.resources[0]._meta);
+assert.deepEqual(metaView.resources[0].examples.current.result.contents[0]._meta, metaSource.resources[0].examples.current.result.contents[0]._meta);
+const mergedMeta = mergeProtocolDescriptions([metaView]);
+assert.deepEqual(mergedMeta.tools[0]._meta, metaView.tools[0]._meta);
+assert.deepEqual(mergedMeta.tools[0].examples, metaView.tools[0].examples);
+assert.deepEqual(mergedMeta.resources[0]._meta, metaView.resources[0]._meta);
+assert.deepEqual(mergedMeta.resources[0].examples, metaView.resources[0].examples);
+
 const changedInstructions = structuredClone(view2026);
 changedInstructions.instructions = 'Different durable guidance.';
 assert.throws(

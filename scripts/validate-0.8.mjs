@@ -21,9 +21,11 @@ export const supportedProtocolVersions = [
 
 const protocolOrder = new Map(supportedProtocolVersions.map((version, index) => [version, index]));
 const toolSchemaDialectVersion = '2025-11-25';
+const completeSemanticConformanceVersion = '2025-06-18';
 const knownReservedCapabilityExtensions = new Set([
   'io.modelcontextprotocol/tasks'
 ]);
+const metaKeyPattern = /^(?:(?:[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)(?:\.[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\/)?(?:[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)?$/;
 
 function createValidatorForDialect(dialect) {
   const Factory = dialect === '2020-12' ? Ajv2020 : Ajv;
@@ -96,6 +98,154 @@ function usesMcpReservedPrefix(identifier) {
   if (labels.length < 2) return false;
   const secondLabel = labels[1].toLowerCase();
   return secondLabel === 'modelcontextprotocol' || secondLabel === 'mcp';
+}
+
+function usesMcpReservedMetaPrefix(identifier, version) {
+  if (typeof identifier !== 'string' || !identifier.includes('/')) return false;
+  const labels = identifier.slice(0, identifier.indexOf('/')).split('.');
+  if (version === '2025-06-18') {
+    return labels.slice(0, -1).some((label) => ['modelcontextprotocol', 'mcp'].includes(label.toLowerCase()));
+  }
+  return labels.length >= 2 && ['modelcontextprotocol', 'mcp'].includes(labels[1].toLowerCase());
+}
+
+function isImplementation(value) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    && typeof value.name === 'string' && typeof value.version === 'string';
+}
+
+function validateMeta(document, rel, diagnostics) {
+  const rootScope = normalizeScope(document.protocolVersions ?? []);
+  const legacyVersions = rootScope.filter(
+    (version) => protocolOrder.get(version) < protocolOrder.get(completeSemanticConformanceVersion)
+  );
+  if (legacyVersions.length) {
+    diagnostics.push(
+      makeDiagnostic(
+        'legacy-protocol-validation-incomplete',
+        'warning',
+        `${rel}: MCP ${legacyVersions.join(', ')} are legacy compatibility revisions; structural and selected checks were applied, but complete MCP semantic conformance was not evaluated`
+      )
+    );
+  }
+
+  function validateKnownReservedKey(key, value, context, version, location) {
+    let validContext;
+    let validValue;
+
+    if (key === 'progressToken' && ['2025-06-18', '2025-11-25', '2026-07-28'].includes(version)) {
+      validContext = context === 'request';
+      validValue = typeof value === 'string' || typeof value === 'number';
+    } else if (key === 'io.modelcontextprotocol/related-task' && version === '2025-11-25') {
+      validContext = context === 'result';
+      validValue = value && typeof value === 'object' && !Array.isArray(value) && typeof value.taskId === 'string';
+    } else if (key === 'io.modelcontextprotocol/serverInfo' && version === '2026-07-28') {
+      validContext = context === 'result';
+      validValue = isImplementation(value);
+    } else if (
+      version === '2026-07-28'
+      && ['io.modelcontextprotocol/protocolVersion', 'io.modelcontextprotocol/clientInfo', 'io.modelcontextprotocol/clientCapabilities', 'io.modelcontextprotocol/logLevel'].includes(key)
+    ) {
+      validContext = context === 'request';
+      validValue = key === 'io.modelcontextprotocol/protocolVersion'
+        ? typeof value === 'string'
+        : key === 'io.modelcontextprotocol/clientInfo'
+          ? isImplementation(value)
+          : key === 'io.modelcontextprotocol/clientCapabilities'
+            ? value && typeof value === 'object' && !Array.isArray(value)
+            : ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'].includes(value);
+    } else if (key === 'io.modelcontextprotocol/subscriptionId' && version === '2026-07-28') {
+      validContext = context === 'notification' || context === 'subscription-result';
+      validValue = typeof value === 'string' || typeof value === 'number';
+    } else if (version === '2026-07-28' && ['traceparent', 'tracestate', 'baggage'].includes(key)) {
+      validContext = true;
+      validValue = typeof value === 'string' && value.length > 0;
+    } else {
+      return false;
+    }
+
+    if (!validContext) {
+      diagnostics.push(
+        makeDiagnostic(
+          'meta-reserved-key-context',
+          'error',
+          `${rel}: ${location} uses reserved _meta key ${JSON.stringify(key)} in a ${context} context where MCP ${version} does not define it`
+        )
+      );
+    } else if (!validValue) {
+      diagnostics.push(
+        makeDiagnostic(
+          'meta-reserved-key-value',
+          'error',
+          `${rel}: ${location}[${JSON.stringify(key)}] has an invalid value for MCP ${version}`
+        )
+      );
+    }
+    return true;
+  }
+
+  function check(meta, context, scope, location) {
+    if (!meta || typeof meta !== 'object' || Array.isArray(meta)) return;
+    for (const [key, value] of Object.entries(meta)) {
+      if (!metaKeyPattern.test(key)) {
+        diagnostics.push(
+          makeDiagnostic(
+            'meta-key-invalid',
+            'error',
+            `${rel}: ${location} contains invalid MCP _meta key ${JSON.stringify(key)}`
+          )
+        );
+        continue;
+      }
+      for (const version of scope.filter((candidate) => protocolOrder.get(candidate) >= protocolOrder.get(completeSemanticConformanceVersion))) {
+        if (validateKnownReservedKey(key, value, context, version, location)) continue;
+        if (usesMcpReservedMetaPrefix(key, version)) {
+          diagnostics.push(
+            makeDiagnostic(
+              'meta-unknown-reserved-key',
+              'warning',
+              `${rel}: ${location} contains unrecognized key ${JSON.stringify(key)} under an MCP-reserved prefix for MCP ${version}; preserve it and review its authority`
+            )
+          );
+        }
+      }
+    }
+  }
+
+  for (const [kind, items] of [
+    ['tools', document.tools ?? []],
+    ['resources', document.resources ?? []],
+    ['resourceTemplates', document.resourceTemplates ?? []],
+    ['prompts', document.prompts ?? []]
+  ]) {
+    items.forEach((item, itemIndex) => {
+      const scope = effectiveScope(document, item, rootScope);
+      check(item._meta, 'declaration', scope, `${kind}[${itemIndex}]._meta`);
+      if (kind === 'tools') {
+        for (const [exampleName, example] of Object.entries(item.examples ?? {})) {
+          const result = example?.result;
+          if (!result || typeof result !== 'object' || Array.isArray(result)) continue;
+          const resultLocation = `${kind}[${itemIndex}].examples[${JSON.stringify(exampleName)}].result`;
+          check(result._meta, 'result', scope, `${resultLocation}._meta`);
+          (result.content ?? []).forEach((content, contentIndex) => {
+            const contentLocation = `${resultLocation}.content[${contentIndex}]`;
+            check(content?._meta, 'content', scope, `${contentLocation}._meta`);
+            if (content?.type === 'resource') check(content.resource?._meta, 'content', scope, `${contentLocation}.resource._meta`);
+          });
+        }
+      } else if (kind !== 'prompts') {
+        for (const [exampleName, example] of Object.entries(item.examples ?? {})) {
+          const result = example?.result;
+          if (!result || typeof result !== 'object' || Array.isArray(result)) continue;
+          const resultLocation = `${kind}[${itemIndex}].examples[${JSON.stringify(exampleName)}].result`;
+          check(result._meta, 'result', scope, `${resultLocation}._meta`);
+          (result.contents ?? []).forEach((content, contentIndex) => {
+            check(content?._meta, 'content', scope, `${resultLocation}.contents[${contentIndex}]._meta`);
+          });
+        }
+      }
+    });
+  }
 }
 
 function validateTagReferences(document, rel, diagnostics) {
@@ -969,6 +1119,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   validateSecurityRequirements(document, rel, diagnostics);
   validateTagReferences(document, rel, diagnostics);
   validateVersionSpecificSemantics(document, rel, diagnostics);
+  validateMeta(document, rel, diagnostics);
   validateToolSchemas(document, rel, diagnostics);
   validateToolExamples(document, rel, diagnostics);
   validateResourceExamples(document, rel, diagnostics);

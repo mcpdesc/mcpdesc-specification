@@ -14,7 +14,7 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
 | `deprecated` | boolean | No | Whether the prompt is deprecated. |
-| `_meta` | object | No | Protocol-reserved metadata. Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Prompt declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 Prompt declarations with the same `name` MUST have pairwise-disjoint effective protocol scopes. Prompt `security` describes statically known authorization required to retrieve the Prompt and replaces inherited transport or root security in full.

@@ -50,6 +50,7 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - Structural and semantic validation for Tool-example names, revision-specific result/content shapes, execution-error constraints, and input/output schema compatibility.
 - Optional named Resource and Resource Template `examples` containing completed MCP Resource read results for documentation, contract tests, and deterministic mocks.
 - Structural and semantic validation for Resource-example names, RFC 6570 expansions, completed result revisions, content URIs, base64 data, MIME-type consistency, and raw-size diagnostics.
+- Literal MCP `_meta` semantics for supported declarations and named Tool and Resource result/content examples, including structural key grammar, revision-aware reserved-key context and value checks, warning-and-preserve handling for unknown reserved keys, and security guidance.
 
 ### Changed
 
@@ -66,6 +67,8 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - Distinguished MCP Tool Annotations from Resource Annotations, defined Resource Annotation fields and revision applicability, and aligned Resource, Resource Template, and embedded content schemas with the applicable MCP types.
 - Clarified that Resource and Resource Template annotations describe discovery declarations, while named Resource examples contain native completed read results and do not define per-example Resource Annotations.
 - Refocused the FAQ on MCP Description authority, multi-revision coverage, Effective Protocol Views, merge behavior, validation, and supplemental metadata; clarified that normative MCP specifications remain authoritative for runtime behavior.
+- Defined MCP 2025-06-18 as the floor for complete revision-specific semantic conformance; MCP 2024-11-05 and MCP 2025-03-26 remain recognized legacy compatibility revisions with incomplete-validation diagnostics.
+- Distinguished literal MCP `_meta` from root `x-*` specification extensions and MCP `capabilities.extensions`; reusable metadata schemas remain outside Proposal 0002.
 
 ### Deferred
 

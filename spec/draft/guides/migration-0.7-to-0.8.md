@@ -65,6 +65,16 @@ Preserve content order, URIs, text, base64 binary data, MIME types, and applicab
 
 A capture tool MUST NOT associate independently observed Resource requests and results without authoritative correlation. Protocol-scoped Resource variants may need different example maps because MCP 2026-07-28 completed results require `resultType: "complete"`, while earlier revisions do not define that field.
 
+## MCP `_meta`
+
+Preserve literal `_meta` already present on Tool, Resource, Resource Template, and Prompt declarations, but validate it against every revision in the declaration's Effective Protocol View. Version 0.8.0 enforces the applicable MCP key grammar from MCP 2025-06-18 onward. Malformed keys and known reserved keys in the wrong context or with the wrong value shape require author review; they MUST NOT be silently renamed or moved.
+
+Literal `_meta` may also be retained on revision-supported completed Tool and Resource result examples and their supported content objects. It remains an illustrative value, not a declaration of metadata that a live server accepts or emits. Do not derive a metadata schema from observed values, and do not translate `_meta` into a root `x-*` property or `capabilities.extensions` entry.
+
+Preserve valid third-party and unprefixed keys. Preserve and warn about an unrecognized key under an MCP-reserved prefix rather than deleting it. For MCP 2024-11-05 and MCP 2025-03-26, retain structurally valid data, report that complete semantic validation was not performed, and do not claim complete MCP conformance.
+
+Before publishing migrated literal values, remove credentials, tokens, user identifiers, internal topology, live trace identifiers, and other sensitive runtime data. Use conspicuously fictitious or redacted values in examples.
+
 ## Security
 
 Move each distinct inline Security Scheme Object to a deterministic local name under root `securitySchemes`. Replace each former root or transport occurrence with a Security Requirement Object referencing that name.
@@ -110,7 +120,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 7. Generate and deduplicate named security schemes, preserving override placement.
 8. Add only authoritatively known instructions, scopes, revisions, and protocol variants.
 9. Validate against the 0.8.0 JSON Schema.
-10. Run semantic validation for protocol scopes, transport coverage, primitive uniqueness, security references, tags, revision applicability, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
+10. Run semantic validation for protocol scopes, transport coverage, primitive uniqueness, security references, tags, revision applicability, literal `_meta`, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
 
 A migration tool MUST report unresolved ambiguity instead of guessing.
 
