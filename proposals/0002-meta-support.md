@@ -82,6 +82,26 @@ For legacy compatibility revisions, validators apply sound checks they implement
 
 MCP Description root `x-*` properties extend the static description format. Declaration or example `_meta` carries MCP metadata on the corresponding MCP object. `capabilities.extensions` advertises MCP protocol extensions. Tooling MUST preserve these mechanisms independently and MUST NOT automatically project or reinterpret one as another.
 
+## Primary-source `_meta` inventory (MCP 2026-07-28)
+
+From the [changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog)
+and [release notes](https://blog.modelcontextprotocol.io/posts/2026-07-28-release-candidate/),
+the stateless rework makes `_meta` central. Standard keys now include:
+
+- `io.modelcontextprotocol/protocolVersion`, `io.modelcontextprotocol/clientCapabilities`,
+  `io.modelcontextprotocol/clientInfo` (per-request), and
+  `io.modelcontextprotocol/serverInfo` (per-result) ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)).
+- `io.modelcontextprotocol/logLevel` (per-request log level, replacing `logging/setLevel`) ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)).
+- `io.modelcontextprotocol/subscriptionId` (tags subscription notifications) ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)).
+- W3C Trace Context keys `traceparent`, `tracestate`, `baggage` ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414)).
+
+The key observation for a **static** description: almost all of these are
+*runtime* values exchanged per request/result. A static MCP Description should
+carry only curated literal values appropriate to the represented declaration or
+named example. Reverse-DNS namespacing (`io.modelcontextprotocol/…`, vendor
+`com.example/…`) is the MCP convention to represent and validate. Proposal 0006
+separately evaluates schemas for metadata that a server defines or expects.
+
 ## Design questions
 
 1. Which MCP-reserved keys have semantics in each declaration and example context represented by 0.8.0?
