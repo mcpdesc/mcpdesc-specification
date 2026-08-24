@@ -18,7 +18,8 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Example Object](#1042-static-resource-example-object)\> | No | Named completed Resource read examples. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading the Resource (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
@@ -44,7 +45,8 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Template Example Object](#1043-resource-template-example-object)\> | No | Named concrete URI and completed read-result examples. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading an expanded Resource (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the template is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Resource Template declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |

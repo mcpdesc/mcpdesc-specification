@@ -88,6 +88,22 @@ tools:
         description: 'Include move-by-move annotations (default: false)'
     required:
     - pgn
+  elicitations:
+  - name: confirm_deep_analysis
+    mode: form
+    when: Requested analysis depth may take significant time.
+    message: Continue with deep analysis?
+    requestedSchema:
+      type: object
+      properties:
+        continue:
+          type: boolean
+          title: Continue
+          default: true
+      required:
+      - continue
+    onDecline: Return without starting analysis.
+    onCancel: Return without starting analysis.
   outputSchema:
     type: object
     properties:

@@ -16,7 +16,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while fulfilling the Tool (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |

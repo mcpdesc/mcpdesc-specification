@@ -135,6 +135,353 @@
       "type": "object",
       "additionalProperties": true
     },
+    "elicitationFormOption": {
+      "type": "object",
+      "required": [
+        "const",
+        "title"
+      ],
+      "properties": {
+        "const": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "elicitationFormProperty": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "minLength": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maxLength": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "format": {
+              "enum": [
+                "email",
+                "uri",
+                "date",
+                "date-time"
+              ]
+            },
+            "default": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "enum": [
+                "number",
+                "integer"
+              ]
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "minimum": {
+              "type": "number"
+            },
+            "maximum": {
+              "type": "number"
+            },
+            "default": {
+              "type": "number"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "type": {
+              "const": "boolean"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "default": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "enum"
+          ],
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "enum": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "enumNames": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "default": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "oneOf"
+          ],
+          "properties": {
+            "type": {
+              "const": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "oneOf": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/elicitationFormOption"
+              }
+            },
+            "default": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "items"
+          ],
+          "properties": {
+            "type": {
+              "const": "array"
+            },
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "minItems": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "maxItems": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "required": [
+                    "type",
+                    "enum"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "string"
+                    },
+                    "enum": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "required": [
+                    "anyOf"
+                  ],
+                  "properties": {
+                    "anyOf": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/elicitationFormOption"
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "default": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "elicitationFormSchema": {
+      "type": "object",
+      "required": [
+        "type",
+        "properties"
+      ],
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "const": "object"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/elicitationFormProperty"
+          }
+        },
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "elicitationDeclaration": {
+      "type": "object",
+      "required": [
+        "name",
+        "mode",
+        "message"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "mode": {
+          "enum": [
+            "form",
+            "url"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "when": {
+          "type": "string",
+          "minLength": 1
+        },
+        "requestedSchema": {
+          "$ref": "#/$defs/elicitationFormSchema"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "onDecline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "onCancel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "protocolVersions": {
+          "$ref": "#/$defs/protocolVersionScope"
+        }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "mode": {
+              "const": "form"
+            }
+          },
+          "required": [
+            "requestedSchema"
+          ],
+          "not": {
+            "required": [
+              "url"
+            ]
+          }
+        },
+        {
+          "properties": {
+            "mode": {
+              "const": "url"
+            }
+          },
+          "not": {
+            "required": [
+              "requestedSchema"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
     "tag": {
       "type": "object",
       "required": [
@@ -913,6 +1260,12 @@
         },
         "examples": {
           "$ref": "#/$defs/toolExamples"
+        },
+        "elicitations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/elicitationDeclaration"
+          }
         }
       },
       "additionalProperties": false
@@ -969,6 +1322,12 @@
         },
         "examples": {
           "$ref": "#/$defs/resourceExamples"
+        },
+        "elicitations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/elicitationDeclaration"
+          }
         }
       },
       "additionalProperties": false
@@ -1022,6 +1381,12 @@
         },
         "examples": {
           "$ref": "#/$defs/resourceTemplateExamples"
+        },
+        "elicitations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/elicitationDeclaration"
+          }
         }
       },
       "additionalProperties": false
@@ -1067,6 +1432,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/promptArgument"
+          }
+        },
+        "elicitations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/elicitationDeclaration"
           }
         }
       },

@@ -75,6 +75,14 @@ Preserve valid third-party and unprefixed keys. Preserve and warn about an unrec
 
 Before publishing migrated literal values, remove credentials, tokens, user identifiers, internal topology, live trace identifiers, and other sensitive runtime data. Use conspicuously fictitious or redacted values in examples.
 
+## Elicitation declarations
+
+No automatic migration is required because 0.7.0 has no Elicitation Declaration model. Add `elicitations` to a Tool, Resource, Resource Template, or Prompt only from authoritative design information about additional user interaction that may occur while fulfilling that primitive.
+
+Use `mode: "form"` with a flat restricted `requestedSchema`, or `mode: "url"` for an out-of-band interaction. A form spanning MCP 2025-06-18 and later revisions must use only the 2025-06-18 vocabulary; split declarations by protocol scope when defaults, titled enums, multi-select enums, or URL mode apply only to MCP 2025-11-25 or later. A nested `protocolVersions` value must remain within its containing primitive's effective scope.
+
+Do not infer an elicitation from an optional input property, a Tool error, or a captured runtime exchange without authoritative correlation. Do not move incomplete workflows into Tool or Resource examples: named examples remain completed results. A migration tool must not retrieve a declared URL, infer runtime MRTR choreography, or claim privacy and security conformance from the static declaration.
+
 ## Security
 
 Move each distinct inline Security Scheme Object to a deterministic local name under root `securitySchemes`. Replace each former root or transport occurrence with a Security Requirement Object referencing that name.
@@ -120,7 +128,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 7. Generate and deduplicate named security schemes, preserving override placement.
 8. Add only authoritatively known instructions, scopes, revisions, and protocol variants.
 9. Validate against the 0.8.0 JSON Schema.
-10. Run semantic validation for protocol scopes, transport coverage, primitive uniqueness, security references, tags, revision applicability, literal `_meta`, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
+10. Run semantic validation for protocol scopes, transport coverage, primitive and Elicitation Declaration uniqueness, security references, tags, revision applicability, elicitation modes and form schemas, literal `_meta`, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
 
 A migration tool MUST report unresolved ambiguity instead of guessing.
 

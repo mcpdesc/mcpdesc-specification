@@ -171,7 +171,7 @@ The root of an MCP Description document is a JSON object with the following stru
 | `resources` | array\<[Resource Object](#10-resources)\> | No | Resources exposed by the server |
 | `resourceTemplates` | array\<[Resource Template Object](#10-resources)\> | No | Resource templates |
 | `prompts` | array\<[Prompt Object](#11-prompts)\> | No | Prompts exposed by the server |
-| `tags` | array\<[Tag Object](#12-tags)\> | No | Flat tag list for categorization |
+| `tags` | array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 
 ### 3.3 Zero-Primitive Descriptions
 
@@ -201,7 +201,7 @@ Property ordering within JSON objects is not significant. Implementations MUST N
 
 ### 3.6 Specification Extensions
 
-Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 13: Specification Extensions](#13-specification-extensions) for details.
+Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for details.
 
 ### 3.7 Additional Properties
 
@@ -716,7 +716,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while fulfilling the Tool (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
@@ -927,7 +928,8 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Example Object](#1042-static-resource-example-object)\> | No | Named completed Resource read examples. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading the Resource (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
@@ -953,7 +955,8 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Template Example Object](#1043-resource-template-example-object)\> | No | Named concrete URI and completed read-result examples. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading an expanded Resource (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the template is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Resource Template declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
@@ -1151,7 +1154,8 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `description` | string | No | Human-readable prompt description. |
 | `arguments` | array\<[Prompt Argument](#112-prompt-argument-object)\> | No | Prompt arguments. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while retrieving the Prompt (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the prompt is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Prompt declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
@@ -1236,24 +1240,139 @@ Prompt declarations with the same `name` MUST have pairwise-disjoint effective p
 }
 ```
 
-## 12. Tags
+## 12. Elicitation Declarations
 
-The root-level `tags` array defines a flat list of tags for the MCP server. It is OPTIONAL.
+### 12.1 Purpose and Placement
+
+An Elicitation Declaration documents that fulfillment of a Tool, Resource, Resource Template, or Prompt may require additional interaction with the user through the MCP client.
+
+Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
+
+An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it.
+
+### 12.2 Elicitation Declaration Object
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | string | **Yes** | Stable local declaration name. |
+| `mode` | `"form"` or `"url"` | **Yes** | Canonical elicitation mode. |
+| `message` | string | **Yes** | Representative user-facing explanation of the interaction. |
+| `when` | string | No | Human-readable description of when the interaction may occur. |
+| `requestedSchema` | object | Conditional | Restricted MCP form-response schema. |
+| `url` | string (URI) | No | Static URL when known at description-authoring time. |
+| `onDecline` | string | No | Human-readable expected behavior after explicit decline. |
+| `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
+| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
+
+`name` MUST match `^[A-Za-z0-9._-]+$`. Names are case-sensitive and MUST be unique within the containing primitive declaration.
+
+`message` MUST be non-empty. It documents the explanation a user should receive and MAY be representative or default wording when runtime context changes the exact text. Runtime wording SHOULD NOT materially contradict the documented purpose, but mcpdesc does not require byte-for-byte equality.
+
+`when`, `onDecline`, and `onCancel`, when present, MUST be non-empty descriptive contract documentation. They are not executable expressions, client instructions, or statically provable guarantees.
+
+Although applicable MCP revisions permit omission of runtime `mode` for form elicitation, mcpdesc requires explicit `mode` to provide one canonical static representation.
+
+### 12.3 Form Mode
+
+For `mode: "form"`:
+
+- `requestedSchema` is REQUIRED;
+- `url` MUST NOT appear; and
+- `requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+
+The schema is limited to a flat object whose properties use MCP elicitation primitive schemas. Nested objects and arrays other than MCP-supported multi-select enumeration forms are invalid. Unsupported keywords and unsupported string formats are invalid.
+
+MCP 2025-06-18 supports string, number, integer, boolean, and legacy string-enum property schemas. It permits string length constraints and the `email`, `uri`, `date`, and `date-time` formats, numeric bounds, boolean defaults, and optional `enumNames` corresponding to enum values. It does not define `$schema`, defaults for strings, numbers, or enums, titled `oneOf` enums, or multi-select arrays.
+
+MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitive types, standard titled single-select enums, titled and untitled multi-select enums, and the legacy `enumNames` form. Validators MUST apply the vocabulary of every applicable protocol revision.
+
+A `required` entry MUST name a property declared in `properties`. `enumNames`, when present, MUST contain one display name for every enum value. An enum default MUST be one of its declared values, and every multi-select default value MUST occur in its declared item choices. Minimum constraints MUST NOT exceed their corresponding maximum constraints.
+
+### 12.4 URL Mode
+
+For `mode: "url"`:
+
+- `requestedSchema` MUST NOT appear;
+- `url`, when present, MUST be a syntactically valid URI; and
+- omission of `url` means the concrete URL is generated or selected at runtime.
+
+A runtime URL-mode elicitation still supplies every field required by the applicable MCP revision. Omission in mcpdesc does not make the runtime URL optional.
+
+Validation of `url` is syntax-only. Validators and other consumers MUST NOT retrieve, prefetch, dereference, or otherwise access it while processing a description. A conforming declaration does not assert that the target is currently available, trusted, immutable, controlled by the server, or suitable for automatic navigation.
+
+### 12.5 Protocol Applicability
+
+An omitted Elicitation Declaration `protocolVersions` inherits the effective scope of its containing primitive. An explicit scope MUST be non-empty and MUST be a subset of that containing scope.
+
+Complete revision-specific validation begins with MCP 2025-06-18:
+
+- MCP 2025-06-18 supports form mode;
+- MCP 2025-11-25 supports form and URL modes; and
+- MCP 2026-07-28 supports form and URL modes.
+
+A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
+
+MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.4. Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
+
+### 12.6 Static-Description Boundary
+
+The applicable MCP revision remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior.
+
+A mock, gateway, documentation tool, or client MAY use a declaration to render its message, collect a form response matching `requestedSchema`, or present a known URL. The declaration alone does not define when a mock triggers the interaction, how it selects among declarations, how responses modify state, or which final primitive result follows.
+
+Elicitation Declarations are distinct from named primitive examples. Tool Examples pair a complete invocation with a completed Tool Result, and Resource Examples contain completed read results. They MUST NOT contain `InputRequiredResult`, `elicitation/create`, MRTR rounds, retries, or other incomplete workflows. MCP Description 0.8.0 does not define an elicitation transcript or workflow language.
+
+The applicable MCP elicitation specification remains authoritative for runtime security and privacy requirements. MCP Description validation does not inspect or certify runtime behavior, privacy compliance, or security conformance and defines no sensitive-field diagnostic.
+
+### 12.7 Example
+
+```yaml
+tools:
+  - name: assign_issue
+    description: Assign an issue to a teammate.
+    inputSchema:
+      type: object
+      properties:
+        issue:
+          type: integer
+        assignee:
+          type: string
+      required: [issue]
+      additionalProperties: false
+    elicitations:
+      - name: choose_assignee
+        mode: form
+        when: No assignee was supplied.
+        message: Who should own this issue?
+        requestedSchema:
+          type: object
+          properties:
+            assignee:
+              type: string
+              title: Assignee
+          required: [assignee]
+        onDecline: Leave the issue unassigned.
+        onCancel: Abort without modifying the issue.
+```
+
+## 13. Tags
+
+The root-level `tags` array defines a flat, document-wide tag catalogue for the MCP server. It is OPTIONAL. Tags are supplemental MCP Description metadata; they are not fields defined by the MCP protocol.
 
 When present, `tags` declares all valid tags that MAY be referenced by tools, resources, resource templates, and prompts. The array order determines display priority — tags appearing earlier in the array SHOULD be presented first in UIs and documentation.
 
-### 12.1 Tag Object
+### 13.1 Tag Object
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Tag identifier. MUST be unique across all tags. |
 | `description` | string | No | Human-readable description of the tag's purpose. |
 
-### 12.2 Tag Uniqueness
+### 13.2 Tag Uniqueness
 
 Tag names MUST be unique across all tags in the array. Implementations MUST reject documents containing duplicate tag names.
 
-### 12.3 Tag References
+### 13.3 Tag References
 
 Per-entity `tags` arrays (on tools, resources, resource templates, and prompts) contain plain strings referencing tag names. When a root-level `tags` array is present:
 
@@ -1261,9 +1380,19 @@ Per-entity `tags` arrays (on tools, resources, resource templates, and prompts) 
 - Implementations MUST treat a reference to an undeclared tag as a validation error.
 - Per-entity tag arrays MUST NOT contain duplicate values.
 
-When the root-level `tags` array is absent, per-entity tags are unconstrained strings (backward-compatible behavior).
+When the root-level `tags` array is absent, per-entity tags are unconstrained strings (backward-compatible behavior). When it is present but empty, no per-entity tag reference is valid.
 
-### 12.4 Example
+### 13.4 Protocol Scopes and Effective Protocol Views
+
+The root tag catalogue is not protocol-scoped. A tag describes a categorization concept across the MCP Description document rather than protocol behavior. An Effective Protocol View MUST preserve the complete root tag catalogue, including entries not referenced by a primitive retained in that view.
+
+Protocol-scoped variants of the same primitive MAY use different `tags` arrays. Every reference in every variant is still validated against the document-wide root catalogue when that catalogue is present.
+
+Merge inputs MUST therefore agree on the root tag catalogue under the general unscoped-metadata merge rules. Merge tooling MUST NOT infer, discard, or synthesize catalogue entries from the tags referenced in individual views.
+
+Elicitation Declarations do not carry tags. They are named behaviors nested within an already categorizable Tool, Resource, Resource Template, or Prompt. A future extension of tags to nested behaviors requires a separate use case and compatibility decision.
+
+### 13.5 Example
 
 Flat tag list with entity references:
 
@@ -1296,11 +1425,11 @@ Flat tag list with entity references:
 }
 ```
 
-## 13. Specification Extensions
+## 14. Specification Extensions
 
 MCP Description documents support vendor-specific metadata through specification extensions.
 
-### 13.1 Extension Naming
+### 14.1 Extension Naming
 
 Specification extension properties MUST match the pattern `^x-`. The RECOMMENDED naming convention is:
 
@@ -1314,21 +1443,21 @@ Examples:
 - `x-acme-deployment`
 - `x-myorg-governance`
 
-### 13.2 Extension Placement
+### 14.2 Extension Placement
 
 Specification extensions MAY appear at the root level of an MCP Description document. Extensions MUST NOT appear within objects defined by this specification (e.g., within `info`, `transports` items, or tool objects) unless the object explicitly allows additional properties.
 
-### 13.3 Extension Values
+### 14.3 Extension Values
 
 Extension values MAY be of any JSON type: object, array, string, number, boolean, or null.
 
-### 13.4 Processing Rules
+### 14.4 Processing Rules
 
 Implementations that do not recognize a specification extension MUST ignore it and MUST NOT reject the document.
 
 Implementations SHOULD preserve unrecognized extensions when processing and re-serializing MCP Description documents.
 
-### 13.5 Extension Documentation
+### 14.5 Extension Documentation
 
 Extension authors SHOULD publish a specification for their extension, including:
 
@@ -1336,7 +1465,7 @@ Extension authors SHOULD publish a specification for their extension, including:
 - Documentation of the extension's purpose and semantics
 - Versioning information
 
-### 13.6 Example
+### 14.6 Example
 
 ```json
 {
@@ -1377,33 +1506,33 @@ Extension authors SHOULD publish a specification for their extension, including:
 }
 ```
 
-## 14. Serialization
+## 15. Serialization
 
-### 14.1 JSON Format
+### 15.1 JSON Format
 
 An MCP Description document MUST be serialized as a JSON document conforming to [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259).
 
-### 14.2 Character Encoding
+### 15.2 Character Encoding
 
 MCP Description documents MUST be encoded in UTF-8.
 
-### 14.3 Numeric Values
+### 15.3 Numeric Values
 
 JSON numbers SHOULD be used for numeric values. Implementations MUST support IEEE 754 double-precision floating-point numbers.
 
-### 14.4 Null Values
+### 15.4 Null Values
 
 Properties with `null` values SHOULD be omitted from the document rather than included with a `null` value, unless the property explicitly permits `null`.
 
-### 14.5 Empty Arrays and Objects
+### 15.5 Empty Arrays and Objects
 
 Empty arrays and objects MAY be omitted only when the property's semantics explicitly make omission equivalent. Implementations MUST preserve semantically significant empty values. In particular, `security: []` clears inherited security while omission inherits it, and `security: [{}]` declares an anonymous alternative; these forms are not interchangeable.
 
-### 14.6 String Values
+### 15.6 String Values
 
 String values MUST be valid JSON strings. URI values MUST conform to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986). Email values SHOULD conform to [RFC 5322](https://www.rfc-editor.org/rfc/rfc5322). Date values MUST conform to ISO 8601.
 
-### 14.7 Schema Reference
+### 15.7 Schema Reference
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support:
 
@@ -1414,32 +1543,32 @@ MCP Description documents SHOULD include a `$schema` property referencing the ap
 }
 ```
 
-## 15. Conformance
+## 16. Conformance
 
-### 15.1 Document Conformance
+### 16.1 Document Conformance
 
 A conforming MCP Description document MUST:
 
-1. Be a valid JSON document (Section 14).
+1. Be a valid JSON document (Section 15).
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
 4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.8.0 (Section 4).
 5. Include the `transports` array with at least one transport object and complete root protocol coverage (Section 6).
 6. Validate against the JSON Schema for the declared `mcpdesc` version.
-7. Satisfy semantic scope, identifier, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+7. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 8. Not contain unknown properties at the root level except specification extensions matching `^x-`.
 
-### 15.2 Implementation Conformance
+### 16.2 Implementation Conformance
 
 A conforming implementation (tool, validator, or platform) MUST:
 
 1. Accept and correctly parse documents conforming to this specification.
-2. Reject documents that fail the requirements in Section 15.1.
-3. Ignore unrecognized specification extensions without error (Section 13.4).
-4. Preserve specification extensions when processing and re-serializing documents (Section 13.4).
+2. Reject documents that fail the requirements in Section 16.1.
+3. Ignore unrecognized specification extensions without error (Section 14.4).
+4. Preserve specification extensions when processing and re-serializing documents (Section 14.4).
 5. Apply structural JSON Schema validation and the cross-object semantic requirements of this specification.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, security references, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security references, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
@@ -1449,11 +1578,11 @@ A conforming implementation SHOULD:
 2. Provide clear error messages when rejecting non-conforming documents.
 3. Support JSON Schema validation against the published schema.
 
-### 15.3 Partial Conformance
+### 16.3 Partial Conformance
 
 Implementations that support only a subset of the specification (e.g., only tools, or only a specific transport type) SHOULD document their limitations clearly.
 
-### 15.4 Versioned Conformance
+### 16.4 Versioned Conformance
 
 Conformance is assessed against a specific specification version. An implementation claiming conformance MUST state which `mcpdesc` version(s) it supports.
 

@@ -39,9 +39,13 @@ assert.deepEqual(view2025.protocolVersions, ['2025-11-25']);
 assert.deepEqual(view2026.protocolVersions, ['2026-07-28']);
 assert.equal(view2025.tools.length, 1);
 assert.equal(view2025.tools[0].execution.taskSupport, 'optional');
+assert.deepEqual(view2025.tools[0].tags, ['queued']);
+assert.deepEqual(view2025.tags, scoped.tags);
 assert.equal('protocolVersions' in view2025.tools[0], false);
 assert.equal(view2026.tools.length, 1);
 assert.equal('execution' in view2026.tools[0], false);
+assert.deepEqual(view2026.tools[0].tags, ['stateless']);
+assert.deepEqual(view2026.tags, scoped.tags);
 assert.equal('protocolVersions' in view2026.tools[0], false);
 assert.throws(() => projectProtocolView(scoped, '2025-06-18'), /absent from root protocolVersions/);
 assertStructurallyConforming(view2025);
@@ -163,6 +167,26 @@ assert.deepEqual(resourceExampleView.resourceTemplates[0].examples, resourceExam
 const mergedResourceExamples = mergeProtocolDescriptions([resourceExampleView]);
 assert.deepEqual(mergedResourceExamples.resources[0].examples, resourceExampleView.resources[0].examples);
 assert.deepEqual(mergedResourceExamples.resourceTemplates[0].examples, resourceExampleView.resourceTemplates[0].examples);
+
+const elicitationSource = fixture('spec/draft/fixtures/expected-valid/elicitation-declarations.json');
+const elicitationView0618 = projectProtocolView(elicitationSource, '2025-06-18');
+const elicitationView1125 = projectProtocolView(elicitationSource, '2025-11-25');
+assert.deepEqual(elicitationView0618.tools[0].elicitations.map((elicitation) => elicitation.name), ['choose_assignee']);
+assert.deepEqual(
+  elicitationView1125.tools[0].elicitations.map((elicitation) => elicitation.name),
+  ['choose_assignee', 'authorize_tracker', 'choose_labels']
+);
+assert.ok(elicitationView1125.tools[0].elicitations.every((elicitation) => !Object.hasOwn(elicitation, 'protocolVersions')));
+assertStructurallyConforming(elicitationView0618);
+assertStructurallyConforming(elicitationView1125);
+const mergedElicitations = mergeProtocolDescriptions([
+  elicitationView0618,
+  elicitationView1125,
+  projectProtocolView(elicitationSource, '2026-07-28')
+]);
+assert.ok(semanticallyEquivalent(projectProtocolView(mergedElicitations, '2025-06-18'), elicitationView0618));
+assert.ok(semanticallyEquivalent(projectProtocolView(mergedElicitations, '2025-11-25'), elicitationView1125));
+assertStructurallyConforming(mergedElicitations);
 
 const metaSource = fixture('spec/draft/fixtures/expected-valid/meta-literal-values.json');
 const metaView = projectProtocolView(metaSource, '2026-07-28');

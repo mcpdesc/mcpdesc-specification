@@ -27,7 +27,10 @@
       },
       "execution": {
         "taskSupport": "optional"
-      }
+      },
+      "tags": [
+        "queued"
+      ]
     },
     {
       "name": "run_job",
@@ -37,7 +40,24 @@
       "inputSchema": {
         "type": "object",
         "additionalProperties": false
-      }
+      },
+      "tags": [
+        "stateless"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "queued",
+      "description": "Operations using the 2025 task model."
+    },
+    {
+      "name": "stateless",
+      "description": "Operations using the 2026 stateless model."
+    },
+    {
+      "name": "reserved",
+      "description": "A document-wide category not used in either projected view."
     }
   ]
 }

@@ -2,7 +2,8 @@
 //
 // The exported helpers complement the published JSON Schema with cross-object
 // rules for protocol scopes, revision applicability, security, tags, embedded
-// Tool schemas and examples, Resource examples, transports, and extension namespaces. Diagnostics
+// Tool schemas and examples, Resource examples, Elicitation Declarations,
+// transports, and extension namespaces. Diagnostics
 // distinguish fatal errors from nonfatal warnings. External schema references
 // are never fetched automatically; unresolved targets are preserved and reported.
 
@@ -257,7 +258,7 @@ function validateTagReferences(document, rel, diagnostics) {
     }
     declaredTags.add(tag.name);
   }
-  if (!declaredTags.size) return;
+  if (!Object.hasOwn(document, 'tags')) return;
 
   for (const [kind, items] of [
     ['tools', document.tools ?? []],
@@ -426,6 +427,10 @@ function validateProtocolScopes(document, rel, diagnostics) {
       const identifier = item[key];
       const scope = effectiveScope(document, item, rootScope);
       assertSubset(scope, rootScope, `${kind}[${index}].protocolVersions`);
+      (item.elicitations ?? []).forEach((elicitation, elicitationIndex) => {
+        const elicitationScope = effectiveScope(document, elicitation, scope);
+        assertSubset(elicitationScope, scope, `${kind}[${index}].elicitations[${elicitationIndex}].protocolVersions`);
+      });
       const existing = byIdentifier.get(identifier) ?? [];
       for (const other of existing) {
         const overlap = intersection(scope, other.scope);
@@ -441,6 +446,150 @@ function validateProtocolScopes(document, rel, diagnostics) {
       }
       existing.push({ index, scope });
       byIdentifier.set(identifier, existing);
+    });
+  }
+}
+
+function validateElicitations(document, rel, diagnostics) {
+  const rootScope = normalizeScope(document.protocolVersions ?? []);
+
+  function validateFormSchema(schema, version, location) {
+    if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return;
+    if (version === '2025-06-18' && Object.hasOwn(schema, '$schema')) {
+      diagnostics.push(
+        makeDiagnostic(
+          'elicitation-form-schema-version-mismatch',
+          'error',
+          `${rel}: ${location}.$schema is not defined for MCP ${version}`
+        )
+      );
+    }
+
+    const propertyNames = new Set(Object.keys(schema.properties ?? {}));
+    for (const requiredName of schema.required ?? []) {
+      if (propertyNames.has(requiredName)) continue;
+      diagnostics.push(
+        makeDiagnostic(
+          'elicitation-form-required-property-unknown',
+          'error',
+          `${rel}: ${location}.required references undeclared property ${JSON.stringify(requiredName)}`
+        )
+      );
+    }
+
+    for (const [propertyName, property] of Object.entries(schema.properties ?? {})) {
+      const propertyLocation = `${location}.properties[${JSON.stringify(propertyName)}]`;
+      if (!property || typeof property !== 'object' || Array.isArray(property)) continue;
+
+      if (version === '2025-06-18') {
+        if (property.type === 'array' || Object.hasOwn(property, 'oneOf')) {
+          diagnostics.push(
+            makeDiagnostic(
+              'elicitation-form-schema-version-mismatch',
+              'error',
+              `${rel}: ${propertyLocation} uses an enum form introduced after MCP ${version}`
+            )
+          );
+        }
+        if (Object.hasOwn(property, 'default') && property.type !== 'boolean') {
+          diagnostics.push(
+            makeDiagnostic(
+              'elicitation-form-schema-version-mismatch',
+              'error',
+              `${rel}: ${propertyLocation}.default is not defined for this property type in MCP ${version}`
+            )
+          );
+        }
+      }
+
+      if (Array.isArray(property.enumNames) && Array.isArray(property.enum) && property.enumNames.length !== property.enum.length) {
+        diagnostics.push(
+          makeDiagnostic(
+            'elicitation-form-enum-names-mismatch',
+            'error',
+            `${rel}: ${propertyLocation}.enumNames must contain one display name for every enum value`
+          )
+        );
+      }
+      if (Object.hasOwn(property, 'default')) {
+        const allowedValues = Array.isArray(property.enum)
+          ? property.enum
+          : Array.isArray(property.oneOf)
+            ? property.oneOf.map((option) => option.const)
+            : undefined;
+        if (allowedValues && !allowedValues.includes(property.default)) {
+          diagnostics.push(
+            makeDiagnostic(
+              'elicitation-form-default-outside-enum',
+              'error',
+              `${rel}: ${propertyLocation}.default must be one of the declared enum values`
+            )
+          );
+        }
+        if (property.type === 'array') {
+          const itemValues = property.items?.enum ?? property.items?.anyOf?.map((option) => option.const);
+          if (Array.isArray(itemValues) && property.default.some((value) => !itemValues.includes(value))) {
+            diagnostics.push(
+              makeDiagnostic(
+                'elicitation-form-default-outside-enum',
+                'error',
+                `${rel}: ${propertyLocation}.default contains a value outside the declared enum values`
+              )
+            );
+          }
+        }
+      }
+      if (typeof property.minLength === 'number' && typeof property.maxLength === 'number' && property.minLength > property.maxLength) {
+        diagnostics.push(makeDiagnostic('elicitation-form-invalid-range', 'error', `${rel}: ${propertyLocation}.minLength must not exceed maxLength`));
+      }
+      if (typeof property.minimum === 'number' && typeof property.maximum === 'number' && property.minimum > property.maximum) {
+        diagnostics.push(makeDiagnostic('elicitation-form-invalid-range', 'error', `${rel}: ${propertyLocation}.minimum must not exceed maximum`));
+      }
+      if (typeof property.minItems === 'number' && typeof property.maxItems === 'number' && property.minItems > property.maxItems) {
+        diagnostics.push(makeDiagnostic('elicitation-form-invalid-range', 'error', `${rel}: ${propertyLocation}.minItems must not exceed maxItems`));
+      }
+    }
+  }
+
+  for (const [kind, items] of [
+    ['tools', document.tools ?? []],
+    ['resources', document.resources ?? []],
+    ['resourceTemplates', document.resourceTemplates ?? []],
+    ['prompts', document.prompts ?? []]
+  ]) {
+    items.forEach((item, itemIndex) => {
+      const parentScope = effectiveScope(document, item, rootScope);
+      const names = new Set();
+      (item.elicitations ?? []).forEach((elicitation, elicitationIndex) => {
+        const location = `${kind}[${itemIndex}].elicitations[${elicitationIndex}]`;
+        if (names.has(elicitation.name)) {
+          diagnostics.push(
+            makeDiagnostic(
+              'duplicate-elicitation-name',
+              'error',
+              `${rel}: ${location}.name duplicates Elicitation Declaration name ${JSON.stringify(elicitation.name)} within the containing primitive`
+            )
+          );
+        }
+        names.add(elicitation.name);
+
+        const scope = effectiveScope(document, elicitation, parentScope);
+        for (const version of scope) {
+          if (protocolOrder.get(version) < protocolOrder.get(completeSemanticConformanceVersion)) continue;
+          if (version === '2025-06-18' && elicitation.mode !== 'form') {
+            diagnostics.push(
+              makeDiagnostic(
+                'elicitation-mode-not-supported-by-version',
+                'error',
+                `${rel}: ${location}.mode ${JSON.stringify(elicitation.mode)} is not defined for MCP ${version}; only form mode is supported`
+              )
+            );
+          }
+          if (elicitation.mode === 'form') {
+            validateFormSchema(elicitation.requestedSchema, version, `${location}.requestedSchema`);
+          }
+        }
+      });
     });
   }
 }
@@ -1119,6 +1268,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   validateSecurityRequirements(document, rel, diagnostics);
   validateTagReferences(document, rel, diagnostics);
   validateVersionSpecificSemantics(document, rel, diagnostics);
+  validateElicitations(document, rel, diagnostics);
   validateMeta(document, rel, diagnostics);
   validateToolSchemas(document, rel, diagnostics);
   validateToolExamples(document, rel, diagnostics);

@@ -17,11 +17,14 @@ For each declared protocol revision, that revision's normative MCP specification
 | Tools | Invoked | Described with input and output schemas |
 | Resources | Read or subscribed to | Catalogued |
 | Prompts | Retrieved | Catalogued |
+| Elicitation | Executed through revision-specific form, URL, or MRTR behavior | Expected operation-level interactions described statically |
 | Authorization | Enforced at runtime | Statically known requirements described |
 
 ## MCP Description Does Not Replace Runtime Behavior
 
 A description does not execute Tools, contain Resource content, retrieve Prompts, enforce authorization, manage sessions, or define runtime error handling. Servers and clients continue to follow the applicable MCP revision.
+
+Elicitation Declarations document that fulfilling a primitive may require additional user interaction. They do not reproduce `elicitation/create`, Multi Round-Trip Request state, retries, correlation, capability negotiation, or lifecycle messages. The applicable MCP revision determines how a declared form or URL interaction is executed. Named Tool and Resource examples remain completed results rather than elicitation transcripts.
 
 Static security requirements do not predict whether an unauthorized primitive is visible during runtime discovery. Likewise, an observed description reflects only the protocol revision and authorization context actually observed unless authoritative design metadata supplies a broader surface.
 
@@ -36,7 +39,7 @@ The `mcpdesc` field and MCP protocol coverage are independent dimensions:
 }
 ```
 
-`mcpdesc` selects this document format. Root `protocolVersions` lists the MCP revisions described by the document. Applicable transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts may narrow that root set with their own `protocolVersions`.
+`mcpdesc` selects this document format. Root `protocolVersions` lists the MCP revisions described by the document. Applicable transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts may narrow that root set with their own `protocolVersions`. An Elicitation Declaration may narrow its containing primitive's effective scope further.
 
 A single-version Effective Protocol View is produced by retaining declarations applicable to one root revision and removing their now-redundant scopes. The applicable MCP revision determines how the represented behavior is exercised on the wire.
 

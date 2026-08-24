@@ -55,6 +55,9 @@ function semanticCanonicalString(value) {
     if (!Array.isArray(normalized[collection])) continue;
     for (const item of normalized[collection]) {
       if (Array.isArray(item.protocolVersions)) item.protocolVersions.sort();
+      for (const elicitation of item.elicitations ?? []) {
+        if (Array.isArray(elicitation.protocolVersions)) elicitation.protocolVersions.sort();
+      }
       normalizeSecurity(item);
     }
     normalized[collection].sort((left, right) => canonicalString(left).localeCompare(canonicalString(right)));
@@ -89,7 +92,16 @@ function projectUnchecked(document, version, options = {}) {
     if (!Array.isArray(document[collection])) continue;
     const projected = document[collection]
       .filter((item) => effectiveScope(item, rootScope).includes(version))
-      .map(withoutScope);
+      .map((item) => {
+        const itemScope = effectiveScope(item, rootScope);
+        const projectedItem = withoutScope(item);
+        if (Array.isArray(item.elicitations)) {
+          projectedItem.elicitations = item.elicitations
+            .filter((elicitation) => effectiveScope(elicitation, itemScope).includes(version))
+            .map(withoutScope);
+        }
+        return projectedItem;
+      });
     if (projected.length || (primitiveCollections.has(collection) && !options.omitEmptyPrimitiveCollections)) {
       result[collection] = projected;
     } else {

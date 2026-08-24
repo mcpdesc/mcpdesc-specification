@@ -51,6 +51,7 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - Optional named Resource and Resource Template `examples` containing completed MCP Resource read results for documentation, contract tests, and deterministic mocks.
 - Structural and semantic validation for Resource-example names, RFC 6570 expansions, completed result revisions, content URIs, base64 data, MIME-type consistency, and raw-size diagnostics.
 - Literal MCP `_meta` semantics for supported declarations and named Tool and Resource result/content examples, including structural key grammar, revision-aware reserved-key context and value checks, warning-and-preserve handling for unknown reserved keys, and security guidance.
+- Experimental operation-level Elicitation Declarations for Tools, Resources, Resource Templates, and Prompts, with form and URL modes, nested protocol scopes, revision-aware restricted form schemas, and Effective Protocol View support, implementing Proposal 0007 while it remains under review.
 
 ### Changed
 
@@ -69,10 +70,10 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - Refocused the FAQ on MCP Description authority, multi-revision coverage, Effective Protocol Views, merge behavior, validation, and supplemental metadata; clarified that normative MCP specifications remain authoritative for runtime behavior.
 - Defined MCP 2025-06-18 as the floor for complete revision-specific semantic conformance; MCP 2024-11-05 and MCP 2025-03-26 remain recognized legacy compatibility revisions with incomplete-validation diagnostics.
 - Distinguished literal MCP `_meta` from root `x-*` specification extensions and MCP `capabilities.extensions`; reusable metadata schemas remain outside Proposal 0002.
+- Clarified that tags are document-wide supplemental metadata, remain unscoped across Effective Protocol Views, and do not extend to nested Elicitation Declarations; corrected explicit empty tag catalogues to reject all tag references.
 
 ### Deferred
 
-- Elicitation declarations pending a separate accepted proposal.
 - Discovery-specific and subscription-specific security metadata.
 - mcpdesc-specific Tool error catalogues.
 - Generic variants/profiles and transport-specific primitive inventories.

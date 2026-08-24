@@ -12,7 +12,8 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `description` | string | No | Human-readable prompt description. |
 | `arguments` | array\<[Prompt Argument](#112-prompt-argument-object)\> | No | Prompt arguments. |
 | `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 12.3](#123-tag-references)). |
+| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while retrieving the Prompt (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the prompt is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Prompt declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |

@@ -27,7 +27,7 @@ The root of an MCP Description document is a JSON object with the following stru
 | `resources` | array\<[Resource Object](#10-resources)\> | No | Resources exposed by the server |
 | `resourceTemplates` | array\<[Resource Template Object](#10-resources)\> | No | Resource templates |
 | `prompts` | array\<[Prompt Object](#11-prompts)\> | No | Prompts exposed by the server |
-| `tags` | array\<[Tag Object](#12-tags)\> | No | Flat tag list for categorization |
+| `tags` | array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 
 ### 3.3 Zero-Primitive Descriptions
 
@@ -57,7 +57,7 @@ Property ordering within JSON objects is not significant. Implementations MUST N
 
 ### 3.6 Specification Extensions
 
-Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 13: Specification Extensions](#13-specification-extensions) for details.
+Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for details.
 
 ### 3.7 Additional Properties
 
