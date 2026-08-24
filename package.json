@@ -14,6 +14,7 @@
   "devDependencies": {
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "uri-template-matcher": "^1.1.2",
     "yaml": "^2.9.0"
   },
   "license": "Apache-2.0"

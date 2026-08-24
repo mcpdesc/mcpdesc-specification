@@ -2,13 +2,14 @@
 //
 // The exported helpers complement the published JSON Schema with cross-object
 // rules for protocol scopes, revision applicability, security, tags, embedded
-// Tool schemas and examples, transports, and extension namespaces. Diagnostics
+// Tool schemas and examples, Resource examples, transports, and extension namespaces. Diagnostics
 // distinguish fatal errors from nonfatal warnings. External schema references
 // are never fetched automatically; unresolved targets are preserved and reported.
 
 import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import { UriTemplateMatcher } from 'uri-template-matcher';
 
 export const supportedProtocolVersions = [
   '2024-11-05',
@@ -856,6 +857,112 @@ function validateToolExamples(document, rel, diagnostics) {
   });
 }
 
+function isValidBase64(value) {
+  if (typeof value !== 'string' || value.length % 4 !== 0 || !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) return false;
+  return Buffer.from(value, 'base64').toString('base64') === value;
+}
+
+function validateCompletedResourceResult(result, scope, location, rel, diagnostics) {
+  for (const envelopeField of ['jsonrpc', 'id', 'error']) {
+    if (Object.hasOwn(result, envelopeField)) {
+      diagnostics.push(makeDiagnostic('resource-example-json-rpc-envelope', 'error', `${rel}: ${location} must not contain JSON-RPC envelope field ${JSON.stringify(envelopeField)}`));
+    }
+  }
+  for (const incompleteField of ['task', 'inputRequests', 'requestState']) {
+    if (Object.hasOwn(result, incompleteField)) {
+      diagnostics.push(makeDiagnostic('incomplete-resource-example-result', 'error', `${rel}: ${location} must not contain non-completed workflow field ${JSON.stringify(incompleteField)}`));
+    }
+  }
+
+  for (const version of scope) {
+    if (version === '2026-07-28' && result.resultType !== 'complete') {
+      diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${rel}: ${location}.resultType must be "complete" for MCP ${version}`));
+    }
+    if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
+      diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${rel}: ${location}.resultType is not defined for MCP ${version}`));
+    }
+    if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+      diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${rel}: ${location}._meta is not defined for MCP ${version}`));
+    }
+    (result.contents ?? []).forEach((content, contentIndex) => {
+      if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+        diagnostics.push(makeDiagnostic('resource-example-content-version-mismatch', 'error', `${rel}: ${location}.contents[${contentIndex}]._meta is not defined for MCP ${version}`));
+      }
+    });
+  }
+}
+
+function validateResourceExampleContents(owner, requestedUri, result, location, rel, diagnostics) {
+  const contents = result.contents ?? [];
+  let requestedEntryFound = false;
+
+  contents.forEach((content, contentIndex) => {
+    const contentLocation = `${location}.result.contents[${contentIndex}]`;
+    if (content.uri === requestedUri) {
+      requestedEntryFound = true;
+      if (owner.mimeType && content.mimeType && content.mimeType !== owner.mimeType) {
+        diagnostics.push(makeDiagnostic('resource-example-mime-type-mismatch', 'warning', `${rel}: ${contentLocation}.mimeType ${JSON.stringify(content.mimeType)} differs from the declaration MIME type ${JSON.stringify(owner.mimeType)}`));
+      }
+      if (owner.size !== undefined) {
+        const actualSize = typeof content.text === 'string'
+          ? Buffer.byteLength(content.text, 'utf8')
+          : typeof content.blob === 'string' && isValidBase64(content.blob)
+            ? Buffer.from(content.blob, 'base64').length
+            : undefined;
+        if (actualSize !== undefined && actualSize !== owner.size) {
+          diagnostics.push(makeDiagnostic('resource-example-size-mismatch', 'warning', `${rel}: ${contentLocation} contains ${actualSize} raw bytes, which differs from the declared Resource size ${owner.size}`));
+        }
+      }
+    }
+    if (typeof content.blob === 'string' && !isValidBase64(content.blob)) {
+      diagnostics.push(makeDiagnostic('invalid-resource-example-base64', 'error', `${rel}: ${contentLocation}.blob must be valid canonical base64`));
+    }
+  });
+
+  if (!requestedEntryFound) {
+    diagnostics.push(makeDiagnostic('resource-example-requested-uri-not-returned', 'warning', `${rel}: ${location}.result.contents has no entry for requested URI ${JSON.stringify(requestedUri)}; this is valid only for a documented collection or indirection`));
+  }
+}
+
+function validateResourceExamples(document, rel, diagnostics) {
+  const rootScope = normalizeScope(document.protocolVersions ?? []);
+
+  for (const [kind, items] of [
+    ['resources', document.resources ?? []],
+    ['resourceTemplates', document.resourceTemplates ?? []]
+  ]) {
+    items.forEach((owner, ownerIndex) => {
+      if (!owner.examples || typeof owner.examples !== 'object' || Array.isArray(owner.examples)) return;
+      const scope = effectiveScope(document, owner, rootScope);
+      let template;
+      if (kind === 'resourceTemplates') {
+        try {
+          template = new UriTemplateMatcher();
+          template.add(owner.uriTemplate);
+        } catch (error) {
+          template = undefined;
+          diagnostics.push(makeDiagnostic('resource-template-example-invalid-template', 'error', `${rel}: ${kind}[${ownerIndex}].uriTemplate is not a valid RFC 6570 template: ${error.message}`));
+        }
+      }
+
+      for (const [exampleName, example] of Object.entries(owner.examples)) {
+        if (!example || typeof example !== 'object' || Array.isArray(example)) continue;
+        const location = `${kind}[${ownerIndex}].examples[${JSON.stringify(exampleName)}]`;
+        const result = example.result;
+        if (!result || typeof result !== 'object' || Array.isArray(result)) continue;
+        const requestedUri = kind === 'resources' ? owner.uri : example.uri;
+
+        if (kind === 'resourceTemplates' && typeof requestedUri === 'string' && template && !template.match(requestedUri)) {
+          diagnostics.push(makeDiagnostic('resource-template-example-invalid-expansion', 'error', `${rel}: ${location}.uri ${JSON.stringify(requestedUri)} is not a valid RFC 6570 expansion of ${JSON.stringify(owner.uriTemplate)}`));
+        }
+
+        validateCompletedResourceResult(result, scope, `${location}.result`, rel, diagnostics);
+        if (typeof requestedUri === 'string') validateResourceExampleContents(owner, requestedUri, result, location, rel, diagnostics);
+      }
+    });
+  }
+}
+
 export function semanticValidateDocument(document, rel = 'document') {
   const diagnostics = [];
   validateProtocolScopes(document, rel, diagnostics);
@@ -864,6 +971,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   validateVersionSpecificSemantics(document, rel, diagnostics);
   validateToolSchemas(document, rel, diagnostics);
   validateToolExamples(document, rel, diagnostics);
+  validateResourceExamples(document, rel, diagnostics);
   diagnostics.sort((left, right) => left.code.localeCompare(right.code) || left.message.localeCompare(right.message));
   return diagnostics;
 }

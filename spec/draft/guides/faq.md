@@ -48,7 +48,15 @@ SSE (`"type": "sse"`) is supported for backward compatibility but is considered 
 
 ### Are tool annotations reliable?
 
-Annotations are advisory hints, not guarantees. A tool marked `readOnlyHint: true` **should** be read-only, but implementations must not assume it is. Annotations help with UI display and safety decisions.
+Tool Annotations are advisory hints, not guarantees. A tool marked `readOnlyHint: true` **should** be read-only, but clients must not make Tool-use decisions from annotations received from an untrusted server. Resource Annotations are a separate type used for audience, priority, and modification-time display hints.
+
+### Do Resource examples guarantee live contents?
+
+No. Resource examples are illustrative snapshots for documentation, tests, and deterministic mocks. They do not guarantee freshness, immutability, or equality with a live read. Consumers must not automatically dereference their untrusted URIs, and authors must redact sensitive or proprietary data.
+
+### How do Resource Template examples identify variables?
+
+They record the exact concrete `resources/read.params.uri`, not a reverse-inferred variable map. The URI must be a valid RFC 6570 expansion of the containing `uriTemplate`.
 
 ### How does versioning work?
 

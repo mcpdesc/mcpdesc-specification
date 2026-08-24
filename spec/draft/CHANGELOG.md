@@ -48,6 +48,8 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 - A concise multi-version example showing common declarations and protocol-scoped capability variants across MCP 2025-11-25 and MCP 2026-07-28.
 - Optional named Tool `examples` that pair complete invocation arguments with completed MCP Tool Results for documentation, contract tests, and deterministic mocks.
 - Structural and semantic validation for Tool-example names, revision-specific result/content shapes, execution-error constraints, and input/output schema compatibility.
+- Optional named Resource and Resource Template `examples` containing completed MCP Resource read results for documentation, contract tests, and deterministic mocks.
+- Structural and semantic validation for Resource-example names, RFC 6570 expansions, completed result revisions, content URIs, base64 data, MIME-type consistency, and raw-size diagnostics.
 
 ### Changed
 

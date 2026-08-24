@@ -162,12 +162,22 @@ resourceTemplates:
   title: Game Detail
   description: Full details of a specific chess game
   mimeType: application/json
+  examples:
+    sample-game:
+      uri: chess://games/example-1234
+      result:
+        contents:
+        - uri: chess://games/example-1234
+          mimeType: application/json
+          text: '{"id":"example-1234","result":"1-0"}'
 - uriTemplate: "chess://players/{player_id}/rating-history"
   name: player_rating_history
   title: Player Rating History
   description: Historical Elo rating progression
   mimeType: application/json
 ```
+
+Resource `examples` use the declaration URI as their implicit read input. Resource Template examples add the exact concrete expanded `uri`. In both cases, copy only a completed `resources/read` result payload, preserve content order, and use exactly one of `text` or base64 `blob` per content entry. Examples are snapshots and do not guarantee live contents or freshness. Never dereference example URIs automatically or publish sensitive captured data.
 
 ## Step 5: Add Prompts
 

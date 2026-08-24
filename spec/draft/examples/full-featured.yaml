@@ -295,6 +295,13 @@ resources:
     - assistant
     priority: 0.9
     lastModified: '2026-08-24T10:00:00Z'
+  examples:
+    top-two:
+      result:
+        contents:
+        - uri: chess://leaderboard/classical
+          mimeType: application/json
+          text: '{"players":[{"name":"Example A","rating":2810},{"name":"Example B","rating":2795}]}'
   tags:
   - games
 - uri: chess://leaderboard/rapid
@@ -337,6 +344,14 @@ resourceTemplates:
     audience:
     - assistant
     priority: 0.7
+  examples:
+    sample-game:
+      uri: chess://games/example-1234
+      result:
+        contents:
+        - uri: chess://games/example-1234
+          mimeType: application/json
+          text: '{"id":"example-1234","result":"1-0"}'
   tags:
   - games
 - uriTemplate: chess://players/{player_id}/games

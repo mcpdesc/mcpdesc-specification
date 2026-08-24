@@ -754,6 +754,78 @@
         "$ref": "#/$defs/toolExample"
       }
     },
+    "completedReadResourceResultExample": {
+      "type": "object",
+      "required": [
+        "contents"
+      ],
+      "properties": {
+        "resultType": {
+          "const": "complete"
+        },
+        "contents": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/resourceContents"
+          }
+        },
+        "_meta": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "resourceExample": {
+      "type": "object",
+      "required": [
+        "result"
+      ],
+      "properties": {
+        "result": {
+          "$ref": "#/$defs/completedReadResourceResultExample"
+        }
+      },
+      "additionalProperties": false
+    },
+    "resourceExamples": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9._-]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/resourceExample"
+      }
+    },
+    "resourceTemplateExample": {
+      "type": "object",
+      "required": [
+        "uri",
+        "result"
+      ],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "result": {
+          "$ref": "#/$defs/completedReadResourceResultExample"
+        }
+      },
+      "additionalProperties": false
+    },
+    "resourceTemplateExamples": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9._-]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/resourceTemplateExample"
+      }
+    },
     "promptArgument": {
       "type": "object",
       "required": [
@@ -897,6 +969,9 @@
         },
         "annotations": {
           "$ref": "#/$defs/resourceAnnotations"
+        },
+        "examples": {
+          "$ref": "#/$defs/resourceExamples"
         }
       },
       "additionalProperties": false
@@ -948,6 +1023,9 @@
         },
         "annotations": {
           "$ref": "#/$defs/resourceAnnotations"
+        },
+        "examples": {
+          "$ref": "#/$defs/resourceTemplateExamples"
         }
       },
       "additionalProperties": false

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-resource-example-semantics",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2024-11-05",
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-resource-example-semantics"
+    }
+  ],
+  "resources": [
+    {
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "uri": "asset:///invalid.bin",
+      "name": "invalid_binary",
+      "examples": {
+        "invalid-result": {
+          "result": {
+            "resultType": "complete",
+            "jsonrpc": "2.0",
+            "task": {},
+            "contents": [
+              {
+                "uri": "asset:///invalid.bin",
+                "blob": "not base64"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2024-11-05"
+      ],
+      "uri": "test://legacy",
+      "name": "legacy",
+      "examples": {
+        "unsupported-metadata": {
+          "result": {
+            "contents": [
+              {
+                "uri": "test://legacy",
+                "text": "legacy",
+                "_meta": {
+                  "unsupported": true
+                }
+              }
+            ],
+            "_meta": {
+              "unsupported": true
+            }
+          }
+        }
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "uriTemplate": "chess://games/{game_id}",
+      "name": "game",
+      "examples": {
+        "not-an-expansion": {
+          "uri": "chess://players/example-1234",
+          "result": {
+            "contents": [
+              {
+                "uri": "chess://players/example-1234",
+                "text": "wrong route"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

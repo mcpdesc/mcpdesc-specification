@@ -57,6 +57,14 @@ Copy the exact `tools/call` `arguments` object to `input`, using `{}` explicitly
 
 Do not pair independently observed inputs and results without authoritative evidence that they came from the same invocation. Do not infer complete Tool Examples by combining unrelated schema annotations. Redact credentials, tokens, personal or customer data, internal hostnames, and production identifiers. Protocol-scoped Tool variants may need different example maps because their completed-result and content-block shapes differ.
 
+## Resource examples
+
+No migration is required because Resource and Resource Template `examples` are optional. For a static Resource, create a named example and copy the completed payload inside a correlated `resources/read` response's `result` member to `result`; the declaration's `uri` is the implicit request URI. For a Resource Template, also copy the exact concrete `resources/read.params.uri` to the example's `uri` and verify that it is an RFC 6570 expansion of `uriTemplate`.
+
+Preserve content order, URIs, text, base64 binary data, MIME types, and applicable result metadata. Do not copy the JSON-RPC envelope or errors. Verify each content entry has exactly one of `text` or `blob`, and redact credentials, personal data, internal paths, and proprietary content. Examples are illustrative snapshots, not statements of freshness or live equality.
+
+A capture tool MUST NOT associate independently observed Resource requests and results without authoritative correlation. Protocol-scoped Resource variants may need different example maps because MCP 2026-07-28 completed results require `resultType: "complete"`, while earlier revisions do not define that field.
+
 ## Security
 
 Move each distinct inline Security Scheme Object to a deterministic local name under root `securitySchemes`. Replace each former root or transport occurrence with a Security Requirement Object referencing that name.

@@ -156,6 +156,14 @@ assert.deepEqual(toolExampleView.tools[0].examples, toolExampleSource.tools[0].e
 const mergedToolExamples = mergeProtocolDescriptions([toolExampleView]);
 assert.deepEqual(mergedToolExamples.tools[0].examples, toolExampleSource.tools[0].examples);
 
+const resourceExampleSource = fixture('spec/draft/fixtures/expected-valid/named-resource-examples.json');
+const resourceExampleView = projectProtocolView(resourceExampleSource, '2026-07-28');
+assert.deepEqual(resourceExampleView.resources[0].examples, resourceExampleSource.resources[1].examples);
+assert.deepEqual(resourceExampleView.resourceTemplates[0].examples, resourceExampleSource.resourceTemplates[0].examples);
+const mergedResourceExamples = mergeProtocolDescriptions([resourceExampleView]);
+assert.deepEqual(mergedResourceExamples.resources[0].examples, resourceExampleView.resources[0].examples);
+assert.deepEqual(mergedResourceExamples.resourceTemplates[0].examples, resourceExampleView.resourceTemplates[0].examples);
+
 const changedInstructions = structuredClone(view2026);
 changedInstructions.instructions = 'Different durable guidance.';
 assert.throws(
