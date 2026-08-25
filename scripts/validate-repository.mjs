@@ -14,7 +14,7 @@ import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import YAML from 'yaml';
-import { semanticValidateDocument } from './validate-0.8.mjs';
+import { validateMcpDescription } from '@mcpdesc/validator';
 
 function createValidatorForDialect(dialect) {
   const Factory = dialect === '2020-12' ? Ajv2020 : Ajv;
@@ -57,6 +57,16 @@ function fail(message) {
 
 function warn(message) {
   warnings.push(message);
+}
+
+function validateDraftDocument(document) {
+  return validateMcpDescription(document, {
+    specification: '0.8.0-draft.1'
+  }).diagnostics;
+}
+
+function reportDiagnostic(rel, diagnostic) {
+  return `${rel}: ${diagnostic.message}`;
 }
 
 function readText(rel) {
@@ -213,10 +223,10 @@ for (const full of exampleFiles) {
   }
   for (const error of validateAgainstVersionedSchema(document, rel)) fail(error);
   if (document?.mcpdesc === '0.8.0') {
-    const diagnostics = semanticValidateDocument(document, rel);
+    const diagnostics = validateDraftDocument(document);
     for (const diagnostic of diagnostics) {
-      if (diagnostic.level === 'error') fail(diagnostic.message);
-      if (diagnostic.level === 'warning') warn(diagnostic.message);
+      if (diagnostic.severity === 'error') fail(reportDiagnostic(rel, diagnostic));
+      if (diagnostic.severity === 'warning') warn(reportDiagnostic(rel, diagnostic));
     }
   }
 }
@@ -238,9 +248,13 @@ for (const [group, expectsErrors, expectsWarnings] of fixtureGroups) {
     }
 
     const schemaErrors = validateAgainstVersionedSchema(document, rel);
-    const semanticDiagnostics = document?.mcpdesc === '0.8.0' ? semanticValidateDocument(document, rel) : [];
-    const semanticErrors = semanticDiagnostics.filter((diagnostic) => diagnostic.level === 'error').map((diagnostic) => diagnostic.message);
-    const semanticWarnings = semanticDiagnostics.filter((diagnostic) => diagnostic.level === 'warning').map((diagnostic) => diagnostic.message);
+    const semanticDiagnostics = document?.mcpdesc === '0.8.0' ? validateDraftDocument(document) : [];
+    const semanticErrors = semanticDiagnostics
+      .filter((diagnostic) => diagnostic.severity === 'error')
+      .map((diagnostic) => reportDiagnostic(rel, diagnostic));
+    const semanticWarnings = semanticDiagnostics
+      .filter((diagnostic) => diagnostic.severity === 'warning')
+      .map((diagnostic) => reportDiagnostic(rel, diagnostic));
     const fixtureErrors = [...schemaErrors, ...semanticErrors];
 
     if (expectsErrors) {

@@ -20,5 +20,9 @@ The following companion tools are published under the [`@cisco_open`](https://ww
 
 ## Validators
 
-Any JSON Schema validator can validate MCP Description documents using the latest schema at [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) or using the `mcpcontract validate --schema mcpdesc <document>` command.
+| Validator | Description | Link |
+|---|---|---|
+| **@mcpdesc/validator** | Isomorphic structural and semantic validation for the immutable `0.8.0-draft.1` snapshot. Diagnostics include stable codes, severities, and structured document paths. | [`packages/validator`](../packages/validator/) |
+
+Any JSON Schema validator can perform structural validation using a versioned schema such as [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json). Draft 1 conformance also includes semantic rules that JSON Schema alone cannot express; consumers should use `@mcpdesc/validator` for the combined result. External Tool-schema references are never fetched automatically and produce warnings when complete offline validation is unavailable.
 

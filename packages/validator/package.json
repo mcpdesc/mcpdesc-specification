@@ -1,0 +1,48 @@
+{
+  "name": "@mcpdesc/validator",
+  "version": "0.1.0",
+  "description": "Structural and semantic validation for MCP Description snapshots",
+  "type": "module",
+  "types": "./index.d.ts",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcpdesc/mcpdesc-specification.git",
+    "directory": "packages/validator"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src/index.js",
+    "src/snapshots",
+    "index.d.ts",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "ORIGIN.md",
+    "MODIFICATIONS.md"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.js && npm run test:types && npm run test:browser && npm run test:package",
+    "test:browser": "node scripts/check-browser-bundle.mjs",
+    "test:package": "node scripts/check-package.mjs",
+    "test:types": "tsc --project test/types/tsconfig.json && node scripts/check-declarations.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "uri-template-matcher": "^1.1.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0",
+    "yaml": "^2.9.0"
+  }
+}

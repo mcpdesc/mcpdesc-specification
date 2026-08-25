@@ -32,6 +32,7 @@ Cisco employees may participate in the project, subject to Cisco's applicable co
 
 ```text
 spec/                         Per-version specification folders (draft/ + frozen releases)
+packages/validator/           Reusable structural and semantic validator package
 schemas/mcp-description/      Versioned MCP Description JSON Schemas
 proposals/                    Specification change proposals
 scripts/                      Repository validation and maintenance scripts
