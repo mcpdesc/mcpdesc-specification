@@ -3,6 +3,7 @@
 - Status: Review
 - Author: Stève Sfartz
 - Created: 2026-08-23
+- Last updated: 2026-08-24
 - Target version: 0.8.0
 - Related issues: https://github.com/mcpdesc/mcpdesc-specification/issues/10
 - Related proposals: Proposal 0004
@@ -56,6 +57,8 @@ Proposal 0004 addresses the related but distinct Tool invocation/result contract
 ## Background and primary references
 
 - MCP 2026-07-28 Resources, including Resource Contents, `resources/read`, URI templates, and error handling: https://modelcontextprotocol.io/specification/2026-07-28/server/resources
+- MCP 2026-07-28 changelog, including required `CacheableResult` fields on `resources/read`: https://modelcontextprotocol.io/specification/2026-07-28/changelog
+- SEP-2549, caching fields for list and Resource read results: https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/2549-TTL-for-list-results.md
 - RFC 6570 URI Templates: https://www.rfc-editor.org/rfc/rfc6570
 - OpenAPI 3.1.1 Example Object: https://spec.openapis.org/oas/v3.1.1.html#example-object
 - MCP Description draft Resource rules: `spec/draft/sections/10-resources.md`
@@ -145,7 +148,7 @@ A content entry's own `mimeType` is authoritative for rendering that entry.
 
 For a static Resource with `size`, tooling MAY verify the example's raw text or decoded binary size. A mismatch SHOULD be reported as a warning because the declaration and example can represent different observations of mutable content.
 
-### 6. Errors and freshness
+### 6. Errors, caching, and freshness
 
 Resource read errors are JSON-RPC errors under MCP and are not Resource Examples in 0.8.0. This includes missing Resources, invalid concrete template URIs, authorization failures expressed as protocol errors, and internal read failures.
 
@@ -157,7 +160,15 @@ Examples are illustrative snapshots. They do not assert that:
 - a Resource is immutable; or
 - every possible template expansion or returned content entry is documented.
 
-Revision-supported cache or result metadata MAY appear in a completed example result. Consumers MUST interpret it as part of the example, not as a guarantee about a live server.
+For MCP `2026-07-28`, a completed Resource read result extends MCP `CacheableResult`. The example `result` therefore MUST contain:
+
+- `resultType: "complete"`;
+- `ttlMs`, a non-negative number of milliseconds; and
+- `cacheScope`, either `"public"` or `"private"`.
+
+Earlier supported MCP revisions do not define these fields on Resource read results. An example applicable to any earlier revision MUST NOT contain `resultType`, `ttlMs`, or `cacheScope`. A Resource or Resource Template whose examples span MCP `2026-07-28` and an earlier revision must therefore use disjoint protocol-scoped declaration variants with revision-compatible example maps.
+
+These values reproduce cache hints from the illustrated completed result. They do not establish that the example itself is fresh, authorize caching of the MCP Description document, or guarantee that a live server returns the same hints. In particular, `cacheScope: "public"` in an example is untrusted descriptive data and MUST NOT by itself authorize sharing live or captured content across authorization contexts.
 
 ### 7. Documentation and mock use
 
@@ -216,6 +227,7 @@ Separate named-map definitions will constrain keys and map values for Resources 
 Semantic validation is required for:
 
 - completed result compatibility with the effective MCP revision;
+- required non-negative `ttlMs` and `public`/`private` `cacheScope` fields for MCP `2026-07-28`, and their absence from earlier revision examples;
 - Resource Template URI expansion under RFC 6570;
 - content URI relationships;
 - text/blob exclusivity and binary base64 validity where not structurally asserted;
@@ -238,6 +250,8 @@ Semantic validation is required for:
     "hello-world": {
       "result": {
         "resultType": "complete",
+        "ttlMs": 60000,
+        "cacheScope": "private",
         "contents": [
           {
             "uri": "file:///project/src/main.rs",
@@ -263,6 +277,8 @@ Semantic validation is required for:
     "small-logo": {
       "result": {
         "resultType": "complete",
+        "ttlMs": 300000,
+        "cacheScope": "public",
         "contents": [
           {
             "uri": "asset:///logo.png",
@@ -291,6 +307,8 @@ The shortened base64 value is illustrative; normative fixtures must use complete
       "uri": "chess://games/1234",
       "result": {
         "resultType": "complete",
+        "ttlMs": 60000,
+        "cacheScope": "private",
         "contents": [
           {
             "uri": "chess://games/1234",
@@ -316,6 +334,8 @@ The shortened base64 value is illustrative; normative fixtures must use complete
     "two-files": {
       "result": {
         "resultType": "complete",
+        "ttlMs": 0,
+        "cacheScope": "private",
         "contents": [
           {
             "uri": "file:///project/src/main.rs",
@@ -340,13 +360,15 @@ The returned content URIs differ from the requested directory URI by design.
 
 Classification: **compatible addition** within the 0.8.0 Community Working Draft.
 
-The fields are optional. Existing 0.7.0 and 0.8.0 documents remain valid, and stable 0.7.0 artifacts do not change. Consumers not using examples can ignore them after validating or preserving their containing declarations.
+The `examples` fields are optional. Existing 0.7.0 documents and 0.8.0 documents without Resource examples remain valid, and stable 0.7.0 artifacts do not change. Consumers not using examples can ignore them after validating or preserving their containing declarations.
+
+This proposal requires an example to preserve the complete applicable `resources/read` result. Early draft implementations that accepted an MCP `2026-07-28` Resource example without `ttlMs` or `cacheScope` were more permissive than the MCP result type and must be corrected. This is a draft conformance fix rather than removal of a conforming example shape.
 
 Examples must not be copied into MCP list results. Projection omits them unless a separate MCP extension defines a destination.
 
 ## Migration
 
-No migration is required for existing documents.
+No migration is required for documents without Resource examples. Early 0.8.0 draft documents containing MCP `2026-07-28` Resource examples must add the cache fields from the authoritative captured result or obtain author input; tooling MUST NOT invent freshness or cache-sharing policy.
 
 Authors may migrate existing documentation or captures as follows:
 
@@ -354,7 +376,7 @@ Authors may migrate existing documentation or captures as follows:
 2. for a static Resource, use the declaration's `uri` as the implicit read input;
 3. for a Resource Template, copy the exact concrete `resources/read.params.uri` into `uri`;
 4. copy the completed `resources/read` result payload into `result`, omitting only the JSON-RPC envelope;
-5. preserve text, base64 binary data, MIME types, content URIs, order, and applicable result metadata;
+5. preserve text, base64 binary data, MIME types, content URIs, order, and applicable result metadata, including required MCP `2026-07-28` `ttlMs` and `cacheScope` fields;
 6. verify the concrete template URI is a valid expansion;
 7. redact secrets, personal data, internal paths, and proprietary content; and
 8. avoid presenting mutable observed content as current or canonical.
@@ -428,9 +450,9 @@ After acceptance, implement on a feature branch. Proposal 0004 may share the bra
 1. add Resource and Resource Template `examples` rules to `spec/draft/sections/10-resources.md`;
 2. add structural definitions to `schemas/mcp-description/0.8.0.json` and synchronize `schemas/draft.json`;
 3. regenerate `spec/draft/mcp-description.md` through the repository view workflow;
-4. implement semantic validation for result revisions, URI-template expansion, content URIs, MIME types, base64 data, and optional size diagnostics;
+4. implement semantic validation for result revisions, required MCP `2026-07-28` cache fields, URI-template expansion, content URIs, MIME types, base64 data, and optional size diagnostics;
 5. add valid fixtures for static text, static binary, template expansion, multiple contents, and applicable result metadata;
-6. add invalid fixtures for empty maps, invalid names, missing fields, invalid template expansions, malformed results, text/blob conflicts, invalid base64, and revision-incompatible fields;
+6. add invalid fixtures for empty maps, invalid names, missing fields, invalid template expansions, malformed results, text/blob conflicts, invalid base64, missing or invalid cache fields, and revision-incompatible fields;
 7. add warning fixtures for explainable MIME-type and mutable-size inconsistencies where specified;
 8. update at least one complete YAML example and relevant Resource guidance;
 9. add compatibility, migration, and draft changelog entries;
@@ -444,6 +466,7 @@ Acceptance criteria:
 - native MCP text and binary Resource Contents are supported;
 - one read can return multiple content entries;
 - URI, template, MIME-type, base64, size, and protocol-revision behavior is specified and testable;
+- MCP `2026-07-28` examples contain required `CacheableResult` fields and earlier revision examples reject them;
 - JSON-RPC errors and incomplete workflows remain out of scope;
 - examples support documentation and deterministic mocks without claiming freshness or live behavior;
 - stable 0.7.0 artifacts and `schemas/latest.json` remain unchanged; and
