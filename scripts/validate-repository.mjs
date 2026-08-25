@@ -137,11 +137,11 @@ if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
 }
 
 const proposalSnapshots = [
-  ['0001-mcp-2026-07-28-alignment.md', '88227a55202f76f2c8d226d98cb208f377999ed8', 'proposals/0001-mcp-2026-07-28-alignment.md', '9713db4d1c8583c9480a5597c8f4500b804f00ddb4c957c2a710821b4d83a02a'],
+  ['0001-mcp-2026-07-28-alignment.md', 'c7328e6c9ee858f712248d2003d8587da4933cd9', 'proposals/0001-mcp-2026-07-28-alignment.md', '9713db4d1c8583c9480a5597c8f4500b804f00ddb4c957c2a710821b4d83a02a'],
   ['0002-meta-support.md', 'c1301cb60f7edc740a937b551e9c0c4e6467d943', 'proposals/0002-meta-support.md', '42b39d056019d26a304929fc5bca68d8c72f01d2340ee3aebbc4d1a041a35adc'],
   ['0003-security-requirements.md', '199555ade2b13eb179c0a473712027582441158b', 'proposals/0003-security-requirements.md', 'fcba623df2b345d8a060ab9a265949dbcf795f0b17651e8fccd4cb7c0d17150d'],
   ['0004-tool-input-output-examples.md', 'efa6130a4818d16f8d4034264ae4641e51cfaf3b', 'proposals/0004-tool-input-output-examples.md', '769451ad9a5bbb6b3c2b1ef87855d8f66daa5a1962f3c6dd57a94c1d5a470f56'],
-  ['0005-resource-examples.md', '88227a55202f76f2c8d226d98cb208f377999ed8', 'proposals/0005-resource-examples.md', 'bc7ddbc27fc316821a6f993fafd07b1fa16dd006aa4acc350c3161fa30d4f3c6'],
+  ['0005-resource-examples.md', '4e83d3980af46fa0f28a05f9bf4dfee6a391ab94', 'proposals/0005-resource-examples.md', 'bc7ddbc27fc316821a6f993fafd07b1fa16dd006aa4acc350c3161fa30d4f3c6'],
   ['0007-elicitation.md', 'bea999a5ec537ed6ebb68e9681f0f4a48d812f20', 'proposals/0007-elicitation.md', '32bbb63c5fe04539414bf46af42023f870f230b738f40278af28592e5d2e9efc']
 ];
 const proposalManifest = fs.existsSync(path.join(root, 'spec/draft/PROPOSALS.md')) ? readText('spec/draft/PROPOSALS.md') : '';

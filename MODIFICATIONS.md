@@ -47,7 +47,7 @@ Adopted a folder-versioned layout (each specification version is a folder under 
 | `spec/draft/**` | Imported v0.7.0 normative material (`mcp-description.md`, `sections/`, `guides/`, `examples/`, `extensions/`, `CHANGELOG.md`) relocated from `spec/` into `spec/draft/`; root-relative links adjusted for the new depth | In-progress work lives in `spec/draft/`; released versions freeze into `spec/<version>/` |
 | `spec/0.7.0/README.md` | Added a pointer to the canonical Cisco Open source for v0.7.0; no specification text copied | Keep the stable release discoverable without forking its canonical source |
 | `bootstrap/` | Removed from the working tree (recoverable in Git history) | Completed one-time bootstrap material |
-| `planning/` | Removed; transient tracking moved to GitHub issues and the impact matrix folded into `proposals/0001-mcp-2026-07-28-alignment.md` | Avoid duplicating issue-tracker content |
+| `planning/` | Removed; transient tracking moved to GitHub issues and the impact matrix folded into Proposal 0001 in [PR #5](https://github.com/mcpdesc/mcpdesc-specification/pull/5) | Avoid duplicating issue-tracker content |
 | `scripts/freeze-version.mjs` | Added | Automate freezing `spec/draft/` into a versioned folder at release |
 | `scripts/validate-repository.mjs` | Requires `spec/draft/mcp-description.md`; validates examples under any `spec/**/examples/` | Match the folder-versioned layout |
 | `GOVERNANCE.md`, `CONTRIBUTING.md`, `AGENTS.md`, `README.md`, `spec/README.md`, `.github/PULL_REQUEST_TEMPLATE.md`, `specification-status.json`, `schemas/draft.json` | Updated to the `main`-integration, folder-versioned layout and the merge-on-accept proposal workflow | Reflect the current repository model |

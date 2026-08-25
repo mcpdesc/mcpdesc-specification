@@ -10,4 +10,4 @@ node_modules/
 .env.local
 
 # Local v0.8 draft source package (reference material only)
-proposals/mcpdesc-v0.8-draft-package/
+spec/draft/materials
