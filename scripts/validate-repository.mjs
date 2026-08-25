@@ -180,7 +180,12 @@ if (fs.existsSync(schemaDir)) {
 
 const specRoot = path.join(root, 'spec');
 const exampleFiles = walk(specRoot).filter(
-  (file) => /(^|[\\/])examples[\\/]/.test(path.relative(specRoot, file)) && /\.(json|ya?ml)$/i.test(file)
+  (file) => {
+    const relative = path.relative(specRoot, file);
+    return !relative.startsWith(`draft${path.sep}materials${path.sep}`)
+      && /(^|[\\/])examples[\\/]/.test(relative)
+      && /\.(json|ya?ml)$/i.test(file);
+  }
 );
 
 function validateAgainstVersionedSchema(document, rel) {

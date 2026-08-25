@@ -53,9 +53,9 @@ Adopted a folder-versioned layout (each specification version is a folder under 
 | `GOVERNANCE.md`, `CONTRIBUTING.md`, `AGENTS.md`, `README.md`, `spec/README.md`, `.github/PULL_REQUEST_TEMPLATE.md`, `specification-status.json`, `schemas/draft.json` | Updated to the `main`-integration, folder-versioned layout and the merge-on-accept proposal workflow | Reflect the current repository model |
 | `spec/GOVERNANCE.md`, `spec/GOVERNANCE-0.7.0.md` | Removed | The repository has a single governance document (`GOVERNANCE.md`); the v0.7.0 specification and its historical governance remain at the canonical Cisco Open source |
 
-## Experimental v0.8.0 draft implementation — 2026-08-22
+## MCP Description v0.8.0 Community Working Draft 1 implementation — frozen 2026-08-24
 
-This work is an unreleased experiment on `experiment/0.8.0-draft-implementation`. It does not modify or supersede the stable v0.7.0 artifacts. It contains candidate implementations based on snapshots of proposals that remain under review; implementation on this branch does not accept a proposal or alter its authoritative design and decision record. Proposal changes belong on the corresponding `feature/<slug>-proposal` branch and are copied here without modification when needed for implementation.
+This work began as an unreleased experiment on `experiment/0.8.0-draft-implementation` and was frozen on 2026-08-24 for publication on `main` as MCP Description v0.8.0 Community Working Draft 1 (`v0.8.0-draft.1`). It does not modify or supersede the stable v0.7.0 artifacts. It contains candidate implementations based on exact snapshots of proposals that remain under review; publication of this draft does not accept a proposal or alter its authoritative design and decision record. Proposal changes belong on the corresponding `feature/<slug>-proposal` branch and are captured under `spec/draft/proposal-snapshots/` with commit and digest provenance when used by a public draft.
 
 | File or path | Change | Reason |
 |---|---|---|
