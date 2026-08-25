@@ -1,0 +1,35 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "unresolved-external-tool-ref",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "unresolved-external-tool-ref"
+    }
+  ],
+  "tools": [
+    {
+      "name": "lookup",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "$ref": "https://schemas.example.com/common.json#/$defs/identifier"
+          }
+        },
+        "required": [
+          "identifier"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

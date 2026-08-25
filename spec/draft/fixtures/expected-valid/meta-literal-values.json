@@ -1,0 +1,102 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "meta-literal-values",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "meta-literal-values"
+    }
+  ],
+  "tools": [
+    {
+      "name": "status",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "_meta": {
+        "com.example/status": "stable",
+        "display_hint": "compact"
+      },
+      "examples": {
+        "complete": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [
+              {
+                "type": "text",
+                "text": "Ready",
+                "_meta": {
+                  "com.example/render-mode": "badge"
+                }
+              }
+            ],
+            "_meta": {
+              "io.modelcontextprotocol/serverInfo": {
+                "name": "example-server",
+                "version": "1.0.0"
+              },
+              "traceparent": "00-00000000000000000000000000000001-0000000000000001-01"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "example:///status",
+      "name": "status",
+      "_meta": {
+        "com.example/classification": "public"
+      },
+      "examples": {
+        "current": {
+          "result": {
+            "resultType": "complete",
+            "ttlMs": 0,
+            "cacheScope": "private",
+            "contents": [
+              {
+                "uri": "example:///status",
+                "text": "Ready",
+                "_meta": {
+                  "captured_at": "redacted"
+                }
+              }
+            ],
+            "_meta": {
+              "io.modelcontextprotocol/serverInfo": {
+                "name": "example-server",
+                "version": "1.0.0"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "example:///items/{id}",
+      "name": "item",
+      "_meta": {
+        "com.example/stability": "experimental"
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "summarize",
+      "_meta": {
+        "com.example/category": "summary"
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "oauth-flow-missing-required-url",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "oauth-flow-missing-required-url"
+    }
+  ],
+  "securitySchemes": {
+    "oauth": {
+      "type": "oauth2",
+      "flows": {
+        "authorizationCode": {
+          "authorizationUrl": "https://auth.example.com/authorize",
+          "scopes": {}
+        }
+      }
+    }
+  }
+}

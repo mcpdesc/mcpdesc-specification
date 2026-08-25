@@ -1,11 +1,11 @@
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-coach
   title: Chess Coach MCP Server
   version: 2.1.0
   description: Comprehensive chess platform — game analysis, Elo ratings, game history,
     opening repertoire, and coaching prompts
-  protocolVersion: '2025-06-18'
   id: urn:mcp:chess-coach
   icons:
     - src: https://chess-coach.example.com/icons/icon-48.png
@@ -25,6 +25,9 @@ info:
   license:
     name: Apache-2.0
     url: https://www.apache.org/licenses/LICENSE-2.0
+protocolVersions:
+- '2025-11-25'
+instructions: Analyze or search before modifying game and rating data.
 transports:
 - type: streamable-http
   url: https://chess-coach.example.com/mcp
@@ -37,22 +40,25 @@ transports:
   env:
     CHESS_ENGINE_PATH: "/usr/local/bin/stockfish"
     CHESS_DB_PATH: "/data/games.db"
+securitySchemes:
+  oauth:
+    type: oauth2
+    description: OAuth2 for cloud access — not required for stdio transport
+    flows:
+      authorizationCode:
+        authorizationUrl: https://auth.chess-coach.example.com/authorize
+        tokenUrl: https://auth.chess-coach.example.com/token
+        refreshUrl: https://auth.chess-coach.example.com/refresh
+        scopes:
+          games:read: Read game history and details
+          games:write: Record new games
+          ratings:read: View player ratings
+          ratings:write: Update player ratings
+          analysis:run: Run game analysis
 security:
-- type: oauth2
-  description: OAuth2 for cloud access — not required for stdio transport
-  flows:
-    authorizationCode:
-      authorizationUrl: https://auth.chess-coach.example.com/authorize
-      tokenUrl: https://auth.chess-coach.example.com/token
-      refreshUrl: https://auth.chess-coach.example.com/refresh
-      scopes:
-        games:read: Read game history and details
-        games:write: Record new games
-        ratings:read: View player ratings
-        ratings:write: Update player ratings
-        analysis:run: Run game analysis
+- oauth: []
 capabilities:
-  tools:
+- tools:
     listChanged: true
   resources:
     subscribe: true
@@ -82,6 +88,22 @@ tools:
         description: 'Include move-by-move annotations (default: false)'
     required:
     - pgn
+  elicitations:
+  - name: confirm_deep_analysis
+    mode: form
+    when: Requested analysis depth may take significant time.
+    message: Continue with deep analysis?
+    requestedSchema:
+      type: object
+      properties:
+        continue:
+          type: boolean
+          title: Continue
+          default: true
+      required:
+      - continue
+    onDecline: Return without starting analysis.
+    onCancel: Return without starting analysis.
   outputSchema:
     type: object
     properties:
@@ -118,6 +140,24 @@ tools:
               type: string
             evaluation_loss:
               type: number
+  examples:
+    decisive-tactic:
+      input:
+        pgn: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+        depth: 20
+        annotate: true
+      result:
+        content:
+        - type: text
+          text: White retains a small advantage; 4. Ba4 is the main continuation.
+        structuredContent:
+          evaluation: 24
+          best_move: Ba4
+          accuracy:
+            white: 96.2
+            black: 95.8
+          blunders: []
+        isError: false
   annotations:
     readOnlyHint: true
     destructiveHint: false
@@ -204,6 +244,17 @@ tools:
     - white_player_id
     - black_player_id
     - result
+  examples:
+    unknown-white-player:
+      input:
+        white_player_id: player-example-404
+        black_player_id: player-example-002
+        result: 1-0
+      result:
+        content:
+        - type: text
+          text: White player player-example-404 does not exist.
+        isError: true
   annotations:
     readOnlyHint: false
     destructiveHint: false
@@ -254,6 +305,19 @@ resources:
   description: Current top-100 classical chess ratings leaderboard with player names,
     ratings, and recent form
   mimeType: application/json
+  annotations:
+    audience:
+    - user
+    - assistant
+    priority: 0.9
+    lastModified: '2026-08-24T10:00:00Z'
+  examples:
+    top-two:
+      result:
+        contents:
+        - uri: chess://leaderboard/classical
+          mimeType: application/json
+          text: '{"players":[{"name":"Example A","rating":2810},{"name":"Example B","rating":2795}]}'
   tags:
   - games
 - uri: chess://leaderboard/rapid
@@ -292,6 +356,18 @@ resourceTemplates:
   description: Full details of a specific chess game — PGN, moves, clock times, and
     engine analysis
   mimeType: application/json
+  annotations:
+    audience:
+    - assistant
+    priority: 0.7
+  examples:
+    sample-game:
+      uri: chess://games/example-1234
+      result:
+        contents:
+        - uri: chess://games/example-1234
+          mimeType: application/json
+          text: '{"id":"example-1234","result":"1-0"}'
   tags:
   - games
 - uriTemplate: chess://players/{player_id}/games

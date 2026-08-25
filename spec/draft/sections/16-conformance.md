@@ -1,25 +1,31 @@
-## 15. Conformance
+## 16. Conformance
 
-### 15.1 Document Conformance
+### 16.1 Document Conformance
 
 A conforming MCP Description document MUST:
 
-1. Be a valid JSON document (Section 14).
+1. Be a valid JSON document (Section 15).
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
-4. Include the `transports` array with at least one transport object (Section 6).
-5. Include at least one of: `tools`, `resources`, `resourceTemplates`, or `prompts` (Section 3.3).
+4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.8.0 (Section 4).
+5. Include the `transports` array with at least one transport object and complete root protocol coverage (Section 6).
 6. Validate against the JSON Schema for the declared `mcpdesc` version.
-7. Not contain unknown properties at the root level except specification extensions matching `^x-`.
+7. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+8. Not contain unknown properties at the root level except specification extensions matching `^x-`.
 
-### 15.2 Implementation Conformance
+### 16.2 Implementation Conformance
 
 A conforming implementation (tool, validator, or platform) MUST:
 
 1. Accept and correctly parse documents conforming to this specification.
-2. Reject documents that fail the requirements in Section 15.1.
-3. Ignore unrecognized specification extensions without error (Section 13.4).
-4. Preserve specification extensions when processing and re-serializing documents (Section 13.4).
+2. Reject documents that fail the requirements in Section 16.1.
+3. Ignore unrecognized specification extensions without error (Section 14.4).
+4. Preserve specification extensions when processing and re-serializing documents (Section 14.4).
+5. Apply structural JSON Schema validation and the cross-object semantic requirements of this specification.
+
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security references, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+
+A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
 A conforming implementation SHOULD:
 
@@ -27,11 +33,11 @@ A conforming implementation SHOULD:
 2. Provide clear error messages when rejecting non-conforming documents.
 3. Support JSON Schema validation against the published schema.
 
-### 15.3 Partial Conformance
+### 16.3 Partial Conformance
 
 Implementations that support only a subset of the specification (e.g., only tools, or only a specific transport type) SHOULD document their limitations clearly.
 
-### 15.4 Versioned Conformance
+### 16.4 Versioned Conformance
 
 Conformance is assessed against a specific specification version. An implementation claiming conformance MUST state which `mcpdesc` version(s) it supports.
 
@@ -62,8 +68,8 @@ See [examples/full-featured.yaml](../examples/full-featured.yaml) for a complete
 
 The normative JSON Schema for this specification version is available at:
 
-- [../../../schemas/mcp-description/0.7.0.json](../../../schemas/mcp-description/0.7.0.json)
-- `https://developer.cisco.com/mcp-description/schema/0.7.0`
+- [../../../schemas/mcp-description/0.8.0.json](../../../schemas/mcp-description/0.8.0.json)
+- `https://mcpdesc.org/schema/0.8.0.json`
 
 ---
 
@@ -82,4 +88,3 @@ The normative JSON Schema for this specification version is available at:
 - **[MCP Protocol]** Anthropic, "Model Context Protocol Specification", https://modelcontextprotocol.io
 - **[OpenAPI 3.1]** OpenAPI Initiative, "OpenAPI Specification v3.1.0", https://spec.openapis.org/oas/v3.1.0
 - **[Semantic Versioning]** Preston-Werner, T., "Semantic Versioning 2.0.0", https://semver.org
-

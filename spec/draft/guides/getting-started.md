@@ -11,16 +11,19 @@ An MCP Description document for a chess server that:
 
 ## Step 1: Start with the Minimum
 
-Every MCP Description needs three things: `mcpdesc`, `info`, and `transports`, plus at least one capability (tools, resources, prompts, or resourceTemplates).
+Every MCP Description needs `mcpdesc`, `info`, `protocolVersions`, and `transports`. Primitive collections are optional in 0.8.0, although this example adds a Tool.
 
 Create a file called `chess-coach.mcpdesc.yaml`:
 
 ```yaml
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-rating-server
   title: Chess Rating MCP Server
   version: 1.0.0
+protocolVersions:
+- '2025-11-25'
 transports:
 - type: stdio
   command: chess-rating
@@ -43,7 +46,7 @@ That's a valid MCP Description. It declares a server with one tool accessible vi
 
 ## Step 2: Add Richer Info
 
-Expand the `info` object with a human-readable title, description, and protocol version:
+Expand the `info` object with a human-readable title and description. Protocol coverage remains at the document root:
 
 ```yaml
 info:
@@ -51,7 +54,6 @@ info:
   title: Chess Coach MCP Server
   version: 1.0.0
   description: Analyze chess games, track ratings, and review game history
-  protocolVersion: "2025-06-18"
   contact:
     name: Your Team
     email: team@example.com
@@ -80,6 +82,28 @@ tools:
         maximum: 40
     required:
     - pgn
+  outputSchema:
+    type: object
+    properties:
+      evaluation:
+        type: number
+      best_move:
+        type: string
+    required:
+    - evaluation
+    - best_move
+  examples:
+    short-opening:
+      input:
+        pgn: 1. e4 e5 2. Nf3 Nc6
+        depth: 12
+      result:
+        content:
+        - type: text
+          text: White has a small opening advantage.
+        structuredContent:
+          evaluation: 18
+          best_move: Bb5
   annotations:
     readOnlyHint: true
     destructiveHint: false
@@ -119,6 +143,8 @@ tools:
 - `destructiveHint: false` — the tool doesn't delete anything
 - `idempotentHint: true` — same input always gives same result
 
+Tool `examples` pair a named complete `tools/call` argument object with a completed Tool Result. Keep `content` even when `structuredContent` is present. Successful structured content must match `outputSchema`; execution errors use `isError: true` and omit `structuredContent`. For a no-argument Tool, write `input: {}` explicitly. Examples are untrusted, non-exhaustive documentation, not guarantees of live behavior; never include credentials or production data.
+
 ## Step 4: Add Resources
 
 Resources are data the server exposes. Static resources have fixed URIs; templates have parameters:
@@ -136,12 +162,24 @@ resourceTemplates:
   title: Game Detail
   description: Full details of a specific chess game
   mimeType: application/json
+  examples:
+    sample-game:
+      uri: chess://games/example-1234
+      result:
+        contents:
+        - uri: chess://games/example-1234
+          mimeType: application/json
+          text: '{"id":"example-1234","result":"1-0"}'
 - uriTemplate: "chess://players/{player_id}/rating-history"
   name: player_rating_history
   title: Player Rating History
   description: Historical Elo rating progression
   mimeType: application/json
 ```
+
+Resource `examples` use the declaration URI as their implicit read input. Resource Template examples add the exact concrete expanded `uri`. In both cases, copy only a completed `resources/read` result payload, preserve content order, and use exactly one of `text` or base64 `blob` per content entry. Examples are snapshots and do not guarantee live contents or freshness. Never dereference example URIs automatically or publish sensitive captured data.
+
+For MCP 2026-07-28, the copied result also requires `resultType: complete`, non-negative `ttlMs`, and `cacheScope: public` or `private`. Earlier revisions omit those fields. Use disjoint protocol-scoped Resource variants when one logical Resource needs examples for both shapes.
 
 ## Step 5: Add Prompts
 
@@ -163,11 +201,11 @@ prompts:
 
 ## Step 6: Validate
 
-To validate your document, use any JSON Schema validator against the [schema file](../../../schemas/mcp-description/0.7.0.json) or the mcpcontract CLI. 
+To validate structure, use a JSON Schema 2020-12 validator against the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json). Complete conformance also requires semantic checks for protocol scopes, transport coverage, security and tag references, revision-specific fields, and Tool-example compatibility with embedded schemas.
 
 ```bash
-# Using the mcpcontract CLI
-mcpcontract validate --schema mcpdesc chess-coach.mcpdesc.yaml
+# From a checkout of this specification repository
+npm test
 ```
 
 
@@ -175,6 +213,8 @@ mcpcontract validate --schema mcpdesc chess-coach.mcpdesc.yaml
 ## Next Steps
 
 - See [examples/](../examples/) for complete working examples at different complexity levels
+- See [examples/multi-version.yaml](../examples/multi-version.yaml) for shared declarations and protocol-scoped capability variants across MCP 2025-11-25 and MCP 2026-07-28
 - Read the [full specification](../mcp-description.md)
 - Learn about [vendor extensions](vendor-extensions-guide.md) for adding custom metadata
+- Read the [0.7.0 to 0.8.0 migration guide](migration-0.7-to-0.8.md)
 - Compare with [OpenAPI concepts](comparison-with-openapi.md) if you have API background

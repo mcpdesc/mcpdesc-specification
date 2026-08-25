@@ -10,6 +10,8 @@ MCP servers can be accessed through different transport mechanisms. The `transpo
 
 Each transport object MUST include a `type` property. The following transport types are defined:
 
+Every Transport Object MAY contain `protocolVersions` and `security`. `protocolVersions` follows Section 4.5. A transport's `security` value is a Security Requirement Array and follows Sections 6.4 and 7.
+
 #### 6.2.1 Streamable HTTP Transport
 
 | Property | Type | Required | Description |
@@ -17,7 +19,7 @@ Each transport object MUST include a `type` property. The following transport ty
 | `type` | `"streamable-http"` | **Yes** | Transport type identifier |
 | `url` | string (URI) | **Yes** | MCP endpoint URL |
 
-The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. This is the RECOMMENDED transport for remote MCP servers.
+The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. It is defined for MCP 2025-03-26 and later and is the RECOMMENDED transport for remote MCP servers in those revisions.
 
 ```json
 {
@@ -55,7 +57,7 @@ The stdio transport launches the MCP server as a subprocess and communicates ove
 | `type` | `"sse"` | **Yes** | Transport type identifier |
 | `url` | string (URI) | **Yes** | SSE endpoint URL |
 
-The Server-Sent Events transport is a legacy transport type retained for backward compatibility. New implementations SHOULD use `streamable-http` instead.
+The Server-Sent Events transport is a legacy transport type retained for backward compatibility. It is the remote transport defined by MCP 2024-11-05. Validators SHOULD warn when it is associated with MCP 2025-03-26 or later, where Streamable HTTP is the standard remote transport. New implementations SHOULD use `streamable-http` instead.
 
 ```json
 {
@@ -79,7 +81,7 @@ A server MAY support multiple transports. Clients SHOULD select the most appropr
 
 ### 6.4 Transport-Scoped Security
 
-Each transport object MAY include a `security` property containing an array of security scheme objects (see Section 7). When present, this transport-level security overrides the root-level `security` for that transport.
+Each transport object MAY include a `security` property containing a Security Requirement Array (see Section 7). When present, transport security replaces root security for that transport.
 
 | Scenario | Effective security |
 |----------|-------------------|
@@ -97,7 +99,7 @@ This mechanism allows a single MCP Description document to declare different sec
       "type": "streamable-http",
       "url": "https://chess-coach.example.com/mcp",
       "security": [
-        { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+        { "bearer": [] }
       ]
     },
     {
@@ -110,7 +112,15 @@ This mechanism allows a single MCP Description document to declare different sec
 }
 ```
 
-### 6.5 Extensibility
+The `bearer` name in this example MUST identify a root `securitySchemes` entry.
 
-Transport objects MUST NOT contain additional properties beyond those defined for their type (plus the optional `security` property). Vendor-specific transport metadata SHOULD be placed in specification extensions at the root level.
+### 6.5 Protocol Coverage
+
+The union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one revision.
+
+A document is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage.
+
+### 6.6 Extensibility
+
+Transport objects MUST NOT contain additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties. Vendor-specific transport metadata SHOULD be placed in specification extensions at the root level.
 

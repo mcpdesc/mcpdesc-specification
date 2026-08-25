@@ -7,7 +7,8 @@ A portable, machine-readable contract format for [Model Context Protocol (MCP)](
 > Open [`mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec)
 > repository, which also provides the reference tooling (`mcpcontract`). This
 > repository, [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification),
-> is the development home for the **0.8.0** community working draft. Implementations
+> is the development home for the **0.8.0 Community Working Draft 1**
+> (`v0.8.0-draft.1`). Implementations
 > vendor a single schema version from [`../schemas/mcp-description/`](../schemas/mcp-description/)
 > and upgrade when the format advances.
 
@@ -22,9 +23,10 @@ Think of it as **OpenAPI for MCP servers**: a static contract that enables disco
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
-| 0.8.0 | Community working draft | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | In progress in [`draft/`](draft/) |
+| 0.8.0 | Community Working Draft 1 (`v0.8.0-draft.1`; unreleased) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) (experimental) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
+The exact proposal revisions represented by Draft 1 are recorded in its [`draft/PROPOSALS.md`](draft/PROPOSALS.md) manifest.
 
 ## Quick Example
 

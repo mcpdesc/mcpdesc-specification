@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// Freeze the in-progress draft into an immutable, versioned specification folder.
+// Freeze the in-progress draft into an immutable, versioned stable-release folder.
+// Do not use this script for `v<version>-draft.<iteration>` snapshot tags.
 //
 // Usage:
 //   node scripts/freeze-version.mjs <version>

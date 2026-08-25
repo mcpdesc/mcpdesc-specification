@@ -50,6 +50,7 @@ npm test
 ```
 
 Do not bypass failing checks. Explain any test limitation honestly.
+See [`scripts/README.md`](scripts/README.md) for how repository scripts enter local validation, CI, and release workflows.
 
 ## AI disclosure
 

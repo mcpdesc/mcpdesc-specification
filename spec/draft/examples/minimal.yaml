@@ -1,8 +1,11 @@
-mcpdesc: 0.7.0
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
 info:
   name: chess-rating-server
   title: Chess Rating MCP Server
   version: 1.0.0
+protocolVersions:
+- '2025-11-25'
 transports:
 - type: stdio
   command: chess-rating

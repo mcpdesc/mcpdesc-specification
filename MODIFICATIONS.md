@@ -47,8 +47,20 @@ Adopted a folder-versioned layout (each specification version is a folder under 
 | `spec/draft/**` | Imported v0.7.0 normative material (`mcp-description.md`, `sections/`, `guides/`, `examples/`, `extensions/`, `CHANGELOG.md`) relocated from `spec/` into `spec/draft/`; root-relative links adjusted for the new depth | In-progress work lives in `spec/draft/`; released versions freeze into `spec/<version>/` |
 | `spec/0.7.0/README.md` | Added a pointer to the canonical Cisco Open source for v0.7.0; no specification text copied | Keep the stable release discoverable without forking its canonical source |
 | `bootstrap/` | Removed from the working tree (recoverable in Git history) | Completed one-time bootstrap material |
-| `planning/` | Removed; transient tracking moved to GitHub issues and the impact matrix folded into `proposals/0001-mcp-2026-07-28-alignment.md` | Avoid duplicating issue-tracker content |
+| `planning/` | Removed; transient tracking moved to GitHub issues and the impact matrix folded into Proposal 0001 in [PR #5](https://github.com/mcpdesc/mcpdesc-specification/pull/5) | Avoid duplicating issue-tracker content |
 | `scripts/freeze-version.mjs` | Added | Automate freezing `spec/draft/` into a versioned folder at release |
 | `scripts/validate-repository.mjs` | Requires `spec/draft/mcp-description.md`; validates examples under any `spec/**/examples/` | Match the folder-versioned layout |
 | `GOVERNANCE.md`, `CONTRIBUTING.md`, `AGENTS.md`, `README.md`, `spec/README.md`, `.github/PULL_REQUEST_TEMPLATE.md`, `specification-status.json`, `schemas/draft.json` | Updated to the `main`-integration, folder-versioned layout and the merge-on-accept proposal workflow | Reflect the current repository model |
 | `spec/GOVERNANCE.md`, `spec/GOVERNANCE-0.7.0.md` | Removed | The repository has a single governance document (`GOVERNANCE.md`); the v0.7.0 specification and its historical governance remain at the canonical Cisco Open source |
+
+## MCP Description v0.8.0 Community Working Draft 1 implementation — frozen 2026-08-24
+
+This work began as an unreleased experiment on `experiment/0.8.0-draft-implementation` and was frozen on 2026-08-24 for publication on `main` as MCP Description v0.8.0 Community Working Draft 1 (`v0.8.0-draft.1`). It does not modify or supersede the stable v0.7.0 artifacts. It contains candidate implementations based on exact snapshots of proposals that remain under review; publication of this draft does not accept a proposal or alter its authoritative design and decision record. Proposal changes belong on the corresponding `feature/<slug>-proposal` branch and are captured under `spec/draft/proposal-snapshots/` with commit and digest provenance when used by a public draft.
+
+| File or path | Change | Reason |
+|---|---|---|
+| `spec/draft/sections/**`, `spec/draft/mcp-description.md` | Revised the imported v0.7.0 baseline into the experimental v0.8.0 normative draft | Implement protocol-revision scoping, named security requirements, revision-aware Tool schemas, Effective Protocol Views, and related conformance rules for interoperability testing |
+| `spec/draft/guides/**`, `spec/draft/examples/**`, `spec/draft/extensions/**`, `spec/draft/CHANGELOG.md` | Updated supporting material and examples for the experimental draft | Keep non-normative guidance and examples synchronized with the normative changes while preserving origin attribution |
+| `schemas/mcp-description/0.8.0.json`, `schemas/draft.json` | Added the unreleased v0.8.0 schema and pointed the draft metadata at it | Provide a testable draft without changing the stable `schemas/latest.json` pointer |
+| `scripts/validate-0.8.mjs`, `scripts/mcpdesc-views.mjs`, `scripts/test-views.mjs`, `scripts/validate-repository.mjs`, `spec/draft/fixtures/**`, `package.json` | Added semantic validation, projection/merge behavior, fixtures, and dependencies | Exercise cross-object requirements that the structural JSON Schema cannot express |
+| `spec/README.md` | Linked the experimental v0.8.0 schema and retained its unreleased status | Keep the specification index synchronized with the available draft artifacts |

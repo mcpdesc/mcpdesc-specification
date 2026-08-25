@@ -1,0 +1,17 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "unknown-reserved-meta-key", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [{ "type": "stdio", "command": "unknown-reserved-meta-key" }],
+  "prompts": [
+    {
+      "name": "future-metadata",
+      "_meta": {
+        "io.modelcontextprotocol/future-key": {
+          "preserved": true
+        }
+      }
+    }
+  ]
+}

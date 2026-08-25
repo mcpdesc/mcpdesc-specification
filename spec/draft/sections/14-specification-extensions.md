@@ -1,8 +1,8 @@
-## 13. Specification Extensions
+## 14. Specification Extensions
 
 MCP Description documents support vendor-specific metadata through specification extensions.
 
-### 13.1 Extension Naming
+### 14.1 Extension Naming
 
 Specification extension properties MUST match the pattern `^x-`. The RECOMMENDED naming convention is:
 
@@ -16,21 +16,21 @@ Examples:
 - `x-acme-deployment`
 - `x-myorg-governance`
 
-### 13.2 Extension Placement
+### 14.2 Extension Placement
 
 Specification extensions MAY appear at the root level of an MCP Description document. Extensions MUST NOT appear within objects defined by this specification (e.g., within `info`, `transports` items, or tool objects) unless the object explicitly allows additional properties.
 
-### 13.3 Extension Values
+### 14.3 Extension Values
 
 Extension values MAY be of any JSON type: object, array, string, number, boolean, or null.
 
-### 13.4 Processing Rules
+### 14.4 Processing Rules
 
 Implementations that do not recognize a specification extension MUST ignore it and MUST NOT reject the document.
 
 Implementations SHOULD preserve unrecognized extensions when processing and re-serializing MCP Description documents.
 
-### 13.5 Extension Documentation
+### 14.5 Extension Documentation
 
 Extension authors SHOULD publish a specification for their extension, including:
 
@@ -38,22 +38,30 @@ Extension authors SHOULD publish a specification for their extension, including:
 - Documentation of the extension's purpose and semantics
 - Versioning information
 
-### 13.6 Example
+### 14.6 Example
 
 ```json
 {
-  "mcpdesc": "0.7.0",
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-coach",
     "version": "2.1.0"
   },
+  "protocolVersions": ["2025-11-25"],
   "transports": [
     { "type": "stdio", "command": "chess-coach", "args": ["mcp"] }
   ],
   "tools": [
     {
       "name": "analyze_game",
-      "description": "Analyze a chess game from PGN notation"
+      "description": "Analyze a chess game from PGN notation",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "pgn": { "type": "string" } },
+        "required": ["pgn"],
+        "additionalProperties": false
+      }
     }
   ],
   "x-cisco-metadata": {
@@ -70,4 +78,3 @@ Extension authors SHOULD publish a specification for their extension, including:
   }
 }
 ```
-

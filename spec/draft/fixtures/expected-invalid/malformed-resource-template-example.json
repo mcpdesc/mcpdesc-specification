@@ -1,0 +1,37 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "malformed-resource-template-example",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "malformed-resource-template-example"
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "test://items/{id",
+      "name": "malformed_template",
+      "examples": {
+        "concrete": {
+          "uri": "test://items/123",
+          "result": {
+            "resultType": "complete",
+            "contents": [
+              {
+                "uri": "test://items/123",
+                "text": "item"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

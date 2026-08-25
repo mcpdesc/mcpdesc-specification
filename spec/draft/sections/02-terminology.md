@@ -7,7 +7,16 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ### 2.2 Definitions
 
 **MCP Description Document**
-A JSON document conforming to this specification that describes the capabilities of an MCP server.
+A JSON document conforming to this specification that describes an MCP server surface.
+
+**Server Surface**
+The durable, externally relevant characteristics and behavior of an MCP server that MCP Description can represent, including transports, instructions, security requirements, capabilities, primitives, schemas, and applicable extensions.
+
+**Described Server Surface**
+The server surface represented by an MCP Description Document. It is not necessarily exhaustive of everything implemented or available in every runtime context.
+
+**Effective Protocol View**
+The projection of an MCP Description Document containing the declarations applicable to one MCP protocol revision.
 
 **MCP Server**
 A server implementing the Model Context Protocol, exposing tools, resources, and/or prompts to MCP clients.
@@ -34,5 +43,11 @@ The communication mechanism used to connect to an MCP server (e.g., stdio, strea
 A property in an MCP Description document whose name begins with `x-` that provides vendor-specific metadata outside the core specification.
 
 **Capability**
-A feature or behavior supported by an MCP server, declared in the `capabilities` object.
+A feature or behavior supported by an MCP server, declared in a Capabilities Object.
+
+**Protocol Applicability**
+The MCP protocol revisions to which a declaration applies, determined from its effective protocol scope.
+
+**Security Requirement**
+A declaration of one or more named security schemes and, where applicable, authorization scopes that must be satisfied to access a transport or primitive.
 

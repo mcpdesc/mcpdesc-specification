@@ -1,0 +1,48 @@
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
+info:
+  name: chess-rating-server
+  title: Multi-Version Chess Rating MCP Server
+  version: 1.1.0
+protocolVersions:
+- '2025-11-25'
+- '2026-07-28'
+# An unscoped transport applies to every root protocol revision.
+transports:
+- type: stdio
+  command: chess-rating
+  args:
+  - serve
+# Capability scopes cannot overlap. Shared values are repeated in each variant,
+# while Tasks uses the representation defined by that MCP revision.
+capabilities:
+- protocolVersions:
+  - '2025-11-25'
+  tools:
+    listChanged: true
+  resources:
+    listChanged: true
+  tasks:
+    requests:
+      tools:
+        call: {}
+- protocolVersions:
+  - '2026-07-28'
+  tools:
+    listChanged: true
+  resources:
+    listChanged: true
+  extensions:
+    io.modelcontextprotocol/tasks: {}
+# An unscoped Tool is common to both protocol revisions.
+tools:
+- name: get_player_rating
+  description: Get the current Elo rating for a chess player
+  inputSchema:
+    type: object
+    properties:
+      player_id:
+        type: string
+        description: Player identifier
+    required:
+    - player_id

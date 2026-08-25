@@ -65,3 +65,4 @@ npm test
 ```
 
 The repository CI must pass before merge.
+See [`scripts/README.md`](scripts/README.md) for the command, CI-trigger, internal-module, and release-tool execution map.

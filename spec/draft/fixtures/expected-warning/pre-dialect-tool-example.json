@@ -1,0 +1,38 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "pre-dialect-example",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2024-11-05"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "pre-dialect-example"
+    }
+  ],
+  "tools": [
+    {
+      "name": "greet",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" }
+        },
+        "required": ["name"],
+        "additionalProperties": false
+      },
+      "examples": {
+        "friendly": {
+          "input": { "name": "Example User" },
+          "result": {
+            "content": [
+              { "type": "text", "text": "Hello, Example User." }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
