@@ -18,11 +18,13 @@ When those sources disagree, the workflow controls CI triggering, `package.json`
 |---|---|---|
 | [`validate-repository.mjs`](validate-repository.mjs) | Invoked by both `npm test` and `npm run validate`; therefore also runs in repository CI. | See its module header for validation scope and [`package.json`](../package.json) for command composition. |
 | [`test-views.mjs`](test-views.mjs) | Invoked by `npm test`; therefore also runs in repository CI. | See its module header for the behaviors covered. |
-| [`validate-0.8.mjs`](validate-0.8.mjs) | Library module imported by repository validation and Effective Protocol View tooling; it is not an independent workflow entry point. | See its exported API and module header. |
+| [`validate-0.8.mjs`](validate-0.8.mjs) | Compatibility facade used by Effective Protocol View tooling. Canonical Draft 1 validation lives in [`packages/validator`](../packages/validator/). | See the package README for the supported public API. |
 | [`mcpdesc-views.mjs`](mcpdesc-views.mjs) | Library module exercised by `test-views.mjs`; it is not independently triggered by CI. | See its exported API and module header. |
 | [`freeze-version.mjs`](freeze-version.mjs) | Maintainer-invoked during an explicitly approved release; it is not part of `npm test` or CI. | See the script header for usage and its printed post-freeze checklist; release authority and prerequisites remain in [`GOVERNANCE.md`](../GOVERNANCE.md#branch-and-release-model). |
 
 The validation scripts report failures but do not modify specification artifacts. The freeze script performs only the mechanical snapshot step and deliberately leaves release-status and schema-pointer decisions to maintainers.
+
+Application consumers should use the independently versioned `@mcpdesc/validator` package rather than importing repository scripts. Repository-integrity checks, filesystem traversal, YAML parsing, projection, and merge behavior remain under `scripts/`.
 
 ## Draft snapshot publication
 

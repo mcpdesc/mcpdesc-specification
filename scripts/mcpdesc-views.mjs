@@ -5,16 +5,10 @@
 // semantic normalization. Public operations validate their inputs and outputs
 // with both the v0.8.0 structural schema and its semantic rules.
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createMcpdesc08Validator, validateMcpdesc08Document } from './validate-0.8.mjs';
+import { validateMcpDescription } from '@mcpdesc/validator';
 
 const scopedCollections = ['transports', 'capabilities', 'tools', 'resources', 'resourceTemplates', 'prompts'];
 const primitiveCollections = new Set(['tools', 'resources', 'resourceTemplates', 'prompts']);
-const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
-const schemaPath = path.join(scriptDirectory, '..', 'schemas', 'mcp-description', '0.8.0.json');
-const validateStructure = createMcpdesc08Validator(JSON.parse(fs.readFileSync(schemaPath, 'utf8')));
 
 function clone(value) {
   return structuredClone(value);
@@ -76,8 +70,9 @@ function effectiveScope(item, rootScope) {
 }
 
 function assertConforming(document, label) {
-  const errors = validateMcpdesc08Document(document, validateStructure, label)
-    .filter((diagnostic) => diagnostic.level === 'error');
+  const errors = validateMcpDescription(document, { specification: '0.8.0-draft.1' })
+    .diagnostics
+    .filter((diagnostic) => diagnostic.severity === 'error');
   if (errors.length) {
     throw new Error(`${label} is not a conforming mcpdesc 0.8.0 document: ${errors.map((diagnostic) => `[${diagnostic.code}] ${diagnostic.message}`).join(' | ')}`);
   }

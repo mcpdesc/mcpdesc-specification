@@ -11,6 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import { validateMcpDescription } from '@mcpdesc/validator';
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
 import { semanticValidateDocument } from './validate-0.8.mjs';
 
@@ -174,7 +175,7 @@ assert.deepEqual(mergedResourceExamples.resources[0].examples, resourceExampleVi
 assert.deepEqual(mergedResourceExamples.resourceTemplates[0].examples, resourceExampleView.resourceTemplates[0].examples);
 
 const invalidResourceCacheFields = fixture('spec/draft/fixtures/expected-invalid/resource-example-cache-fields.json');
-const invalidResourceCacheDiagnostics = semanticValidateDocument(invalidResourceCacheFields, 'resource-example-cache-fields.json');
+const invalidResourceCacheDiagnostics = semanticValidateDocument(invalidResourceCacheFields);
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.ttlMs is required')));
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is required')));
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.ttlMs is not defined')));
