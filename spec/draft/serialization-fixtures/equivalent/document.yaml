@@ -1,0 +1,6 @@
+mcpdesc: 0.8.0
+info:
+  name: example
+  version: 1.0.0
+protocolVersions: ["2026-07-28"]
+x-values: [true, false, null, 12, -1.5, 6.02e23, 2026-08-25]

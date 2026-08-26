@@ -15,6 +15,8 @@ Every MCP Description needs `mcpdesc`, `info`, `protocolVersions`, and `transpor
 
 Create a file called `chess-coach.mcpdesc.yaml`:
 
+MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files use YAML 1.2.2 JSON-schema scalar resolution and exclude aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numbers.
+
 ```yaml
 $schema: https://mcpdesc.org/schema/0.8.0.json
 mcpdesc: 0.8.0

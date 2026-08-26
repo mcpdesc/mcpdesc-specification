@@ -79,7 +79,9 @@ For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/0.8.0.jso
 
 ### What file extension should be used?
 
-The recommended JSON extension is `.mcpdesc.json`; `.mcp-description.json` is also recognized by existing tooling. YAML may be used where tooling supports it.
+The recommended JSON extension is `.mcpdesc.json`. The recommended YAML extensions are `.mcpdesc.yaml` and `.mcpdesc.yml`, with `.mcpdesc.yaml` preferred. JSON and restricted YAML are equally conforming when supported by the producer and consumer.
+
+The recommended media types are `application/mcp-description+json` and `application/mcp-description+yaml`. The project-specific YAML media type is not registered by RFC 9512; generic tooling should use the registered `application/yaml` media type when the project-specific type is unavailable or inappropriate.
 
 ## Supplemental MCP Description Metadata
 

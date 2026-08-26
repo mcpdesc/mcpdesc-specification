@@ -8,7 +8,7 @@
   "description": "Development and validation tooling for the MCP Description specification",
   "type": "module",
   "scripts": {
-    "test": "npm test --workspace @mcpdesc/validator && node scripts/validate-repository.mjs && node scripts/test-views.mjs",
+    "test": "npm test --workspace @mcpdesc/validator && node scripts/test-serializations.mjs && node scripts/validate-repository.mjs && node scripts/test-views.mjs",
     "validate": "node scripts/validate-repository.mjs"
   },
   "engines": {

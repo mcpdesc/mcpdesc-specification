@@ -2,15 +2,15 @@
 
 ### 3.1 Format
 
-An MCP Description document MUST be a JSON document encoded in UTF-8.
+An MCP Description document is a JSON-compatible data model composed only of objects whose property names are strings, arrays, strings, finite JSON numbers, booleans, and null. Its semantic meaning is defined by this data model independently of whether it is serialized as JSON or YAML.
 
-The RECOMMENDED file extension is `.mcpdesc.json`. Implementations MAY also accept `.mcp-description.json`.
+An MCP Description document MUST use one of the conforming serializations defined in Section 15. JSON and restricted YAML are equally conforming serializations; neither has greater semantic or conformance status.
 
-The RECOMMENDED media type is `application/mcp-description+json`.
+Property ordering is not significant unless an individual field explicitly defines array ordering semantics. Mapping serialization order MUST NOT affect conformance.
 
 ### 3.2 Root Object
 
-The root of an MCP Description document is a JSON object with the following structure:
+The root of an MCP Description document is an object with the following structure:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -61,7 +61,7 @@ Authors MUST NOT publish credentials, tokens, user identifiers, internal topolog
 
 ### 3.6 Property Ordering
 
-Property ordering within JSON objects is not significant. Implementations MUST NOT depend on property order.
+Property ordering within objects is not significant. Implementations MUST NOT depend on property or mapping serialization order.
 
 ### 3.7 Specification Extensions
 

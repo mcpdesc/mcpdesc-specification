@@ -2,6 +2,14 @@
 
 MCP Description 0.8.0 is intentionally breaking. Migration must preserve author intent and must not infer protocol revisions, Tool parameters, OAuth scopes, or hidden runtime surfaces from insufficient evidence.
 
+## Serialization
+
+JSON documents require no serialization migration and remain conforming as `.mcpdesc.json` with media type `application/mcp-description+json`.
+
+Version 0.8.0 also defines restricted YAML as an equally conforming serialization of the same JSON-compatible data model. Rename YAML descriptions to `.mcpdesc.yaml` or `.mcpdesc.yml`, with `.mcpdesc.yaml` preferred. Use `application/mcp-description+yaml`; generic tooling should use the RFC 9512 `application/yaml` media type when the project-specific type is unavailable or inappropriate.
+
+Before treating an existing YAML file as conforming, verify YAML 1.2.2 JSON-schema scalar resolution, exactly one document, string and unique mapping keys, no custom tags or aliases, no merge semantics, and finite JSON-compatible numbers. Apply the same 0.8.0 JSON Schema and semantic validation after decoding as for JSON. Conversion between JSON and YAML must preserve the decoded data model; comments, scalar style, and mapping order are not semantic.
+
 ## Protocol coverage
 
 Move `info.protocolVersion` to required root `protocolVersions` and remove the old field.

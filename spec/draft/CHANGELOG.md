@@ -62,6 +62,8 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - Literal MCP `_meta` semantics for supported declarations and named Tool and Resource result/content examples, including structural key grammar, revision-aware reserved-key context and value checks, warning-and-preserve handling for unknown reserved keys, and security guidance.
 - Experimental operation-level Elicitation Declarations for Tools, Resources, Resource Templates, and Prompts, with form and URL modes, nested protocol scopes, revision-aware restricted form schemas, and Effective Protocol View support, implementing Proposal 0007 while it remains under review.
 - Object-level `x-*` specification extensions on explicitly eligible MCP Description semantic objects, with strict excluded locations and projection, merge, preservation, and core-semantics boundaries, implementing Proposal 0011 while it remains under review.
+- JSON and restricted YAML as equally conforming serializations of one JSON-compatible data model, including YAML 1.2.2 JSON-schema scalar resolution, deterministic profile restrictions, serialization-specific capability claims, and file-extension and media-type guidance, implementing Proposal 0010 while it remains under review.
+- Repository-only strict raw-source decoding and isolated serialization fixtures for JSON/YAML equivalence, safe YAML parsing, single-document input, string and unique mapping keys, tag and alias rejection, disabled merge semantics, and finite numbers. The public `@mcpdesc/validator` API remains a parsed-value API.
 
 ### Changed
 
