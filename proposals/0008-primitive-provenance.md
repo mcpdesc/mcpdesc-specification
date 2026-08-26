@@ -1,4 +1,4 @@
-# Proposal 0008: Primitive Provenance and Description Completeness
+# Proposal 0008: Provenance Records and Primitive Attribution
 
 - Status: Review
 - Author: Stève Sfartz
@@ -10,339 +10,337 @@
 
 ## Summary
 
-Add an optional `provenance` object to MCP Description primitive declarations: Tool, Resource, Resource Template, and Prompt. The object records how the declaration was produced (`curated`, `observed`, or `generated`) and whether the producer asserts that the declaration is `complete`, `partial`, or of `unknown` completeness.
+Add an optional document-level provenance registry and provenance references for Tool, Resource, Resource Template, and Prompt declarations. A provenance record identifies how source evidence was produced (`curated`, `observed`, or `generated`) and may identify the producer, method, external artifact, and recording time.
 
-The proposal deliberately places provenance on each primitive rather than at the document root. This permits a single MCP Description to combine carefully curated contract declarations with runtime-observed or generated declarations without assigning one provenance claim to the entire document. The metadata is descriptive evidence about the declaration; it does not alter MCP runtime behavior or introduce a new protocol-variant axis.
+A document whose primitives share one source can declare default provenance once. Mixed-origin and merged documents can attribute individual primitives to one or more records. Provenance records contain descriptive facts only: they do not declare completeness, confidence, trust, or the consumer policy that interprets them.
 
 ## Problem
 
-MCP Description 0.8.0 Draft 1 defines a **Described Server Surface** as the surface represented by a document and explicitly states that it is not necessarily exhaustive of everything implemented or available in every runtime context. It also states that omission of a primitive collection does not prove that no other runtime context exposes primitives of that kind.
+MCP Description 0.8.0 Draft 1 defines a **Described Server Surface** as the surface represented by a document and explicitly states that it is not necessarily exhaustive of everything implemented or available in every runtime context.
 
-Those caveats are important, but they are currently only available as specification-wide interpretation rules. A machine cannot determine how an individual primitive declaration was obtained or how strongly its author claims that the declaration reflects the primitive's durable contract.
+A machine still cannot determine how a declaration was obtained or which capture, inspection, generation, or curation event supports it. A timestamp alone cannot identify the evidence, and an assertion that a declaration is `complete` is difficult to establish independently of the producer's method and observation scope.
 
-This matters because MCP Description is intended to support offline discovery, documentation generation, testing, governance, and change analysis. A declaration obtained by design-time authoring has different evidentiary value from a declaration captured from one authenticated runtime observation, and both differ from a declaration generated mechanically from source code or framework metadata.
-
-For example, a contract-diff tool may see a Tool declaration with no `description`, no examples, and a minimal `inputSchema`. Without provenance metadata, the tool cannot distinguish among:
-
-* an intentionally minimal curated contract;
-* a partial runtime observation where descriptive metadata was unavailable;
-* a generated declaration produced by a framework that does not expose all available metadata.
-
-The current format therefore supports the data itself but not the provenance needed to interpret the confidence and completeness of that data.
+This matters for offline discovery, documentation, testing, governance, merging, and change analysis. When descriptions are merged, downstream tools need to retain source distinctions rather than flatten them into one undocumented claim. The current format supports declaration data but not portable attribution to its source evidence.
 
 ## Goals
 
-* Allow every Tool, Resource, Resource Template, and Prompt declaration to state how it was produced.
-* Allow a producer to state whether the individual declaration is believed to be complete, partial, or of unknown completeness.
-* Support mixed-origin documents in which different primitives have different provenance.
-* Help diff, governance, documentation, and review tooling distinguish authoritative curated declarations from observed or generated evidence.
+* Identify reusable provenance records within an MCP Description document.
+* Distinguish curated, runtime-observed, and mechanically generated evidence.
+* Avoid repeating systemic provenance on every primitive in a single-source document.
+* Support fine-grained and multi-source attribution in merged documents.
+* Allow records to reference external dumps, inspection results, or generator artifacts.
+* Give consumers stable facts with which to select and apply their own interpretation policies.
 * Keep provenance separate from MCP protocol semantics and runtime wire behavior.
-* Preserve the existing rule that an MCP Description does not necessarily enumerate every primitive available in every runtime context.
 * Keep the feature optional and backward compatible for existing 0.8.0 documents.
 
 ## Non-goals
 
-* Assert that a primitive collection is exhaustive. Primitive-level provenance cannot prove that an omitted Tool, Resource, Resource Template, or Prompt does not exist.
+* Assert primitive, collection, or document completeness.
+* Define confidence scores, trust levels, or consumer interpretation policies.
+* Prove producer identity or artifact authenticity.
 * Model authorization contexts, tenants, users, roles, credentials, feature flags, or client capabilities.
-* Record request/response transcripts or runtime session state.
-* Standardize source-control provenance, build attestations, signatures, SBOMs, or software supply-chain metadata.
-* Require timestamps or source identifiers for every generated or observed declaration.
-* Define merge policy for semantically different primitive declarations beyond the existing protocol-scope and merge rules.
+* Embed request/response transcripts, dump payloads, or runtime session state.
+* Standardize build attestations, signatures, SBOMs, or software supply-chain metadata.
+* Define merge policy for semantically different primitive declarations.
 * Treat provenance as evidence that a live server currently behaves exactly as described.
 
 ## Background and primary references
 
 * MCP Description 0.8.0 Draft 1, definitions of `Described Server Surface` and protocol coverage: https://github.com/mcpdesc/mcpdesc-specification/blob/main/spec/draft/mcp-description.md
 * MCP Description 0.8.0 Draft 1, zero-primitive descriptions: https://github.com/mcpdesc/mcpdesc-specification/blob/main/spec/draft/mcp-description.md#33-zero-primitive-descriptions
-* Proposal 0001, which explicitly aims to keep runtime dumps honest about what was observed: https://github.com/mcpdesc/mcpdesc-specification/blob/main/spec/draft/proposal-snapshots/0001-mcp-2026-07-28-alignment.md
+* Proposal 0001, which aims to keep runtime dumps honest about what was observed: https://github.com/mcpdesc/mcpdesc-specification/blob/main/spec/draft/proposal-snapshots/0001-mcp-2026-07-28-alignment.md
 * Cisco DevNet, “Beyond the Protocol: Applying API Engineering Practices to MCP Servers”: https://blogs.cisco.com/developer/beyond-the-protocol-applying-api-engineering-practices-to-mcp-servers
 
-The existing draft already makes the correct semantic distinction between a server's implementation and the **described** surface. This proposal makes part of that distinction machine-readable at the primitive level.
+The existing draft distinguishes a server's implementation from its described surface. This proposal adds machine-readable attribution without asking the producer to determine how much evidentiary weight a consumer should assign.
 
 ## Proposed normative behavior
 
-### 1. Primitive `provenance` property
+### 1. Document-level `provenance`
 
-A Tool Object, Resource Object, Resource Template Object, or Prompt Object MAY contain a `provenance` property whose value is a Primitive Provenance Object.
-
-`provenance` MUST NOT appear on objects other than those primitive declarations unless another proposal explicitly permits it.
-
-The Primitive Provenance Object has the following fields:
+The root MCP Description Object MAY contain a `provenance` property whose value is a Provenance Registry Object.
 
 | Property | Type | Required | Description |
 | --- | --- | --- | --- |
-| `kind` | string enum | Yes | How the primitive declaration was produced: `curated`, `observed`, or `generated`. |
-| `completeness` | string enum | Yes | Producer assertion about the completeness of this primitive declaration: `complete`, `partial`, or `unknown`. |
-| `observedAt` | string (`date-time`) | No | Time at which the represented primitive was observed. Intended for `kind: "observed"`. |
+| `records` | map of Provenance Record Objects | Yes | Locally identified provenance records available for attribution. |
+| `defaultIds` | array of unique strings | No | Record identifiers that apply to primitives without explicit `provenanceIds`. |
 
-No additional properties are allowed in the Primitive Provenance Object in 0.8.0.
+`records` MUST contain at least one entry. Each key is a document-local Provenance ID and MUST be unique within the registry. Every value in `defaultIds` MUST match a key in `records`.
 
-### 2. `kind` semantics
+A producer SHOULD use `defaultIds` only when the referenced records apply systemically to primitive declarations that do not carry explicit attribution.
+
+### 2. Provenance IDs
+
+A Provenance ID is an opaque, non-empty string whose meaning is local to the containing document. Consumers MUST compare Provenance IDs as case-sensitive strings and MUST NOT infer producer, time, ordering, or trust from their lexical form.
+
+Provenance IDs identify records, not MCP runtime sessions. Producers SHOULD NOT use an MCP transport session ID as the sole provenance identity because runtime session IDs may be absent, transient, sensitive, or ambiguous across captures.
+
+An external dump or inspector session identifier MAY appear in an artifact URI or in an extension associated with the provenance record.
+
+### 3. Provenance records
+
+| Property | Type | Required | Description |
+| --- | --- | --- | --- |
+| `kind` | string enum | Yes | How the evidence was produced: `curated`, `observed`, or `generated`. |
+| `producer` | Producer Object | No | Tool or organization that produced the evidence. |
+| `method` | string | No | Stable producer-defined method identifier, such as `dump`. |
+| `artifact` | Artifact Reference Object | No | Reference to external evidence supporting the record. |
+| `recordedAt` | string (`date-time`) | No | Time at which the evidence was recorded. |
 
 `kind` MUST have one of these values:
 
-* `curated` — the primitive declaration was intentionally authored or reviewed as a design-time or release-time contract.
-* `observed` — the primitive declaration was derived from one or more runtime observations of an MCP server.
-* `generated` — the primitive declaration was produced mechanically from source code, configuration, framework metadata, or another non-runtime source.
+* `curated` — evidence from intentional contract authoring or review;
+* `observed` — evidence from one or more runtime observations of an MCP server;
+* `generated` — evidence produced mechanically from source code, configuration, framework metadata, or another non-runtime source.
 
-These values describe the origin of the MCP Description declaration. They do not describe how the underlying MCP server implementation was created.
+These values describe the origin of the evidence, not how the server implementation was created. A producer MUST NOT use `curated` solely because generated or observed output was saved or committed.
 
-A producer MUST NOT use `curated` solely because a generated or observed document was manually saved or committed to source control. `curated` implies an intentional contract-authoring or review step.
+A Producer Object MUST contain a non-empty `name` and MAY contain a non-empty `version`. Producer identity is a descriptive assertion, not proof of authorship.
 
-### 3. `completeness` semantics
+An Artifact Reference Object MUST contain an absolute `uri` and MAY contain a `digest`. When present, `digest` MUST identify both the digest algorithm and value. This proposal does not require consumers to retrieve or verify an artifact.
 
-`completeness` MUST have one of these values:
+When present, `recordedAt` MUST be an RFC 3339 date-time string. It is supporting metadata and MUST NOT be used as the identity of the record.
 
-* `complete` — the producer asserts that, to the best of its knowledge, the declaration captures all externally relevant properties of this primitive that are representable by the applicable MCP Description version and known to the producer.
-* `partial` — the producer knows that one or more externally relevant properties of the primitive may be omitted, generalized, redacted, or unavailable.
-* `unknown` — the producer makes no completeness assertion for the declaration.
+Records do not contain completeness, confidence, trust, or policy fields. Producers MAY expose additional evidence through the referenced artifact or specification extensions. Consumers determine whether and how to use that evidence under policy external to the document.
 
-`complete` applies only to the declaration itself. It MUST NOT be interpreted as an assertion that the containing primitive collection is exhaustive or that no additional primitive exists in another runtime context.
+### 4. Default attribution
 
-A consumer MUST NOT infer collection completeness from every present primitive having `completeness: "complete"`.
+When a primitive omits `provenanceIds`, its effective provenance is the registry's `defaultIds`, if present. Omission of both means the document makes no portable provenance attribution for that primitive.
 
-### 4. `observedAt`
+Defaults reduce repetition for descriptions produced by one tool or method. They MUST NOT be interpreted as an assertion that every declaration is complete, every primitive was enumerated, or the referenced evidence is trustworthy.
 
-When present, `observedAt` MUST be an RFC 3339 date-time string.
+### 5. Primitive attribution
 
-`observedAt` SHOULD be used only when `kind` is `observed`. A validator SHOULD warn when `observedAt` appears with another `kind` value.
+A Tool Object, Resource Object, Resource Template Object, or Prompt Object MAY contain `provenanceIds` as a non-empty array of unique Provenance IDs.
 
-`observedAt` records when the primitive declaration was observed, not when the MCP Description file was created or last modified.
+When present, `provenanceIds` replaces, rather than extends, `defaultIds` for that primitive. Every referenced ID MUST match a key in the root registry.
 
-### 5. Protocol scoping
+Multiple IDs mean that evidence from multiple records contributed to the declaration. Their order MUST NOT imply precedence, confidence, or merge order.
 
-Primitive provenance inherits the effective protocol scope of its containing primitive declaration. It does not define an independent `protocolVersions` property.
+### 6. Protocol scoping and projection
 
-If materially different provenance applies to protocol-specific variants of the same logical primitive, the author SHOULD express those variants using the existing primitive `protocolVersions` mechanism and attach the appropriate provenance to each variant.
+Primitive attribution inherits the protocol scope of its containing declaration. If different attribution applies to protocol-specific variants, the author SHOULD use the existing primitive `protocolVersions` mechanism and attach appropriate `provenanceIds` to each variant.
 
-### 6. Projection
-
-A conforming single-version projection tool MUST preserve the `provenance` object on every retained primitive.
-
-Projection MUST NOT synthesize, upgrade, or downgrade a provenance assertion.
+A conforming single-version projection tool MUST retain records referenced by retained primitives' effective provenance and MUST preserve corresponding attribution. It MAY remove unreferenced records. Projection MUST NOT synthesize records or change attribution.
 
 ### 7. Merge and semantic comparison
 
-Primitive provenance is descriptive metadata about the declaration rather than MCP runtime semantics.
+Provenance is descriptive metadata rather than MCP runtime semantics. Compatibility analysis MUST NOT treat a change only to provenance records or attribution as a change to a primitive's runtime contract.
 
-A semantic compatibility or breaking-change analysis MUST NOT treat a change only to `provenance` as a change to the MCP primitive's runtime contract.
+A merge tool SHOULD preserve records and attribution from every contributing document. It MUST remap colliding document-local IDs when their records differ. When equivalent declarations are combined from multiple sources, the merged declaration SHOULD reference all contributing records.
 
-A merge tool SHOULD preserve provenance when equivalent declarations are combined. If the merge implementation cannot preserve materially different provenance claims without inventing a new claim, it SHOULD retain separate source evidence out of band or report a provenance-preservation warning rather than silently choosing one claim.
+A merge tool MUST NOT infer completeness, confidence, precedence, or trust merely from the number, kind, producer, or recording time of contributing records.
 
-This proposal does not require a canonical algorithm for aggregating multiple provenance records in 0.8.0.
+### 8. Consumer behavior and policy
 
-### 8. Consumer behavior
+Consumers MAY use provenance attributes and referenced artifacts to select an external policy for documentation, filtering, governance, comparison, or human review.
 
-Consumers MAY use provenance when presenting confidence, filtering runtime observations, or deciding whether an automated compatibility conclusion requires human review.
+The applicable policy is owned by the consuming toolset and is not selected or defined by the provenance producer inside the document. Different consumers MAY reach different conclusions from the same record.
 
-Consumers MUST NOT treat `kind: "observed"` or `completeness: "partial"` as making the containing MCP Description invalid.
+Consumers MUST treat records as untrusted descriptive assertions unless independently verified. A producer name, method, artifact URI, digest, or timestamp alone is not a cryptographic attestation or guarantee of live behavior.
 
-Consumers MUST NOT interpret `kind: "curated"` or `completeness: "complete"` as cryptographic proof, remote attestation, or a guarantee of live runtime behavior.
+Consumers MUST NOT infer collection completeness solely from provenance attribution. A disappearance between descriptions is conclusive only under a consumer policy that establishes sufficient and comparable evidence outside this proposal's semantics.
 
 ## Schema impact
 
-The JSON Schema should add a reusable `primitiveProvenance` definition and permit an optional `provenance` property in the schemas for:
-
-* Tool Object;
-* Resource Object;
-* Resource Template Object; and
-* Prompt Object.
+The JSON Schema should add definitions for a provenance registry, record, producer, artifact reference, and ID array. It should permit root `provenance` and primitive `provenanceIds` properties.
 
 Illustrative structural schema:
 
 ```json
 {
   "$defs": {
-    "primitiveProvenance": {
+    "provenanceRecord": {
       "type": "object",
-      "required": ["kind", "completeness"],
+      "required": ["kind"],
       "properties": {
-        "kind": {
-          "enum": ["curated", "observed", "generated"]
+        "kind": { "enum": ["curated", "observed", "generated"] },
+        "producer": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "version": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
         },
-        "completeness": {
-          "enum": ["complete", "partial", "unknown"]
+        "method": { "type": "string", "minLength": 1 },
+        "artifact": {
+          "type": "object",
+          "required": ["uri"],
+          "properties": {
+            "uri": { "type": "string", "format": "uri" },
+            "digest": { "type": "string", "minLength": 1 }
+          },
+          "additionalProperties": false
         },
-        "observedAt": {
-          "type": "string",
-          "format": "date-time"
+        "recordedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "provenanceRegistry": {
+      "type": "object",
+      "required": ["records"],
+      "properties": {
+        "records": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "minLength": 1 },
+          "additionalProperties": { "$ref": "#/$defs/provenanceRecord" }
+        },
+        "defaultIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
         }
       },
       "additionalProperties": false
+    },
+    "provenanceIds": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
     }
   }
 }
 ```
 
-The schema can enforce the value sets and date-time shape. The recommendation that `observedAt` be used only for observed provenance may remain a semantic warning rather than a structural validation error.
+JSON Schema cannot enforce that IDs resolve to keys in `records`; the validator should perform that referential-integrity check.
 
 ## Examples
 
-### Curated Tool contract
-
-```json
-{
-  "name": "delete_account",
-  "description": "Delete an account and its retained data.",
-  "inputSchema": {
-    "type": "object",
-    "properties": {
-      "accountId": { "type": "string" }
-    },
-    "required": ["accountId"],
-    "additionalProperties": false
-  },
-  "provenance": {
-    "kind": "curated",
-    "completeness": "complete"
-  }
-}
-```
-
-### Partially observed Resource
-
-```json
-{
-  "uri": "inventory://current",
-  "name": "current_inventory",
-  "provenance": {
-    "kind": "observed",
-    "completeness": "partial",
-    "observedAt": "2026-08-25T12:30:00Z"
-  }
-}
-```
-
-The second example states that the Resource declaration was captured at runtime and that the producer knows the declaration may omit relevant details. It does **not** claim that other Resources were absent at that time.
-
-### Mixed-origin document
+### Single-source generated document
 
 ```json
 {
   "mcpdesc": "0.8.0",
-  "info": {
-    "name": "example-server",
-    "version": "2.0.0"
-  },
+  "info": { "name": "example-server", "version": "2.0.0" },
   "protocolVersions": ["2026-07-28"],
-  "transports": [
-    { "type": "streamable-http", "url": "https://example.com/mcp" }
-  ],
+  "transports": [{ "type": "streamable-http", "url": "https://example.com/mcp" }],
+  "provenance": {
+    "records": {
+      "generation-01": {
+        "kind": "generated",
+        "producer": { "name": "example-generator", "version": "3.1.0" },
+        "method": "source-generation",
+        "artifact": {
+          "uri": "https://example.com/builds/42/generation.json",
+          "digest": "sha256:7f83b1657ff1fc53b92dc18148a1d65dfa13514e"
+        }
+      }
+    },
+    "defaultIds": ["generation-01"]
+  },
+  "tools": [{ "name": "search", "inputSchema": { "type": "object" } }]
+}
+```
+
+The default applies to `search` without repeating provenance on the Tool Object. It does not assert that the declaration or Tools collection is complete.
+
+### Merged document with fine-grained attribution
+
+```json
+{
+  "mcpdesc": "0.8.0",
+  "info": { "name": "merged-server", "version": "2.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [{ "type": "streamable-http", "url": "https://example.com/mcp" }],
+  "provenance": {
+    "records": {
+      "contract-review": {
+        "kind": "curated",
+        "producer": { "name": "contract-repository" },
+        "method": "review"
+      },
+      "inspection-42": {
+        "kind": "observed",
+        "producer": { "name": "mcpcontract", "version": "0.8.0" },
+        "method": "dump",
+        "artifact": { "uri": "urn:mcpcontract:dump:42" },
+        "recordedAt": "2026-08-25T12:30:00Z"
+      }
+    }
+  },
   "tools": [
     {
       "name": "search",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "query": { "type": "string" }
-        },
-        "required": ["query"]
-      },
-      "provenance": {
-        "kind": "curated",
-        "completeness": "complete"
-      }
+      "inputSchema": { "type": "object" },
+      "provenanceIds": ["contract-review", "inspection-42"]
     },
     {
       "name": "experimental_lookup",
       "inputSchema": { "type": "object" },
-      "provenance": {
-        "kind": "observed",
-        "completeness": "unknown",
-        "observedAt": "2026-08-25T12:30:00Z"
-      }
+      "provenanceIds": ["inspection-42"]
     }
   ]
 }
 ```
 
+The records retain distinct evidence for downstream policy evaluation. The document does not prescribe whether either source is authoritative or sufficient to establish completeness.
+
 ## Compatibility
 
-This is an additive, backward-compatible change to MCP Description 0.8.0 Draft 1.
+This is an additive, backward-compatible change to MCP Description 0.8.0 Draft 1. Existing documents remain valid because provenance is optional. Implementations that reject unknown root or primitive properties will need the 0.8.0 schema update.
 
-Existing conforming documents remain valid because `provenance` is optional.
-
-Existing implementations that reject unknown properties inside primitive objects will need a schema update before accepting documents that use this proposal, which is expected for any new 0.8.0 feature.
-
-The proposal does not change MCP protocol behavior and does not change the meaning of existing primitive fields.
+The proposal does not change MCP protocol behavior or the meaning of existing primitive fields.
 
 ## Migration
 
-No migration is required for existing descriptions.
+No migration is required. A tool that generates a homogeneous description SHOULD emit one record and apply it through `defaultIds`. A merge tool SHOULD omit defaults when no record applies systemically and SHOULD use primitive `provenanceIds` where attribution differs.
 
-Tools that generate descriptions MAY initially omit provenance. Generators that can distinguish runtime introspection from static code generation are encouraged to emit the corresponding `kind` and use `completeness: "unknown"` until they can make a stronger assertion.
-
-Runtime dump tools SHOULD prefer:
-
-```json
-{
-  "kind": "observed",
-  "completeness": "unknown"
-}
-```
-
-unless they have evidence that the represented primitive declaration is partial or complete.
-
-Curated contract repositories MAY progressively add:
-
-```json
-{
-  "kind": "curated",
-  "completeness": "complete"
-}
-```
-
-after review.
+Experiments based on the original proposal draft should replace inline primitive `provenance` objects with root records and references. The original `completeness` field has no replacement because completeness is now consumer-derived. An original `observedAt` value may become optional `recordedAt` metadata, but it is no longer provenance identity.
 
 ## Security and privacy considerations
 
-Provenance metadata MUST NOT contain credentials, tokens, user identifiers, role names tied to individuals, authorization claims, internal topology, or other sensitive runtime context.
+Provenance metadata MUST NOT contain credentials, tokens, user identifiers, role names tied to individuals, authorization claims, internal topology, raw runtime session IDs, or other sensitive runtime context.
 
-This proposal intentionally does not define fields such as `principal`, `tenant`, `credential`, or raw observation source because static publication of such values can expose sensitive information.
+Artifact URIs and recording times may reveal infrastructure, repository, build, or operational information. Authors SHOULD use non-sensitive identifiers and omit optional fields when publication creates risk.
 
-`observedAt` may reveal operational timing. Authors publishing sensitive infrastructure descriptions SHOULD omit it when unnecessary.
+Consumers MUST treat provenance and referenced artifacts as untrusted input. Resolving an artifact URI can create network, authentication, tracking, and content-processing risks; consumers SHOULD apply their own retrieval and verification policy.
 
-Consumers MUST treat provenance claims as untrusted assertions supplied by the document author or generator. They are not cryptographic attestations.
+A digest can establish artifact integrity relative to an expected value, but does not establish producer identity, correctness, completeness, or trustworthiness.
 
 ## Alternatives considered
 
-### Root-level `coverage`
+### Inline provenance on every primitive
 
-A root-level object could label an entire document as `curated`, `observed`, or `generated`. This is simpler and can express document-wide enumeration intent, but it cannot represent mixed-origin descriptions. A single document may contain curated Tools and runtime-observed Resources, or generated declarations subsequently reviewed individually.
+Inline records duplicate systemic metadata in descriptions produced by one tool or method and make merged records harder to preserve. The registry provides defaults for homogeneous documents and references for mixed-origin documents.
 
-This proposal therefore places provenance on primitives as requested. Document- or collection-level enumeration completeness may be proposed separately if implementation experience demonstrates a need.
+### Producer-declared completeness
 
-### Collection-level completeness
+The original draft proposed `complete`, `partial`, and `unknown`. Review concluded that completeness is difficult to establish without interpreting the producer's method, observation scope, evidence, and consumer requirements. This revision carries provenance facts and leaves completeness as a consumer-derived conclusion.
 
-A `toolsCoverage`, `resourcesCoverage`, or equivalent collection wrapper could state whether each collection is exhaustive. That addresses omission semantics more directly but would change the current simple array shape and introduce a larger structural change.
+### Embedded interpretation policy
 
-This proposal does not introduce collection wrappers in 0.8.0.
+A record could identify or define the policy under which it should be trusted. That would couple a portable description to a consumer policy and let the producer influence interpretation of its own evidence. This proposal gives the consuming toolset ownership of policy selection and evaluation.
 
-### Root `x-*` metadata
+### Runtime session IDs as provenance IDs
 
-A vendor extension can encode provenance today, but every tool would need a parallel map keyed by primitive identity. That creates rename, protocol-scope, and referential-integrity problems and prevents portable consumers from understanding the semantics.
+An MCP runtime session ID identifies protocol session state, not necessarily a durable capture artifact. It may be absent, transient, reused, or sensitive. Document-local Provenance IDs may refer to external dump or inspector artifacts without overloading MCP session semantics.
 
-### Infer provenance from tooling
+### Collection completeness
 
-A consumer could infer that a file produced by a dump command is observed. The inference is lost when files are copied, merged, transformed, or checked into source control, and it is not portable across producers.
+Collection status can describe whether enumeration was attempted, failed, filtered, or exhausted under an observation method. Those facts may be useful in referenced artifacts or a future proposal, but they do not establish universal completeness. This proposal adds no collection completeness claim.
 
 ## Open questions
 
-* Should a later proposal add collection-level enumeration completeness so that an empty observed collection can be distinguished from an authoritative empty collection?
-* Should `observedAt` be omitted from the core object and left to primitive-level specification extensions to reduce diff churn?
-* Should a future version permit multiple provenance records when equivalent declarations are merged from several sources?
-* Should `generated` be split into more specific origins such as source-code generation and imported-contract generation, or is one generic value sufficient?
+* Should Provenance IDs remain document-local or support globally unique identifiers directly?
+* Should a future proposal standardize capture outcomes such as collection request success and pagination exhaustion?
+* Should producer and artifact objects permit specification extensions after Proposal 0011 is resolved?
+* Should `generated` be split into more specific origins, or is producer-defined `method` sufficient?
 
 ## Implementation and validation plan
 
-1. Add `primitiveProvenance` to the draft JSON Schema.
-2. Add optional `provenance` properties to Tool, Resource, Resource Template, and Prompt schemas.
-3. Add semantic validation for the `observedAt` recommendation and protocol projection preservation.
-4. Add positive fixtures for all three `kind` values and all three `completeness` values.
-5. Add negative fixtures for unknown enum values, malformed timestamps, and unknown properties.
-6. Add a projection fixture proving provenance is preserved on retained protocol-scoped variants.
-7. Add documentation guidance stating explicitly that primitive completeness does not imply collection exhaustiveness.
-8. Add a changelog entry and update the full-featured example with at least one curated and one observed primitive.
+1. Add provenance registry, record, producer, artifact reference, and ID-array definitions to the draft JSON Schema.
+2. Add optional root `provenance` and primitive `provenanceIds` properties.
+3. Validate that every default and primitive ID resolves to a registry record.
+4. Add positive fixtures for default attribution, primitive overrides, and multiple contributing records.
+5. Add negative fixtures for unresolved or duplicate IDs, malformed records, and malformed artifact URIs or timestamps.
+6. Add merge tests for ID collisions and preservation of multi-source attribution.
+7. Add projection tests proving that effective attribution and referenced records are preserved.
+8. Document that provenance is untrusted evidence interpreted under consumer-owned policy and does not assert completeness.
+9. Add a changelog entry and update the full-featured example.
 
 ## Decision record
 
