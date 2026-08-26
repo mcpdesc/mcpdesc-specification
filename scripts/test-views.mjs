@@ -33,6 +33,44 @@ function assertStructurallyConforming(document) {
   );
 }
 
+const partial = fixture('spec/draft/fixtures/expected-valid/minimal-zero-primitives.json');
+assertStructurallyConforming(partial);
+assert.equal('transports' in partial, false);
+for (const [property, emptyValue] of [
+  ['transports', []],
+  ['securitySchemes', {}],
+  ['capabilities', []],
+  ['tools', []],
+  ['resources', []],
+  ['resourceTemplates', []],
+  ['prompts', []],
+  ['tags', []]
+]) {
+  const invalid = { ...partial, [property]: emptyValue };
+  assert.equal(validate(invalid), false, `${property} must be non-empty when present`);
+}
+const emptyInputSchema = { type: 'object', additionalProperties: false };
+for (const [label, document] of [
+  ['info.icons', { ...partial, info: { ...partial.info, icons: [] } }],
+  ['capabilities.extensions', { ...partial, capabilities: [{ extensions: {} }] }],
+  ['tool.icons', { ...partial, tools: [{ name: 'tool', inputSchema: emptyInputSchema, icons: [] }] }],
+  ['tool.tags', { ...partial, tools: [{ name: 'tool', inputSchema: emptyInputSchema, tags: [] }] }],
+  ['tool.elicitations', { ...partial, tools: [{ name: 'tool', inputSchema: emptyInputSchema, elicitations: [] }] }],
+  ['resource.tags', { ...partial, resources: [{ uri: 'test://resource', name: 'resource', tags: [] }] }],
+  ['resource.elicitations', { ...partial, resources: [{ uri: 'test://resource', name: 'resource', elicitations: [] }] }],
+  ['resourceTemplate.tags', { ...partial, resourceTemplates: [{ uriTemplate: 'test://resource/{id}', name: 'template', tags: [] }] }],
+  ['resourceTemplate.elicitations', { ...partial, resourceTemplates: [{ uriTemplate: 'test://resource/{id}', name: 'template', elicitations: [] }] }],
+  ['prompt.tags', { ...partial, prompts: [{ name: 'prompt', tags: [] }] }],
+  ['prompt.arguments', { ...partial, prompts: [{ name: 'prompt', arguments: [] }] }],
+  ['prompt.elicitations', { ...partial, prompts: [{ name: 'prompt', elicitations: [] }] }]
+]) {
+  assert.equal(validate(document), false, `${label} must be non-empty when present`);
+}
+const partialView = projectProtocolView(partial, '2026-07-28');
+assert.equal('transports' in partialView, false);
+const mergedPartial = mergeProtocolDescriptions([partialView]);
+assert.equal('transports' in mergedPartial, false);
+
 const scoped = fixture('spec/draft/fixtures/expected-valid/protocol-scoped-primitives.json');
 const view2025 = projectProtocolView(scoped, '2025-11-25');
 const view2026 = projectProtocolView(scoped, '2026-07-28');
@@ -63,6 +101,12 @@ capabilityScoped.capabilities = [
 const viewWithoutCapabilities = projectProtocolView(capabilityScoped, '2026-07-28');
 assert.equal('capabilities' in viewWithoutCapabilities, false);
 assertStructurallyConforming(viewWithoutCapabilities);
+
+const primitiveScoped = structuredClone(scoped);
+primitiveScoped.tools = primitiveScoped.tools.filter((tool) => tool.protocolVersions?.includes('2025-11-25'));
+const viewWithoutTools = projectProtocolView(primitiveScoped, '2026-07-28');
+assert.equal('tools' in viewWithoutTools, false);
+assertStructurallyConforming(viewWithoutTools);
 
 const merged = mergeProtocolDescriptions([view2025, view2026]);
 assert.deepEqual(merged.protocolVersions, ['2025-11-25', '2026-07-28']);
@@ -182,6 +226,13 @@ assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code =
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is not defined')));
 
 const elicitationSource = fixture('spec/draft/fixtures/expected-valid/elicitation-declarations.json');
+const filteredElicitationSource = structuredClone(elicitationSource);
+filteredElicitationSource.tools[0].elicitations = filteredElicitationSource.tools[0].elicitations.filter(
+  (elicitation) => elicitation.protocolVersions?.includes('2025-11-25')
+);
+const viewWithoutElicitations = projectProtocolView(filteredElicitationSource, '2025-06-18');
+assert.equal('elicitations' in viewWithoutElicitations.tools[0], false);
+assertStructurallyConforming(viewWithoutElicitations);
 const elicitationView0618 = projectProtocolView(elicitationSource, '2025-06-18');
 const elicitationView1125 = projectProtocolView(elicitationSource, '2025-11-25');
 assert.deepEqual(elicitationView0618.tools[0].elicitations.map((elicitation) => elicitation.name), ['choose_assignee']);

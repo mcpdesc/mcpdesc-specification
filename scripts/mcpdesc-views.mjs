@@ -5,10 +5,9 @@
 // semantic normalization. Public operations validate their inputs and outputs
 // with both the v0.8.0 structural schema and its semantic rules.
 
-import { validateMcpDescription } from '@mcpdesc/validator';
+import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 const scopedCollections = ['transports', 'capabilities', 'tools', 'resources', 'resourceTemplates', 'prompts'];
-const primitiveCollections = new Set(['tools', 'resources', 'resourceTemplates', 'prompts']);
 
 function clone(value) {
   return structuredClone(value);
@@ -70,15 +69,14 @@ function effectiveScope(item, rootScope) {
 }
 
 function assertConforming(document, label) {
-  const errors = validateMcpDescription(document, { specification: '0.8.0-draft.1' })
-    .diagnostics
+  const errors = validateMcpdesc08Document(document)
     .filter((diagnostic) => diagnostic.severity === 'error');
   if (errors.length) {
     throw new Error(`${label} is not a conforming mcpdesc 0.8.0 document: ${errors.map((diagnostic) => `[${diagnostic.code}] ${diagnostic.message}`).join(' | ')}`);
   }
 }
 
-function projectUnchecked(document, version, options = {}) {
+function projectUnchecked(document, version) {
   const rootScope = document.protocolVersions;
   const result = clone(document);
   result.protocolVersions = [version];
@@ -91,13 +89,18 @@ function projectUnchecked(document, version, options = {}) {
         const itemScope = effectiveScope(item, rootScope);
         const projectedItem = withoutScope(item);
         if (Array.isArray(item.elicitations)) {
-          projectedItem.elicitations = item.elicitations
+          const projectedElicitations = item.elicitations
             .filter((elicitation) => effectiveScope(elicitation, itemScope).includes(version))
             .map(withoutScope);
+          if (projectedElicitations.length) {
+            projectedItem.elicitations = projectedElicitations;
+          } else {
+            delete projectedItem.elicitations;
+          }
         }
         return projectedItem;
       });
-    if (projected.length || (primitiveCollections.has(collection) && !options.omitEmptyPrimitiveCollections)) {
+    if (projected.length) {
       result[collection] = projected;
     } else {
       delete result[collection];
@@ -107,13 +110,13 @@ function projectUnchecked(document, version, options = {}) {
   return result;
 }
 
-export function projectProtocolView(document, version, options = {}) {
+export function projectProtocolView(document, version) {
   const rootScope = document?.protocolVersions;
   if (!Array.isArray(rootScope) || !rootScope.includes(version)) {
     throw new Error(`Cannot project MCP protocol revision ${JSON.stringify(version)} because it is absent from root protocolVersions`);
   }
   assertConforming(document, 'Projection source');
-  const result = projectUnchecked(document, version, options);
+  const result = projectUnchecked(document, version);
   assertConforming(result, `Projection result for MCP ${version}`);
   return result;
 }

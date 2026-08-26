@@ -13,7 +13,7 @@ The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fi
 | `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Maps to `Implementation.title` (MCP `BaseMetadata`, since 2025-06-18). |
 | `description` | string | No | Brief description of what the server does. Maps to `Implementation.description` (MCP, since 2025-11-25). |
 | `id` | string | No | Unique server identifier (URI, DID, or URN). |
-| `icons` | array\<[Icon](#icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
+| `icons` | non-empty array\<[Icon](#icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
 | `websiteUrl` | string (URI) | No | URL of the server's website. Maps to `Implementation.websiteUrl` (MCP, since 2025-11-25). |
 | `contact` | [Contact Object](#53-contact-object) | No | Contact information (OpenAPI-style, not part of MCP `Implementation`). |
 | `license` | [License Object](#54-license-object) | No | License information (OpenAPI-style, not part of MCP `Implementation`). |

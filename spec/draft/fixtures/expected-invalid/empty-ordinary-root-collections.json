@@ -1,0 +1,19 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "empty-ordinary-collections",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [],
+  "securitySchemes": {},
+  "capabilities": [],
+  "tools": [],
+  "resources": [],
+  "resourceTemplates": [],
+  "prompts": [],
+  "tags": []
+}

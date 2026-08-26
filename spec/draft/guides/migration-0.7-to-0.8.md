@@ -17,6 +17,14 @@ The value must be one of the MCP revisions supported by 0.8.0. If the 0.7.0 docu
 
 For a multi-revision description, declarations that apply to all root revisions omit their scope. Materially different declarations use disjoint `protocolVersions` variants. Transports must collectively cover every root revision; Capabilities Objects and same-identifier primitive variants must not overlap.
 
+## Optional sections and collection cardinality
+
+Version 0.8.0 requires only `mcpdesc`, `info`, and non-empty `protocolVersions` at the root. A migrated document MAY omit `transports` when connection details are unavailable, environment-specific, or intentionally undeclared. Omission makes no transport declaration and does not assert that the runtime has no transport. When `transports` is present, it MUST be non-empty and its effective scopes must still cover every root protocol revision.
+
+Remove any empty ordinary declaration property rather than inserting a placeholder. This applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. Projection and merge output must likewise omit an ordinary collection after its last entry is removed.
+
+Do not apply that normalization to security values. Preserve omitted `security`, `security: []`, `security: [{}]`, and empty scope arrays as distinct forms. Do not infer runtime non-support from an omitted security, capability, primitive, or tag section.
+
 ## Capabilities
 
 Wrap a present root Capabilities Object in an array:

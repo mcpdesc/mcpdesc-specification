@@ -64,6 +64,9 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 
 ### Changed
 
+- Made `transports` optional and defined omission of an optional section as no declaration rather than evidence of runtime non-support.
+- Required ordinary declaration collections to be non-empty when present, while preserving `security: []`, `security: [{}]`, and empty Security Requirement scope arrays.
+- Required projection and merge to omit emptied ordinary collections and made transport coverage conditional on a present `transports` section.
 - Capability wording is no longer tied to MCP initialization or notification wire mechanisms.
 - `resources.subscribe` and `listChanged` fields retain their durable semantic meaning across protocol revisions.
 - Core Tasks in MCP 2025-11-25 and Tasks extensions in MCP 2026-07-28 are treated as distinct declarations.

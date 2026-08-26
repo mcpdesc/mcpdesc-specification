@@ -7,8 +7,7 @@
   "required": [
     "mcpdesc",
     "info",
-    "protocolVersions",
-    "transports"
+    "protocolVersions"
   ],
   "properties": {
     "$schema": {
@@ -49,30 +48,35 @@
     },
     "tools": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/tool"
       }
     },
     "resources": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/resource"
       }
     },
     "resourceTemplates": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/resourceTemplate"
       }
     },
     "prompts": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/prompt"
       }
     },
     "tags": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/tag"
       }
@@ -529,6 +533,7 @@
     },
     "icons": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "$ref": "#/$defs/icon"
       }
@@ -784,6 +789,7 @@
     },
     "securitySchemeMap": {
       "type": "object",
+      "minProperties": 1,
       "propertyNames": {
         "pattern": "^[A-Za-z0-9._-]+$"
       },
@@ -1224,6 +1230,7 @@
         },
         "tags": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "type": "string"
           },
@@ -1273,6 +1280,7 @@
         },
         "elicitations": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "$ref": "#/$defs/elicitationDeclaration"
           }
@@ -1301,6 +1309,7 @@
         },
         "tags": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "type": "string"
           },
@@ -1335,6 +1344,7 @@
         },
         "elicitations": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "$ref": "#/$defs/elicitationDeclaration"
           }
@@ -1363,6 +1373,7 @@
         },
         "tags": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "type": "string"
           },
@@ -1394,6 +1405,7 @@
         },
         "elicitations": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "$ref": "#/$defs/elicitationDeclaration"
           }
@@ -1421,6 +1433,7 @@
         },
         "tags": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "type": "string"
           },
@@ -1440,12 +1453,14 @@
         },
         "arguments": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "$ref": "#/$defs/promptArgument"
           }
         },
         "elicitations": {
           "type": "array",
+          "minItems": 1,
           "items": {
             "$ref": "#/$defs/elicitationDeclaration"
           }
@@ -1569,6 +1584,7 @@
     },
     "extensionCapabilities": {
       "type": "object",
+      "minProperties": 1,
       "propertyNames": {
         "pattern": "^[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\\.[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*/[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$"
       },

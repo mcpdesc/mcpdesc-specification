@@ -8,10 +8,11 @@ A conforming MCP Description document MUST:
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
 4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.8.0 (Section 4).
-5. Include the `transports` array with at least one transport object and complete root protocol coverage (Section 6).
-6. Validate against the JSON Schema for the declared `mcpdesc` version.
-7. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
-8. Not contain unknown properties at the root level except specification extensions matching `^x-`.
+5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
+6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
+7. Validate against the JSON Schema for the declared `mcpdesc` version.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+9. Not contain unknown properties at the root level except specification extensions matching `^x-`.
 
 ### 16.2 Implementation Conformance
 

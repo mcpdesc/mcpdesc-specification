@@ -165,23 +165,31 @@ The root of an MCP Description document is a JSON object with the following stru
 | `info` | [Info Object](#5-info-object) | **Yes** | Server metadata |
 | `protocolVersions` | array\<string\> | **Yes** | MCP protocol revisions described by the document |
 | `instructions` | string | No | Durable natural-language guidance for using the server |
-| `transports` | array\<[Transport Object](#6-transports)\> | **Yes** | Supported transports (at least one) |
-| `securitySchemes` | map\<string, [Security Scheme Object](#72-security-scheme-object)\> | No | Reusable named security schemes |
+| `transports` | non-empty array\<[Transport Object](#6-transports)\> | No | Declared transports |
+| `securitySchemes` | non-empty map\<string, [Security Scheme Object](#72-security-scheme-object)\> | No | Reusable named security schemes |
 | `security` | [Security Requirement Array](#73-security-requirement-array) | No | Default security requirements |
 | `capabilities` | non-empty array\<[Capabilities Object](#8-capabilities)\> | No | Protocol-scoped server capability declarations |
-| `tools` | array\<[Tool Object](#9-tools)\> | No | Tools exposed by the server |
-| `resources` | array\<[Resource Object](#10-resources)\> | No | Resources exposed by the server |
-| `resourceTemplates` | array\<[Resource Template Object](#10-resources)\> | No | Resource templates |
-| `prompts` | array\<[Prompt Object](#11-prompts)\> | No | Prompts exposed by the server |
-| `tags` | array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
+| `tools` | non-empty array\<[Tool Object](#9-tools)\> | No | Tools declared by the document |
+| `resources` | non-empty array\<[Resource Object](#10-resources)\> | No | Resources declared by the document |
+| `resourceTemplates` | non-empty array\<[Resource Template Object](#10-resources)\> | No | Resource templates declared by the document |
+| `prompts` | non-empty array\<[Prompt Object](#11-prompts)\> | No | Prompts declared by the document |
+| `tags` | non-empty array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 
-### 3.3 Zero-Primitive Descriptions
+### 3.3 Optional Sections and Ordinary Collections
+
+Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section. Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
+
+An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
+
+An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
+
+### 3.4 Zero-Primitive Descriptions
 
 A document MAY omit all of `tools`, `resources`, `resourceTemplates`, and `prompts`. Such a document can describe a server under development, a legitimately empty server, or an authorization-scoped observation.
 
 Absence of a primitive collection MUST NOT be interpreted as proof that no other runtime context exposes primitives of that kind.
 
-### 3.4 MCP `_meta`
+### 3.5 MCP `_meta`
 
 MCP-derived declaration and example objects identified by this specification MAY carry a literal `_meta` object when every revision in their Effective Protocol View defines `_meta` on the corresponding MCP object. A declaration `_meta` is the literal metadata on that Tool, Resource, Resource Template, or Prompt declaration. An example `_meta` is one illustrative literal value on the represented completed result or content object. Neither form declares a reusable metadata schema or requires a live server to emit the shown value.
 
@@ -197,19 +205,19 @@ MCP `_meta`, root `x-*` specification extensions, and `capabilities.extensions` 
 
 Authors MUST NOT publish credentials, tokens, user identifiers, internal topology, live trace identifiers, or other runtime-sensitive data in static `_meta`; fictitious or redacted values MUST be used where disclosure creates risk. Consumers MUST treat keys and values as untrusted data and apply appropriate size, rendering, logging, and processing limits.
 
-### 3.5 Property Ordering
+### 3.6 Property Ordering
 
 Property ordering within JSON objects is not significant. Implementations MUST NOT depend on property order.
 
-### 3.6 Specification Extensions
+### 3.7 Specification Extensions
 
 Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for details.
 
-### 3.7 Additional Properties
+### 3.8 Additional Properties
 
 Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear at the root level. Implementations SHOULD reject documents containing unknown root-level properties.
 
-### 3.8 Example
+### 3.9 Example
 
 A minimal valid MCP Description document:
 
@@ -221,25 +229,11 @@ A minimal valid MCP Description document:
     "name": "chess-rating-server",
     "version": "1.0.0"
   },
-  "protocolVersions": ["2025-11-25"],
-  "transports": [
-    { "type": "stdio", "command": "chess-rating", "args": ["serve"] }
-  ],
-  "tools": [
-    {
-      "name": "get_player_rating",
-      "description": "Get the current Elo rating for a chess player",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "player_id": { "type": "string", "description": "Player identifier" }
-        },
-        "required": ["player_id"]
-      }
-    }
-  ]
+  "protocolVersions": ["2026-07-28"]
 }
 ```
+
+This document makes no transport or primitive declaration. Those omissions do not assert runtime non-support.
 
 ## 4. Versioning
 
@@ -312,7 +306,7 @@ A conforming single-version projection tool MUST:
 4. retain applicable transports, capabilities, primitives, and nested declarations;
 5. remove `protocolVersions` from retained declarations because applicability is unambiguous;
 6. preserve semantically significant empty values and inheritance, including security declarations;
-7. optionally omit empty primitive collections; and
+7. omit every ordinary declaration collection from which projection removes the last entry; and
 8. validate the projected document structurally and semantically for `V`.
 
 Projection produces an ordinary conforming MCP Description document, not a second format. It MUST NOT materialize transport-dependent inherited values onto a primitive unless the operation also selects a transport and defines that resolution.
@@ -333,6 +327,8 @@ P_V(merge(D_1, ..., D_n)) is semantically equivalent to D_V
 
 Semantic equivalence need not preserve property order, redundant scopes, array order where semantically insignificant, or the original choice between an omitted scope and an explicit full-parent scope. Merge tools MUST preserve the distinction among omitted `security`, `security: []`, and `security: [{}]`.
 
+Omission contributes no entries to an ordinary declaration collection during merge. A merge result MUST omit an ordinary declaration collection when it has no entries. Merge output MUST satisfy transport protocol coverage whenever it contains `transports`.
+
 ## 5. Info Object
 
 The `info` object provides metadata about the MCP server. It is REQUIRED.
@@ -348,7 +344,7 @@ The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fi
 | `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Maps to `Implementation.title` (MCP `BaseMetadata`, since 2025-06-18). |
 | `description` | string | No | Brief description of what the server does. Maps to `Implementation.description` (MCP, since 2025-11-25). |
 | `id` | string | No | Unique server identifier (URI, DID, or URN). |
-| `icons` | array\<[Icon](#icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
+| `icons` | non-empty array\<[Icon](#icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
 | `websiteUrl` | string (URI) | No | URL of the server's website. Maps to `Implementation.websiteUrl` (MCP, since 2025-11-25). |
 | `contact` | [Contact Object](#53-contact-object) | No | Contact information (OpenAPI-style, not part of MCP `Implementation`). |
 | `license` | [License Object](#54-license-object) | No | License information (OpenAPI-style, not part of MCP `Implementation`). |
@@ -407,7 +403,7 @@ The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fi
 
 ## 6. Transports
 
-The `transports` property declares one or more communication mechanisms supported by the MCP server. It is REQUIRED and MUST contain at least one transport object.
+The optional `transports` property declares one or more communication mechanisms for the MCP server. When present, it MUST contain at least one Transport Object. Omission means that the document declares no connection mechanism; it MUST NOT be interpreted as proof that the server has no transport.
 
 ### 6.1 Overview
 
@@ -523,9 +519,9 @@ The `bearer` name in this example MUST identify a root `securitySchemes` entry.
 
 ### 6.5 Protocol Coverage
 
-The union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one revision.
+When `transports` is present, the union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one revision.
 
-A document is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage.
+A document with `transports` is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage. When `transports` is omitted, transport coverage validation does not apply: validators MUST NOT infer a transport or report uncovered root revisions.
 
 ### 6.6 Extensibility
 
@@ -539,7 +535,7 @@ These declarations describe access requirements. They do not define token acquis
 
 ### 7.1 Named Security Schemes
 
-Root `securitySchemes` is a map from a local name to a Security Scheme Object. Every local name MUST match `^[A-Za-z0-9._-]+$`.
+Root `securitySchemes` is a map from a local name to a Security Scheme Object. When present, it MUST contain at least one entry. Every local name MUST match `^[A-Za-z0-9._-]+$`. Omission makes no security-scheme declaration and MUST NOT be interpreted as proof that the runtime uses no authentication or authorization mechanism.
 
 ```json
 {
@@ -652,7 +648,7 @@ Capabilities represent externally relevant server behavior beyond primitive inve
 | `completions` | object | Present if the server supports argument autocompletion (MCP 2025-03-26+) |
 | `logging` | object | Present if the server supports sending log messages to the client |
 | `tasks` | object | Present if the server supports core task-augmented requests (MCP 2025-11-25 only) |
-| `extensions` | map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28) |
+| `extensions` | non-empty map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28) |
 | `experimental` | object | Experimental, non-standard capabilities |
 
 ### 8.3 Tasks Capability
@@ -717,11 +713,11 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `annotations` | [Tool Annotations Object](#95-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
 | `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
-| `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
-| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while fulfilling the Tool (see [Section 12](#12-elicitation-declarations)). |
+| `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
+| `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while fulfilling the Tool (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
-| `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 ### 9.2 Input and Output Schemas
@@ -761,7 +757,7 @@ The Tool Example Object MUST NOT contain additional properties. In particular, 0
 
 `result` MUST contain `content` and MUST have the completed Tool Result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. Task, input-required, streaming, progress, JSON-RPC envelope, and JSON-RPC protocol-error forms are not Tool Examples. Content blocks MAY use any text, image, audio, embedded-resource, or resource-link form supported by every applicable revision.
 
-Revision-supported `_meta` on the completed result, content blocks, and embedded Resource Contents is literal illustrative metadata governed by [Section 3.4](#34-mcp-_meta). It is not a schema or a request-metadata declaration. In MCP 2026-07-28, a result example MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid in these represented contexts.
+Revision-supported `_meta` on the completed result, content blocks, and embedded Resource Contents is literal illustrative metadata governed by [Section 3.5](#35-mcp-_meta). It is not a schema or a request-metadata declaration. In MCP 2026-07-28, a result example MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid in these represented contexts.
 
 A successful result MUST omit `isError` or set it to `false`. It MAY contain `structuredContent` only in revisions that support that field. If the Tool declares `outputSchema`, a successful result MUST contain `structuredContent`, which MUST validate against that schema under the applicable schema rules. Unstructured `content` remains required when `structuredContent` is present. If the Tool has no `outputSchema`, a successful result MAY contain revision-supported `structuredContent`, but mcpdesc makes no schema-compatibility claim for that value.
 
@@ -929,11 +925,11 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `size` | number | No | Size of the raw resource content in bytes. |
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Example Object](#1042-static-resource-example-object)\> | No | Named completed Resource read examples. |
-| `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
-| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading the Resource (see [Section 12](#12-elicitation-declarations)). |
+| `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
+| `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading the Resource (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
-| `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 #### 10.1.2 Resource URI
@@ -956,11 +952,11 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `mimeType` | string | No | MIME type of the resource content. |
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Template Example Object](#1043-resource-template-example-object)\> | No | Named concrete URI and completed read-result examples. |
-| `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
-| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading an expanded Resource (see [Section 12](#12-elicitation-declarations)). |
+| `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
+| `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading an expanded Resource (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the template is deprecated. |
-| `_meta` | object | No | Literal MCP metadata on the Resource Template declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Resource Template declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 ### 10.3 Resource Annotations
@@ -1008,7 +1004,7 @@ No additional properties are allowed. `uri` MUST be a valid RFC 6570 expansion o
 
 #### 10.4.4 Completed Resource Read Result
 
-The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. For MCP 2026-07-28 it MUST contain `resultType: "complete"`, non-negative numeric `ttlMs`, and `cacheScope` equal to `"public"` or `"private"`; these are required fields of the MCP `CacheableResult` extended by `ReadResourceResult`. For earlier supported revisions it MUST NOT contain `resultType`, `ttlMs`, or `cacheScope`. A declaration whose examples would span MCP 2026-07-28 and an earlier revision therefore MUST be split into disjoint protocol-scoped variants with revision-compatible example maps. Result `_meta` and Resource Contents `_meta` are available from MCP 2025-06-18 and are literal illustrative values governed by [Section 3.4](#34-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
+The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. For MCP 2026-07-28 it MUST contain `resultType: "complete"`, non-negative numeric `ttlMs`, and `cacheScope` equal to `"public"` or `"private"`; these are required fields of the MCP `CacheableResult` extended by `ReadResourceResult`. For earlier supported revisions it MUST NOT contain `resultType`, `ttlMs`, or `cacheScope`. A declaration whose examples would span MCP 2026-07-28 and an earlier revision therefore MUST be split into disjoint protocol-scoped variants with revision-compatible example maps. Result `_meta` and Resource Contents `_meta` are available from MCP 2025-06-18 and are literal illustrative values governed by [Section 3.5](#35-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
 
 Every `contents` entry MUST contain `uri` and exactly one of `text` or `blob`. A `blob` value MUST be valid base64. An example MAY contain multiple entries; consumers MUST preserve their order and MUST NOT assume every returned URI equals the requested URI.
 
@@ -1158,12 +1154,12 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `name` | string | **Yes** | Programmatic prompt name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable prompt description. |
-| `arguments` | array\<[Prompt Argument](#112-prompt-argument-object)\> | No | Prompt arguments. |
-| `icons` | array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
-| `tags` | array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
-| `elicitations` | array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while retrieving the Prompt (see [Section 12](#12-elicitation-declarations)). |
+| `arguments` | non-empty array\<[Prompt Argument](#112-prompt-argument-object)\> | No | Prompt arguments. |
+| `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
+| `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
+| `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while retrieving the Prompt (see [Section 12](#12-elicitation-declarations)). |
 | `deprecated` | boolean | No | Whether the prompt is deprecated. |
-| `_meta` | object | No | Literal MCP metadata on the Prompt declaration, subject to [Section 3.4](#34-mcp-_meta). Since MCP 2025-06-18. |
+| `_meta` | object | No | Literal MCP metadata on the Prompt declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 
 Prompt declarations with the same `name` MUST have pairwise-disjoint effective protocol scopes. Prompt `security` describes statically known authorization required to retrieve the Prompt and replaces inherited transport or root security in full.
@@ -1252,7 +1248,7 @@ Prompt declarations with the same `name` MUST have pairwise-disjoint effective p
 
 An Elicitation Declaration documents that fulfillment of a Tool, Resource, Resource Template, or Prompt may require additional interaction with the user through the MCP client.
 
-Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
+Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. The array MUST contain at least one declaration when present. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
 
 An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it.
 
@@ -1318,7 +1314,7 @@ Complete revision-specific validation begins with MCP 2025-06-18:
 
 A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
 
-MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.4. Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
+MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.5. Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
 
 ### 12.6 Static-Description Boundary
 
@@ -1363,7 +1359,7 @@ tools:
 
 ## 13. Tags
 
-The root-level `tags` array defines a flat, document-wide tag catalogue for the MCP server. It is OPTIONAL. Tags are supplemental MCP Description metadata; they are not fields defined by the MCP protocol.
+The root-level `tags` array defines a flat, document-wide tag catalogue for the MCP server. It is OPTIONAL and MUST be non-empty when present. Tags are supplemental MCP Description metadata; they are not fields defined by the MCP protocol.
 
 When present, `tags` declares all valid tags that MAY be referenced by tools, resources, resource templates, and prompts. The array order determines display priority — tags appearing earlier in the array SHOULD be presented first in UIs and documentation.
 
@@ -1380,13 +1376,13 @@ Tag names MUST be unique across all tags in the array. Implementations MUST reje
 
 ### 13.3 Tag References
 
-Per-entity `tags` arrays (on tools, resources, resource templates, and prompts) contain plain strings referencing tag names. When a root-level `tags` array is present:
+Per-entity `tags` arrays (on tools, resources, resource templates, and prompts) MUST be non-empty when present and contain plain strings referencing tag names. When a root-level `tags` array is present:
 
 - Every tag referenced by an entity MUST be declared in the root `tags` array.
 - Implementations MUST treat a reference to an undeclared tag as a validation error.
 - Per-entity tag arrays MUST NOT contain duplicate values.
 
-When the root-level `tags` array is absent, per-entity tags are unconstrained strings (backward-compatible behavior). When it is present but empty, no per-entity tag reference is valid.
+When the root-level `tags` array is absent, per-entity tags are unconstrained strings (backward-compatible behavior). An empty root tag catalogue is invalid; producers MUST omit `tags` when no catalogue entries are declared.
 
 ### 13.4 Protocol Scopes and Effective Protocol Views
 
@@ -1532,7 +1528,7 @@ Properties with `null` values SHOULD be omitted from the document rather than in
 
 ### 15.5 Empty Arrays and Objects
 
-Empty arrays and objects MAY be omitted only when the property's semantics explicitly make omission equivalent. Implementations MUST preserve semantically significant empty values. In particular, `security: []` clears inherited security while omission inherits it, and `security: [{}]` declares an anonymous alternative; these forms are not interchangeable.
+An ordinary declaration collection with no entries MUST be omitted; an explicit empty array or object is not conforming. Serialization MUST NOT convert omission into an explicit empty value. Implementations MUST preserve semantically significant empty values and MUST NOT convert them to omission. In particular, `security: []` clears inherited security while omission inherits it, `security: [{}]` declares an anonymous alternative, and empty Security Requirement scope arrays remain significant; these forms are not interchangeable.
 
 ### 15.6 String Values
 
@@ -1559,10 +1555,11 @@ A conforming MCP Description document MUST:
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
 4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.8.0 (Section 4).
-5. Include the `transports` array with at least one transport object and complete root protocol coverage (Section 6).
-6. Validate against the JSON Schema for the declared `mcpdesc` version.
-7. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
-8. Not contain unknown properties at the root level except specification extensions matching `^x-`.
+5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
+6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
+7. Validate against the JSON Schema for the declared `mcpdesc` version.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+9. Not contain unknown properties at the root level except specification extensions matching `^x-`.
 
 ### 16.2 Implementation Conformance
 

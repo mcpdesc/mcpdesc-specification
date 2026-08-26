@@ -1,6 +1,6 @@
 ## 13. Tags
 
-The root-level `tags` array defines a flat, document-wide tag catalogue for the MCP server. It is OPTIONAL. Tags are supplemental MCP Description metadata; they are not fields defined by the MCP protocol.
+The root-level `tags` array defines a flat, document-wide tag catalogue for the MCP server. It is OPTIONAL and MUST be non-empty when present. Tags are supplemental MCP Description metadata; they are not fields defined by the MCP protocol.
 
 When present, `tags` declares all valid tags that MAY be referenced by tools, resources, resource templates, and prompts. The array order determines display priority — tags appearing earlier in the array SHOULD be presented first in UIs and documentation.
 
@@ -17,13 +17,13 @@ Tag names MUST be unique across all tags in the array. Implementations MUST reje
 
 ### 13.3 Tag References
 
-Per-entity `tags` arrays (on tools, resources, resource templates, and prompts) contain plain strings referencing tag names. When a root-level `tags` array is present:
+Per-entity `tags` arrays (on tools, resources, resource templates, and prompts) MUST be non-empty when present and contain plain strings referencing tag names. When a root-level `tags` array is present:
 
 - Every tag referenced by an entity MUST be declared in the root `tags` array.
 - Implementations MUST treat a reference to an undeclared tag as a validation error.
 - Per-entity tag arrays MUST NOT contain duplicate values.
 
-When the root-level `tags` array is absent, per-entity tags are unconstrained strings (backward-compatible behavior). When it is present but empty, no per-entity tag reference is valid.
+When the root-level `tags` array is absent, per-entity tags are unconstrained strings (backward-compatible behavior). An empty root tag catalogue is invalid; producers MUST omit `tags` when no catalogue entries are declared.
 
 ### 13.4 Protocol Scopes and Effective Protocol Views
 

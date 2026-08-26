@@ -8,11 +8,5 @@
   "protocolVersions": [
     "2026-07-28"
   ],
-  "instructions": "This server is under construction.",
-  "transports": [
-    {
-      "type": "stdio",
-      "command": "empty-server"
-    }
-  ]
+  "instructions": "This server is under construction. Connection details and primitives are not declared."
 }

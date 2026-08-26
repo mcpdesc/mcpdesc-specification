@@ -14,7 +14,7 @@ import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import YAML from 'yaml';
-import { validateMcpDescription } from '@mcpdesc/validator';
+import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 function createValidatorForDialect(dialect) {
   const Factory = dialect === '2020-12' ? Ajv2020 : Ajv;
@@ -60,9 +60,7 @@ function warn(message) {
 }
 
 function validateDraftDocument(document) {
-  return validateMcpDescription(document, {
-    specification: '0.8.0-draft.1'
-  }).diagnostics;
+  return validateMcpdesc08Document(document);
 }
 
 function reportDiagnostic(rel, diagnostic) {

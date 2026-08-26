@@ -19,23 +19,31 @@ The root of an MCP Description document is a JSON object with the following stru
 | `info` | [Info Object](#5-info-object) | **Yes** | Server metadata |
 | `protocolVersions` | array\<string\> | **Yes** | MCP protocol revisions described by the document |
 | `instructions` | string | No | Durable natural-language guidance for using the server |
-| `transports` | array\<[Transport Object](#6-transports)\> | **Yes** | Supported transports (at least one) |
-| `securitySchemes` | map\<string, [Security Scheme Object](#72-security-scheme-object)\> | No | Reusable named security schemes |
+| `transports` | non-empty array\<[Transport Object](#6-transports)\> | No | Declared transports |
+| `securitySchemes` | non-empty map\<string, [Security Scheme Object](#72-security-scheme-object)\> | No | Reusable named security schemes |
 | `security` | [Security Requirement Array](#73-security-requirement-array) | No | Default security requirements |
 | `capabilities` | non-empty array\<[Capabilities Object](#8-capabilities)\> | No | Protocol-scoped server capability declarations |
-| `tools` | array\<[Tool Object](#9-tools)\> | No | Tools exposed by the server |
-| `resources` | array\<[Resource Object](#10-resources)\> | No | Resources exposed by the server |
-| `resourceTemplates` | array\<[Resource Template Object](#10-resources)\> | No | Resource templates |
-| `prompts` | array\<[Prompt Object](#11-prompts)\> | No | Prompts exposed by the server |
-| `tags` | array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
+| `tools` | non-empty array\<[Tool Object](#9-tools)\> | No | Tools declared by the document |
+| `resources` | non-empty array\<[Resource Object](#10-resources)\> | No | Resources declared by the document |
+| `resourceTemplates` | non-empty array\<[Resource Template Object](#10-resources)\> | No | Resource templates declared by the document |
+| `prompts` | non-empty array\<[Prompt Object](#11-prompts)\> | No | Prompts declared by the document |
+| `tags` | non-empty array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 
-### 3.3 Zero-Primitive Descriptions
+### 3.3 Optional Sections and Ordinary Collections
+
+Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section. Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
+
+An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
+
+An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
+
+### 3.4 Zero-Primitive Descriptions
 
 A document MAY omit all of `tools`, `resources`, `resourceTemplates`, and `prompts`. Such a document can describe a server under development, a legitimately empty server, or an authorization-scoped observation.
 
 Absence of a primitive collection MUST NOT be interpreted as proof that no other runtime context exposes primitives of that kind.
 
-### 3.4 MCP `_meta`
+### 3.5 MCP `_meta`
 
 MCP-derived declaration and example objects identified by this specification MAY carry a literal `_meta` object when every revision in their Effective Protocol View defines `_meta` on the corresponding MCP object. A declaration `_meta` is the literal metadata on that Tool, Resource, Resource Template, or Prompt declaration. An example `_meta` is one illustrative literal value on the represented completed result or content object. Neither form declares a reusable metadata schema or requires a live server to emit the shown value.
 
@@ -51,19 +59,19 @@ MCP `_meta`, root `x-*` specification extensions, and `capabilities.extensions` 
 
 Authors MUST NOT publish credentials, tokens, user identifiers, internal topology, live trace identifiers, or other runtime-sensitive data in static `_meta`; fictitious or redacted values MUST be used where disclosure creates risk. Consumers MUST treat keys and values as untrusted data and apply appropriate size, rendering, logging, and processing limits.
 
-### 3.5 Property Ordering
+### 3.6 Property Ordering
 
 Property ordering within JSON objects is not significant. Implementations MUST NOT depend on property order.
 
-### 3.6 Specification Extensions
+### 3.7 Specification Extensions
 
 Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for details.
 
-### 3.7 Additional Properties
+### 3.8 Additional Properties
 
 Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear at the root level. Implementations SHOULD reject documents containing unknown root-level properties.
 
-### 3.8 Example
+### 3.9 Example
 
 A minimal valid MCP Description document:
 
@@ -75,23 +83,9 @@ A minimal valid MCP Description document:
     "name": "chess-rating-server",
     "version": "1.0.0"
   },
-  "protocolVersions": ["2025-11-25"],
-  "transports": [
-    { "type": "stdio", "command": "chess-rating", "args": ["serve"] }
-  ],
-  "tools": [
-    {
-      "name": "get_player_rating",
-      "description": "Get the current Elo rating for a chess player",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "player_id": { "type": "string", "description": "Player identifier" }
-        },
-        "required": ["player_id"]
-      }
-    }
-  ]
+  "protocolVersions": ["2026-07-28"]
 }
 ```
+
+This document makes no transport or primitive declaration. Those omissions do not assert runtime non-support.
 
