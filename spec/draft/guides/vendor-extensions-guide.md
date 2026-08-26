@@ -41,7 +41,7 @@ Extensions may appear at the root or directly on an eligible MCP Description-def
 
 Object eligibility is explicit. Domain-keyed maps, Security Requirement Objects, `capabilities.extensions`, embedded JSON Schemas, MCP-native payload/result/annotation/`_meta` objects, arbitrary values, and Reference Objects do not gain extension slots. Extensions on eligible map values belong to those values, not to the containing map.
 
-When Components are added, use `x-*` on the outer Components Object and eligible semantic component values. Do not treat component namespace maps, schemas, or Reference Objects as extension locations unless their specifications explicitly allow it.
+Use `x-*` on the outer Components Object and eligible semantic Tool, Resource, and Resource Template Example component values. Component namespace maps, schema component values, and Reference Objects are not specification-extension locations. An `x-*` key inside a namespace map is an ordinary component name and its value must satisfy that namespace's type.
 
 ## Do Not Confuse Extension Mechanisms
 

@@ -10,8 +10,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `name` | string | **Yes** | Programmatic tool name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable tool description. |
-| `inputSchema` | object | **Yes** | JSON Schema whose root describes an object containing tool input parameters. |
-| `outputSchema` | object | No | JSON Schema for structured tool output. Since MCP 2025-06-18. |
+| `inputSchema` | object or Reference Object | **Yes** | Inline or reusable JSON Schema whose root describes an object containing tool input parameters. |
+| `outputSchema` | object or Reference Object | No | Inline or reusable JSON Schema for structured tool output. Since MCP 2025-06-18. |
 | `annotations` | [Tool Annotations Object](#95-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
 | `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
@@ -26,6 +26,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 ### 9.2 Input and Output Schemas
 
 Every Tool MUST contain `inputSchema`. Absence MUST NOT be interpreted as evidence that the Tool accepts no arguments. The schema root MUST describe an object.
+
+`inputSchema` and `outputSchema` MAY be Reference Objects targeting the `schemas` component namespace. Resolution MUST occur before applying every inline schema rule in this section, including root shape, dialect, protocol applicability, `x-mcp-header`, and example compatibility. See [Section 18](#18-reusable-components-and-local-references).
 
 A closed no-parameter Tool SHOULD use `{ "type": "object", "additionalProperties": false }`. An open unspecified-parameter Tool may use `{ "type": "object" }`, but this is NOT RECOMMENDED because it gives little validation or guidance. A declared-parameter schema uses `properties` and, when undeclared properties must be rejected, `additionalProperties: false`.
 
@@ -45,7 +47,7 @@ MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input t
 
 ### 9.3 Named Tool Examples
 
-A Tool Object MAY contain `examples`, a map from a local example name to a Tool Example Object. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant.
+A Tool Object MAY contain `examples`, a map from a local example name to an inline Tool Example Object or a Reference Object targeting `#/components/toolExamples/<name>`. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant. A referenced example MUST be resolved before applying every contextual requirement of the containing Tool and effective protocol scope.
 
 A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
@@ -54,7 +56,7 @@ A Tool Example Object contains these core properties and MAY carry `x-*` specifi
 | `input` | object | **Yes** | Complete `params.arguments` value from a `tools/call` request. |
 | `result` | object | **Yes** | Complete applicable completed Tool Result payload, excluding the JSON-RPC envelope. |
 
-The Tool Example Object MUST NOT contain other additional properties. In particular, 0.8.0 does not define `summary`, `description`, `externalValue`, or references to reusable examples.
+The Tool Example Object MUST NOT contain other additional properties. In particular, 0.8.0 does not define `summary`, `description`, or `externalValue`.
 
 `input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
 

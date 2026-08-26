@@ -101,6 +101,12 @@ No. Named examples are MCP Description metadata for documentation, contract test
 
 Tool examples pair one complete input with a completed Tool Result. Static Resource examples use the Resource URI as the implicit read input; Resource Template examples record the exact concrete RFC 6570 expansion. Consumers must not execute Tools or dereference Resource URIs merely because an example exists.
 
+### What is the difference between `$componentRef` and JSON Schema `$ref`?
+
+`$componentRef` is an MCP Description Reference Object that points only to a typed value under the same document's root `components` object. It can replace a complete supported schema or named example value and is resolved before the containing use site's rules are applied. It never retrieves another document.
+
+JSON Schema `$ref` remains a JSON Schema keyword inside an embedded schema and follows that schema's dialect and resolution policy. Neither spelling is accepted as a substitute for the other.
+
 ### Can custom metadata be added?
 
 Yes. Properties beginning with `x-` on the root or another explicitly eligible MCP Description semantic object are specification extensions. Unrecognized extensions are ignored for core interpretation and should be preserved when round-tripping. Extensions cannot override MCP or MCP Description requirements, and their authors should publish their schema, semantics, versioning policy, and eligible object locations. See the [Vendor Extensions Guide](vendor-extensions-guide.md).

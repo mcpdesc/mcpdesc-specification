@@ -9,6 +9,7 @@ import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 const scopedCollections = ['transports', 'capabilities', 'tools', 'resources', 'resourceTemplates', 'prompts'];
 const primitiveCollections = new Set(['tools', 'resources', 'resourceTemplates', 'prompts']);
+const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples'];
 
 function clone(value) {
   return structuredClone(value);
@@ -84,6 +85,79 @@ function effectiveScope(item, rootScope) {
   return item.protocolVersions ?? rootScope;
 }
 
+function isReferenceObject(value) {
+  return value !== null
+    && typeof value === 'object'
+    && !Array.isArray(value)
+    && Object.keys(value).length === 1
+    && typeof value.$componentRef === 'string';
+}
+
+function visitReferenceObjects(document, visitor) {
+  for (const namespace of componentNamespaces) {
+    for (const value of Object.values(document.components?.[namespace] ?? {})) {
+      if (isReferenceObject(value)) visitor(value);
+    }
+  }
+  for (const [collection, declarations] of Object.entries({
+    tools: document.tools,
+    resources: document.resources,
+    resourceTemplates: document.resourceTemplates
+  })) {
+    for (const declaration of declarations ?? []) {
+      if (collection === 'tools') {
+        for (const field of ['inputSchema', 'outputSchema']) {
+          if (isReferenceObject(declaration[field])) visitor(declaration[field]);
+        }
+      }
+      for (const value of Object.values(declaration.examples ?? {})) {
+        if (isReferenceObject(value)) visitor(value);
+      }
+    }
+  }
+  for (const collection of primitiveCollections) {
+    for (const declaration of document[collection] ?? []) {
+      for (const elicitation of declaration.elicitations ?? []) {
+        if (isReferenceObject(elicitation.requestedSchema)) visitor(elicitation.requestedSchema);
+      }
+    }
+  }
+}
+
+function pruneComponents(document) {
+  if (!document.components) return;
+  const retained = new Set();
+  const pending = [];
+  const enqueue = (reference) => {
+    if (!reference.startsWith('#/components/') || retained.has(reference)) return;
+    retained.add(reference);
+    pending.push(reference);
+  };
+
+  const declarationsOnly = clone(document);
+  delete declarationsOnly.components;
+  visitReferenceObjects(declarationsOnly, (reference) => enqueue(reference.$componentRef));
+  while (pending.length) {
+    const reference = pending.shift();
+    const [, , namespace, name] = reference.split('/');
+    const value = document.components?.[namespace]?.[name];
+    if (isReferenceObject(value)) enqueue(value.$componentRef);
+  }
+
+  const components = Object.fromEntries(
+    Object.entries(document.components).filter(([name]) => name.startsWith('x-'))
+  );
+  for (const namespace of componentNamespaces) {
+    const values = Object.fromEntries(
+      Object.entries(document.components[namespace] ?? {})
+        .filter(([name]) => retained.has(`#/components/${namespace}/${name}`))
+    );
+    if (Object.keys(values).length) components[namespace] = values;
+  }
+  if (Object.keys(components).length) document.components = components;
+  else delete document.components;
+}
+
 function assertConforming(document, label) {
   const errors = validateMcpdesc08Document(document)
     .filter((diagnostic) => diagnostic.severity === 'error');
@@ -92,7 +166,7 @@ function assertConforming(document, label) {
   }
 }
 
-function projectUnchecked(document, version) {
+function projectUnchecked(document, version, pruneUnusedComponents = true) {
   const rootScope = document.protocolVersions;
   const result = clone(document);
   result.protocolVersions = [version];
@@ -122,6 +196,8 @@ function projectUnchecked(document, version) {
       delete result[collection];
     }
   }
+
+  if (pruneUnusedComponents) pruneComponents(result);
 
   return result;
 }
@@ -217,6 +293,76 @@ function mergeProvenance(documents) {
   return normalizedDocuments;
 }
 
+function mergeComponents(documents) {
+  const components = {};
+  const extensions = {};
+  const referenceMaps = [];
+
+  documents.forEach((document, documentIndex) => {
+    const referenceMap = new Map();
+    for (const [name, value] of Object.entries(document.components ?? {}).filter(([name]) => name.startsWith('x-'))) {
+      if (Object.hasOwn(extensions, name) && canonicalString(extensions[name]) !== canonicalString(value)) {
+        throw new Error(`Conflicting Components Object extension ${JSON.stringify(name)} cannot be preserved during merge`);
+      }
+      extensions[name] = clone(value);
+    }
+    for (const namespace of componentNamespaces) {
+      const targetNamespace = components[namespace] ??= {};
+      for (const [name, value] of Object.entries(document.components?.[namespace] ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
+        let mappedName = name;
+        if (Object.hasOwn(targetNamespace, mappedName)
+          && (isReferenceObject(value) || canonicalString(targetNamespace[mappedName]) !== canonicalString(value))) {
+          const suffix = `-${documentIndex + 1}`;
+          mappedName = `${name}${suffix}`;
+          let collision = 2;
+          while (Object.hasOwn(targetNamespace, mappedName)) {
+            mappedName = `${name}${suffix}-${collision}`;
+            collision += 1;
+          }
+        }
+        referenceMap.set(
+          `#/components/${namespace}/${name}`,
+          `#/components/${namespace}/${mappedName}`
+        );
+        if (!Object.hasOwn(targetNamespace, mappedName)) targetNamespace[mappedName] = clone(value);
+      }
+    }
+    referenceMaps.push(referenceMap);
+  });
+
+  documents.forEach((document, documentIndex) => {
+    const referenceMap = referenceMaps[documentIndex];
+    for (const namespace of componentNamespaces) {
+      for (const [name, value] of Object.entries(document.components?.[namespace] ?? {})) {
+        const mappedReference = referenceMap.get(`#/components/${namespace}/${name}`);
+        const mappedName = mappedReference?.split('/').at(-1);
+        if (mappedName && isReferenceObject(value)) {
+          components[namespace][mappedName] = {
+            $componentRef: referenceMap.get(value.$componentRef) ?? value.$componentRef
+          };
+        }
+      }
+    }
+  });
+
+  for (const namespace of componentNamespaces) {
+    if (Object.keys(components[namespace] ?? {}).length === 0) delete components[namespace];
+  }
+  const combined = Object.keys(components).length || Object.keys(extensions).length
+    ? { ...components, ...extensions }
+    : undefined;
+
+  return documents.map((document, documentIndex) => {
+    const normalized = clone(document);
+    visitReferenceObjects(normalized, (reference) => {
+      reference.$componentRef = referenceMaps[documentIndex].get(reference.$componentRef) ?? reference.$componentRef;
+    });
+    if (combined) normalized.components = clone(combined);
+    else delete normalized.components;
+    return normalized;
+  });
+}
+
 function effectiveProvenanceIds(view, declaration) {
   return declaration.provenanceIds ?? view.provenance?.defaultIds ?? [];
 }
@@ -256,7 +402,7 @@ function collectProtocolViews(documents, inputsValidated = false) {
     }
     if (!inputsValidated) assertConforming(document, `Merge input ${documentIndex + 1}`);
     for (const version of document.protocolVersions) {
-      const view = projectUnchecked(document, version);
+      const view = projectUnchecked(document, version, false);
       assertConforming(view, `Merge input ${documentIndex + 1} projection for MCP ${version}`);
       const previous = byVersion.get(version);
       if (previous && !semanticallyEquivalent(previous, view)) {
@@ -295,7 +441,7 @@ export function mergeProtocolDescriptions(documents) {
   }
 
   documents.forEach((document, index) => assertConforming(document, `Merge input ${index + 1}`));
-  const normalizedDocuments = mergeProvenance(documents);
+  const normalizedDocuments = mergeProvenance(mergeComponents(documents));
   const views = collectProtocolViews(normalizedDocuments, true);
   const versions = [...views.keys()].sort();
   const firstView = views.values().next().value;

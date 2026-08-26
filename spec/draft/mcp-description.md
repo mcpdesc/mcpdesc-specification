@@ -169,6 +169,7 @@ The root of an MCP Description document is an object with the following structur
 | `securitySchemes` | non-empty map\<string, [Security Scheme Object](#72-security-scheme-object)\> | No | Reusable named security schemes |
 | `security` | [Security Requirement Array](#73-security-requirement-array) | No | Default security requirements |
 | `provenance` | [Provenance Registry Object](#171-provenance-registry-object) | No | Reusable evidence records and default primitive attribution |
+| `components` | [Components Object](#181-components-object) | No | Reusable schemas and named primitive examples |
 | `capabilities` | non-empty array\<[Capabilities Object](#8-capabilities)\> | No | Protocol-scoped server capability declarations |
 | `tools` | non-empty array\<[Tool Object](#9-tools)\> | No | Tools declared by the document |
 | `resources` | non-empty array\<[Resource Object](#10-resources)\> | No | Resources declared by the document |
@@ -180,7 +181,7 @@ The root of an MCP Description document is an object with the following structur
 
 Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section. Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
 
-An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; provenance `records`, `defaultIds`, and primitive `provenanceIds`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
+An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; provenance `records`, `defaultIds`, and primitive `provenanceIds`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
 
 An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
 
@@ -709,8 +710,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `name` | string | **Yes** | Programmatic tool name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable tool description. |
-| `inputSchema` | object | **Yes** | JSON Schema whose root describes an object containing tool input parameters. |
-| `outputSchema` | object | No | JSON Schema for structured tool output. Since MCP 2025-06-18. |
+| `inputSchema` | object or Reference Object | **Yes** | Inline or reusable JSON Schema whose root describes an object containing tool input parameters. |
+| `outputSchema` | object or Reference Object | No | Inline or reusable JSON Schema for structured tool output. Since MCP 2025-06-18. |
 | `annotations` | [Tool Annotations Object](#95-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
 | `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
@@ -725,6 +726,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 ### 9.2 Input and Output Schemas
 
 Every Tool MUST contain `inputSchema`. Absence MUST NOT be interpreted as evidence that the Tool accepts no arguments. The schema root MUST describe an object.
+
+`inputSchema` and `outputSchema` MAY be Reference Objects targeting the `schemas` component namespace. Resolution MUST occur before applying every inline schema rule in this section, including root shape, dialect, protocol applicability, `x-mcp-header`, and example compatibility. See [Section 18](#18-reusable-components-and-local-references).
 
 A closed no-parameter Tool SHOULD use `{ "type": "object", "additionalProperties": false }`. An open unspecified-parameter Tool may use `{ "type": "object" }`, but this is NOT RECOMMENDED because it gives little validation or guidance. A declared-parameter schema uses `properties` and, when undeclared properties must be rejected, `additionalProperties: false`.
 
@@ -744,7 +747,7 @@ MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input t
 
 ### 9.3 Named Tool Examples
 
-A Tool Object MAY contain `examples`, a map from a local example name to a Tool Example Object. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant.
+A Tool Object MAY contain `examples`, a map from a local example name to an inline Tool Example Object or a Reference Object targeting `#/components/toolExamples/<name>`. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant. A referenced example MUST be resolved before applying every contextual requirement of the containing Tool and effective protocol scope.
 
 A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
@@ -753,7 +756,7 @@ A Tool Example Object contains these core properties and MAY carry `x-*` specifi
 | `input` | object | **Yes** | Complete `params.arguments` value from a `tools/call` request. |
 | `result` | object | **Yes** | Complete applicable completed Tool Result payload, excluding the JSON-RPC envelope. |
 
-The Tool Example Object MUST NOT contain other additional properties. In particular, 0.8.0 does not define `summary`, `description`, `externalValue`, or references to reusable examples.
+The Tool Example Object MUST NOT contain other additional properties. In particular, 0.8.0 does not define `summary`, `description`, or `externalValue`.
 
 `input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
 
@@ -985,7 +988,7 @@ In MCP protocol values, the same Resource Annotations type also applies to suppo
 
 #### 10.4.1 Shared Named-Map Rules
 
-A Resource or Resource Template Object MAY contain an `examples` map. When present, it MUST contain at least one entry. Each case-sensitive local example name MUST match `^[A-Za-z0-9._-]+$` and is scoped to its containing declaration. Entry order is not semantically significant. The map key is both a human-meaningful label and a stable local selection name; 0.8.0 does not define separate example prose fields.
+A Resource or Resource Template Object MAY contain an `examples` map. Each value MAY be the applicable inline example object or a Reference Object targeting `resourceExamples` for a Resource or `resourceTemplateExamples` for a Resource Template. When present, the map MUST contain at least one entry. Each case-sensitive local example name MUST match `^[A-Za-z0-9._-]+$` and is scoped to its containing declaration. Entry order is not semantically significant. The map key is both a human-meaningful label and a stable local selection name; 0.8.0 does not define separate example prose fields. A referenced example MUST be resolved before applying URI, result-shape, content, and protocol-scope requirements at its use site.
 
 Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol scopes have independent example maps.
 
@@ -1022,7 +1025,7 @@ Resource read errors are JSON-RPC errors and are not Resource Examples in 0.8.0.
 
 Resource examples are illustrative, non-exhaustive snapshots. They do not assert live equality, freshness, immutability, cache validity, or complete coverage. Revision-supported metadata is part of the example and is not a guarantee about a live server. In particular, `ttlMs` and `cacheScope` reproduce the illustrated MCP 2026-07-28 result; they do not govern caching of the MCP Description document or authorize sharing captured or live content across authorization contexts.
 
-Documentation tooling SHOULD preserve names, concrete template URIs, result fields, and content order. Mock and contract-test tooling MAY select an exact named example. It MUST NOT dereference example URIs or fetch a live Resource while loading or serving an inline example. This specification defines no default example, wildcard match, template fallback, dynamic behavior, external value, or reusable root component.
+Documentation tooling SHOULD preserve names, concrete template URIs, result fields, and content order. Mock and contract-test tooling MAY select an exact named example. It MUST NOT dereference example URIs or fetch a live Resource while loading or serving an inline or referenced example. This specification defines no default example, wildcard match, template fallback, dynamic behavior, or external value.
 
 Resource examples are MCP Description metadata, not fields of MCP Resource or Resource Template list values. Projection to MCP list values MUST omit `examples` unless an independent MCP extension defines a destination. Effective Protocol View projection preserves the selected declaration's map and MUST NOT combine maps from declarations with disjoint scopes. MCP Description round-tripping MUST preserve example names and values.
 
@@ -1265,7 +1268,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 | `mode` | `"form"` or `"url"` | **Yes** | Canonical elicitation mode. |
 | `message` | string | **Yes** | Representative user-facing explanation of the interaction. |
 | `when` | string | No | Human-readable description of when the interaction may occur. |
-| `requestedSchema` | object | Conditional | Restricted MCP form-response schema. |
+| `requestedSchema` | object or Reference Object | Conditional | Inline or reusable restricted MCP form-response schema. |
 | `url` | string (URI) | No | Static URL when known at description-authoring time. |
 | `onDecline` | string | No | Human-readable expected behavior after explicit decline. |
 | `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
@@ -1286,6 +1289,8 @@ For `mode: "form"`:
 - `requestedSchema` is REQUIRED;
 - `url` MUST NOT appear; and
 - `requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+
+`requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 
 The schema is limited to a flat object whose properties use MCP elicitation primitive schemas. Nested objects and arrays other than MCP-supported multi-select enumeration forms are invalid. Unsupported keywords and unsupported string formats are invalid.
 
@@ -1456,13 +1461,14 @@ A specification extension MAY appear directly on the root MCP Description Object
 - the Capabilities Object and MCP Description-defined capability declaration objects;
 - Tool, Resource, Resource Template, Prompt, Prompt Argument, and Elicitation Declaration Objects; and
 - MCP Description-defined named Tool, Resource, and Resource Template Example wrapper objects; and
-- Provenance Registry, Provenance Record, Provenance Producer, and Provenance Artifact Objects.
+- Provenance Registry, Provenance Record, Provenance Producer, and Provenance Artifact Objects; and
+- the outer Components Object and semantic Tool, Resource, and Resource Template Example component values.
 
 Eligibility follows the object's specification-defined role, not the fact that a serialized value is a JSON object. A map value that is an eligible object MAY carry extensions, but the containing map does not thereby gain an extension slot.
 
 Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
 
-If a Components Object is introduced, the outer Components Object and eligible semantic component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible unless their specifications explicitly state otherwise. This rule does not define Components syntax in 0.8.0.
+The outer Components Object and eligible semantic example component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible. An `x-*` key inside a component namespace map is an ordinary component name and its value MUST satisfy that namespace's component type.
 
 ### 14.3 Extension Values
 
@@ -1647,7 +1653,7 @@ A conforming MCP Description document MUST:
 5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
 6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
 7. Validate against the JSON Schema for the declared `mcpdesc` version.
-8. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, provenance-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, provenance-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
 ### 16.2 Implementation Conformance
@@ -1663,8 +1669,9 @@ A conforming implementation (tool, validator, or platform) MUST:
 7. Apply the same structural JSON Schema validation and cross-object semantic requirements after decoding JSON or YAML.
 8. Use safe YAML parsing and reject unsupported YAML constructs when claiming YAML input support (Section 15.3).
 9. Apply reasonable document-size, nesting-depth, scalar-length, and collection-size limits to supported input serializations.
+10. Resolve `$componentRef` only within the same parsed document, without network access, before contextual semantic validation.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security references, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
@@ -1792,3 +1799,60 @@ A merge tool SHOULD preserve records and attribution from every contributing doc
 Consumers MAY use provenance under externally selected policy for documentation, filtering, governance, comparison, or review. They MUST treat records and artifacts as untrusted assertions unless independently verified and MUST NOT infer collection completeness solely from attribution.
 
 Provenance metadata MUST NOT contain credentials, tokens, personal user identifiers, person-specific roles, authorization claims, confidential topology, raw runtime session IDs, or other sensitive runtime context. Artifact URIs and recording times can expose infrastructure or operational information; authors SHOULD omit or redact optional data when publication creates risk. Artifact retrieval requires an explicit consumer-controlled network, authentication, tracking, and content-processing policy.
+
+## 18. Reusable Components and Local References
+
+### 18.1 Components Object
+
+The root MCP Description Object MAY contain a `components` property. A Components Object MUST contain at least one property when present and MAY contain these typed namespace maps:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `schemas` | non-empty map\<string, JSON Schema Object or Reference Object\> | Reusable schema values. |
+| `toolExamples` | non-empty map\<string, Tool Example Object or Reference Object\> | Reusable Tool examples. |
+| `resourceExamples` | non-empty map\<string, Resource Example Object or Reference Object\> | Reusable static Resource examples. |
+| `resourceTemplateExamples` | non-empty map\<string, Resource Template Example Object or Reference Object\> | Reusable Resource Template examples. |
+
+Every present namespace map MUST contain at least one entry. Each component name MUST match `^[A-Za-z0-9._-]+$`. Names are case-sensitive and unique only within their namespace.
+
+The outer Components Object MAY carry `x-*` specification extensions and MUST NOT contain other properties. Namespace maps are closed component-name maps rather than extension locations. Schema component values follow JSON Schema, including its extension-keyword rules. Tool, Resource, and Resource Template Example component values are eligible semantic objects and MAY carry the same `x-*` specification extensions as their inline forms. Components and component values MUST NOT declare MCP Description `protocolVersions`; protocol applicability is inherited exclusively from each use site.
+
+### 18.2 Reference Object
+
+A Reference Object contains exactly one required property:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `$componentRef` | string | Local JSON Pointer to one named value in the compatible `#/components` namespace. |
+
+No sibling property, including an `x-*` property, is permitted. The pointer MUST have the form `#/components/<namespace>/<name>`, where `<namespace>` is one of the four namespaces in Section 18.1 and `<name>` follows the component-name grammar. Remote URIs, relative-file references, pointers outside `#/components`, missing targets, and targets in an incompatible namespace are invalid.
+
+A `$componentRef` is an MCP Description reference only at a use site that permits a Reference Object. JSON Schema `$ref` remains governed exclusively by the applicable embedded JSON Schema dialect. Implementations MUST NOT accept `$ref` as an MCP Description component reference and MUST NOT reinterpret a `$componentRef` nested inside an embedded JSON Schema.
+
+### 18.3 Use Sites and Contextual Validation
+
+Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; and Resource Template `examples` values MAY reference `resourceTemplateExamples`.
+
+Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output revision rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
+
+### 18.4 Resolution
+
+A conforming implementation MUST resolve Reference Objects as JSON Pointers into the same parsed MCP Description document. It MUST require the target to exist in the namespace appropriate to the use site, preserve the target JSON value for validation, follow component-to-component references transitively, and reject cycles. It MUST NOT access the network, filesystem, package registry, or another document while resolving `$componentRef`.
+
+Resolution errors are document-conformance errors. A validator SHOULD report the use-site or component path and distinguish a malformed pointer, missing target, incompatible namespace, and cycle.
+
+### 18.5 Projection
+
+An Effective Protocol View MAY retain every component or prune components unused by retained declarations. A pruning projection MUST retain every component transitively reached through a retained Reference Object and MUST remove no target required by the projected document. It MUST validate all retained references after projection. The outer Components Object and namespace maps MUST be omitted if pruning would otherwise leave them empty, except that retained outer specification extensions keep the Components Object non-empty.
+
+Components have no independent protocol scope. Their validity is determined only after use-site projection.
+
+### 18.6 Merge
+
+Merge tooling MUST preserve every referenced component and MUST NOT silently bind different component values to one name. It MAY deduplicate equivalent values. When different values collide at one namespace and name, tooling MAY fail with a merge conflict or deterministically rename one value and rewrite every affected Reference Object. A generated name MUST satisfy the component-name grammar, and all rewritten references MUST validate in the merged result.
+
+Outer Components Object extensions with the same name and different values are conflicts unless the merge operation has an independently defined lossless representation. Merge processing MUST remain local and MUST NOT retrieve component values from a network or another document.
+
+### 18.7 Security and Processing Limits
+
+Components and referenced examples are untrusted document content. Implementations SHOULD bound reference depth, component count, nesting, and resolved validation work. They MUST detect cycles without unbounded recursion and MUST apply the same safe rendering, schema-evaluation, URI, content, and secret-handling rules as for inline values.

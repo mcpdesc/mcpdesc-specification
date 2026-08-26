@@ -6,12 +6,12 @@ This guide maps MCP Description concepts to OpenAPI for developers familiar with
 
 | OpenAPI Concept | MCP Description Equivalent | Notes |
 |----------------|---------------------------|-------|
-| `openapi: "3.1.0"` | `mcpdesc: "0.6.0"` | Specification version |
+| `openapi: "3.1.0"` | `mcpdesc: "0.8.0"` | Specification version |
 | `info` | `info` | Nearly identical structure |
 | `servers` | `transports` | Connection endpoints |
 | `paths` + operations | `tools` | Server capabilities |
 | `webhooks` | — | No equivalent (MCP uses notifications) |
-| `components/schemas` | `inputSchema` / `outputSchema` | Inline per-tool |
+| `components/schemas` and Reference Objects | `components/schemas` and `$componentRef` | Typed local reuse; different reference syntax and semantics |
 | `security` / `securitySchemes` | `security` | Same structure |
 | `tags` | `tags` on tools/resources/prompts | Per-entity tagging |
 | — | `resources` | No direct OpenAPI equivalent |
@@ -167,7 +167,7 @@ MCP Description uses named scheme definitions and requirement arrays aligned wit
 | **HTTP methods** | MCP uses tool names, not GET/POST/PUT/DELETE |
 | **Content negotiation** | MCP uses structured JSON, not multiple media types |
 | **Response codes** | MCP uses protocol-level success/error, not HTTP status codes |
-| **Components/reuse** | MCP Description doesn't have `$ref` or shared components (yet) |
+| **External component references** | MCP Description `$componentRef` is local to one document and does not define imports or network retrieval |
 | **Webhooks** | MCP uses notifications within the protocol |
 
 ## When to Use Which

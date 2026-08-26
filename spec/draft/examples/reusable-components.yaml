@@ -1,0 +1,44 @@
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
+info:
+  name: reusable-search
+  version: 1.0.0
+protocolVersions:
+  - '2026-07-28'
+components:
+  schemas:
+    SearchInput:
+      type: object
+      properties:
+        query:
+          type: string
+      required: [query]
+      additionalProperties: false
+    SearchOutput:
+      type: object
+      properties:
+        count:
+          type: integer
+      required: [count]
+      additionalProperties: false
+  toolExamples:
+    basic-search:
+      input:
+        query: components
+      result:
+        resultType: complete
+        content:
+          - type: text
+            text: Found one result.
+        structuredContent:
+          count: 1
+      x-example-source: documentation
+tools:
+  - name: search
+    inputSchema:
+      $componentRef: '#/components/schemas/SearchInput'
+    outputSchema:
+      $componentRef: '#/components/schemas/SearchOutput'
+    examples:
+      basic:
+        $componentRef: '#/components/toolExamples/basic-search'

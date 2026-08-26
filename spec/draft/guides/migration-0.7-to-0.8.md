@@ -53,7 +53,15 @@ No migration is required for existing root `x-*` properties. Version 0.8.0 also 
 
 Preserve unknown object-level extensions without assigning them core semantics. Do not move extensions into domain maps, Security Requirement Objects, `capabilities.extensions`, embedded JSON Schemas, carried MCP payload/result/annotation/`_meta` objects, arbitrary values, or Reference Objects. A nested `protocolVersions` field inside an extension value belongs to that extension and does not scope the containing MCP Description object.
 
-If a later Components proposal is implemented, apply object-level extensions to the outer Components Object and eligible semantic component values only. Component namespace maps, schemas, and Reference Objects remain closed to this mechanism unless their specifications explicitly provide otherwise.
+Apply object-level extensions to the outer Components Object and eligible semantic example component values only. Component namespace maps, schemas, and Reference Objects remain closed to this mechanism. An `x-*` key inside a namespace map is a component name and its value must satisfy the namespace type.
+
+## Reusable components
+
+No migration is required because root `components` and `$componentRef` are optional. To deduplicate repeated complete schemas or named example objects, move the value into the matching `schemas`, `toolExamples`, `resourceExamples`, or `resourceTemplateExamples` namespace and replace each complete use-site value with a local Reference Object such as `{ "$componentRef": "#/components/schemas/SearchInput" }`.
+
+Do not replace JSON Schema `$ref` or `$defs`; those remain scoped to an embedded JSON Schema resource. Do not convert remote or relative-file references into `$componentRef`, add sibling properties to a Reference Object, add `protocolVersions` to a component, or use a component to bypass an inline use-site rule. Validate each referenced value under every Tool, Elicitation Declaration, Resource, Resource Template, and protocol scope where it is used.
+
+Migration and merge tooling must keep resolution within one document, reject missing or cyclic targets, and never retrieve component values from a network. When combining descriptions, deduplicate equivalent components or deterministically rename collisions and rewrite all affected `$componentRef` values. Projection may remove unused values only after retaining every transitive target.
 
 ## Provenance records
 
@@ -160,7 +168,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 7. Generate and deduplicate named security schemes, preserving override placement.
 8. Add only authoritatively known instructions, scopes, revisions, and protocol variants.
 9. Validate against the 0.8.0 JSON Schema.
-10. Run semantic validation for protocol scopes, transport coverage, primitive and Elicitation Declaration uniqueness, security references, tags, revision applicability, elicitation modes and form schemas, literal `_meta`, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
+10. Run semantic validation for protocol scopes, transport coverage, primitive and Elicitation Declaration uniqueness, security and component references, tags, revision applicability, elicitation modes and form schemas, literal `_meta`, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
 
 A migration tool MUST report unresolved ambiguity instead of guessing.
 

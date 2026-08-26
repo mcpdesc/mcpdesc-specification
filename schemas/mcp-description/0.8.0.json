@@ -42,6 +42,9 @@
     "provenance": {
       "$ref": "#/$defs/provenanceRegistry"
     },
+    "components": {
+      "$ref": "#/$defs/components"
+    },
     "capabilities": {
       "type": "array",
       "minItems": 1,
@@ -259,6 +262,40 @@
     "jsonSchemaObject": {
       "type": "object",
       "additionalProperties": true
+    },
+    "referenceObject": {
+      "type": "object",
+      "required": [
+        "$componentRef"
+      ],
+      "properties": {
+        "$componentRef": {
+          "type": "string",
+          "pattern": "^#/components/(schemas|toolExamples|resourceExamples|resourceTemplateExamples)/[A-Za-z0-9._-]+$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "schemaComponentValue": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/referenceObject"
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/jsonSchemaObject"
+            },
+            {
+              "not": {
+                "required": [
+                  "$componentRef"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     },
     "elicitationFormOption": {
       "type": "object",
@@ -558,7 +595,14 @@
           "minLength": 1
         },
         "requestedSchema": {
-          "$ref": "#/$defs/elicitationFormSchema"
+          "oneOf": [
+            {
+              "$ref": "#/$defs/referenceObject"
+            },
+            {
+              "$ref": "#/$defs/elicitationFormSchema"
+            }
+          ]
         },
         "url": {
           "type": "string",
@@ -1311,7 +1355,14 @@
         "pattern": "^[A-Za-z0-9._-]+$"
       },
       "additionalProperties": {
-        "$ref": "#/$defs/toolExample"
+        "oneOf": [
+          {
+            "$ref": "#/$defs/referenceObject"
+          },
+          {
+            "$ref": "#/$defs/toolExample"
+          }
+        ]
       }
     },
     "completedReadResourceResultExample": {
@@ -1370,7 +1421,14 @@
         "pattern": "^[A-Za-z0-9._-]+$"
       },
       "additionalProperties": {
-        "$ref": "#/$defs/resourceExample"
+        "oneOf": [
+          {
+            "$ref": "#/$defs/referenceObject"
+          },
+          {
+            "$ref": "#/$defs/resourceExample"
+          }
+        ]
       }
     },
     "resourceTemplateExample": {
@@ -1402,8 +1460,103 @@
         "pattern": "^[A-Za-z0-9._-]+$"
       },
       "additionalProperties": {
-        "$ref": "#/$defs/resourceTemplateExample"
+        "oneOf": [
+          {
+            "$ref": "#/$defs/referenceObject"
+          },
+          {
+            "$ref": "#/$defs/resourceTemplateExample"
+          }
+        ]
       }
+    },
+    "componentMap": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9._-]+$"
+      }
+    },
+    "components": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "schemas": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/componentMap"
+            },
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/schemaComponentValue"
+              }
+            }
+          ]
+        },
+        "toolExamples": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/componentMap"
+            },
+            {
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/referenceObject"
+                  },
+                  {
+                    "$ref": "#/$defs/toolExample"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "resourceExamples": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/componentMap"
+            },
+            {
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/referenceObject"
+                  },
+                  {
+                    "$ref": "#/$defs/resourceExample"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "resourceTemplateExamples": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/componentMap"
+            },
+            {
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/referenceObject"
+                  },
+                  {
+                    "$ref": "#/$defs/resourceTemplateExample"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
+      "additionalProperties": false
     },
     "promptArgument": {
       "type": "object",
@@ -1475,24 +1628,31 @@
           "minLength": 1
         },
         "inputSchema": {
-          "allOf": [
+          "oneOf": [
             {
-              "$ref": "#/$defs/jsonSchemaObject"
+              "$ref": "#/$defs/referenceObject"
             },
             {
-              "required": [
-                "type"
-              ],
-              "properties": {
-                "type": {
-                  "const": "object"
+              "allOf": [
+                {
+                  "$ref": "#/$defs/schemaComponentValue"
+                },
+                {
+                  "required": [
+                    "type"
+                  ],
+                  "properties": {
+                    "type": {
+                      "const": "object"
+                    }
+                  }
                 }
-              }
+              ]
             }
           ]
         },
         "outputSchema": {
-          "$ref": "#/$defs/jsonSchemaObject"
+          "$ref": "#/$defs/schemaComponentValue"
         },
         "annotations": {
           "$ref": "#/$defs/toolAnnotations"

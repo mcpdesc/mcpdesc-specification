@@ -22,13 +22,14 @@ A specification extension MAY appear directly on the root MCP Description Object
 - the Capabilities Object and MCP Description-defined capability declaration objects;
 - Tool, Resource, Resource Template, Prompt, Prompt Argument, and Elicitation Declaration Objects; and
 - MCP Description-defined named Tool, Resource, and Resource Template Example wrapper objects; and
-- Provenance Registry, Provenance Record, Provenance Producer, and Provenance Artifact Objects.
+- Provenance Registry, Provenance Record, Provenance Producer, and Provenance Artifact Objects; and
+- the outer Components Object and semantic Tool, Resource, and Resource Template Example component values.
 
 Eligibility follows the object's specification-defined role, not the fact that a serialized value is a JSON object. A map value that is an eligible object MAY carry extensions, but the containing map does not thereby gain an extension slot.
 
 Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
 
-If a Components Object is introduced, the outer Components Object and eligible semantic component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible unless their specifications explicitly state otherwise. This rule does not define Components syntax in 0.8.0.
+The outer Components Object and eligible semantic example component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible. An `x-*` key inside a component namespace map is an ordinary component name and its value MUST satisfy that namespace's component type.
 
 ### 14.3 Extension Values
 

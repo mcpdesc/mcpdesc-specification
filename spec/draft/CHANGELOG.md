@@ -65,6 +65,7 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - JSON and restricted YAML as equally conforming serializations of one JSON-compatible data model, including YAML 1.2.2 JSON-schema scalar resolution, deterministic profile restrictions, serialization-specific capability claims, and file-extension and media-type guidance, implementing Proposal 0010 while it remains under review.
 - Repository-only strict raw-source decoding and isolated serialization fixtures for JSON/YAML equivalence, safe YAML parsing, single-document input, string and unique mapping keys, tag and alias rejection, disabled merge semantics, and finite numbers. The public `@mcpdesc/validator` API remains a parsed-value API.
 - Optional document-level provenance records, default attribution, primitive overrides, referential validation, descriptive-only semantic comparison, and provenance-preserving projection and merge behavior, implementing Proposal 0008 while it remains under review.
+- Optional typed `components` namespaces and local `$componentRef` Reference Objects for reusable Tool schemas, Elicitation schemas, and named Tool, Resource, and Resource Template examples, including contextual resolution, cycle detection, projection pruning, and collision-safe merge rewriting, implementing Proposal 0009 while it remains under review.
 
 ### Changed
 

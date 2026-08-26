@@ -13,7 +13,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { validateMcpDescription } from '@mcpdesc/validator';
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
-import { semanticValidateDocument } from './validate-0.8.mjs';
+import { resolveComponentReferences, semanticValidateDocument, validateMcpdesc08Document } from './validate-0.8.mjs';
 
 const root = process.cwd();
 
@@ -262,6 +262,120 @@ assert.equal(resourceExampleView.resourceTemplates[0].examples['sample-game'].re
 const mergedResourceExamples = mergeProtocolDescriptions([resourceExampleView]);
 assert.deepEqual(mergedResourceExamples.resources[0].examples, resourceExampleView.resources[0].examples);
 assert.deepEqual(mergedResourceExamples.resourceTemplates[0].examples, resourceExampleView.resourceTemplates[0].examples);
+
+const componentSource = fixture('spec/draft/fixtures/expected-valid/reusable-components.json');
+assertStructurallyConforming(componentSource);
+assert.deepEqual(validateMcpdesc08Document(componentSource).filter((diagnostic) => diagnostic.severity === 'error'), []);
+const resolvedComponents = resolveComponentReferences(componentSource).document;
+assert.deepEqual(resolvedComponents.tools[0].inputSchema, componentSource.components.schemas.Input);
+assert.deepEqual(resolvedComponents.tools[0].examples.basic, componentSource.components.toolExamples.basic);
+assert.equal(
+  resolvedComponents.components.schemas.Input.properties.query.$componentRef,
+  undefined,
+  '$componentRef inside an embedded JSON Schema is not traversed'
+);
+
+for (const [label, mutate] of [
+  ['empty outer object', (document) => { document.components = {}; }],
+  ['empty namespace', (document) => { document.components.schemas = {}; }],
+  ['invalid component name', (document) => { document.components.schemas['bad/name'] = { type: 'object' }; }],
+  ['outer protocol scope', (document) => { document.components.protocolVersions = ['2026-07-28']; }],
+  ['example component protocol scope', (document) => { document.components.toolExamples.basic.protocolVersions = ['2026-07-28']; }],
+  ['reference sibling', (document) => { document.tools[0].inputSchema['x-forbidden'] = true; }],
+  ['remote reference', (document) => { document.tools[0].inputSchema.$componentRef = 'https://example.com/components.json#/schemas/Input'; }],
+  ['non-component reference', (document) => { document.tools[0].inputSchema.$componentRef = '#/tools/0/inputSchema'; }],
+  ['namespace extension value', (document) => { document.components.toolExamples['x-map-extension'] = true; }]
+]) {
+  const invalid = structuredClone(componentSource);
+  mutate(invalid);
+  assert.equal(validate(invalid), false, `components must reject ${label}`);
+}
+
+const schemaKeywordBoundary = structuredClone(componentSource);
+schemaKeywordBoundary.components.schemas.Input.properties.query.$componentRef = 'not-an-mcp-description-reference';
+assert.deepEqual(validateMcpdesc08Document(schemaKeywordBoundary).filter((diagnostic) => diagnostic.severity === 'error'), []);
+assert.equal(
+  resolveComponentReferences(schemaKeywordBoundary).document.tools[0].inputSchema.properties.query.$componentRef,
+  'not-an-mcp-description-reference'
+);
+
+const invalidComponentResolution = fixture('spec/draft/fixtures/expected-invalid/component-reference-resolution.json');
+const invalidResolutionCodes = semanticValidateDocument(invalidComponentResolution).map((diagnostic) => diagnostic.code);
+assert.ok(invalidResolutionCodes.includes('missing-component-reference-target'));
+assert.ok(invalidResolutionCodes.includes('wrong-component-reference-namespace'));
+assert.ok(invalidResolutionCodes.includes('component-reference-cycle'));
+
+const invalidComponentSchemas = fixture('spec/draft/fixtures/expected-invalid/component-contextual-schemas.json');
+assert.ok(validateMcpdesc08Document(invalidComponentSchemas).some((diagnostic) => diagnostic.code === 'schema-validation'));
+const invalidComponentExamples = fixture('spec/draft/fixtures/expected-invalid/component-contextual-examples.json');
+const referencedExampleDiagnostics = semanticValidateDocument(invalidComponentExamples);
+assert.ok(referencedExampleDiagnostics.some(
+  (diagnostic) => diagnostic.code === 'tool-example-schema-mismatch' && diagnostic.path.at(-1) === 'input'
+));
+assert.ok(referencedExampleDiagnostics.some(
+  (diagnostic) => diagnostic.code === 'tool-example-schema-mismatch' && diagnostic.path.at(-1) === 'structuredContent'
+));
+assert.ok(referencedExampleDiagnostics.some((diagnostic) => diagnostic.code === 'resource-template-example-invalid-expansion'));
+const inlineInvalidExamples = structuredClone(invalidComponentExamples);
+inlineInvalidExamples.tools[0].examples.bad = structuredClone(inlineInvalidExamples.components.toolExamples['bad-input']);
+inlineInvalidExamples.resourceTemplates[0].examples.bad = structuredClone(
+  inlineInvalidExamples.components.resourceTemplateExamples['bad-uri']
+);
+assert.deepEqual(
+  semanticValidateDocument(inlineInvalidExamples).map(({ code, path }) => ({ code, path })),
+  referencedExampleDiagnostics.map(({ code, path }) => ({ code, path }))
+);
+const invalidComponentProtocolScope = fixture('spec/draft/fixtures/expected-invalid/component-protocol-scope.json');
+const componentProtocolDiagnostics = semanticValidateDocument(invalidComponentProtocolScope);
+assert.ok(componentProtocolDiagnostics.some(
+  (diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch'
+    && diagnostic.path[0] === 'resources'
+    && diagnostic.path[1] === 0
+));
+assert.equal(componentProtocolDiagnostics.some(
+  (diagnostic) => diagnostic.path[0] === 'resources' && diagnostic.path[1] === 1
+), false);
+
+const componentProjectionSource = structuredClone(componentSource);
+componentProjectionSource.components.schemas.Unused = { type: 'object' };
+componentProjectionSource.components.toolExamples.Unused = structuredClone(componentSource.components.toolExamples.basic);
+const projectedComponents = projectProtocolView(componentProjectionSource, '2026-07-28');
+assert.deepEqual(Object.keys(projectedComponents.components.schemas), ['Input', 'InputAlias', 'Output', 'Form']);
+assert.deepEqual(Object.keys(projectedComponents.components.toolExamples), ['basic']);
+assert.equal(projectedComponents.components['x-example-owner'], 'documentation');
+
+function componentMergeInput(version, schema, extension = 'shared') {
+  return {
+    mcpdesc: '0.8.0',
+    info: { name: 'component-merge', version: '1.0.0' },
+    protocolVersions: [version],
+    components: {
+      schemas: { Input: schema },
+      'x-example-registry': extension
+    },
+    tools: [{ name: 'search', inputSchema: { $componentRef: '#/components/schemas/Input' } }]
+  };
+}
+
+const component2025 = componentMergeInput('2025-11-25', { type: 'object', properties: { legacy: { type: 'string' } } });
+const component2026 = componentMergeInput('2026-07-28', { type: 'object', properties: { query: { type: 'string' } } });
+const mergedComponentCollision = mergeProtocolDescriptions([component2025, component2026]);
+assert.deepEqual(Object.keys(mergedComponentCollision.components.schemas), ['Input', 'Input-2']);
+assert.deepEqual(
+  mergedComponentCollision.tools.map((tool) => tool.inputSchema.$componentRef).sort(),
+  ['#/components/schemas/Input', '#/components/schemas/Input-2']
+);
+assert.deepEqual(mergeProtocolDescriptions([component2025, component2026]), mergedComponentCollision);
+assertStructurallyConforming(mergedComponentCollision);
+
+const equivalentComponent2026 = componentMergeInput('2026-07-28', structuredClone(component2025.components.schemas.Input));
+const mergedEquivalentComponents = mergeProtocolDescriptions([component2025, equivalentComponent2026]);
+assert.deepEqual(Object.keys(mergedEquivalentComponents.components.schemas), ['Input']);
+assert.equal(mergedEquivalentComponents.tools.length, 1);
+assert.throws(
+  () => mergeProtocolDescriptions([component2025, componentMergeInput('2026-07-28', structuredClone(component2025.components.schemas.Input), 'conflict')]),
+  /Conflicting Components Object extension/
+);
 
 const invalidResourceCacheFields = fixture('spec/draft/fixtures/expected-invalid/resource-example-cache-fields.json');
 const invalidResourceCacheDiagnostics = semanticValidateDocument(invalidResourceCacheFields);

@@ -1,0 +1,87 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "reusable-components",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2026-07-28"],
+  "components": {
+    "schemas": {
+      "Input": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } },
+        "required": ["query"],
+        "additionalProperties": false
+      },
+      "InputAlias": {
+        "$componentRef": "#/components/schemas/Input"
+      },
+      "Output": {
+        "type": "object",
+        "properties": { "count": { "type": "integer" } },
+        "required": ["count"]
+      },
+      "Form": {
+        "type": "object",
+        "properties": { "approval": { "type": "boolean" } },
+        "required": ["approval"]
+      }
+    },
+    "toolExamples": {
+      "basic": {
+        "input": { "query": "mcp" },
+        "result": {
+          "resultType": "complete",
+          "content": [{ "type": "text", "text": "One result" }],
+          "structuredContent": { "count": 1 }
+        },
+        "x-example-source": "documentation"
+      }
+    },
+    "resourceExamples": {
+      "current": {
+        "result": {
+          "resultType": "complete",
+          "ttlMs": 60,
+          "cacheScope": "private",
+          "contents": [{ "uri": "data://status", "text": "ready" }]
+        }
+      }
+    },
+    "resourceTemplateExamples": {
+      "item": {
+        "uri": "data://items/1",
+        "result": {
+          "resultType": "complete",
+          "ttlMs": 60,
+          "cacheScope": "public",
+          "contents": [{ "uri": "data://items/1", "text": "item 1" }]
+        }
+      }
+    },
+    "x-example-owner": "documentation"
+  },
+  "tools": [{
+    "name": "search",
+    "inputSchema": { "$componentRef": "#/components/schemas/InputAlias" },
+    "outputSchema": { "$componentRef": "#/components/schemas/Output" },
+    "examples": { "basic": { "$componentRef": "#/components/toolExamples/basic" } },
+    "elicitations": [{
+      "name": "approve",
+      "mode": "form",
+      "message": "Approve this search?",
+      "requestedSchema": { "$componentRef": "#/components/schemas/Form" }
+    }]
+  }],
+  "resources": [{
+    "uri": "data://status",
+    "name": "status",
+    "examples": { "current": { "$componentRef": "#/components/resourceExamples/current" } }
+  }],
+  "resourceTemplates": [{
+    "uriTemplate": "data://items/{id}",
+    "name": "item",
+    "examples": { "item": { "$componentRef": "#/components/resourceTemplateExamples/item" } }
+  }]
+}

@@ -16,7 +16,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 | `mode` | `"form"` or `"url"` | **Yes** | Canonical elicitation mode. |
 | `message` | string | **Yes** | Representative user-facing explanation of the interaction. |
 | `when` | string | No | Human-readable description of when the interaction may occur. |
-| `requestedSchema` | object | Conditional | Restricted MCP form-response schema. |
+| `requestedSchema` | object or Reference Object | Conditional | Inline or reusable restricted MCP form-response schema. |
 | `url` | string (URI) | No | Static URL when known at description-authoring time. |
 | `onDecline` | string | No | Human-readable expected behavior after explicit decline. |
 | `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
@@ -37,6 +37,8 @@ For `mode: "form"`:
 - `requestedSchema` is REQUIRED;
 - `url` MUST NOT appear; and
 - `requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+
+`requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 
 The schema is limited to a flat object whose properties use MCP elicitation primitive schemas. Nested objects and arrays other than MCP-supported multi-select enumeration forms are invalid. Unsupported keywords and unsupported string formats are invalid.
 

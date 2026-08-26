@@ -75,7 +75,7 @@ In MCP protocol values, the same Resource Annotations type also applies to suppo
 
 #### 10.4.1 Shared Named-Map Rules
 
-A Resource or Resource Template Object MAY contain an `examples` map. When present, it MUST contain at least one entry. Each case-sensitive local example name MUST match `^[A-Za-z0-9._-]+$` and is scoped to its containing declaration. Entry order is not semantically significant. The map key is both a human-meaningful label and a stable local selection name; 0.8.0 does not define separate example prose fields.
+A Resource or Resource Template Object MAY contain an `examples` map. Each value MAY be the applicable inline example object or a Reference Object targeting `resourceExamples` for a Resource or `resourceTemplateExamples` for a Resource Template. When present, the map MUST contain at least one entry. Each case-sensitive local example name MUST match `^[A-Za-z0-9._-]+$` and is scoped to its containing declaration. Entry order is not semantically significant. The map key is both a human-meaningful label and a stable local selection name; 0.8.0 does not define separate example prose fields. A referenced example MUST be resolved before applying URI, result-shape, content, and protocol-scope requirements at its use site.
 
 Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol scopes have independent example maps.
 
@@ -112,7 +112,7 @@ Resource read errors are JSON-RPC errors and are not Resource Examples in 0.8.0.
 
 Resource examples are illustrative, non-exhaustive snapshots. They do not assert live equality, freshness, immutability, cache validity, or complete coverage. Revision-supported metadata is part of the example and is not a guarantee about a live server. In particular, `ttlMs` and `cacheScope` reproduce the illustrated MCP 2026-07-28 result; they do not govern caching of the MCP Description document or authorize sharing captured or live content across authorization contexts.
 
-Documentation tooling SHOULD preserve names, concrete template URIs, result fields, and content order. Mock and contract-test tooling MAY select an exact named example. It MUST NOT dereference example URIs or fetch a live Resource while loading or serving an inline example. This specification defines no default example, wildcard match, template fallback, dynamic behavior, external value, or reusable root component.
+Documentation tooling SHOULD preserve names, concrete template URIs, result fields, and content order. Mock and contract-test tooling MAY select an exact named example. It MUST NOT dereference example URIs or fetch a live Resource while loading or serving an inline or referenced example. This specification defines no default example, wildcard match, template fallback, dynamic behavior, or external value.
 
 Resource examples are MCP Description metadata, not fields of MCP Resource or Resource Template list values. Projection to MCP list values MUST omit `examples` unless an independent MCP extension defines a destination. Effective Protocol View projection preserves the selected declaration's map and MUST NOT combine maps from declarations with disjoint scopes. MCP Description round-tripping MUST preserve example names and values.
 
