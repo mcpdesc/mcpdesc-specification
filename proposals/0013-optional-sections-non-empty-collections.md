@@ -1,4 +1,4 @@
-# Proposal 0011: Optional Sections and Non-Empty Collections
+# Proposal 0013: Optional Sections and Non-Empty Collections
 
 - Status: Review
 - Author: Stève Sfartz
