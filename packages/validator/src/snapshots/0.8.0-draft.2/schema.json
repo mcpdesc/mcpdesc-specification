@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mcpdesc.org/schema/0.8.0.json",
   "title": "MCP Description",
-  "description": "MCP Description 0.8.0 Community Working Draft 1 (v0.8.0-draft.1; unreleased).",
+  "description": "MCP Description 0.8.0 Community Working Draft 2 (v0.8.0-draft.2; unreleased).",
   "type": "object",
   "required": [
     "mcpdesc",

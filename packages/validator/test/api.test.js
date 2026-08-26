@@ -39,7 +39,7 @@ test('exports the cumulative validator API', () => {
     },
     '0.8.0-draft.2': {
       snapshotTag: 'v0.8.0-draft.2',
-      schemaSha256: '57594803b38a2acd054241e85a34446e681924e5e579ecf5341091f26e217a52'
+      schemaSha256: 'ab692c1a5a0f7e5f29be1940aa8c64a56d4620be0a19d00cf0a64680b7e517fa'
     }
   });
 });

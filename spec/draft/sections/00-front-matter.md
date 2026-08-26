@@ -1,12 +1,12 @@
 ---
 title: MCP Description Specification
 version: 0.8.0
-status: Community working draft 1
-draft-iteration: 1
-snapshot-tag: v0.8.0-draft.1
+status: Community working draft 2
+draft-iteration: 2
+snapshot-tag: v0.8.0-draft.2
 released: false
 baseline: 0.7.0
-date: 2026-08-24
+date: 2026-08-26
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
@@ -18,13 +18,13 @@ editors:
 
 # MCP Description Specification
 
-**Version**: 0.8.0 (community working draft 1; `v0.8.0-draft.1`)
+**Version**: 0.8.0 (community working draft 2; `v0.8.0-draft.2`)
 
-**Status**: Community working draft 1 — not released
+**Status**: Community working draft 2 — not released
 
 **Baseline**: v0.7.0
 
-**Date**: 2026-08-24
+**Date**: 2026-08-26
 
 ## Abstract
 
@@ -34,5 +34,5 @@ An MCP Description declares supported MCP protocol revisions, instructions, tran
 
 ## Status of This Document
 
-This document is **Community Working Draft 1** for MCP Description v0.8.0, identified by snapshot tag `v0.8.0-draft.1`. The snapshot label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a released specification and may change during proposal review, implementation, and interoperability testing. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by this draft are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is **Community Working Draft 2** for MCP Description v0.8.0, identified by snapshot tag `v0.8.0-draft.2`. The snapshot label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a released specification and may change during proposal review, implementation, and interoperability testing. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by this draft are recorded in the [proposal revision manifest](../PROPOSALS.md).
 

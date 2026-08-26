@@ -26,6 +26,21 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 
 ### Draft snapshots
 
+#### Community Working Draft 2 — 2026-08-26 (`v0.8.0-draft.2`)
+
+Draft 2 is the second public interoperability snapshot of v0.8.0. It remains unreleased: the snapshot identifier does not change the `mcpdesc` value from `0.8.0`, update `schemas/latest.json`, accept any proposal, or publish the validator package.
+
+The [proposal revision manifest](PROPOSALS.md) records exact source commits and SHA-256 digests for the six Draft 1 inputs and six additional review-stage proposals: 0008, 0009, 0010, 0011, 0012, and 0013. All 12 are implemented experimentally. Proposal 0006 (Issue #13, PR #15) is explicitly excluded.
+
+Issue [#18](https://github.com/mcpdesc/mcpdesc-specification/issues/18) established the validator snapshot lifecycle used by this assembly:
+
+- [x] preserve immutable Draft 1 runtime and test snapshots;
+- [x] add sibling Draft 2 runtime and frozen test snapshots with exact selector and schema provenance;
+- [x] select cumulative validator version `0.2.0` and record npm `latest` as the intended dist-tag;
+- [x] require package, declaration, browser, fixture, and tarball validation before release review;
+- [ ] create or push `v0.8.0-draft.2` only after explicit maintainer approval;
+- [ ] publish validator `0.2.0` only after reviewing the tarball from the approved tag.
+
 #### Community Working Draft 1 — 2026-08-24 (`v0.8.0-draft.1`)
 
 Draft 1 is the first public interoperability snapshot of v0.8.0. The tag identifies an immutable snapshot, not a distinct `mcpdesc` conformance version, stable release, feature freeze, or claim of community consensus. Review-stage features may change incompatibly or be removed before a later draft or stable release.

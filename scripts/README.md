@@ -18,7 +18,7 @@ When those sources disagree, the workflow controls CI triggering, `package.json`
 |---|---|---|
 | [`validate-repository.mjs`](validate-repository.mjs) | Invoked by both `npm test` and `npm run validate`; therefore also runs in repository CI. | See its module header for validation scope and [`package.json`](../package.json) for command composition. |
 | [`test-views.mjs`](test-views.mjs) | Invoked by `npm test`; therefore also runs in repository CI. | See its module header for the behaviors covered. |
-| [`validate-0.8.mjs`](validate-0.8.mjs) | Compatibility facade used by Effective Protocol View tooling. Canonical Draft 1 validation lives in [`packages/validator`](../packages/validator/). | See the package README for the supported public API. |
+| [`validate-0.8.mjs`](validate-0.8.mjs) | Draft 2 working-tree facade used by repository and Effective Protocol View tooling. It extends the shared Draft 1 semantic base without modifying the immutable Draft 1 snapshot. | See the package README for the cumulative public Draft 1 and Draft 2 API. |
 | [`mcpdesc-views.mjs`](mcpdesc-views.mjs) | Library module exercised by `test-views.mjs`; it is not independently triggered by CI. | See its exported API and module header. |
 | [`freeze-version.mjs`](freeze-version.mjs) | Maintainer-invoked during an explicitly approved release; it is not part of `npm test` or CI. | See the script header for usage and its printed post-freeze checklist; release authority and prerequisites remain in [`GOVERNANCE.md`](../GOVERNANCE.md#branch-and-release-model). |
 

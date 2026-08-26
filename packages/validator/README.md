@@ -7,7 +7,7 @@ Version `0.2.0` cumulatively supports these immutable snapshots:
 | Selector | Tag | Embedded schema SHA-256 |
 |---|---|---|
 | `0.8.0-draft.1` | `v0.8.0-draft.1` | `4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4` |
-| `0.8.0-draft.2` | `v0.8.0-draft.2` | `57594803b38a2acd054241e85a34446e681924e5e579ecf5341091f26e217a52` |
+| `0.8.0-draft.2` | `v0.8.0-draft.2` | `ab692c1a5a0f7e5f29be1940aa8c64a56d4620be0a19d00cf0a64680b7e517fa` |
 
 This cumulative release is intended to receive the npm `latest` dist-tag after the Draft 2 tag and tarball are reviewed. Repository changes alone do not publish the package or create either tag.
 

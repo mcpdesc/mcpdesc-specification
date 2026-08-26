@@ -13,7 +13,7 @@ import process from 'node:process';
 import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import YAML from 'yaml';
+import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 function createValidatorForDialect(dialect) {
@@ -92,10 +92,10 @@ function parseDocumentFile(full) {
   const rel = path.relative(root, full);
   try {
     const text = fs.readFileSync(full, 'utf8');
-    const document = /\.json$/i.test(full) ? JSON.parse(text) : YAML.parse(text);
+    const document = decodeDocumentSource(text, documentFormatForPath(full), rel);
     return { rel, document };
   } catch (error) {
-    return { rel, parseError: `${rel}: cannot parse document: ${error.message}` };
+    return { rel, parseError: error.message };
   }
 }
 
@@ -126,9 +126,9 @@ const status = readJson('specification-status.json');
 const latest = readJson('schemas/latest.json');
 if (status && status.stable?.version !== '0.7.0') fail('stable status must remain 0.7.0 during bootstrap');
 if (status && status.draft?.version !== '0.8.0') fail('draft status must identify 0.8.0');
-if (status && status.draft?.iteration !== 1) fail('draft status must identify iteration 1');
-if (status && status.draft?.snapshotTag !== 'v0.8.0-draft.1') fail('draft status must identify snapshot tag v0.8.0-draft.1');
-if (status && status.draft?.snapshotDate !== '2026-08-24') fail('draft status must identify snapshot date 2026-08-24');
+if (status && !Number.isInteger(status.draft?.iteration)) fail('draft status iteration must be an integer');
+if (status && status.draft?.snapshotTag !== `v${status.draft?.version}-draft.${status.draft?.iteration}`) fail('draft status snapshot tag must match its version and iteration');
+if (status && !/^\d{4}-\d{2}-\d{2}$/.test(status.draft?.snapshotDate ?? '')) fail('draft status snapshot date must use YYYY-MM-DD');
 if (status && status.draft?.released !== false) fail('v0.8.0 must remain unreleased during bootstrap');
 if (latest && latest['mcp-description'] !== '0.7.0') fail('schemas/latest.json must remain on 0.7.0 until release');
 
@@ -150,7 +150,13 @@ const proposalSnapshots = [
   ['0003-security-requirements.md', '199555ade2b13eb179c0a473712027582441158b', 'proposals/0003-security-requirements.md', 'fcba623df2b345d8a060ab9a265949dbcf795f0b17651e8fccd4cb7c0d17150d'],
   ['0004-tool-input-output-examples.md', 'efa6130a4818d16f8d4034264ae4641e51cfaf3b', 'proposals/0004-tool-input-output-examples.md', '769451ad9a5bbb6b3c2b1ef87855d8f66daa5a1962f3c6dd57a94c1d5a470f56'],
   ['0005-resource-examples.md', '4e83d3980af46fa0f28a05f9bf4dfee6a391ab94', 'proposals/0005-resource-examples.md', 'bc7ddbc27fc316821a6f993fafd07b1fa16dd006aa4acc350c3161fa30d4f3c6'],
-  ['0007-elicitation.md', 'bea999a5ec537ed6ebb68e9681f0f4a48d812f20', 'proposals/0007-elicitation.md', '32bbb63c5fe04539414bf46af42023f870f230b738f40278af28592e5d2e9efc']
+  ['0007-elicitation.md', 'bea999a5ec537ed6ebb68e9681f0f4a48d812f20', 'proposals/0007-elicitation.md', '32bbb63c5fe04539414bf46af42023f870f230b738f40278af28592e5d2e9efc'],
+  ['0008-primitive-provenance.md', 'f4ba3d43d67365a8c8aee48160870a6dec6a9e15', 'proposals/0008-primitive-provenance.md', '1be8746bcb0914cbcd7add6246f6105637df3e96aec719fe9f8cd02ae05cef3c'],
+  ['0009-reusable-components.md', '309f006f5a0f42c612e2f3f0a06e25441437f8b3', 'proposals/0009-reusable-components.md', '0bc534169c0f1a05e3bc50e96c63859536ab905d2d68dec5737627b168f26e1c'],
+  ['0010-json-yaml-serialization.md', '2171023d01a7f24d97510c6185d464c32ef8ba09', 'proposals/0010-json-yaml-serialization.md', '2d11a529ba94041c390c1e3dab80b56c9408be260c881873db7341c6f4718291'],
+  ['0011-primitive-specification-extensions.md', 'de79bcd28da06b4355668f5403b84ac276f7ae7e', 'proposals/0011-primitive-specification-extensions.md', '4b2dd0c29a520e9bfe00b6571bc6a486e70f17ee2e368797d655e747351a3f12'],
+  ['0012-primitive-client-capability-requirements.md', '45e033975e22b699b3c3f2f0eeb160f9678e4369', 'proposals/0012-primitive-client-capability-requirements.md', '4bc568e6374af3745a62ce7892d574171e0fefac091a133ecca0ed77899c86f8'],
+  ['0013-optional-sections-non-empty-collections.md', 'e6243738ef685f5da5fa9418269cfe4317fe7b12', 'proposals/0013-optional-sections-non-empty-collections.md', '47fe7d3380ba92d3ad10ae719a29017221868d99c4336011fd2f2bdd2aa36a83']
 ];
 const proposalManifest = fs.existsSync(path.join(root, 'spec/draft/PROPOSALS.md')) ? readText('spec/draft/PROPOSALS.md') : '';
 if (!proposalManifest) fail('missing required file: spec/draft/PROPOSALS.md');

@@ -19,7 +19,7 @@ The MCP Toolkit and `mcpcontract` implementation remain in `cisco-open/mcptoolki
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | `cisco-open/mcptoolkit-contract` |
-| 0.8.0 | Community Working Draft 1 (`v0.8.0-draft.1`) | `mcpdesc/mcpdesc-specification` |
+| 0.8.0 | Community Working Draft 2 (`v0.8.0-draft.2`; unreleased) | `mcpdesc/mcpdesc-specification` |
 
 The v0.8.0 draft is not a stable specification release. Draft snapshot tags publish specific review and interoperability baselines without satisfying the stable-release approval requirements.
 
@@ -118,6 +118,14 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 - Draft status may be represented separately in `schemas/draft.json` and `specification-status.json`.
 - Maintainers may publish annotated draft snapshot tags named `v<version>-draft.<iteration>` for community feedback. A draft snapshot does not change the `mcpdesc` conformance version, freeze `spec/draft/`, update `schemas/latest.json`, or satisfy the approval requirements for a stable release.
 - Releases require passing validation, updated normative text and schemas, examples, changelog and migration guidance, an explicit maintainer decision, and an annotated version tag.
+
+### Validator snapshot publication
+
+The `@mcpdesc/validator` package uses implementation SemVer independently from immutable specification snapshot selectors. Each selector has sibling runtime and frozen test snapshot directories; publishing support for a later draft MUST NOT alter an earlier selector's schema, semantics, metadata, fixtures, or expected results.
+
+The reviewed specification assembly records the chosen package version, exact selector metadata, schema digests, and intended npm dist-tag. A maintainer creates the specification snapshot tag first, then reviews `npm pack --dry-run --json` from that tag before explicitly publishing. Repository scripts and CI validate these artifacts but MUST NOT create tags, move npm dist-tags, or publish packages.
+
+For Community Working Draft 2, validator `0.2.0` cumulatively supports `0.8.0-draft.1` and `0.8.0-draft.2` and is intended to receive npm `latest` after tag and tarball review. This intent is not publication authorization.
 
 ## Intellectual property and contributions
 

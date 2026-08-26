@@ -8,9 +8,9 @@
   "draft": {
     "version": "0.8.0",
     "status": "community-working-draft",
-    "iteration": 1,
-    "snapshotTag": "v0.8.0-draft.1",
-    "snapshotDate": "2026-08-24",
+    "iteration": 2,
+    "snapshotTag": "v0.8.0-draft.2",
+    "snapshotDate": "2026-08-26",
     "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
     "branch": "main",
     "path": "spec/draft",
