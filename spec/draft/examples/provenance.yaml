@@ -1,0 +1,43 @@
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
+info:
+  name: attributed-search
+  version: 1.0.0
+protocolVersions:
+  - '2026-07-28'
+provenance:
+  records:
+    generated-contract:
+      kind: generated
+      producer:
+        name: example-generator
+        version: 3.1.0
+      method: source-generation
+      artifact:
+        uri: https://example.com/builds/42/description.json
+        digest: sha256:7f83b1657ff1fc53
+    runtime-inspection:
+      kind: observed
+      producer:
+        name: example-inspector
+      method: dump
+      artifact:
+        uri: urn:example:inspection:42
+      recordedAt: '2026-08-26T12:30:00Z'
+  defaultIds:
+    - generated-contract
+tools:
+  - name: search
+    inputSchema:
+      type: object
+      properties:
+        query:
+          type: string
+      required:
+        - query
+  - name: runtime_status
+    inputSchema:
+      type: object
+      additionalProperties: false
+    provenanceIds:
+      - runtime-inspection

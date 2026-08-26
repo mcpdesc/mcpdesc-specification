@@ -309,6 +309,129 @@ assert.deepEqual(mergedMeta.tools[0].examples, metaView.tools[0].examples);
 assert.deepEqual(mergedMeta.resources[0]._meta, metaView.resources[0]._meta);
 assert.deepEqual(mergedMeta.resources[0].examples, metaView.resources[0].examples);
 
+const provenanceSource = fixture('spec/draft/fixtures/expected-valid/provenance-records-and-attribution.json');
+for (const [label, mutate] of [
+  ['empty records', (document) => { document.provenance.records = {}; }],
+  ['empty defaults', (document) => { document.provenance.defaultIds = []; }],
+  ['duplicate defaults', (document) => { document.provenance.defaultIds = ['generated-source', 'generated-source']; }],
+  ['unknown kind', (document) => { document.provenance.records['generated-source'].kind = 'trusted'; }],
+  ['empty producer name', (document) => { document.provenance.records['generated-source'].producer.name = ''; }],
+  ['empty method', (document) => { document.provenance.records['generated-source'].method = ''; }],
+  ['relative artifact URI', (document) => { document.provenance.records['generated-source'].artifact.uri = 'builds/42.json'; }],
+  ['empty digest', (document) => { document.provenance.records['generated-source'].artifact.digest = ''; }],
+  ['invalid recordedAt', (document) => { document.provenance.records['generated-source'].recordedAt = 'yesterday'; }],
+  ['forbidden confidence', (document) => { document.provenance.records['generated-source'].confidence = 1; }],
+  ['empty primitive attribution', (document) => { document.resources[0].provenanceIds = []; }],
+  ['duplicate primitive attribution', (document) => { document.resources[0].provenanceIds = ['runtime-inspection', 'runtime-inspection']; }]
+]) {
+  const invalid = structuredClone(provenanceSource);
+  mutate(invalid);
+  assert.equal(validate(invalid), false, `provenance must reject ${label}`);
+}
+
+const invalidProvenanceSemantics = fixture('spec/draft/fixtures/expected-invalid/provenance-references-and-digest.json');
+const invalidProvenanceDiagnostics = semanticValidateDocument(invalidProvenanceSemantics);
+assert.equal(invalidProvenanceDiagnostics.filter((diagnostic) => diagnostic.code === 'unknown-provenance-reference').length, 2);
+assert.equal(invalidProvenanceDiagnostics.filter((diagnostic) => diagnostic.code === 'invalid-provenance-digest').length, 1);
+
+const provenanceView = projectProtocolView(provenanceSource, '2026-07-28');
+assert.deepEqual(provenanceView.provenance, provenanceSource.provenance);
+assert.equal('provenanceIds' in provenanceView.tools[0], false);
+assert.deepEqual(provenanceView.resources[0].provenanceIds, ['runtime-inspection']);
+assert.deepEqual(provenanceView.resourceTemplates[0].provenanceIds, ['contract-review', 'generated-source']);
+assert.equal(provenanceView.provenance.records['generated-source'].producer['x-example-team'], 'platform');
+assert.equal(provenanceView.provenance.records['generated-source'].artifact['x-example-retention-days'], 30);
+
+const changedProvenance = structuredClone(provenanceView);
+changedProvenance.provenance.records['generated-source'].recordedAt = '2026-08-27T12:30:00Z';
+changedProvenance.tools[0].provenanceIds = ['contract-review'];
+assert.equal(semanticallyEquivalent(provenanceView, changedProvenance), true);
+assert.notDeepEqual(provenanceView, changedProvenance);
+
+const mergedProvenanceView = mergeProtocolDescriptions([provenanceView]);
+assert.deepEqual(mergedProvenanceView.provenance, provenanceView.provenance);
+assert.equal('provenanceIds' in mergedProvenanceView.tools[0], false);
+assert.deepEqual(mergedProvenanceView.resources[0].provenanceIds, ['runtime-inspection']);
+
+function provenanceContributor(kind, registryExtension = 'shared') {
+  return {
+    mcpdesc: '0.8.0',
+    info: { name: 'provenance-merge', version: '1.0.0' },
+    protocolVersions: ['2026-07-28'],
+    provenance: {
+      records: {
+        source: { kind }
+      },
+      defaultIds: ['source'],
+      'x-example-registry': registryExtension
+    },
+    tools: [
+      {
+        name: 'search',
+        inputSchema: { type: 'object' }
+      }
+    ]
+  };
+}
+
+const observedContributor = provenanceContributor('observed');
+const curatedContributor = provenanceContributor('curated');
+const mergedContributors = mergeProtocolDescriptions([observedContributor, curatedContributor]);
+assert.deepEqual(Object.keys(mergedContributors.provenance.records), ['source', 'source~2']);
+assert.equal(mergedContributors.provenance.records.source.kind, 'observed');
+assert.equal(mergedContributors.provenance.records['source~2'].kind, 'curated');
+assert.equal('defaultIds' in mergedContributors.provenance, false);
+assert.deepEqual(mergedContributors.tools[0].provenanceIds, ['source', 'source~2']);
+assert.deepEqual(mergeProtocolDescriptions([observedContributor, curatedContributor]), mergedContributors);
+assertStructurallyConforming(mergedContributors);
+
+const unattributedContributor = structuredClone(observedContributor);
+delete unattributedContributor.provenance;
+const mergedAttributedAndUnattributed = mergeProtocolDescriptions([unattributedContributor, observedContributor]);
+assert.deepEqual(mergedAttributedAndUnattributed.tools[0].provenanceIds, ['source']);
+
+const protocolSpecificProvenance = structuredClone(provenanceSource);
+protocolSpecificProvenance.protocolVersions = ['2025-11-25', '2026-07-28'];
+protocolSpecificProvenance.tools = [
+  {
+    name: 'search',
+    inputSchema: { type: 'object' },
+    protocolVersions: ['2025-11-25'],
+    provenanceIds: ['contract-review']
+  },
+  {
+    name: 'search',
+    inputSchema: { type: 'object' },
+    protocolVersions: ['2026-07-28'],
+    provenanceIds: ['runtime-inspection']
+  }
+];
+delete protocolSpecificProvenance.resources;
+delete protocolSpecificProvenance.resourceTemplates;
+delete protocolSpecificProvenance.prompts;
+const provenance2025 = projectProtocolView(protocolSpecificProvenance, '2025-11-25');
+const provenance2026 = projectProtocolView(protocolSpecificProvenance, '2026-07-28');
+const mergedProtocolSpecificProvenance = mergeProtocolDescriptions([provenance2025, provenance2026]);
+assert.equal(mergedProtocolSpecificProvenance.tools.length, 2);
+assert.ok(semanticallyEquivalent(projectProtocolView(mergedProtocolSpecificProvenance, '2025-11-25'), provenance2025));
+assert.ok(semanticallyEquivalent(projectProtocolView(mergedProtocolSpecificProvenance, '2026-07-28'), provenance2026));
+assert.deepEqual(
+  mergedProtocolSpecificProvenance.tools.map((tool) => tool.provenanceIds[0]).sort(),
+  ['contract-review', 'runtime-inspection']
+);
+
+const warningProvenanceSource = fixture('spec/draft/fixtures/expected-warning/provenance-with-reserved-extension-warning.json');
+const warningProvenanceView = projectProtocolView(warningProvenanceSource, '2026-07-28');
+assert.deepEqual(warningProvenanceView.provenance, warningProvenanceSource.provenance);
+assert.ok(semanticValidateDocument(warningProvenanceView).some((diagnostic) => diagnostic.severity === 'warning'));
+assert.deepEqual(mergeProtocolDescriptions([warningProvenanceView]).provenance, warningProvenanceView.provenance);
+
+const conflictingRegistryExtension = provenanceContributor('observed', 'conflicting');
+assert.throws(
+  () => mergeProtocolDescriptions([observedContributor, conflictingRegistryExtension]),
+  /Conflicting provenance registry extension/
+);
+
 const changedInstructions = structuredClone(view2026);
 changedInstructions.instructions = 'Different durable guidance.';
 assert.throws(

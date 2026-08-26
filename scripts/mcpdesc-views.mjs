@@ -8,6 +8,7 @@
 import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 const scopedCollections = ['transports', 'capabilities', 'tools', 'resources', 'resourceTemplates', 'prompts'];
+const primitiveCollections = new Set(['tools', 'resources', 'resourceTemplates', 'prompts']);
 
 function clone(value) {
   return structuredClone(value);
@@ -42,11 +43,13 @@ function normalizeSecurity(owner) {
 
 function semanticCanonicalString(value) {
   const normalized = clone(value);
+  delete normalized.provenance;
   if (Array.isArray(normalized.protocolVersions)) normalized.protocolVersions.sort();
   normalizeSecurity(normalized);
   for (const collection of scopedCollections) {
     if (!Array.isArray(normalized[collection])) continue;
     for (const item of normalized[collection]) {
+      if (primitiveCollections.has(collection)) delete item.provenanceIds;
       if (Array.isArray(item.protocolVersions)) item.protocolVersions.sort();
       for (const elicitation of item.elicitations ?? []) {
         if (Array.isArray(elicitation.protocolVersions)) elicitation.protocolVersions.sort();
@@ -56,6 +59,19 @@ function semanticCanonicalString(value) {
     normalized[collection].sort((left, right) => canonicalString(left).localeCompare(canonicalString(right)));
   }
   return canonicalString(normalized);
+}
+
+function semanticDeclarationCanonicalString(value) {
+  const normalized = clone(value);
+  delete normalized.provenanceIds;
+  return semanticCanonicalString(normalized);
+}
+
+function mergeDeclarationCanonicalString(value) {
+  return canonicalString({
+    runtime: semanticDeclarationCanonicalString(value),
+    provenanceIds: Array.isArray(value.provenanceIds) ? [...value.provenanceIds].sort() : null
+  });
 }
 
 function withoutScope(value) {
@@ -128,6 +144,110 @@ function unscopedDocumentPart(view) {
   return result;
 }
 
+function sameStringSet(left, right) {
+  return canonicalString([...left].sort()) === canonicalString([...right].sort());
+}
+
+function mergeProvenance(documents) {
+  const records = {};
+  const registryExtensions = {};
+  const idMaps = [];
+  const mappedDefaults = [];
+
+  documents.forEach((document, documentIndex) => {
+    const registry = document.provenance;
+    const idMap = new Map();
+    for (const [id, record] of Object.entries(registry?.records ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
+      let mappedId = id;
+      if (Object.hasOwn(records, mappedId) && canonicalString(records[mappedId]) !== canonicalString(record)) {
+        const suffix = `~${documentIndex + 1}`;
+        mappedId = `${id}${suffix}`;
+        let collision = 2;
+        while (Object.hasOwn(records, mappedId)) {
+          if (canonicalString(records[mappedId]) === canonicalString(record)) break;
+          mappedId = `${id}${suffix}-${collision}`;
+          collision += 1;
+        }
+      }
+      if (!Object.hasOwn(records, mappedId)) records[mappedId] = clone(record);
+      idMap.set(id, mappedId);
+    }
+
+    for (const [name, value] of Object.entries(registry ?? {}).filter(([name]) => name.startsWith('x-'))) {
+      if (Object.hasOwn(registryExtensions, name) && canonicalString(registryExtensions[name]) !== canonicalString(value)) {
+        throw new Error(`Conflicting provenance registry extension ${JSON.stringify(name)} cannot be preserved during merge`);
+      }
+      registryExtensions[name] = clone(value);
+    }
+
+    idMaps.push(idMap);
+    mappedDefaults.push((registry?.defaultIds ?? []).map((id) => idMap.get(id)));
+  });
+
+  const firstDefaults = mappedDefaults[0] ?? [];
+  const defaultIds = firstDefaults.length > 0 && mappedDefaults.every((ids) => sameStringSet(ids, firstDefaults))
+    ? [...firstDefaults]
+    : [];
+  const provenance = Object.keys(records).length > 0
+    ? { records, ...(defaultIds.length ? { defaultIds } : {}), ...registryExtensions }
+    : undefined;
+
+  const normalizedDocuments = documents.map((document, documentIndex) => {
+    const normalized = clone(document);
+    const sourceDefaults = document.provenance?.defaultIds ?? [];
+    const idMap = idMaps[documentIndex];
+    for (const collection of primitiveCollections) {
+      for (const [primitiveIndex, primitive] of (normalized[collection] ?? []).entries()) {
+        const sourcePrimitive = document[collection][primitiveIndex];
+        const hadOverride = Array.isArray(sourcePrimitive.provenanceIds);
+        const effectiveIds = (sourcePrimitive.provenanceIds ?? sourceDefaults).map((id) => idMap.get(id));
+        if (hadOverride || !sameStringSet(effectiveIds, defaultIds)) {
+          if (effectiveIds.length) primitive.provenanceIds = effectiveIds;
+          else delete primitive.provenanceIds;
+        } else {
+          delete primitive.provenanceIds;
+        }
+      }
+    }
+    if (provenance) normalized.provenance = clone(provenance);
+    else delete normalized.provenance;
+    return normalized;
+  });
+
+  return normalizedDocuments;
+}
+
+function effectiveProvenanceIds(view, declaration) {
+  return declaration.provenanceIds ?? view.provenance?.defaultIds ?? [];
+}
+
+function combineEquivalentViews(previous, incoming) {
+  const combined = clone(previous);
+  const defaultIds = combined.provenance?.defaultIds ?? [];
+  for (const collection of primitiveCollections) {
+    const declarations = new Map(
+      (combined[collection] ?? []).map((declaration) => [semanticDeclarationCanonicalString(declaration), declaration])
+    );
+    for (const incomingDeclaration of incoming[collection] ?? []) {
+      const key = semanticDeclarationCanonicalString(incomingDeclaration);
+      const declaration = declarations.get(key);
+      if (!declaration) continue;
+      const ids = [...new Set([
+        ...effectiveProvenanceIds(previous, declaration),
+        ...effectiveProvenanceIds(incoming, incomingDeclaration)
+      ])].sort();
+      const preserveOverride = Array.isArray(declaration.provenanceIds) || Array.isArray(incomingDeclaration.provenanceIds);
+      if (preserveOverride || !sameStringSet(ids, defaultIds)) {
+        if (ids.length) declaration.provenanceIds = ids;
+        else delete declaration.provenanceIds;
+      } else {
+        delete declaration.provenanceIds;
+      }
+    }
+  }
+  return combined;
+}
+
 function collectProtocolViews(documents, inputsValidated = false) {
   const byVersion = new Map();
   documents.forEach((document, documentIndex) => {
@@ -142,7 +262,7 @@ function collectProtocolViews(documents, inputsValidated = false) {
       if (previous && !semanticallyEquivalent(previous, view)) {
         throw new Error(`Conflicting Effective Protocol Views for MCP ${version}`);
       }
-      byVersion.set(version, view);
+      byVersion.set(version, previous ? combineEquivalentViews(previous, view) : view);
     }
   });
   return byVersion;
@@ -153,7 +273,7 @@ function mergeCollection(views, collection, allVersions) {
   for (const [version, view] of views) {
     for (const declaration of view[collection] ?? []) {
       const unscoped = withoutScope(declaration);
-      const key = semanticCanonicalString(unscoped);
+      const key = mergeDeclarationCanonicalString(unscoped);
       const existing = declarations.get(key) ?? { declaration: unscoped, versions: [] };
       existing.versions.push(version);
       declarations.set(key, existing);
@@ -175,7 +295,8 @@ export function mergeProtocolDescriptions(documents) {
   }
 
   documents.forEach((document, index) => assertConforming(document, `Merge input ${index + 1}`));
-  const views = collectProtocolViews(documents, true);
+  const normalizedDocuments = mergeProvenance(documents);
+  const views = collectProtocolViews(normalizedDocuments, true);
   const versions = [...views.keys()].sort();
   const firstView = views.values().next().value;
   const expectedUnscoped = semanticCanonicalString(unscopedDocumentPart(firstView));

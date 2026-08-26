@@ -69,7 +69,7 @@ The specification distinguishes between:
 | **Metadata** | Who built it and how | Authors, generation provenance |
 | **Observation** | What was discovered at runtime | Latency, CORS support, session behavior |
 
-Server-surface declarations live in the core specification. Observation provenance and runtime diagnostics belong in vendor extensions such as `x-cisco-metadata`. An observed view need not claim a server's exhaustive surface.
+Server-surface declarations and portable evidence attribution live in the core specification. Source-specific runtime diagnostics belong in vendor extensions such as `x-cisco-metadata`. An observed view need not claim a server's exhaustive surface, and provenance does not establish completeness or trust.
 
 ## 7. Offline-First
 

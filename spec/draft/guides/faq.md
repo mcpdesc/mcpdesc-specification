@@ -28,7 +28,11 @@ MCP Description adopts familiar description patterns where they fit, including s
 
 No. A description represents its declared server surface and may be authored from design metadata, generated from a runtime observation, or assembled from both. An observation can cover only the protocol revision, authorization context, and server state that were actually observed.
 
-Omitted primitives do not prove that no other revision or runtime context exposes them. Producers should record provenance in surrounding tooling or a documented extension when consumers need to assess freshness or authority.
+Omitted primitives do not prove that no other revision or runtime context exposes them. Producers can use root provenance records and primitive attribution to identify contributing evidence, while consumers assess freshness or authority under external policy.
+
+### Does provenance establish completeness or trust?
+
+No. Root provenance records and primitive attribution describe evidence sources only. They do not assert that every primitive was enumerated, assign confidence or trust, or select consumer policy. Consumers apply policy externally and treat records and referenced artifacts as untrusted unless independently verified.
 
 ## Versions and Views
 
@@ -58,7 +62,7 @@ Yes, when they describe compatible views of the same logical server. Merge tooli
 
 ### What is the minimum valid document?
 
-A document needs `mcpdesc`, `info` with `name` and `version`, a non-empty `protocolVersions` array, and one or more transports that collectively cover every declared revision. Tool, Resource, Resource Template, and Prompt collections are optional. See [the minimal example](../examples/minimal.yaml).
+A document needs `mcpdesc`, `info` with `name` and `version`, and a non-empty `protocolVersions` array. Transports and Tool, Resource, Resource Template, and Prompt collections are optional. When transports are present, they collectively cover every declared revision. See [the minimal example](../examples/minimal.yaml).
 
 ### Do I have to write it by hand?
 

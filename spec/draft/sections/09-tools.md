@@ -21,6 +21,7 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
+| `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Tool (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 ### 9.2 Input and Output Schemas
 
