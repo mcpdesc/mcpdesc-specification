@@ -158,6 +158,40 @@ function pruneComponents(document) {
   else delete document.components;
 }
 
+function pruneProvenance(document) {
+  if (!document.provenance) return;
+  const retained = new Set();
+  const defaultIds = document.provenance.defaultIds ?? [];
+  let defaultsAreUsed = false;
+
+  for (const collection of primitiveCollections) {
+    for (const declaration of document[collection] ?? []) {
+      if (Array.isArray(declaration.provenanceIds)) {
+        for (const id of declaration.provenanceIds) retained.add(id);
+      } else if (defaultIds.length) {
+        defaultsAreUsed = true;
+        for (const id of defaultIds) retained.add(id);
+      }
+    }
+  }
+
+  const records = Object.fromEntries(
+    Object.entries(document.provenance.records ?? {}).filter(([id]) => retained.has(id))
+  );
+  if (Object.keys(records).length === 0) {
+    delete document.provenance;
+    return;
+  }
+
+  document.provenance = {
+    records,
+    ...(defaultsAreUsed ? { defaultIds } : {}),
+    ...Object.fromEntries(
+      Object.entries(document.provenance).filter(([name]) => name.startsWith('x-'))
+    )
+  };
+}
+
 function assertConforming(document, label) {
   const errors = validateMcpdesc08Document(document)
     .filter((diagnostic) => diagnostic.severity === 'error');
@@ -166,7 +200,7 @@ function assertConforming(document, label) {
   }
 }
 
-function projectUnchecked(document, version, pruneUnusedComponents = true) {
+function projectUnchecked(document, version, pruneUnusedComponents = true, pruneUnusedProvenance = true) {
   const rootScope = document.protocolVersions;
   const result = clone(document);
   result.protocolVersions = [version];
@@ -197,6 +231,7 @@ function projectUnchecked(document, version, pruneUnusedComponents = true) {
     }
   }
 
+  if (pruneUnusedProvenance) pruneProvenance(result);
   if (pruneUnusedComponents) pruneComponents(result);
 
   return result;
@@ -402,7 +437,7 @@ function collectProtocolViews(documents, inputsValidated = false) {
     }
     if (!inputsValidated) assertConforming(document, `Merge input ${documentIndex + 1}`);
     for (const version of document.protocolVersions) {
-      const view = projectUnchecked(document, version, false);
+      const view = projectUnchecked(document, version, false, false);
       assertConforming(view, `Merge input ${documentIndex + 1} projection for MCP ${version}`);
       const previous = byVersion.get(version);
       if (previous && !semanticallyEquivalent(previous, view)) {

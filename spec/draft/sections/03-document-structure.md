@@ -26,8 +26,8 @@ The root of an MCP Description document is an object with the following structur
 | `components` | [Components Object](#181-components-object) | No | Reusable schemas and named primitive examples |
 | `capabilities` | non-empty array\<[Capabilities Object](#8-capabilities)\> | No | Protocol-scoped server capability declarations |
 | `tools` | non-empty array\<[Tool Object](#9-tools)\> | No | Tools declared by the document |
-| `resources` | non-empty array\<[Resource Object](#10-resources)\> | No | Resources declared by the document |
-| `resourceTemplates` | non-empty array\<[Resource Template Object](#10-resources)\> | No | Resource templates declared by the document |
+| `resources` | non-empty array\<[Resource Object](#1011-resource-object)\> | No | Resources declared by the document |
+| `resourceTemplates` | non-empty array\<[Resource Template Object](#1021-resource-template-object)\> | No | Resource templates declared by the document |
 | `prompts` | non-empty array\<[Prompt Object](#11-prompts)\> | No | Prompts declared by the document |
 | `tags` | non-empty array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 

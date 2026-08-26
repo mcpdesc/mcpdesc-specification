@@ -12,6 +12,7 @@ import path from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { validateMcpDescription } from '@mcpdesc/validator';
+import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
 import {
   evaluateClientRequirements,
@@ -23,7 +24,11 @@ import {
 const root = process.cwd();
 
 function fixture(relativePath) {
-  return JSON.parse(fs.readFileSync(path.join(root, relativePath), 'utf8'));
+  return decodeDocumentSource(
+    fs.readFileSync(path.join(root, relativePath), 'utf8'),
+    documentFormatForPath(relativePath),
+    relativePath
+  );
 }
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
@@ -414,6 +419,34 @@ assert.deepEqual(Object.keys(projectedComponents.components.schemas), ['Input', 
 assert.deepEqual(Object.keys(projectedComponents.components.toolExamples), ['basic']);
 assert.equal(projectedComponents.components['x-example-owner'], 'documentation');
 
+const integratedSource = fixture('spec/draft/fixtures/expected-valid/integrated-draft2-features.yaml');
+assert.deepEqual(validateMcpdesc08Document(integratedSource), []);
+assert.equal('transports' in integratedSource, false);
+const integratedView = projectProtocolView(integratedSource, '2026-07-28');
+assert.deepEqual(Object.keys(integratedView.components.schemas), ['Input']);
+assert.deepEqual(Object.keys(integratedView.components.toolExamples), ['basic']);
+assert.equal(integratedView.components['x-example-registry'], 'shared');
+assert.deepEqual(Object.keys(integratedView.provenance.records), ['source']);
+assert.deepEqual(integratedView.provenance.defaultIds, ['source']);
+assert.equal(integratedView.provenance['x-example-profile'], 'public');
+assert.equal(integratedView.tools[0].inputSchema.$componentRef, '#/components/schemas/Input');
+assert.deepEqual(integratedView.tools[0].clientRequirements, { elicitation: { form: {} } });
+assert.deepEqual(integratedView.tools[0].provenanceIds, ['source']);
+assert.deepEqual(integratedView.security, [{ 'api-key': [] }]);
+assert.deepEqual(integratedView.tools[0].security, []);
+assert.equal('transports' in integratedView, false);
+assert.deepEqual(validateMcpdesc08Document(integratedView), []);
+const integratedInvalid = structuredClone(integratedSource);
+integratedInvalid.provenance.records.source.artifact.digest = 'missing-algorithm';
+integratedInvalid.tools[0].provenanceIds = ['missing-source'];
+integratedInvalid.tools[0].clientRequirements = { roots: {} };
+const integratedInvalidDiagnostics = validateMcpdesc08Document(integratedInvalid);
+assert.deepEqual(
+  integratedInvalidDiagnostics.map((diagnostic) => diagnostic.code),
+  ['deprecated-client-requirement', 'invalid-provenance-digest', 'unknown-provenance-reference']
+);
+assert.deepEqual(validateMcpdesc08Document(structuredClone(integratedInvalid)), integratedInvalidDiagnostics);
+
 function componentMergeInput(version, schema, extension = 'shared') {
   return {
     mcpdesc: '0.8.0',
@@ -568,6 +601,35 @@ assert.equal('defaultIds' in mergedContributors.provenance, false);
 assert.deepEqual(mergedContributors.tools[0].provenanceIds, ['source', 'source~2']);
 assert.deepEqual(mergeProtocolDescriptions([observedContributor, curatedContributor]), mergedContributors);
 assertStructurallyConforming(mergedContributors);
+
+const observedComponentContributor = {
+  ...observedContributor,
+  protocolVersions: ['2025-11-25'],
+  components: { schemas: { Input: { type: 'object', properties: { observed: { type: 'boolean' } } } } },
+  tools: [{ ...observedContributor.tools[0], inputSchema: { $componentRef: '#/components/schemas/Input' } }]
+};
+const curatedComponentContributor = {
+  ...curatedContributor,
+  components: { schemas: { Input: { type: 'object', properties: { curated: { type: 'boolean' } } } } },
+  tools: [{ ...curatedContributor.tools[0], inputSchema: { $componentRef: '#/components/schemas/Input' } }]
+};
+const mergedComponentAndProvenanceCollisions = mergeProtocolDescriptions([
+  observedComponentContributor,
+  curatedComponentContributor
+]);
+assert.deepEqual(Object.keys(mergedComponentAndProvenanceCollisions.components.schemas), ['Input', 'Input-2']);
+assert.deepEqual(Object.keys(mergedComponentAndProvenanceCollisions.provenance.records), ['source', 'source~2']);
+assert.deepEqual(
+  mergedComponentAndProvenanceCollisions.tools.map((tool) => ({
+    componentRef: tool.inputSchema.$componentRef,
+    provenanceIds: tool.provenanceIds
+  })).sort((left, right) => left.componentRef.localeCompare(right.componentRef)),
+  [
+    { componentRef: '#/components/schemas/Input', provenanceIds: ['source'] },
+    { componentRef: '#/components/schemas/Input-2', provenanceIds: ['source~2'] }
+  ]
+);
+assertStructurallyConforming(mergedComponentAndProvenanceCollisions);
 
 const unattributedContributor = structuredClone(observedContributor);
 delete unattributedContributor.provenance;

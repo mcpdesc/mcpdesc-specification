@@ -172,8 +172,8 @@ The root of an MCP Description document is an object with the following structur
 | `components` | [Components Object](#181-components-object) | No | Reusable schemas and named primitive examples |
 | `capabilities` | non-empty array\<[Capabilities Object](#8-capabilities)\> | No | Protocol-scoped server capability declarations |
 | `tools` | non-empty array\<[Tool Object](#9-tools)\> | No | Tools declared by the document |
-| `resources` | non-empty array\<[Resource Object](#10-resources)\> | No | Resources declared by the document |
-| `resourceTemplates` | non-empty array\<[Resource Template Object](#10-resources)\> | No | Resource templates declared by the document |
+| `resources` | non-empty array\<[Resource Object](#1011-resource-object)\> | No | Resources declared by the document |
+| `resourceTemplates` | non-empty array\<[Resource Template Object](#1021-resource-template-object)\> | No | Resource templates declared by the document |
 | `prompts` | non-empty array\<[Prompt Object](#11-prompts)\> | No | Prompts declared by the document |
 | `tags` | non-empty array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 
@@ -346,10 +346,10 @@ The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fi
 | `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Maps to `Implementation.title` (MCP `BaseMetadata`, since 2025-06-18). |
 | `description` | string | No | Brief description of what the server does. Maps to `Implementation.description` (MCP, since 2025-11-25). |
 | `id` | string | No | Unique server identifier (URI, DID, or URN). |
-| `icons` | non-empty array\<[Icon](#icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
+| `icons` | non-empty array\<[Icon](#appendix-a-icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
 | `websiteUrl` | string (URI) | No | URL of the server's website. Maps to `Implementation.websiteUrl` (MCP, since 2025-11-25). |
-| `contact` | [Contact Object](#53-contact-object) | No | Contact information (OpenAPI-style, not part of MCP `Implementation`). |
-| `license` | [License Object](#54-license-object) | No | License information (OpenAPI-style, not part of MCP `Implementation`). |
+| `contact` | [Contact Object](#52-contact-object) | No | Contact information (OpenAPI-style, not part of MCP `Implementation`). |
+| `license` | [License Object](#53-license-object) | No | License information (OpenAPI-style, not part of MCP `Implementation`). |
 
 ### 5.2 Contact Object
 

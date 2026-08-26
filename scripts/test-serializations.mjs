@@ -21,6 +21,39 @@ const jsonDocument = decodeDocumentSource(
 assert.deepEqual(yamlDocument, jsonDocument);
 assert.deepEqual(validateMcpdesc08Document(yamlDocument), validateMcpdesc08Document(jsonDocument));
 
+const integratedSource = fs.readFileSync(
+  path.join(process.cwd(), 'spec', 'draft', 'fixtures', 'expected-valid', 'integrated-draft2-features.yaml'),
+  'utf8'
+);
+const integratedYamlDocument = decodeDocumentSource(
+  integratedSource,
+  'yaml',
+  'expected-valid/integrated-draft2-features.yaml'
+);
+const integratedJsonDocument = decodeDocumentSource(
+  JSON.stringify(integratedYamlDocument),
+  'json',
+  'integrated-draft2-features.json'
+);
+assert.deepEqual(integratedYamlDocument, integratedJsonDocument);
+assert.equal('transports' in integratedJsonDocument, false);
+assert.deepEqual(integratedJsonDocument.security, [{ 'api-key': [] }]);
+assert.deepEqual(integratedJsonDocument.tools[0].security, []);
+const integratedDiagnostics = validateMcpdesc08Document(integratedYamlDocument);
+assert.deepEqual(integratedDiagnostics, []);
+assert.deepEqual(validateMcpdesc08Document(integratedYamlDocument), integratedDiagnostics);
+assert.deepEqual(validateMcpdesc08Document(integratedJsonDocument), integratedDiagnostics);
+
+assert.throws(
+  () => decodeDocumentSource(`components:
+  schemas:
+    Input: &shared
+      type: object
+    Duplicate: *shared
+`, 'yaml', 'component-alias.yaml'),
+  /YAML aliases are not supported/
+);
+
 for (const filename of fs.readdirSync(path.join(fixtureRoot, 'expected-invalid'))) {
   const relative = `expected-invalid/${filename}`;
   assert.throws(
