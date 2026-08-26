@@ -10,9 +10,9 @@
 
 ## Summary
 
-Define MCP Description as a JSON-compatible data model with two supported textual serializations: JSON and YAML. JSON remains the required baseline interchange format and normative JSON Schema target; YAML becomes an explicitly supported authoring serialization using YAML 1.2.2's JSON schema plus strict restrictions that guarantee a deterministic mapping to the same JSON-compatible data model.
+Define MCP Description as a JSON-compatible data model with two equally conforming textual serializations: JSON and YAML. JSON follows RFC 8259; YAML follows YAML 1.2.2's JSON schema plus strict restrictions that guarantee a deterministic mapping to the same JSON-compatible data model. Neither serialization has greater semantic or conformance status.
 
-The proposal resolves the current inconsistency in Draft 1, where normative text requires JSON while repository examples and ecosystem usage include YAML. It preserves JSON interoperability while allowing human-friendly `.mcpdesc.yaml` and `.mcpdesc.yml` documents.
+The proposal resolves the current inconsistency in Draft 1, where normative text requires JSON while repository examples and ecosystem usage include YAML. Both serializations use the same JSON Schema and semantic-validation pipeline after decoding.
 
 ## Problem
 
@@ -37,8 +37,8 @@ Simply saying “YAML is allowed” is insufficient because unrestricted YAML ca
 ## Goals
 
 * Define one serialization-independent MCP Description data model using JSON-compatible types.
-* Keep JSON as the required baseline interchange format.
-* Make YAML 1.2.2 with JSON-schema scalar resolution an explicitly supported authoring serialization.
+* Give JSON and restricted YAML equal status as conforming serializations.
+* Define JSON serialization using RFC 8259 and YAML serialization using YAML 1.2.2 with JSON-schema scalar resolution.
 * Define a deterministic YAML-to-MCP-Description mapping.
 * Restrict YAML features that cannot be represented faithfully in the JSON data model.
 * Define recommended YAML file extensions and media type.
@@ -51,10 +51,10 @@ Simply saying “YAML is allowed” is insufficient because unrestricted YAML ca
 * Support arbitrary YAML object graphs or YAML-specific semantic types.
 * Preserve YAML comments, anchors, aliases, scalar style, key order, or formatting through round trips.
 * Define TOML, XML, JSON5, HJSON, or other serializations.
-* Make YAML a dependency of every minimal MCP Description consumer.
+* Require every MCP Description implementation to parse or emit both serializations.
 * Replace JSON Schema with a YAML-specific schema language.
 * Define a canonical byte serialization for signing or hashing.
-* Require YAML output from implementations that only need machine interchange.
+* Require a producer to emit a serialization it does not claim to support.
 
 ## Background and primary references
 
@@ -82,11 +82,13 @@ The semantic meaning of an MCP Description is defined by this data model, indepe
 
 Property ordering is not significant unless an individual field explicitly defines array ordering semantics. Mapping serialization order MUST NOT affect conformance.
 
+A conforming document consumer or producer MUST support at least one conforming serialization and MUST declare whether it supports JSON, YAML, or both for each applicable input or output capability.
+
 ### 2. JSON serialization
 
-JSON remains the baseline serialization.
+An MCP Description MAY be serialized as JSON.
 
-A conforming MCP Description implementation MUST support JSON input when it claims document-consumer conformance.
+A consumer that claims JSON input support MUST accept conforming JSON MCP Description documents. A producer that claims JSON output support MUST emit conforming JSON MCP Description documents. General MCP Description conformance does not make JSON support mandatory or preferred over YAML support.
 
 JSON serialization MUST conform to RFC 8259 and MUST be encoded in UTF-8.
 
@@ -106,7 +108,7 @@ application/mcp-description+json
 
 An MCP Description MAY be serialized as YAML 1.2.2 using the JSON schema defined by Section 10.2.1.3 of the YAML 1.2.2 specification for scalar resolution.
 
-A general MCP Description consumer SHOULD support the restricted YAML serialization defined by this proposal. A minimal implementation MAY support JSON only, but it MUST NOT claim YAML serialization support unless it implements all restrictions in this proposal.
+A consumer that claims YAML input support MUST accept YAML MCP Description documents that satisfy this proposal's restricted profile and MUST reject documents that violate it. A producer that claims YAML output support MUST emit only documents that satisfy the restricted profile. General MCP Description conformance does not make YAML support mandatory or preferred over JSON support.
 
 A YAML MCP Description MUST consist of exactly one YAML document and MUST decode to the JSON-compatible MCP Description data model defined above.
 
@@ -208,11 +210,11 @@ The referenced schema remains a JSON Schema even though the instance document is
 
 ### 8. Producer guidance
 
-Machine-to-machine interchange SHOULD prefer JSON when YAML support cannot be assumed.
+Producers and consumers SHOULD explicitly communicate or negotiate the serialization when it cannot be determined from a file extension, media type, or other enclosing protocol metadata.
 
-Human-authored repositories MAY prefer YAML for readability.
+Implementations MAY support JSON, YAML, or both according to their use case and declared capabilities.
 
-Tools that emit YAML SHOULD offer a JSON serialization path for maximum interoperability.
+Tools that convert between JSON and YAML MUST preserve the decoded MCP Description data model, subject only to non-semantic source details such as comments, scalar style, and mapping order.
 
 ## Schema impact
 
@@ -299,7 +301,7 @@ All existing conforming JSON MCP Description documents remain conforming without
 
 The data model and field semantics do not change.
 
-Existing JSON-only consumers remain conforming as minimal consumers if the implementation-conformance section explicitly distinguishes required JSON support from recommended YAML support.
+Existing JSON-only consumers remain conforming if they claim only JSON serialization support. Existing YAML-only consumers can conform if they implement the complete restricted YAML profile. Implementations that claim support for both serializations must apply the same structural and semantic validation to both.
 
 Existing tools that already accept YAML may need to tighten parser behavior to reject aliases, duplicate keys, custom tags, multi-document streams, non-string mapping keys, and non-finite numeric values.
 
@@ -313,9 +315,9 @@ The specification's current statement that every MCP Description **MUST be a JSO
 
 Documentation should make clear that:
 
-* JSON is the baseline interchange format;
-* YAML is an explicitly supported authoring serialization; and
-* the normative schema remains JSON Schema.
+* JSON and restricted YAML are equally conforming serializations;
+* both decode to the same JSON-compatible MCP Description data model; and
+* the authoritative structural schema remains JSON Schema and applies after either serialization is decoded.
 
 ## Security and privacy considerations
 
@@ -345,9 +347,9 @@ This is simple to state but allows graph structures, custom tags, parser-specifi
 
 Tools could be allowed informally to preprocess YAML into JSON while the specification remains JSON-only. That preserves ambiguity around interoperability, file naming, parser behavior, and conformance and does not resolve the current contradiction.
 
-### Require YAML support from every consumer
+### Require both serializations from every consumer
 
-This maximizes portability of YAML documents but imposes an additional parser and security surface on very small consumers. The proposed compromise keeps JSON mandatory and YAML strongly standardized but not mandatory for a minimal consumer.
+This maximizes document portability but imposes two parsers and YAML's additional security surface on every consumer. The proposed capability-based conformance model lets an implementation support JSON, restricted YAML, or both without giving either serialization greater semantic status.
 
 ### Use JSON5 instead of YAML
 
@@ -355,14 +357,13 @@ JSON5 improves comments and trailing-comma ergonomics but has substantially less
 
 ## Open questions
 
-* Should YAML support be a `MUST` rather than `SHOULD` for all 0.8.0 document consumers?
 * Should YAML anchors without aliases be allowed, since they have no effect on the resulting JSON data model, or rejected uniformly for simpler tooling?
 * Should the repository publish every normative example in both JSON and YAML, or only selected paired examples?
 
 ## Implementation and validation plan
 
 1. Rewrite the Format and Serialization sections around a JSON-compatible data model.
-2. Retain JSON as mandatory input for conforming consumers.
+2. Define JSON and restricted YAML as equally conforming serializations with capability-based implementation claims.
 3. Add the restricted YAML 1.2.2 JSON-schema serialization rules and file-extension guidance.
 4. Add YAML parser conformance fixtures for valid mappings, arrays, strings, booleans, nulls, and finite numbers.
 5. Add negative fixtures for duplicate keys, aliases, custom tags, multiple documents, non-string keys, NaN, and infinity.
