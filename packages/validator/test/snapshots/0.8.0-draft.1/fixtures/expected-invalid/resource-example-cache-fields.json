@@ -1,0 +1,83 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-resource-example-cache-fields",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-resource-example-cache-fields"
+    }
+  ],
+  "resources": [
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uri": "example:///missing-cache-fields",
+      "name": "missing_cache_fields",
+      "examples": {
+        "missing": {
+          "result": {
+            "resultType": "complete",
+            "contents": [
+              {
+                "uri": "example:///missing-cache-fields",
+                "text": "missing required cache hints"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uri": "example:///invalid-cache-fields",
+      "name": "invalid_cache_fields",
+      "examples": {
+        "invalid": {
+          "result": {
+            "resultType": "complete",
+            "ttlMs": -1,
+            "cacheScope": "shared",
+            "contents": [
+              {
+                "uri": "example:///invalid-cache-fields",
+                "text": "invalid cache hints"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "uri": "example:///premature-cache-fields",
+      "name": "premature_cache_fields",
+      "examples": {
+        "premature": {
+          "result": {
+            "ttlMs": 60000,
+            "cacheScope": "private",
+            "contents": [
+              {
+                "uri": "example:///premature-cache-fields",
+                "text": "fields are not defined by this revision"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -7,7 +7,7 @@ import YAML from 'yaml';
 
 import { validateMcpDescription } from '../src/index.js';
 
-const fixtureRoot = fileURLToPath(new URL('../../../spec/draft/fixtures/', import.meta.url));
+const fixtureRoot = fileURLToPath(new URL('./snapshots/0.8.0-draft.1/fixtures/', import.meta.url));
 
 function fixtureFiles(group) {
   const directory = path.join(fixtureRoot, group);

@@ -40,9 +40,9 @@ export declare const supportedProtocolVersions: readonly [
   '2026-07-28'
 ];
 
-export declare const specificationProvenance: Readonly<{
-  readonly '0.8.0-draft.1': Readonly<SpecificationProvenance>;
-}>;
+export declare const specificationProvenance: Readonly<
+  Record<McpDescriptionSpecification, Readonly<SpecificationProvenance>>
+>;
 
 export declare function validateMcpDescription(
   document: unknown,

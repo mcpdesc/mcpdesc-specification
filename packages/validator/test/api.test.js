@@ -9,7 +9,7 @@ import {
   validateMcpDescription
 } from '../src/index.js';
 
-const fixtureRoot = new URL('../../../spec/draft/fixtures/', import.meta.url);
+const fixtureRoot = new URL('./snapshots/0.8.0-draft.1/fixtures/', import.meta.url);
 
 function fixture(group, name) {
   return JSON.parse(fs.readFileSync(new URL(`${group}/${name}`, fixtureRoot), 'utf8'));
@@ -42,6 +42,10 @@ test('requires an explicit exact specification selector', () => {
   assert.throws(
     () => validateMcpDescription(document, { specification: '0.8.0-draft.2' }),
     /Unsupported MCP Description specification: 0\.8\.0-draft\.2/
+  );
+  assert.throws(
+    () => validateMcpDescription(document, { specification: { toString: () => '0.8.0-draft.1' } }),
+    /Unsupported MCP Description specification: 0\.8\.0-draft\.1/
   );
 });
 

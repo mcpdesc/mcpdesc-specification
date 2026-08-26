@@ -10,6 +10,10 @@ const output = execFileSync(
 );
 const [pack] = JSON.parse(output);
 const actual = pack.files.map((file) => file.path).sort();
+if (actual.some((filename) => filename.startsWith('test/snapshots/'))) {
+  throw new Error('Frozen test snapshots must not ship in the package tarball');
+}
+
 const expected = [
   'LICENSE',
   'MODIFICATIONS.md',
