@@ -95,6 +95,12 @@ They describe authorization requirements known to the document author. They do n
 
 Within MCP Description, a primitive `security` value replaces a selected transport's value, which replaces root `security`. Omission inherits, `security: []` clears inherited requirements, and `security: [{}]` includes an explicit anonymous alternative.
 
+### What does `clientRequirements` mean?
+
+It is a non-empty, revision-specific declaration of unconditional minimum client capabilities needed to call a Tool, read a Resource or concrete Resource Template URI, or get a Prompt. All entries are required together. It does not apply to listing, inherit from root server capabilities, follow automatically from an Elicitation Declaration, or satisfy authorization.
+
+Use protocol-scoped primitive variants when requirements differ by MCP revision. Unknown or experimental requirements are preserved; generic tooling should report compatibility as indeterminate when it lacks matching semantics rather than assuming support.
+
 ### Do Tool or Resource examples define runtime behavior?
 
 No. Named examples are MCP Description metadata for documentation, contract tests, and deterministic mocks. They do not alter MCP schemas, guarantee live results, establish freshness, or define a default runtime response.

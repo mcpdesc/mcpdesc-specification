@@ -21,7 +21,7 @@ Examples:
 
 ## Where Extensions Go
 
-Extensions may appear at the root or directly on an eligible MCP Description-defined semantic object, such as Info, Transport, Security Scheme, Capabilities, Tool, Resource, Resource Template, Prompt, Prompt Argument, Tag, Elicitation Declaration, or named example wrapper objects:
+Extensions may appear at the root or directly on an eligible MCP Description-defined semantic object, such as Info, Transport, Security Scheme, Capabilities, Client Capability Requirements, Tool, Resource, Resource Template, Prompt, Prompt Argument, Tag, Elicitation Declaration, or named example wrapper objects:
 
 ```json
 {
@@ -39,15 +39,15 @@ Extensions may appear at the root or directly on an eligible MCP Description-def
 }
 ```
 
-Object eligibility is explicit. Domain-keyed maps, Security Requirement Objects, `capabilities.extensions`, embedded JSON Schemas, MCP-native payload/result/annotation/`_meta` objects, arbitrary values, and Reference Objects do not gain extension slots. Extensions on eligible map values belong to those values, not to the containing map.
+Object eligibility is explicit. Domain-keyed maps, Security Requirement Objects, `capabilities.extensions`, `clientRequirements.extensions`, embedded JSON Schemas, MCP-native payload/result/annotation/`_meta` objects, arbitrary values, and Reference Objects do not gain extension slots. Extensions on eligible map values belong to those values, not to the containing map.
 
 Use `x-*` on the outer Components Object and eligible semantic Tool, Resource, and Resource Template Example component values. Component namespace maps, schema component values, and Reference Objects are not specification-extension locations. An `x-*` key inside a namespace map is an ordinary component name and its value must satisfy that namespace's type.
 
 ## Do Not Confuse Extension Mechanisms
 
-Root and object-level `x-*` properties extend the MCP Description document format. Literal `_meta` belongs to a particular MCP declaration, result, or content object and follows the applicable MCP revision's key and context rules. `capabilities.extensions` advertises negotiated MCP protocol extensions. Root provenance records and primitive `provenanceIds` attribute descriptive evidence. These mechanisms are independent: tooling must preserve each one and must not automatically copy, project, or reinterpret data between them.
+Root and object-level `x-*` properties extend the MCP Description document format. Literal `_meta` belongs to a particular MCP declaration, result, or content object and follows the applicable MCP revision's key and context rules. `capabilities.extensions` advertises server protocol extensions, while `clientRequirements.extensions` declares required client protocol extensions for one primitive. Root provenance records and primitive `provenanceIds` attribute descriptive evidence. These mechanisms are independent: tooling must preserve each one and must not automatically copy, project, or reinterpret data between them.
 
-Use `x-*` for static description-format metadata that is not part of MCP, placing object-specific data on its eligible owner. Use `_meta` only where MCP defines it on the represented object. Use `capabilities.extensions` only to advertise an MCP protocol extension supported in that Effective Protocol View.
+Use `x-*` for static description-format metadata that is not part of MCP, placing object-specific data on its eligible owner. Use `_meta` only where MCP defines it on the represented object. Use `capabilities.extensions` only to advertise an MCP protocol extension supported by the server in that Effective Protocol View, and `clientRequirements.extensions` only for an unconditional extension capability required from the client by one primitive.
 
 ## Creating Your Own Extension
 

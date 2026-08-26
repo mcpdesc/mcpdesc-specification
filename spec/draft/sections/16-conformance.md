@@ -11,7 +11,7 @@ A conforming MCP Description document MUST:
 5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
 6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
 7. Validate against the JSON Schema for the declared `mcpdesc` version.
-8. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, provenance-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, provenance-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
 ### 16.2 Implementation Conformance
@@ -29,7 +29,7 @@ A conforming implementation (tool, validator, or platform) MUST:
 9. Apply reasonable document-size, nesting-depth, scalar-length, and collection-size limits to supported input serializations.
 10. Resolve `$componentRef` only within the same parsed document, without network access, before contextual semantic validation.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 

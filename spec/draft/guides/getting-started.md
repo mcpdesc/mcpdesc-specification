@@ -147,6 +147,22 @@ tools:
 
 Tool `examples` pair a named complete `tools/call` argument object with a completed Tool Result. Keep `content` even when `structuredContent` is present. Successful structured content must match `outputSchema`; execution errors use `isError: true` and omit `structuredContent`. For a no-argument Tool, write `input: {}` explicitly. Examples are untrusted, non-exhaustive documentation, not guarantees of live behavior; never include credentials or production data.
 
+When a Tool has an unconditional client capability precondition, add a revision-valid non-empty `clientRequirements` object. This applies to `tools/call`, not `tools/list`:
+
+```yaml
+tools:
+- name: full_rebuild
+  protocolVersions: ['2026-07-28']
+  inputSchema:
+    type: object
+    additionalProperties: false
+  clientRequirements:
+    extensions:
+      io.modelcontextprotocol/tasks: {}
+```
+
+Do not derive this field from server capabilities or conditional Elicitation Declarations. Split protocol-scoped variants when the requirement shape differs by MCP revision.
+
 When several declarations reuse a complete schema or named example, place it in the matching root `components` namespace and use a local `$componentRef`:
 
 ```yaml

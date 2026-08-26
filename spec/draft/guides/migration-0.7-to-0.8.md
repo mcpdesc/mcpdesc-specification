@@ -47,6 +47,14 @@ Wrap a present root Capabilities Object in an array:
 
 Do not translate durable notification semantics into wire-message catalogues. Keep fields such as `resources.subscribe`. Do not copy 2025 core Tasks declarations into a 2026 view; represent a 2026 Tasks extension separately when authoritative metadata supports it.
 
+## Primitive client requirements
+
+No automatic migration is required because `clientRequirements` is optional and 0.7.0 has no equivalent. Add it only when authoritative design information confirms that successful Tool invocation, Resource read, concrete Resource Template read, or Prompt retrieval has an unconditional minimum dependency on client capabilities. Do not infer it from root server `capabilities`, every Elicitation Declaration, optional runtime feature use, security requirements, or one input-dependent failure observation.
+
+The object must be non-empty and valid under every revision in the primitive's effective scope. Split the primitive into disjoint protocol variants when the required shape changes, including core Tasks in MCP 2025-11-25 versus a formal Tasks extension in MCP 2026-07-28. Preserve unknown and experimental capabilities without inventing matching semantics. Treat non-empty formal extension settings as indeterminate unless the evaluator understands the extension specification.
+
+Migration tooling SHOULD require explicit author confirmation before converting runtime observations into unconditional requirements. Capability compatibility and authorization remain separate decisions, and requirements apply to call, read, or get rather than primitive listing.
+
 ## Object-level specification extensions
 
 No migration is required for existing root `x-*` properties. Version 0.8.0 also permits `x-*` directly on eligible MCP Description-defined semantic objects. Organizations MAY move object-specific metadata from a root parallel map to the object it describes, but migration tooling SHOULD do so only when each source entry resolves unambiguously to one object and protocol-scoped variant.

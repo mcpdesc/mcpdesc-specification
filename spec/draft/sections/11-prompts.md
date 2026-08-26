@@ -17,9 +17,12 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `deprecated` | boolean | No | Whether the prompt is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Prompt declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
+| `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required for `prompts/get`; does not apply to `prompts/list`. |
 | `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Prompt (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 Prompt declarations with the same `name` MUST have pairwise-disjoint effective protocol scopes. Prompt `security` describes statically known authorization required to retrieve the Prompt and replaces inherited transport or root security in full.
+
+Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It does not state that a client needs those capabilities to discover the Prompt through `prompts/list`.
 
 ### 11.2 Prompt Argument Object
 

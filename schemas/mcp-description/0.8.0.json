@@ -153,6 +153,47 @@
         "minLength": 1
       }
     },
+    "clientCapabilityValue": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/jsonValue"
+      }
+    },
+    "clientCapabilityRequirements": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "roots": {
+          "$ref": "#/$defs/clientCapabilityValue"
+        },
+        "sampling": {
+          "$ref": "#/$defs/clientCapabilityValue"
+        },
+        "elicitation": {
+          "$ref": "#/$defs/clientCapabilityValue"
+        },
+        "tasks": {
+          "$ref": "#/$defs/clientCapabilityValue"
+        },
+        "extensions": {
+          "$ref": "#/$defs/extensionCapabilities"
+        },
+        "experimental": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/clientCapabilityValue"
+          }
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/clientCapabilityValue"
+      }
+    },
     "provenanceProducer": {
       "type": "object",
       "required": [
@@ -1620,6 +1661,9 @@
         "security": {
           "$ref": "#/$defs/securityRequirementArray"
         },
+        "clientRequirements": {
+          "$ref": "#/$defs/clientCapabilityRequirements"
+        },
         "provenanceIds": {
           "$ref": "#/$defs/provenanceIds"
         },
@@ -1714,6 +1758,9 @@
         "security": {
           "$ref": "#/$defs/securityRequirementArray"
         },
+        "clientRequirements": {
+          "$ref": "#/$defs/clientCapabilityRequirements"
+        },
         "provenanceIds": {
           "$ref": "#/$defs/provenanceIds"
         },
@@ -1786,6 +1833,9 @@
         "security": {
           "$ref": "#/$defs/securityRequirementArray"
         },
+        "clientRequirements": {
+          "$ref": "#/$defs/clientCapabilityRequirements"
+        },
         "provenanceIds": {
           "$ref": "#/$defs/provenanceIds"
         },
@@ -1853,6 +1903,9 @@
         },
         "security": {
           "$ref": "#/$defs/securityRequirementArray"
+        },
+        "clientRequirements": {
+          "$ref": "#/$defs/clientCapabilityRequirements"
         },
         "provenanceIds": {
           "$ref": "#/$defs/provenanceIds"

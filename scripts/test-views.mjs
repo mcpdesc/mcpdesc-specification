@@ -13,7 +13,12 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { validateMcpDescription } from '@mcpdesc/validator';
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
-import { resolveComponentReferences, semanticValidateDocument, validateMcpdesc08Document } from './validate-0.8.mjs';
+import {
+  evaluateClientRequirements,
+  resolveComponentReferences,
+  semanticValidateDocument,
+  validateMcpdesc08Document
+} from './validate-0.8.mjs';
 
 const root = process.cwd();
 
@@ -62,7 +67,8 @@ for (const [label, document] of [
   ['resourceTemplate.elicitations', { ...partial, resourceTemplates: [{ uriTemplate: 'test://resource/{id}', name: 'template', elicitations: [] }] }],
   ['prompt.tags', { ...partial, prompts: [{ name: 'prompt', tags: [] }] }],
   ['prompt.arguments', { ...partial, prompts: [{ name: 'prompt', arguments: [] }] }],
-  ['prompt.elicitations', { ...partial, prompts: [{ name: 'prompt', elicitations: [] }] }]
+  ['prompt.elicitations', { ...partial, prompts: [{ name: 'prompt', elicitations: [] }] }],
+  ['prompt.clientRequirements', { ...partial, prompts: [{ name: 'prompt', clientRequirements: {} }] }]
 ]) {
   assert.equal(validate(document), false, `${label} must be non-empty when present`);
 }
@@ -113,6 +119,70 @@ assert.deepEqual(merged.protocolVersions, ['2025-11-25', '2026-07-28']);
 assert.equal(merged.tools.length, 2);
 assert.ok(semanticallyEquivalent(projectProtocolView(merged, '2025-11-25'), view2025));
 assert.ok(semanticallyEquivalent(projectProtocolView(merged, '2026-07-28'), view2026));
+
+const clientRequirementSource = fixture('spec/draft/fixtures/expected-valid/client-capability-requirements.json');
+const clientRequirementView2025 = projectProtocolView(clientRequirementSource, '2025-11-25');
+const clientRequirementView2026 = projectProtocolView(clientRequirementSource, '2026-07-28');
+assert.deepEqual(clientRequirementView2025.tools[0].clientRequirements, {
+  tasks: { requests: { sampling: { createMessage: {} } } }
+});
+assert.deepEqual(clientRequirementView2026.tools[0].clientRequirements, {
+  extensions: { 'io.modelcontextprotocol/tasks': {} }
+});
+const mergedClientRequirements = mergeProtocolDescriptions([clientRequirementView2025, clientRequirementView2026]);
+assert.equal(mergedClientRequirements.tools.length, 2);
+assert.ok(mergedClientRequirements.tools.every((tool) => tool.protocolVersions?.length === 1));
+assert.ok(semanticallyEquivalent(
+  projectProtocolView(mergedClientRequirements, '2025-11-25'),
+  clientRequirementView2025
+));
+assert.ok(semanticallyEquivalent(
+  projectProtocolView(mergedClientRequirements, '2026-07-28'),
+  clientRequirementView2026
+));
+
+const conflictingClientRequirements = structuredClone(clientRequirementView2026);
+conflictingClientRequirements.tools[0].clientRequirements = { elicitation: { form: {} } };
+assert.throws(
+  () => mergeProtocolDescriptions([clientRequirementView2026, conflictingClientRequirements]),
+  /Conflicting Effective Protocol Views/
+);
+
+assert.deepEqual(
+  evaluateClientRequirements(undefined, {}, '2026-07-28'),
+  { status: 'satisfied', declared: false, unsatisfied: [], indeterminate: [] }
+);
+assert.equal(evaluateClientRequirements(
+  { elicitation: { form: {} }, extensions: { 'io.modelcontextprotocol/tasks': {} } },
+  { elicitation: { form: {} }, extensions: { 'io.modelcontextprotocol/tasks': {} } },
+  '2026-07-28'
+).status, 'satisfied');
+assert.equal(evaluateClientRequirements(
+  { elicitation: { form: {} }, extensions: { 'io.modelcontextprotocol/tasks': {} } },
+  { elicitation: { form: {} } },
+  '2026-07-28'
+).status, 'unsatisfied');
+assert.equal(evaluateClientRequirements(
+  { extensions: { 'com.example/configured': { mode: 'strict' } } },
+  { extensions: { 'com.example/configured': { mode: 'strict' } } },
+  '2026-07-28'
+).status, 'indeterminate');
+assert.equal(evaluateClientRequirements(
+  { futureCapability: {} },
+  { futureCapability: {} },
+  '2026-07-28'
+).status, 'indeterminate');
+
+const invalidClientRequirement = structuredClone(clientRequirementView2026);
+invalidClientRequirement.tools[0].clientRequirements = { roots: { listChanged: true } };
+assert.ok(validateMcpdesc08Document(invalidClientRequirement).some(
+  (diagnostic) => diagnostic.code === 'client-requirement-version-mismatch'
+));
+const malformedClientRequirement = structuredClone(clientRequirementView2025);
+malformedClientRequirement.tools[0].clientRequirements = { tasks: { requests: { sampling: null } } };
+assert.ok(validateMcpdesc08Document(malformedClientRequirement).some(
+  (diagnostic) => diagnostic.code === 'invalid-client-requirement-value'
+));
 
 const secured = fixture('spec/draft/fixtures/expected-valid/security-root-and-override.json');
 const securedView = projectProtocolView(secured, secured.protocolVersions[0]);

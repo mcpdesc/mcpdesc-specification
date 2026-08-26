@@ -14,6 +14,7 @@ For each declared protocol revision, that revision's normative MCP specification
 | Server required | Yes | No |
 | Protocol revisions | Selected and used at runtime | Declared and scoped statically |
 | Capabilities | Advertised or discovered dynamically | Described as durable semantics |
+| Primitive client requirements | Declared through the revision's client capability mechanism | Unconditional minimum capabilities described per Tool, Resource, Resource Template, or Prompt |
 | Tools | Invoked | Described with input and output schemas |
 | Resources | Read or subscribed to | Catalogued |
 | Prompts | Retrieved | Catalogued |
@@ -25,6 +26,8 @@ For each declared protocol revision, that revision's normative MCP specification
 A description does not execute Tools, contain Resource content, retrieve Prompts, enforce authorization, manage sessions, or define runtime error handling. Servers and clients continue to follow the applicable MCP revision.
 
 Elicitation Declarations document that fulfilling a primitive may require additional user interaction. They do not reproduce `elicitation/create`, Multi Round-Trip Request state, retries, correlation, capability negotiation, or lifecycle messages. The applicable MCP revision determines how a declared form or URL interaction is executed. Named Tool and Resource examples remain completed results rather than elicitation transcripts.
+
+Primitive `clientRequirements` describes the opposite direction from root server `capabilities`: it records unconditional minimum client capabilities for call, read, or get of one primitive. It does not apply to listing, inherit from another object, imply authorization, or turn a conditional Elicitation Declaration into a hard requirement. MCP remains authoritative for how the client advertises those capabilities at runtime.
 
 Static security requirements do not predict whether an unauthorized primitive is visible during runtime discovery. Likewise, an observed description reflects only the protocol revision and authorization context actually observed unless authoritative design metadata supplies a broader surface.
 

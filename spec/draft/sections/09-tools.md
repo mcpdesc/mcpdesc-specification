@@ -21,6 +21,7 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
+| `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required for `tools/call`; does not apply to `tools/list`. |
 | `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Tool (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 ### 9.2 Input and Output Schemas
@@ -83,6 +84,8 @@ Tool Examples are MCP Description metadata, not fields of the MCP Tool type. Pro
 Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root revisions and overlaps every scoped Tool with the same name.
 
 Tool `security` describes statically known authorization required to call the Tool and replaces inherited transport or root security in full.
+
+Tool `clientRequirements` applies only to invocation through `tools/call`. It does not state that a client needs those capabilities to discover the Tool through `tools/list`.
 
 ### 9.5 Tool Annotations
 

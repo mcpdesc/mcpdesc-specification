@@ -19,7 +19,7 @@ A specification extension MAY appear directly on the root MCP Description Object
 - Info, Contact, License, Icon, and Tag Objects;
 - Transport Objects and MCP Description-defined transport configuration objects;
 - Security Scheme, OAuth Flows, and OAuth Flow Objects;
-- the Capabilities Object and MCP Description-defined capability declaration objects;
+- the Capabilities Object, Client Capability Requirements Object, and MCP Description-defined capability declaration objects;
 - Tool, Resource, Resource Template, Prompt, Prompt Argument, and Elicitation Declaration Objects; and
 - MCP Description-defined named Tool, Resource, and Resource Template Example wrapper objects; and
 - Provenance Registry, Provenance Record, Provenance Producer, and Provenance Artifact Objects; and
@@ -27,7 +27,7 @@ A specification extension MAY appear directly on the root MCP Description Object
 
 Eligibility follows the object's specification-defined role, not the fact that a serialized value is a JSON object. A map value that is an eligible object MAY carry extensions, but the containing map does not thereby gain an extension slot.
 
-Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
+Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` or `clientRequirements.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
 
 The outer Components Object and eligible semantic example component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible. An `x-*` key inside a component namespace map is an ordinary component name and its value MUST satisfy that namespace's component type.
 
@@ -57,7 +57,7 @@ Extension authors SHOULD publish a JSON Schema for the value, purpose and semant
 
 ### 14.7 Relationship to Other Extension Mechanisms
 
-Object-level `x-*`, literal MCP `_meta`, and formal MCP `capabilities.extensions` are separate mechanisms. Tooling MUST NOT automatically copy, project, or reinterpret data among them. `x-*` is MCP Description-specific vendor metadata; `_meta` represents literal MCP metadata in supported contexts; and `capabilities.extensions` declares formal MCP protocol-extension support.
+Object-level `x-*`, literal MCP `_meta`, formal MCP `capabilities.extensions`, and formal MCP `clientRequirements.extensions` are separate mechanisms. Tooling MUST NOT automatically copy, project, or reinterpret data among them. `x-*` is MCP Description-specific vendor metadata; `_meta` represents literal MCP metadata in supported contexts; `capabilities.extensions` declares server extension support; and `clientRequirements.extensions` declares an unconditional primitive-level client extension requirement.
 
 ### 14.8 Security and Privacy
 

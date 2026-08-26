@@ -671,11 +671,40 @@ Core `tasks` in MCP 2025-11-25 and a Tasks extension in MCP 2026-07-28 are disti
 
 The Capabilities Object and the MCP Description-defined `tools`, `resources`, and `prompts` capability declaration objects MAY carry `x-*` specification extensions. Other unknown properties on those objects are invalid. MCP-native capability payloads retain their own forward-compatibility rules. The `capabilities.extensions` map is a formal MCP protocol-extension namespace, not an MCP Description specification-extension location; tooling MUST NOT reinterpret or move values between these mechanisms.
 
-### 8.5 Scope Uniqueness
+### 8.5 Primitive Client Capability Requirements
+
+Tool, Resource, Resource Template, and Prompt Objects MAY contain a `clientRequirements` Client Capability Requirements Object. It describes an unconditional static precondition on the minimum MCP client capabilities required to use that primitive through `tools/call`, `resources/read`, or `prompts/get`. A Resource Template requirement applies to reading a concrete URI produced from the template. Requirements do not apply to listing or discovery, and this specification neither requires nor prohibits runtime filtering based on them.
+
+The object uses the `ClientCapabilities` structure of every MCP revision in the containing primitive's effective protocol scope. It MUST be non-empty, MUST NOT contain `protocolVersions`, and inherits no value from the root, a Transport Object, server `capabilities`, an Elicitation Declaration, or another primitive. Every declared capability and nested capability member MUST be valid for every effective revision. When requirements differ materially between revisions, the primitive MUST be split into pairwise-disjoint protocol-scoped variants.
+
+All requirements are conjunctive. Satisfying them does not guarantee success or authorization. Authors MUST NOT declare a capability that is optional, opportunistic, input-dependent, or used only on some runtime paths as an unconditional requirement.
+
+The recognized core structure is revision-specific:
+
+| Revision | Core client capability shape |
+|----------|------------------------------|
+| MCP 2024-11-05 and MCP 2025-03-26 | `roots.listChanged`, `sampling`, and `experimental` |
+| MCP 2025-06-18 | The earlier shape plus `elicitation` |
+| MCP 2025-11-25 | `roots.listChanged`; `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; core `tasks.list`, `tasks.cancel`, `tasks.requests.sampling.createMessage`, and `tasks.requests.elicitation.create`; and `experimental` |
+| MCP 2026-07-28 | Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental` |
+
+Capability marker and settings values MUST be objects. MCP 2026-07-28 `roots` MUST be empty. Validators SHOULD warn when a requirement uses a capability or nested member deprecated in its applicable revision. MCP 2024-11-05 and MCP 2025-03-26 retain the legacy incomplete-validation treatment in Section 3.5: validators apply structural and selected sound checks and MUST NOT report complete MCP semantic conformance.
+
+Where the applicable MCP `ClientCapabilities` type is open, unknown and experimental capability entries are accepted and MUST be preserved. Validators MUST NOT invent matching semantics for them. This Client Capability Requirements Object is an MCP Description-defined semantic object and MAY carry `x-*` specification extensions; those properties are MCP Description metadata, not client capabilities.
+
+For MCP 2026-07-28, `extensions` MUST be a non-empty map whose keys satisfy the same mandatory-prefix identifier grammar and reserved-prefix rules as `capabilities.extensions`, and whose values are objects. Unknown syntactically valid identifiers MUST be preserved. Validators SHOULD warn about an unrecognized identifier under an MCP-reserved prefix. A generic compatibility checker MAY treat an empty extension requirement value as satisfied by presence of that identifier in the client's extension map. It MUST NOT claim a non-empty extension requirement is satisfied without understanding the extension-specific settings semantics.
+
+A compatibility tool comparing `clientRequirements` with a client capability profile for one revision SHOULD report `satisfied` when every requirement is known to be satisfied, `unsatisfied` when any requirement is known not to be satisfied, and `indeterminate` when none is known to fail but at least one cannot be evaluated. An omitted property means that the description makes no primitive-level hard-requirement claim; it does not prove that no runtime path can optionally use a capability.
+
+Server `capabilities`, primitive `clientRequirements`, Elicitation Declarations, and `security` are independent. Tooling MUST NOT infer or copy one from another. In particular, a conditional elicitation does not imply an unconditional elicitation requirement, and capability compatibility is not an authorization decision.
+
+A single-version projection MUST preserve `clientRequirements` on every retained primitive and MUST NOT synthesize requirements. Merge tooling MAY collapse otherwise equivalent declarations with equivalent requirements. It MUST NOT select or union materially different requirements over overlapping protocol scope; it MUST preserve distinct non-overlapping variants where representable or report a conflict.
+
+### 8.6 Scope Uniqueness
 
 Effective Capabilities Object scopes MUST be pairwise disjoint. At most one Capabilities Object may apply to a protocol revision.
 
-### 8.5 Example
+### 8.7 Example
 
 ```json
 {
@@ -721,6 +750,7 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `deprecated` | boolean | No | Whether the tool is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Tool declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
+| `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required for `tools/call`; does not apply to `tools/list`. |
 | `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Tool (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 ### 9.2 Input and Output Schemas
@@ -783,6 +813,8 @@ Tool Examples are MCP Description metadata, not fields of the MCP Tool type. Pro
 Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root revisions and overlaps every scoped Tool with the same name.
 
 Tool `security` describes statically known authorization required to call the Tool and replaces inherited transport or root security in full.
+
+Tool `clientRequirements` applies only to invocation through `tools/call`. It does not state that a client needs those capabilities to discover the Tool through `tools/list`.
 
 ### 9.5 Tool Annotations
 
@@ -936,6 +968,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `deprecated` | boolean | No | Whether the resource is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
+| `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required for `resources/read`; does not apply to resource listing. |
 | `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Resource (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 #### 10.1.2 Resource URI
@@ -964,6 +997,7 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `deprecated` | boolean | No | Whether the template is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Resource Template declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
+| `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required to read a concrete URI produced from the template; does not apply to template listing. |
 | `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Resource Template (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 ### 10.3 Resource Annotations
@@ -1036,6 +1070,8 @@ Examples and their URIs are untrusted. Authors MUST NOT include secrets and SHOU
 Resources with the same `uri` MUST have pairwise-disjoint effective protocol scopes. Resource Templates with the same `uriTemplate` MUST likewise have pairwise-disjoint effective protocol scopes.
 
 Resource `security` describes statically known authorization required to access it. Resource Template `security` describes authorization required to use the template to access matching resources. Each replaces inherited transport or root security in full.
+
+Resource `clientRequirements` applies only to `resources/read` of its URI. Resource Template `clientRequirements` applies only to `resources/read` of a concrete URI produced from the template. Neither applies to `resources/list` or `resources/templates/list`.
 
 ### 10.6 Examples
 
@@ -1168,9 +1204,12 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `deprecated` | boolean | No | Whether the prompt is deprecated. |
 | `_meta` | object | No | Literal MCP metadata on the Prompt declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
+| `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required for `prompts/get`; does not apply to `prompts/list`. |
 | `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Prompt (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 Prompt declarations with the same `name` MUST have pairwise-disjoint effective protocol scopes. Prompt `security` describes statically known authorization required to retrieve the Prompt and replaces inherited transport or root security in full.
+
+Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It does not state that a client needs those capabilities to discover the Prompt through `prompts/list`.
 
 ### 11.2 Prompt Argument Object
 
@@ -1258,7 +1297,7 @@ An Elicitation Declaration documents that fulfillment of a Tool, Resource, Resou
 
 Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. The array MUST contain at least one declaration when present. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
 
-An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it.
+An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it. A conditional or optional Elicitation Declaration MUST NOT by itself be interpreted as an unconditional `clientRequirements.elicitation` capability requirement.
 
 ### 12.2 Elicitation Declaration Object
 
@@ -1328,7 +1367,7 @@ MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in S
 
 ### 12.6 Static-Description Boundary
 
-The applicable MCP revision remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior.
+The applicable MCP revision remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior. Static primitive `clientRequirements` may record an unconditional minimum elicitation capability without defining any of that choreography.
 
 A mock, gateway, documentation tool, or client MAY use a declaration to render its message, collect a form response matching `requestedSchema`, or present a known URL. The declaration alone does not define when a mock triggers the interaction, how it selects among declarations, how responses modify state, or which final primitive result follows.
 
@@ -1458,7 +1497,7 @@ A specification extension MAY appear directly on the root MCP Description Object
 - Info, Contact, License, Icon, and Tag Objects;
 - Transport Objects and MCP Description-defined transport configuration objects;
 - Security Scheme, OAuth Flows, and OAuth Flow Objects;
-- the Capabilities Object and MCP Description-defined capability declaration objects;
+- the Capabilities Object, Client Capability Requirements Object, and MCP Description-defined capability declaration objects;
 - Tool, Resource, Resource Template, Prompt, Prompt Argument, and Elicitation Declaration Objects; and
 - MCP Description-defined named Tool, Resource, and Resource Template Example wrapper objects; and
 - Provenance Registry, Provenance Record, Provenance Producer, and Provenance Artifact Objects; and
@@ -1466,7 +1505,7 @@ A specification extension MAY appear directly on the root MCP Description Object
 
 Eligibility follows the object's specification-defined role, not the fact that a serialized value is a JSON object. A map value that is an eligible object MAY carry extensions, but the containing map does not thereby gain an extension slot.
 
-Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
+Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` or `clientRequirements.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
 
 The outer Components Object and eligible semantic example component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible. An `x-*` key inside a component namespace map is an ordinary component name and its value MUST satisfy that namespace's component type.
 
@@ -1496,7 +1535,7 @@ Extension authors SHOULD publish a JSON Schema for the value, purpose and semant
 
 ### 14.7 Relationship to Other Extension Mechanisms
 
-Object-level `x-*`, literal MCP `_meta`, and formal MCP `capabilities.extensions` are separate mechanisms. Tooling MUST NOT automatically copy, project, or reinterpret data among them. `x-*` is MCP Description-specific vendor metadata; `_meta` represents literal MCP metadata in supported contexts; and `capabilities.extensions` declares formal MCP protocol-extension support.
+Object-level `x-*`, literal MCP `_meta`, formal MCP `capabilities.extensions`, and formal MCP `clientRequirements.extensions` are separate mechanisms. Tooling MUST NOT automatically copy, project, or reinterpret data among them. `x-*` is MCP Description-specific vendor metadata; `_meta` represents literal MCP metadata in supported contexts; `capabilities.extensions` declares server extension support; and `clientRequirements.extensions` declares an unconditional primitive-level client extension requirement.
 
 ### 14.8 Security and Privacy
 
@@ -1653,7 +1692,7 @@ A conforming MCP Description document MUST:
 5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
 6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
 7. Validate against the JSON Schema for the declared `mcpdesc` version.
-8. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, provenance-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, provenance-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
 ### 16.2 Implementation Conformance
@@ -1671,7 +1710,7 @@ A conforming implementation (tool, validator, or platform) MUST:
 9. Apply reasonable document-size, nesting-depth, scalar-length, and collection-size limits to supported input serializations.
 10. Resolve `$componentRef` only within the same parsed document, without network access, before contextual semantic validation.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
