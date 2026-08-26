@@ -1,0 +1,17 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "legacy-sse-modern-revision",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-03-26"
+  ],
+  "transports": [
+    {
+      "type": "sse",
+      "url": "https://example.com/sse"
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "resource-example-catalogue",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "resource-example-catalogue"
+    }
+  ],
+  "resources": [
+    {
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "uri": "file:///project/src/",
+      "name": "source_directory",
+      "mimeType": "inode/directory",
+      "examples": {
+        "two-files": {
+          "result": {
+            "contents": [
+              {
+                "uri": "file:///project/src/",
+                "mimeType": "inode/directory",
+                "text": "main.rs\nlib.rs\n"
+              },
+              {
+                "uri": "file:///project/src/main.rs",
+                "mimeType": "text/x-rust",
+                "text": "fn main() {}\n",
+                "_meta": {
+                  "captured": true
+                }
+              },
+              {
+                "uri": "file:///project/src/lib.rs",
+                "mimeType": "text/x-rust",
+                "text": "pub fn answer() -> u8 { 42 }\n"
+              }
+            ],
+            "_meta": {
+              "snapshot": "example"
+            }
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uri": "file:///project/src/",
+      "name": "source_directory",
+      "mimeType": "inode/directory",
+      "examples": {
+        "two-files": {
+          "result": {
+            "resultType": "complete",
+            "ttlMs": 60000,
+            "cacheScope": "private",
+            "contents": [
+              {
+                "uri": "file:///project/src/",
+                "mimeType": "inode/directory",
+                "text": "main.rs\nlib.rs\n"
+              },
+              {
+                "uri": "file:///project/src/main.rs",
+                "mimeType": "text/x-rust",
+                "text": "fn main() {}\n"
+              },
+              {
+                "uri": "file:///project/src/lib.rs",
+                "mimeType": "text/x-rust",
+                "text": "pub fn answer() -> u8 { 42 }\n"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "uri": "asset:///pixel.bin",
+      "name": "pixel",
+      "mimeType": "application/octet-stream",
+      "size": 3,
+      "examples": {
+        "three-bytes": {
+          "result": {
+            "contents": [
+              {
+                "uri": "asset:///pixel.bin",
+                "mimeType": "application/octet-stream",
+                "blob": "AAEC"
+              }
+            ]
+          }
+        }
+      },
+      "protocolVersions": [
+        "2025-11-25"
+      ]
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uriTemplate": "chess://games/{game_id}",
+      "name": "game_detail",
+      "mimeType": "application/json",
+      "examples": {
+        "sample-game": {
+          "uri": "chess://games/example-1234",
+          "result": {
+            "resultType": "complete",
+            "ttlMs": 300000,
+            "cacheScope": "public",
+            "contents": [
+              {
+                "uri": "chess://games/example-1234",
+                "mimeType": "application/json",
+                "text": "{\"id\":\"example-1234\",\"result\":\"1-0\"}"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -7,9 +7,7 @@ import YAML from 'yaml';
 
 import { validateMcpDescription } from '../src/index.js';
 
-const fixtureRoot = fileURLToPath(new URL('./snapshots/0.8.0-draft.1/fixtures/', import.meta.url));
-
-function fixtureFiles(group) {
+function fixtureFiles(fixtureRoot, group) {
   const directory = path.join(fixtureRoot, group);
   return fs.readdirSync(directory, { withFileTypes: true })
     .filter((entry) => entry.isFile() && /\.(?:json|ya?ml)$/i.test(entry.name))
@@ -22,35 +20,36 @@ function parseFixture(filename) {
   return filename.endsWith('.json') ? JSON.parse(source) : YAML.parse(source);
 }
 
-for (const [group, expected] of [
-  ['expected-valid', 'valid'],
-  ['expected-invalid', 'invalid'],
-  ['expected-warning', 'warning']
-]) {
-  for (const filename of fixtureFiles(group)) {
-    test(`${group}/${path.basename(filename)}`, () => {
-      const result = validateMcpDescription(parseFixture(filename), {
-        specification: '0.8.0-draft.1'
+for (const specification of ['0.8.0-draft.1', '0.8.0-draft.2']) {
+  const fixtureRoot = fileURLToPath(new URL(`./snapshots/${specification}/fixtures/`, import.meta.url));
+  for (const [group, expected] of [
+    ['expected-valid', 'valid'],
+    ['expected-invalid', 'invalid'],
+    ['expected-warning', 'warning']
+  ]) {
+    for (const filename of fixtureFiles(fixtureRoot, group)) {
+      test(`${specification}/${group}/${path.basename(filename)}`, () => {
+        const result = validateMcpDescription(parseFixture(filename), { specification });
+        const errors = result.diagnostics.filter((diagnostic) => diagnostic.severity === 'error');
+        const warnings = result.diagnostics.filter((diagnostic) => diagnostic.severity === 'warning');
+
+        if (expected === 'valid') {
+          assert.equal(result.valid, true);
+          assert.deepEqual(result.diagnostics, []);
+        } else if (expected === 'invalid') {
+          assert.equal(result.valid, false);
+          assert.ok(errors.length > 0);
+        } else {
+          assert.equal(result.valid, true);
+          assert.deepEqual(errors, []);
+          assert.ok(warnings.length > 0);
+        }
+
+        for (const diagnostic of result.diagnostics) {
+          assert.deepEqual(Object.keys(diagnostic).sort(), ['code', 'message', 'path', 'severity']);
+          assert.ok(diagnostic.path.every((segment) => typeof segment === 'string' || Number.isInteger(segment)));
+        }
       });
-      const errors = result.diagnostics.filter((diagnostic) => diagnostic.severity === 'error');
-      const warnings = result.diagnostics.filter((diagnostic) => diagnostic.severity === 'warning');
-
-      if (expected === 'valid') {
-        assert.equal(result.valid, true);
-        assert.deepEqual(result.diagnostics, []);
-      } else if (expected === 'invalid') {
-        assert.equal(result.valid, false);
-        assert.ok(errors.length > 0);
-      } else {
-        assert.equal(result.valid, true);
-        assert.deepEqual(errors, []);
-        assert.ok(warnings.length > 0);
-      }
-
-      for (const diagnostic of result.diagnostics) {
-        assert.deepEqual(Object.keys(diagnostic).sort(), ['code', 'message', 'path', 'severity']);
-        assert.ok(diagnostic.path.every((segment) => typeof segment === 'string' || Number.isInteger(segment)));
-      }
-    });
+    }
   }
 }

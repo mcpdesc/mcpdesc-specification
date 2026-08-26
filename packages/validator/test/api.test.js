@@ -9,24 +9,37 @@ import {
   validateMcpDescription
 } from '../src/index.js';
 
-const fixtureRoot = new URL('./snapshots/0.8.0-draft.1/fixtures/', import.meta.url);
+const fixtureRoots = {
+  '0.8.0-draft.1': new URL('./snapshots/0.8.0-draft.1/fixtures/', import.meta.url),
+  '0.8.0-draft.2': new URL('./snapshots/0.8.0-draft.2/fixtures/', import.meta.url)
+};
 
-function fixture(group, name) {
-  return JSON.parse(fs.readFileSync(new URL(`${group}/${name}`, fixtureRoot), 'utf8'));
+function fixture(group, name, specification = '0.8.0-draft.1') {
+  return JSON.parse(fs.readFileSync(new URL(`${group}/${name}`, fixtureRoots[specification]), 'utf8'));
 }
 
-function validate(document) {
-  return validateMcpDescription(document, { specification: '0.8.0-draft.1' });
+function validate(document, specification = '0.8.0-draft.1') {
+  return validateMcpDescription(document, { specification });
 }
 
-test('exports the Draft 1 validator API', () => {
+test('exports the cumulative validator API', () => {
   assert.equal(typeof validateMcpDescription, 'function');
-  assert.deepEqual(supportedSpecifications, ['0.8.0-draft.1']);
-  assert.ok(supportedProtocolVersions.includes('2026-07-28'));
+  assert.deepEqual(supportedSpecifications, ['0.8.0-draft.1', '0.8.0-draft.2']);
+  assert.deepEqual(supportedProtocolVersions, [
+    '2024-11-05',
+    '2025-03-26',
+    '2025-06-18',
+    '2025-11-25',
+    '2026-07-28'
+  ]);
   assert.deepEqual(specificationProvenance, {
     '0.8.0-draft.1': {
       snapshotTag: 'v0.8.0-draft.1',
       schemaSha256: '4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4'
+    },
+    '0.8.0-draft.2': {
+      snapshotTag: 'v0.8.0-draft.2',
+      schemaSha256: '57594803b38a2acd054241e85a34446e681924e5e579ecf5341091f26e217a52'
     }
   });
 });
@@ -40,13 +53,19 @@ test('requires an explicit exact specification selector', () => {
     /Unsupported MCP Description specification: 0\.8\.0/
   );
   assert.throws(
-    () => validateMcpDescription(document, { specification: '0.8.0-draft.2' }),
-    /Unsupported MCP Description specification: 0\.8\.0-draft\.2/
+    () => validateMcpDescription(document, { specification: '0.8.0-draft.3' }),
+    /Unsupported MCP Description specification: 0\.8\.0-draft\.3/
   );
   assert.throws(
     () => validateMcpDescription(document, { specification: { toString: () => '0.8.0-draft.1' } }),
     /Unsupported MCP Description specification: 0\.8\.0-draft\.1/
   );
+});
+
+test('dispatches only to the exact selected snapshot', () => {
+  const document = fixture('expected-valid', 'reusable-components.json', '0.8.0-draft.2');
+  assert.equal(validate(document, '0.8.0-draft.2').valid, true);
+  assert.equal(validate(document, '0.8.0-draft.1').valid, false);
 });
 
 test('accepts an unknown JavaScript value and returns individual structural diagnostics', () => {
@@ -92,10 +111,14 @@ test('exports immutable support and provenance data', () => {
   assert.ok(Object.isFrozen(supportedProtocolVersions));
   assert.ok(Object.isFrozen(specificationProvenance));
   assert.ok(Object.isFrozen(specificationProvenance['0.8.0-draft.1']));
+  assert.ok(Object.isFrozen(specificationProvenance['0.8.0-draft.2']));
   assert.throws(() => supportedSpecifications.push('0.8.0'));
   assert.throws(() => supportedProtocolVersions.pop());
   assert.throws(() => {
     specificationProvenance['0.8.0-draft.1'].snapshotTag = 'changed';
+  });
+  assert.throws(() => {
+    specificationProvenance['0.8.0-draft.2'].snapshotTag = 'changed';
   });
 });
 

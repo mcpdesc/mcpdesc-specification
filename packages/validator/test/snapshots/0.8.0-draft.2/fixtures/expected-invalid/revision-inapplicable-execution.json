@@ -1,0 +1,29 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-execution-revision",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-execution-revision"
+    }
+  ],
+  "tools": [
+    {
+      "name": "run_job",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "execution": {
+        "taskSupport": "optional"
+      }
+    }
+  ]
+}

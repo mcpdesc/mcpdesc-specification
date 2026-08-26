@@ -1,0 +1,35 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-elicitation-branch",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-elicitation-branch"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "example:///account",
+      "name": "account",
+      "elicitations": [
+        {
+          "name": "mixed",
+          "mode": "form",
+          "message": "Supply account details.",
+          "url": "not a valid URI",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    }
+  ]
+}

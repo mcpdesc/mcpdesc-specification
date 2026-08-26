@@ -1,0 +1,29 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "revision-incompatible-tool-example", "version": "1.0.0" },
+  "protocolVersions": ["2025-03-26"],
+  "transports": [{ "type": "stdio", "command": "fixture" }],
+  "tools": [
+    {
+      "name": "old_tool",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "future-result": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [
+              {
+                "type": "resource_link",
+                "uri": "resource://example/item",
+                "name": "Future resource link"
+              }
+            ],
+            "structuredContent": { "future": true }
+          }
+        }
+      }
+    }
+  ]
+}

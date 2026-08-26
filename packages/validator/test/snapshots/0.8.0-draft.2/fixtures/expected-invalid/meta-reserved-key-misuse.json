@@ -1,0 +1,28 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "meta-reserved-key-misuse", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [{ "type": "stdio", "command": "meta-reserved-key-misuse" }],
+  "tools": [
+    {
+      "name": "invalid-context",
+      "inputSchema": { "type": "object" },
+      "_meta": {
+        "progressToken": "request-only"
+      },
+      "examples": {
+        "invalid-server-info": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [{ "type": "text", "text": "invalid" }],
+            "_meta": {
+              "io.modelcontextprotocol/serverInfo": "not-an-implementation"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "provenance-references-and-digest",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "provenance": {
+    "records": {
+      "inspection": {
+        "kind": "observed",
+        "artifact": {
+          "uri": "urn:example:inspection:42",
+          "digest": "missing-algorithm-separator"
+        }
+      }
+    },
+    "defaultIds": [
+      "missing-default"
+    ]
+  },
+  "tools": [
+    {
+      "name": "search",
+      "inputSchema": {
+        "type": "object"
+      },
+      "provenanceIds": [
+        "missing-override"
+      ]
+    }
+  ]
+}

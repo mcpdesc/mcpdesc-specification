@@ -1,0 +1,26 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "unknown-reserved-extension-identifier",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "unknown-reserved-extension-identifier"
+    }
+  ],
+  "capabilities": [
+    {
+      "extensions": {
+        "io.modelcontextprotocol/future-capability": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}

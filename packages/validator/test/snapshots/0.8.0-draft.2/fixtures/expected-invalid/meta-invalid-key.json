@@ -1,0 +1,16 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "meta-invalid-key", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25"],
+  "transports": [{ "type": "stdio", "command": "meta-invalid-key" }],
+  "tools": [
+    {
+      "name": "invalid",
+      "inputSchema": { "type": "object" },
+      "_meta": {
+        "bad key": true
+      }
+    }
+  ]
+}

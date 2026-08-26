@@ -1,0 +1,31 @@
+{
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-component-protocol-scope", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25", "2026-07-28"],
+  "components": {
+    "resourceExamples": {
+      "current": {
+        "result": {
+          "resultType": "complete",
+          "ttlMs": 60,
+          "cacheScope": "private",
+          "contents": [{ "uri": "data://status", "text": "ready" }]
+        }
+      }
+    }
+  },
+  "resources": [
+    {
+      "protocolVersions": ["2025-11-25"],
+      "uri": "data://status",
+      "name": "status",
+      "examples": { "current": { "$componentRef": "#/components/resourceExamples/current" } }
+    },
+    {
+      "protocolVersions": ["2026-07-28"],
+      "uri": "data://status",
+      "name": "status",
+      "examples": { "current": { "$componentRef": "#/components/resourceExamples/current" } }
+    }
+  ]
+}

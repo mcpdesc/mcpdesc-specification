@@ -1,0 +1,39 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "duplicate-security-scope",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "duplicate-security-scope"
+    }
+  ],
+  "securitySchemes": {
+    "oauth": {
+      "type": "oauth2",
+      "flows": {
+        "authorizationCode": {
+          "authorizationUrl": "https://auth.example.com/authorize",
+          "tokenUrl": "https://auth.example.com/token",
+          "scopes": {
+            "records:read": "Read records"
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "oauth": [
+        "records:read",
+        "records:read"
+      ]
+    }
+  ]
+}

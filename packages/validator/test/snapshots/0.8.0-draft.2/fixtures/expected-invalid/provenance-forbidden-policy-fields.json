@@ -1,0 +1,22 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "provenance-forbidden-policy-fields",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "provenance": {
+    "records": {
+      "inspection": {
+        "kind": "observed",
+        "completeness": "complete",
+        "confidence": 1,
+        "trust": "verified",
+        "policy": "prefer-newest"
+      }
+    }
+  }
+}

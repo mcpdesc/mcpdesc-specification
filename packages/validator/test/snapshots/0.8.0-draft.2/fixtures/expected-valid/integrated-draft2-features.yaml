@@ -1,0 +1,77 @@
+$schema: https://mcpdesc.org/schema/0.8.0.json
+mcpdesc: 0.8.0
+info:
+  name: integrated-draft2-features
+  version: 1.0.0
+  x-example-owner: platform
+protocolVersions: [2026-07-28]
+securitySchemes:
+  api-key:
+    type: apiKey
+    in: header
+    name: X-API-Key
+    x-example-rotation: managed
+security:
+  - api-key: []
+provenance:
+  records:
+    source:
+      kind: generated
+      producer:
+        name: description-generator
+        version: 2.0.0
+        x-example-team: platform
+      artifact:
+        uri: https://example.com/builds/42/description.yaml
+        digest: sha256:7f83b1657ff1fc53
+        x-example-retention-days: 30
+      recordedAt: "2026-08-26T12:30:00Z"
+      x-example-reviewed: true
+    unused:
+      kind: observed
+      producer:
+        name: unused-inspector
+  defaultIds: [source]
+  x-example-profile: public
+components:
+  schemas:
+    Input:
+      type: object
+      properties:
+        query:
+          type: string
+      required: [query]
+      additionalProperties: false
+    Unused:
+      type: object
+    x-named-schema:
+      type: object
+  toolExamples:
+    basic:
+      input:
+        query: mcp
+      result:
+        resultType: complete
+        content:
+          - type: text
+            text: One result
+      x-example-source: documentation
+  x-example-registry: shared
+tools:
+  - name: search
+    inputSchema:
+      $componentRef: "#/components/schemas/Input"
+    examples:
+      basic:
+        $componentRef: "#/components/toolExamples/basic"
+    clientRequirements:
+      elicitation:
+        form: {}
+    provenanceIds: [source]
+    security: []
+    x-example-stability: stable
+  - name: status
+    inputSchema:
+      type: object
+      additionalProperties: false
+x-example-document: integrated

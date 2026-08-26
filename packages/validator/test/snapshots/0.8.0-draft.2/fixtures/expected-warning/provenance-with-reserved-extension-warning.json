@@ -1,0 +1,41 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "provenance-with-reserved-extension-warning",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "provenance": {
+    "records": {
+      "generated": {
+        "kind": "generated",
+        "producer": {
+          "name": "generator"
+        }
+      }
+    },
+    "defaultIds": [
+      "generated"
+    ]
+  },
+  "capabilities": [
+    {
+      "extensions": {
+        "io.modelcontextprotocol/future-capability": {
+          "enabled": true
+        }
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "inputSchema": {
+        "type": "object"
+      }
+    }
+  ]
+}

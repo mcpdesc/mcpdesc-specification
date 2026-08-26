@@ -1,0 +1,21 @@
+{
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-component-resolution", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "components": {
+    "schemas": {
+      "CycleA": { "$componentRef": "#/components/schemas/CycleB" },
+      "CycleB": { "$componentRef": "#/components/schemas/CycleA" }
+    },
+    "toolExamples": {
+      "sample": {
+        "input": {},
+        "result": { "resultType": "complete", "content": [] }
+      }
+    }
+  },
+  "tools": [
+    { "name": "missing", "inputSchema": { "$componentRef": "#/components/schemas/Missing" } },
+    { "name": "wrong", "inputSchema": { "$componentRef": "#/components/toolExamples/sample" } }
+  ]
+}

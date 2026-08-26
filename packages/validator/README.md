@@ -2,7 +2,14 @@
 
 Isomorphic structural and semantic validation for immutable MCP Description specification snapshots.
 
-The initial implementation supports exactly MCP Description `0.8.0-draft.1`, bound to tag `v0.8.0-draft.1` and the embedded `schemas/mcp-description/0.8.0.json` SHA-256 digest `4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4`.
+Version `0.2.0` cumulatively supports these immutable snapshots:
+
+| Selector | Tag | Embedded schema SHA-256 |
+|---|---|---|
+| `0.8.0-draft.1` | `v0.8.0-draft.1` | `4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4` |
+| `0.8.0-draft.2` | `v0.8.0-draft.2` | `57594803b38a2acd054241e85a34446e681924e5e579ecf5341091f26e217a52` |
+
+This cumulative release is intended to receive the npm `latest` dist-tag after the Draft 2 tag and tarball are reviewed. Repository changes alone do not publish the package or create either tag.
 
 ## Usage
 
@@ -10,7 +17,7 @@ The initial implementation supports exactly MCP Description `0.8.0-draft.1`, bou
 import { validateMcpDescription } from '@mcpdesc/validator';
 
 const result = validateMcpDescription(parsedDocument, {
-  specification: '0.8.0-draft.1'
+  specification: '0.8.0-draft.2'
 });
 
 if (!result.valid) {
@@ -44,7 +51,7 @@ Structural paths start with AJV's instance path. A `required` error appends its 
 
 ## Support metadata
 
-The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. Public validation dispatches through a registry keyed by exact specification selectors. The current selector set remains only `0.8.0-draft.1`.
+The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. Public validation dispatches through a registry keyed by exact specification selectors. The current selector set is `0.8.0-draft.1` and `0.8.0-draft.2`; the protocol-version export is the deduplicated union supported by those snapshots.
 
 npm package SemVer tracks implementation releases independently from specification snapshot identity. Adding a later snapshot is additive: it must use a sibling implementation and selector rather than changing an existing snapshot's schema, semantics, metadata, fixtures, or results.
 
@@ -74,4 +81,4 @@ npm run test:browser --workspace @mcpdesc/validator
 npm run test:package --workspace @mcpdesc/validator
 ```
 
-The package test covers the frozen Draft 1 valid, invalid, and warning fixture corpus. The other checks compile the declarations, build for a browser target, and inspect `npm pack --dry-run --json` against the intended tarball contents, including exclusion of test snapshots.
+The package test runs each immutable snapshot against its own frozen valid, invalid, and warning fixture corpus. YAML source fixtures are decoded by the test harness before validation; the public API continues to accept parsed JavaScript values only. The other checks compile the declarations, build both runtime snapshots for a browser target, and inspect `npm pack --dry-run --json` against the intended tarball contents, including both runtime snapshots and exclusion of test snapshots.

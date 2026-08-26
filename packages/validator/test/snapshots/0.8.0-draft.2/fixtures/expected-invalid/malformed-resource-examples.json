@@ -1,0 +1,81 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "malformed-resource-examples",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "malformed-resource-examples"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "test://empty",
+      "name": "empty",
+      "examples": {}
+    },
+    {
+      "uri": "test://missing-result",
+      "name": "missing_result",
+      "examples": {
+        "invalid name": {}
+      }
+    },
+    {
+      "uri": "test://ambiguous-content",
+      "name": "ambiguous_content",
+      "examples": {
+        "both-text-and-blob": {
+          "result": {
+            "resultType": "complete",
+            "contents": [
+              {
+                "uri": "test://ambiguous-content",
+                "text": "text",
+                "blob": "dGV4dA=="
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "test://items/{id}",
+      "name": "item",
+      "examples": {
+        "missing-uri": {
+          "result": {
+            "resultType": "complete",
+            "contents": []
+          }
+        }
+      }
+    },
+    {
+      "uriTemplate": "test://items/{id",
+      "name": "malformed_template",
+      "examples": {
+        "concrete": {
+          "uri": "test://items/123",
+          "result": {
+            "resultType": "complete",
+            "contents": [
+              {
+                "uri": "test://items/123",
+                "text": "item"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

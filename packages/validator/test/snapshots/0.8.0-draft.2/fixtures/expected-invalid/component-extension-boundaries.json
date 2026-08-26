@@ -1,0 +1,10 @@
+{
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-component-extensions", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "components": {
+    "toolExamples": {
+      "x-map-extension": true
+    }
+  }
+}
