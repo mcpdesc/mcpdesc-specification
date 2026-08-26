@@ -97,4 +97,4 @@ Tool examples pair one complete input with a completed Tool Result. Static Resou
 
 ### Can custom metadata be added?
 
-Yes. Root properties beginning with `x-` are specification extensions. Unrecognized extensions are ignored for interpretation and should be preserved when round-tripping. Extensions cannot override MCP or MCP Description requirements, and their authors should publish their schema, semantics, and versioning policy. See the [Vendor Extensions Guide](vendor-extensions-guide.md).
+Yes. Properties beginning with `x-` on the root or another explicitly eligible MCP Description semantic object are specification extensions. Unrecognized extensions are ignored for core interpretation and should be preserved when round-tripping. Extensions cannot override MCP or MCP Description requirements, and their authors should publish their schema, semantics, versioning policy, and eligible object locations. See the [Vendor Extensions Guide](vendor-extensions-guide.md).

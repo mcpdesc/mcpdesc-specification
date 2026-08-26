@@ -83,7 +83,7 @@ Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol 
 |----------|------|----------|-------------|
 | `result` | [Completed Resource Read Result](#1044-completed-resource-read-result) | **Yes** | Completed `resources/read` result payload for the containing Resource's `uri`, excluding the JSON-RPC envelope. |
 
-No additional properties are allowed. The requested URI is implicit in the containing Resource and MUST NOT be duplicated at the example level.
+The object MAY carry `x-*` specification extensions; no other additional properties are allowed. The requested URI is implicit in the containing Resource and MUST NOT be duplicated at the example level.
 
 #### 10.4.3 Resource Template Example Object
 
@@ -92,7 +92,7 @@ No additional properties are allowed. The requested URI is implicit in the conta
 | `uri` | string | **Yes** | Concrete Resource URI used as `resources/read.params.uri`. |
 | `result` | [Completed Resource Read Result](#1044-completed-resource-read-result) | **Yes** | Completed `resources/read` result payload for `uri`, excluding the JSON-RPC envelope. |
 
-No additional properties are allowed. `uri` MUST be a valid RFC 6570 expansion of the containing `uriTemplate`. It records the exact request value rather than reverse-inferred template variables.
+The object MAY carry `x-*` specification extensions; no other additional properties are allowed. `uri` MUST be a valid RFC 6570 expansion of the containing `uriTemplate`. It records the exact request value rather than reverse-inferred template variables.
 
 #### 10.4.4 Completed Resource Read Result
 

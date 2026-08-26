@@ -135,6 +135,9 @@
         }
       ]
     },
+    "specificationExtensionValue": {
+      "$ref": "#/$defs/jsonValue"
+    },
     "jsonSchemaObject": {
       "type": "object",
       "additionalProperties": true
@@ -484,6 +487,11 @@
           }
         }
       ],
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "tag": {
@@ -498,6 +506,11 @@
         },
         "description": {
           "type": "string"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
         }
       },
       "additionalProperties": false
@@ -529,6 +542,11 @@
           ]
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "icons": {
@@ -553,6 +571,11 @@
           "format": "email"
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "license": {
@@ -567,6 +590,11 @@
         "url": {
           "type": "string",
           "format": "uri"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
         }
       },
       "additionalProperties": false
@@ -609,6 +637,11 @@
           "$ref": "#/$defs/license"
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "oauthFlow": {
@@ -636,6 +669,11 @@
       "required": [
         "scopes"
       ],
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "oauthFlows": {
@@ -691,8 +729,34 @@
           ]
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false,
-      "minProperties": 1
+      "anyOf": [
+        {
+          "required": [
+            "implicit"
+          ]
+        },
+        {
+          "required": [
+            "password"
+          ]
+        },
+        {
+          "required": [
+            "clientCredentials"
+          ]
+        },
+        {
+          "required": [
+            "authorizationCode"
+          ]
+        }
+      ]
     },
     "securityScheme": {
       "oneOf": [
@@ -714,6 +778,11 @@
             },
             "description": {
               "type": "string"
+            }
+          },
+          "patternProperties": {
+            "^x-": {
+              "$ref": "#/$defs/specificationExtensionValue"
             }
           },
           "additionalProperties": false
@@ -744,6 +813,11 @@
               "type": "string"
             }
           },
+          "patternProperties": {
+            "^x-": {
+              "$ref": "#/$defs/specificationExtensionValue"
+            }
+          },
           "additionalProperties": false
         },
         {
@@ -761,6 +835,11 @@
             },
             "description": {
               "type": "string"
+            }
+          },
+          "patternProperties": {
+            "^x-": {
+              "$ref": "#/$defs/specificationExtensionValue"
             }
           },
           "additionalProperties": false
@@ -781,6 +860,11 @@
             },
             "description": {
               "type": "string"
+            }
+          },
+          "patternProperties": {
+            "^x-": {
+              "$ref": "#/$defs/specificationExtensionValue"
             }
           },
           "additionalProperties": false
@@ -1095,6 +1179,11 @@
           "$ref": "#/$defs/completedToolResultExample"
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "toolExamples": {
@@ -1149,6 +1238,11 @@
           "$ref": "#/$defs/completedReadResourceResultExample"
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "resourceExamples": {
@@ -1174,6 +1268,11 @@
         },
         "result": {
           "$ref": "#/$defs/completedReadResourceResultExample"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
         }
       },
       "additionalProperties": false
@@ -1205,6 +1304,11 @@
         },
         "required": {
           "type": "boolean"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
         }
       },
       "additionalProperties": false
@@ -1286,6 +1390,11 @@
           }
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "resource": {
@@ -1350,6 +1459,11 @@
           }
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "resourceTemplate": {
@@ -1411,6 +1525,11 @@
           }
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "prompt": {
@@ -1466,6 +1585,11 @@
           }
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "transport": {
@@ -1489,6 +1613,11 @@
             },
             "security": {
               "$ref": "#/$defs/securityRequirementArray"
+            }
+          },
+          "patternProperties": {
+            "^x-": {
+              "$ref": "#/$defs/specificationExtensionValue"
             }
           },
           "additionalProperties": false
@@ -1525,6 +1654,11 @@
               "$ref": "#/$defs/securityRequirementArray"
             }
           },
+          "patternProperties": {
+            "^x-": {
+              "$ref": "#/$defs/specificationExtensionValue"
+            }
+          },
           "additionalProperties": false
         },
         {
@@ -1548,6 +1682,11 @@
               "$ref": "#/$defs/securityRequirementArray"
             }
           },
+          "patternProperties": {
+            "^x-": {
+              "$ref": "#/$defs/specificationExtensionValue"
+            }
+          },
           "additionalProperties": false
         }
       ]
@@ -1557,6 +1696,11 @@
       "properties": {
         "listChanged": {
           "type": "boolean"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
         }
       },
       "additionalProperties": false
@@ -1571,6 +1715,11 @@
           "type": "boolean"
         }
       },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
       "additionalProperties": false
     },
     "capabilityPrompts": {
@@ -1578,6 +1727,11 @@
       "properties": {
         "listChanged": {
           "type": "boolean"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
         }
       },
       "additionalProperties": false
@@ -1655,10 +1809,10 @@
       },
       "patternProperties": {
         "^x-": {
-          "$ref": "#/$defs/jsonValue"
+          "$ref": "#/$defs/specificationExtensionValue"
         }
       },
-      "additionalProperties": true
+      "additionalProperties": false
     }
   }
 }

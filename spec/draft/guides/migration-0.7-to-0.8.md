@@ -39,6 +39,14 @@ Wrap a present root Capabilities Object in an array:
 
 Do not translate durable notification semantics into wire-message catalogues. Keep fields such as `resources.subscribe`. Do not copy 2025 core Tasks declarations into a 2026 view; represent a 2026 Tasks extension separately when authoritative metadata supports it.
 
+## Object-level specification extensions
+
+No migration is required for existing root `x-*` properties. Version 0.8.0 also permits `x-*` directly on eligible MCP Description-defined semantic objects. Organizations MAY move object-specific metadata from a root parallel map to the object it describes, but migration tooling SHOULD do so only when each source entry resolves unambiguously to one object and protocol-scoped variant.
+
+Preserve unknown object-level extensions without assigning them core semantics. Do not move extensions into domain maps, Security Requirement Objects, `capabilities.extensions`, embedded JSON Schemas, carried MCP payload/result/annotation/`_meta` objects, arbitrary values, or Reference Objects. A nested `protocolVersions` field inside an extension value belongs to that extension and does not scope the containing MCP Description object.
+
+If a later Components proposal is implemented, apply object-level extensions to the outer Components Object and eligible semantic component values only. Component namespace maps, schemas, and Reference Objects remain closed to this mechanism unless their specifications explicitly provide otherwise.
+
 ## Tool input schemas
 
 Every 0.8.0 Tool requires `inputSchema`. A migration tool MUST require author intervention for a Tool that omitted it in 0.7.0.

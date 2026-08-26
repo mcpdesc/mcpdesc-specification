@@ -55,7 +55,7 @@ In contexts represented by 0.8.0, MCP 2026-07-28 `io.modelcontextprotocol/server
 
 Complete revision-specific semantic validation begins with MCP 2025-06-18. MCP 2024-11-05 and MCP 2025-03-26 remain recognized legacy compatibility revisions: validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
 
-MCP `_meta`, root `x-*` specification extensions, and `capabilities.extensions` are independent mechanisms. Tooling MUST preserve them independently and MUST NOT automatically project or reinterpret one as another. Projection MUST preserve `_meta` on each selected declaration and named example without merging metadata from disjoint protocol variants.
+MCP `_meta`, `x-*` specification extensions, and `capabilities.extensions` are independent mechanisms. Tooling MUST preserve them independently and MUST NOT automatically project or reinterpret one as another. Projection MUST preserve `_meta` and object-level specification extensions on each selected declaration and named example without merging values from disjoint protocol variants.
 
 Authors MUST NOT publish credentials, tokens, user identifiers, internal topology, live trace identifiers, or other runtime-sensitive data in static `_meta`; fictitious or redacted values MUST be used where disclosure creates risk. Consumers MUST treat keys and values as untrusted data and apply appropriate size, rendering, logging, and processing limits.
 
@@ -65,11 +65,11 @@ Property ordering within JSON objects is not significant. Implementations MUST N
 
 ### 3.7 Specification Extensions
 
-Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for details.
+Any property whose name matches the pattern `^x-` on the root or another eligible MCP Description-defined semantic object is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for eligibility and exclusion rules.
 
 ### 3.8 Additional Properties
 
-Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear at the root level. Implementations SHOULD reject documents containing unknown root-level properties.
+Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear on the root or another closed eligible semantic object. Implementations MUST reject such unknown properties. An `x-*` property does not make an otherwise ineligible object extensible.
 
 ### 3.9 Example
 

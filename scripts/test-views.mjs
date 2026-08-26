@@ -188,6 +188,51 @@ assert.deepEqual(
   { enabled: true }
 );
 
+const objectExtensionSource = fixture('spec/draft/fixtures/expected-valid/object-level-specification-extensions.json');
+const objectExtensionView2025 = projectProtocolView(objectExtensionSource, '2025-11-25');
+const objectExtensionView2026 = projectProtocolView(objectExtensionSource, '2026-07-28');
+assert.deepEqual(objectExtensionView2025.info['x-example-owner'], {
+  team: 'platform',
+  protocolVersions: ['extension-private-version']
+});
+assert.deepEqual(objectExtensionView2025.tools[0]['x-example-lifecycle'], { status: 'legacy' });
+assert.equal(objectExtensionView2025.tools[0].examples.default['x-example-confidence'], 0.9);
+assert.deepEqual(objectExtensionView2026.tools[0]['x-example-lifecycle'], { status: 'current' });
+assert.equal(objectExtensionView2026.tools.length, 1);
+const mergedObjectExtensions = mergeProtocolDescriptions([objectExtensionView2025, objectExtensionView2026]);
+assert.deepEqual(mergedObjectExtensions.info['x-example-owner'], {
+  team: 'platform',
+  protocolVersions: ['extension-private-version']
+});
+assert.equal(mergedObjectExtensions.tools.length, 2);
+assert.ok(semanticallyEquivalent(projectProtocolView(mergedObjectExtensions, '2025-11-25'), objectExtensionView2025));
+assert.ok(semanticallyEquivalent(projectProtocolView(mergedObjectExtensions, '2026-07-28'), objectExtensionView2026));
+
+const mergeableObjectExtensionView2025 = structuredClone(objectExtensionView2025);
+delete mergeableObjectExtensionView2025.tools[0].examples;
+const equivalentObjectExtensionView = structuredClone(mergeableObjectExtensionView2025);
+equivalentObjectExtensionView.protocolVersions = ['2026-07-28'];
+const collapsedObjectExtensions = mergeProtocolDescriptions([mergeableObjectExtensionView2025, equivalentObjectExtensionView]);
+assert.equal(collapsedObjectExtensions.tools.length, 1);
+assert.equal('protocolVersions' in collapsedObjectExtensions.tools[0], false);
+
+const conflictingObjectExtensionView = structuredClone(equivalentObjectExtensionView);
+conflictingObjectExtensionView.tools[0]['x-example-lifecycle'] = { status: 'conflicting' };
+assert.equal(semanticallyEquivalent(equivalentObjectExtensionView, conflictingObjectExtensionView), false);
+const distinctObjectExtensions = mergeProtocolDescriptions([mergeableObjectExtensionView2025, conflictingObjectExtensionView]);
+assert.equal(distinctObjectExtensions.tools.length, 2);
+assert.deepEqual(
+  distinctObjectExtensions.tools.map((tool) => tool['x-example-lifecycle'].status).sort(),
+  ['conflicting', 'legacy']
+);
+
+const sameRevisionExtensionConflict = structuredClone(mergeableObjectExtensionView2025);
+sameRevisionExtensionConflict.tools[0]['x-example-lifecycle'] = { status: 'conflicting' };
+assert.throws(
+  () => mergeProtocolDescriptions([mergeableObjectExtensionView2025, sameRevisionExtensionConflict]),
+  /Conflicting Effective Protocol Views/
+);
+
 const externalReferenceSource = fixture('spec/draft/fixtures/expected-warning/unresolved-external-tool-ref.json');
 const externalReferenceView = projectProtocolView(externalReferenceSource, '2026-07-28');
 assert.equal(

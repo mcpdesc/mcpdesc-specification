@@ -46,14 +46,14 @@ MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input t
 
 A Tool Object MAY contain `examples`, a map from a local example name to a Tool Example Object. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant.
 
-A Tool Example Object contains exactly these properties:
+A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `input` | object | **Yes** | Complete `params.arguments` value from a `tools/call` request. |
 | `result` | object | **Yes** | Complete applicable completed Tool Result payload, excluding the JSON-RPC envelope. |
 
-The Tool Example Object MUST NOT contain additional properties. In particular, 0.8.0 does not define `summary`, `description`, `externalValue`, or references to reusable examples.
+The Tool Example Object MUST NOT contain other additional properties. In particular, 0.8.0 does not define `summary`, `description`, `externalValue`, or references to reusable examples.
 
 `input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
 

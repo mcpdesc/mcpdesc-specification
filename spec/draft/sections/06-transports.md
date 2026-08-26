@@ -122,5 +122,5 @@ A document with `transports` is invalid when any root revision has no applicable
 
 ### 6.6 Extensibility
 
-Transport objects MUST NOT contain additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties. Vendor-specific transport metadata SHOULD be placed in specification extensions at the root level.
+Transport Objects MAY carry `x-*` specification extensions. They MUST NOT contain other additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties.
 

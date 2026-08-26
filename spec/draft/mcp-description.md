@@ -201,7 +201,7 @@ In contexts represented by 0.8.0, MCP 2026-07-28 `io.modelcontextprotocol/server
 
 Complete revision-specific semantic validation begins with MCP 2025-06-18. MCP 2024-11-05 and MCP 2025-03-26 remain recognized legacy compatibility revisions: validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
 
-MCP `_meta`, root `x-*` specification extensions, and `capabilities.extensions` are independent mechanisms. Tooling MUST preserve them independently and MUST NOT automatically project or reinterpret one as another. Projection MUST preserve `_meta` on each selected declaration and named example without merging metadata from disjoint protocol variants.
+MCP `_meta`, `x-*` specification extensions, and `capabilities.extensions` are independent mechanisms. Tooling MUST preserve them independently and MUST NOT automatically project or reinterpret one as another. Projection MUST preserve `_meta` and object-level specification extensions on each selected declaration and named example without merging values from disjoint protocol variants.
 
 Authors MUST NOT publish credentials, tokens, user identifiers, internal topology, live trace identifiers, or other runtime-sensitive data in static `_meta`; fictitious or redacted values MUST be used where disclosure creates risk. Consumers MUST treat keys and values as untrusted data and apply appropriate size, rendering, logging, and processing limits.
 
@@ -211,11 +211,11 @@ Property ordering within JSON objects is not significant. Implementations MUST N
 
 ### 3.7 Specification Extensions
 
-Any property at the root level whose name matches the pattern `^x-` is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for details.
+Any property whose name matches the pattern `^x-` on the root or another eligible MCP Description-defined semantic object is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for eligibility and exclusion rules.
 
 ### 3.8 Additional Properties
 
-Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear at the root level. Implementations SHOULD reject documents containing unknown root-level properties.
+Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear on the root or another closed eligible semantic object. Implementations MUST reject such unknown properties. An `x-*` property does not make an otherwise ineligible object extensible.
 
 ### 3.9 Example
 
@@ -525,7 +525,7 @@ A document with `transports` is invalid when any root revision has no applicable
 
 ### 6.6 Extensibility
 
-Transport objects MUST NOT contain additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties. Vendor-specific transport metadata SHOULD be placed in specification extensions at the root level.
+Transport Objects MAY carry `x-*` specification extensions. They MUST NOT contain other additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties.
 
 ## 7. Security
 
@@ -667,7 +667,7 @@ The `tasks` object, when present, indicates the server supports long-running tas
 
 Core `tasks` in MCP 2025-11-25 and a Tasks extension in MCP 2026-07-28 are distinct declarations and MUST NOT be automatically reinterpreted as one another. `logging` remains representable for revisions that define it; validators SHOULD warn when it applies to MCP 2026-07-28, where it is deprecated.
 
-Unknown capability properties SHOULD be preserved. Root `x-*` specification extensions and MCP capability `extensions` are distinct namespaces.
+The Capabilities Object and the MCP Description-defined `tools`, `resources`, and `prompts` capability declaration objects MAY carry `x-*` specification extensions. Other unknown properties on those objects are invalid. MCP-native capability payloads retain their own forward-compatibility rules. The `capabilities.extensions` map is a formal MCP protocol-extension namespace, not an MCP Description specification-extension location; tooling MUST NOT reinterpret or move values between these mechanisms.
 
 ### 8.5 Scope Uniqueness
 
@@ -744,14 +744,14 @@ MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input t
 
 A Tool Object MAY contain `examples`, a map from a local example name to a Tool Example Object. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant.
 
-A Tool Example Object contains exactly these properties:
+A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `input` | object | **Yes** | Complete `params.arguments` value from a `tools/call` request. |
 | `result` | object | **Yes** | Complete applicable completed Tool Result payload, excluding the JSON-RPC envelope. |
 
-The Tool Example Object MUST NOT contain additional properties. In particular, 0.8.0 does not define `summary`, `description`, `externalValue`, or references to reusable examples.
+The Tool Example Object MUST NOT contain other additional properties. In particular, 0.8.0 does not define `summary`, `description`, `externalValue`, or references to reusable examples.
 
 `input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
 
@@ -991,7 +991,7 @@ Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol 
 |----------|------|----------|-------------|
 | `result` | [Completed Resource Read Result](#1044-completed-resource-read-result) | **Yes** | Completed `resources/read` result payload for the containing Resource's `uri`, excluding the JSON-RPC envelope. |
 
-No additional properties are allowed. The requested URI is implicit in the containing Resource and MUST NOT be duplicated at the example level.
+The object MAY carry `x-*` specification extensions; no other additional properties are allowed. The requested URI is implicit in the containing Resource and MUST NOT be duplicated at the example level.
 
 #### 10.4.3 Resource Template Example Object
 
@@ -1000,7 +1000,7 @@ No additional properties are allowed. The requested URI is implicit in the conta
 | `uri` | string | **Yes** | Concrete Resource URI used as `resources/read.params.uri`. |
 | `result` | [Completed Resource Read Result](#1044-completed-resource-read-result) | **Yes** | Completed `resources/read` result payload for `uri`, excluding the JSON-RPC envelope. |
 
-No additional properties are allowed. `uri` MUST be a valid RFC 6570 expansion of the containing `uriTemplate`. It records the exact request value rather than reverse-inferred template variables.
+The object MAY carry `x-*` specification extensions; no other additional properties are allowed. `uri` MUST be a valid RFC 6570 expansion of the containing `uriTemplate`. It records the exact request value rather than reverse-inferred template variables.
 
 #### 10.4.4 Completed Resource Read Result
 
@@ -1429,82 +1429,88 @@ Flat tag list with entity references:
 
 ## 14. Specification Extensions
 
-MCP Description documents support vendor-specific metadata through specification extensions.
+MCP Description documents support vendor-specific metadata through specification extensions on explicitly eligible semantic objects.
 
 ### 14.1 Extension Naming
 
-Specification extension properties MUST match the pattern `^x-`. The RECOMMENDED naming convention is:
+Specification extension properties MUST match the pattern `^x-`. Names are case-sensitive. The RECOMMENDED naming convention is:
 
 ```
 x-{organization}-{feature}
 ```
 
-Examples:
-
-- `x-cisco-metadata`
-- `x-acme-deployment`
-- `x-myorg-governance`
+Authors SHOULD use lowercase organization prefixes. Examples include `x-cisco-metadata`, `x-acme-owner`, and `x-example-cost-profile`.
 
 ### 14.2 Extension Placement
 
-Specification extensions MAY appear at the root level of an MCP Description document. Extensions MUST NOT appear within objects defined by this specification (e.g., within `info`, `transports` items, or tool objects) unless the object explicitly allows additional properties.
+A specification extension MAY appear directly on the root MCP Description Object or another eligible MCP Description-defined semantic object. Eligible categories in 0.8.0 are:
+
+- Info, Contact, License, Icon, and Tag Objects;
+- Transport Objects and MCP Description-defined transport configuration objects;
+- Security Scheme, OAuth Flows, and OAuth Flow Objects;
+- the Capabilities Object and MCP Description-defined capability declaration objects;
+- Tool, Resource, Resource Template, Prompt, Prompt Argument, and Elicitation Declaration Objects; and
+- MCP Description-defined named Tool, Resource, and Resource Template Example wrapper objects.
+
+Eligibility follows the object's specification-defined role, not the fact that a serialized value is a JSON object. A map value that is an eligible object MAY carry extensions, but the containing map does not thereby gain an extension slot.
+
+Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
+
+If a Components Object is introduced, the outer Components Object and eligible semantic component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible unless their specifications explicitly state otherwise. This rule does not define Components syntax in 0.8.0.
 
 ### 14.3 Extension Values
 
-Extension values MAY be of any JSON type: object, array, string, number, boolean, or null.
+An extension value MAY be any JSON-compatible value: object, array, string, number, boolean, or null. Authors SHOULD prefer an object when the value may evolve compatibly.
 
 ### 14.4 Processing Rules
 
-Implementations that do not recognize a specification extension MUST ignore it and MUST NOT reject the document.
+An implementation that does not recognize a specification extension MUST NOT reject the document because of that extension, MUST ignore it when interpreting core MCP Description semantics, and SHOULD preserve it when processing and reserializing the document. A consumer MUST NOT infer core semantics from an unrecognized extension.
 
-Implementations SHOULD preserve unrecognized extensions when processing and re-serializing MCP Description documents.
+A specification extension MUST NOT redefine, contradict, or weaken a core requirement. It cannot make a required field optional, change `security` or protocol applicability, or make an invalid example conforming. Core fields remain authoritative.
 
-### 14.5 Extension Documentation
+A validator MAY validate a recognized extension using a configured trusted schema. Failure to obtain that schema MUST NOT invalidate an otherwise conforming document unless the validator identifies a separate profile that requires the extension.
 
-Extension authors SHOULD publish a specification for their extension, including:
+### 14.5 Ownership, Projection, and Merge
 
-- A JSON Schema defining the extension's structure
-- Documentation of the extension's purpose and semantics
-- Versioning information
+An object-level extension belongs to its containing semantic object and follows that object's lifecycle and Effective Protocol View. A nested `protocolVersions` member inside an extension value has no MCP Description scoping meaning.
 
-### 14.6 Example
+A single-version projection MUST preserve every `x-*` property on a retained eligible object unless extension stripping was explicitly requested. Projection MUST NOT move it, combine it with `_meta`, or reinterpret it as an MCP protocol extension. Removing an out-of-scope owner removes its extensions with it.
+
+Extensions participate in the semantic representation of their containing object. Merge tools MAY collapse objects with semantically equivalent extension values under the ordinary merge rules. For conflicting values on corresponding objects, a merge tool MUST retain distinct non-overlapping variants where representable or report a conflict. It MUST NOT guess, silently discard an extension, or move it to another object.
+
+### 14.6 Extension Documentation
+
+Extension authors SHOULD publish a JSON Schema for the value, purpose and semantic documentation, versioning information, and the eligible MCP Description object types on which the extension is valid.
+
+### 14.7 Relationship to Other Extension Mechanisms
+
+Object-level `x-*`, literal MCP `_meta`, and formal MCP `capabilities.extensions` are separate mechanisms. Tooling MUST NOT automatically copy, project, or reinterpret data among them. `x-*` is MCP Description-specific vendor metadata; `_meta` represents literal MCP metadata in supported contexts; and `capabilities.extensions` declares formal MCP protocol-extension support.
+
+### 14.8 Security and Privacy
+
+Authors MUST NOT publish credentials, tokens, user identifiers, confidential topology, live trace identifiers, or other secrets in extensions. Consumers MUST treat extension names and values as untrusted content and apply appropriate size, output-encoding, rendering, logging, and execution controls. Unknown extensions MUST NOT bypass core conformance or security checks. Validators SHOULD avoid automatic network retrieval of extension schemas.
+
+### 14.9 Example
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
   "mcpdesc": "0.8.0",
   "info": {
-    "name": "chess-coach",
-    "version": "2.1.0"
+    "name": "account-service",
+    "version": "1.0.0",
+    "x-acme-owner": { "team": "identity" }
   },
-  "protocolVersions": ["2025-11-25"],
-  "transports": [
-    { "type": "stdio", "command": "chess-coach", "args": ["mcp"] }
-  ],
+  "protocolVersions": ["2026-07-28"],
   "tools": [
     {
-      "name": "analyze_game",
-      "description": "Analyze a chess game from PGN notation",
-      "inputSchema": {
-        "type": "object",
-        "properties": { "pgn": { "type": "string" } },
-        "required": ["pgn"],
-        "additionalProperties": false
+      "name": "delete_account",
+      "inputSchema": { "type": "object" },
+      "x-acme-governance": {
+        "risk": "high",
+        "reviewRequired": true
       }
     }
-  ],
-  "x-cisco-metadata": {
-    "version": "0.2.0",
-    "dump": {
-      "toolName": "mcpcontract",
-      "toolVersion": "0.8.0",
-      "createdAt": "2026-03-15T14:30:00Z"
-    }
-  },
-  "x-acme-deployment": {
-    "region": "us-west-2",
-    "tier": "production"
-  }
+  ]
 }
 ```
 
@@ -1559,7 +1565,7 @@ A conforming MCP Description document MUST:
 6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
 7. Validate against the JSON Schema for the declared `mcpdesc` version.
 8. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
-9. Not contain unknown properties at the root level except specification extensions matching `^x-`.
+9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
 ### 16.2 Implementation Conformance
 
@@ -1567,8 +1573,8 @@ A conforming implementation (tool, validator, or platform) MUST:
 
 1. Accept and correctly parse documents conforming to this specification.
 2. Reject documents that fail the requirements in Section 16.1.
-3. Ignore unrecognized specification extensions without error (Section 14.4).
-4. Preserve specification extensions when processing and re-serializing documents (Section 14.4).
+3. Ignore unrecognized specification extensions when interpreting core semantics and accept them without error at eligible locations (Section 14.4).
+4. Preserve root and object-level specification extensions when processing, projecting, merging, and reserializing documents unless explicitly requested to strip them (Sections 14.4 and 14.5).
 5. Apply structural JSON Schema validation and the cross-object semantic requirements of this specification.
 
 The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security references, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
