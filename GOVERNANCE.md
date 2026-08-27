@@ -123,7 +123,7 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 
 The `@mcpdesc/validator` package uses implementation SemVer independently from immutable specification snapshot selectors. Each selector has sibling runtime and frozen test snapshot directories; publishing support for a later draft MUST NOT alter an earlier selector's schema, semantics, metadata, fixtures, or expected results.
 
-The reviewed specification assembly records the chosen package version, exact selector metadata, schema digests, and intended npm dist-tag. A maintainer creates the specification snapshot tag first, then reviews `npm pack --dry-run --json` from that tag before explicitly publishing. Repository scripts and CI validate these artifacts but MUST NOT create tags, move npm dist-tags, or publish packages.
+The reviewed specification assembly records the chosen package version, exact selector metadata, schema digests, and intended npm dist-tag. A maintainer creates the specification snapshot tag first, then reviews `npm pack --dry-run --json` from that tag. Publishing an annotated `validator-v<semver>` tag explicitly authorizes the trusted-publishing workflow to publish that exact package version. A SemVer prerelease is published with the npm `next` dist-tag; a stable SemVer is published with `latest`. Repository scripts and other CI workflows MUST NOT create release tags, move npm dist-tags, select package versions, or publish packages.
 
 For Community Working Draft 2, validator `0.2.0` cumulatively supports `0.8.0-draft.1` and `0.8.0-draft.2` and is intended to receive npm `latest` after tag and tarball review. This intent is not publication authorization.
 

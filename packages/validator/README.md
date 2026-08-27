@@ -68,7 +68,7 @@ For each approved specification snapshot, maintainers:
 
 The test snapshots are repository-only development assets and are excluded from the npm tarball. Runtime snapshot implementations and embedded schemas do ship so installed packages remain self-contained.
 
-Supporting code does not authorize publication. During release review, a maintainer explicitly decides the validator package version and intended npm dist-tag so the reviewed specification-tag commit contains the chosen package metadata. Only after that specification snapshot is tagged does a maintainer review the tarball from the tag and run `npm publish`. CI and repository scripts do not choose versions, create tags, move dist-tags, or publish packages. No package version or publication choice for a later draft is made by this lifecycle description.
+Supporting code does not authorize publication. During release review, a maintainer explicitly decides the validator package version and intended npm dist-tag so the reviewed specification-tag commit contains the chosen package metadata. Only after that specification snapshot is tagged does a maintainer review the tarball and push an annotated `validator-v<semver>` tag. The trusted-publishing workflow requires that exact tag/package version match, reruns the package checks, and publishes SemVer prereleases with npm `next` or stable versions with `latest`. Repository scripts and other CI workflows do not choose versions, create release tags, or publish packages. No package version or publication choice for a later draft is made by this lifecycle description.
 
 ## Development checks
 
