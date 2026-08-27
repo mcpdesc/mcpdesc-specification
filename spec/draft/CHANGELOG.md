@@ -26,6 +26,21 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 
 ### Draft snapshots
 
+#### Community Working Draft 2 — 2026-08-26 (`v0.8.0-draft.2`)
+
+Draft 2 is the second public interoperability snapshot of v0.8.0. It remains unreleased: the snapshot identifier does not change the `mcpdesc` value from `0.8.0`, update `schemas/latest.json`, accept any proposal, or publish the validator package.
+
+The [proposal revision manifest](PROPOSALS.md) records exact source commits and SHA-256 digests for the six Draft 1 inputs and six additional review-stage proposals: 0008, 0009, 0010, 0011, 0012, and 0013. All 12 are implemented experimentally. Proposal 0006 (Issue #13, PR #15) is explicitly excluded.
+
+Issue [#18](https://github.com/mcpdesc/mcpdesc-specification/issues/18) established the validator snapshot lifecycle used by this assembly:
+
+- [x] preserve immutable Draft 1 runtime and test snapshots;
+- [x] add sibling Draft 2 runtime and frozen test snapshots with exact selector and schema provenance;
+- [x] select cumulative validator version `0.2.0` and record npm `latest` as the intended dist-tag;
+- [x] require package, declaration, browser, fixture, and tarball validation before release review;
+- [ ] create or push `v0.8.0-draft.2` only after explicit maintainer approval;
+- [ ] publish validator `0.2.0` only after reviewing the tarball from the approved tag.
+
 #### Community Working Draft 1 — 2026-08-24 (`v0.8.0-draft.1`)
 
 Draft 1 is the first public interoperability snapshot of v0.8.0. The tag identifies an immutable snapshot, not a distinct `mcpdesc` conformance version, stable release, feature freeze, or claim of community consensus. Review-stage features may change incompatibly or be removed before a later draft or stable release.
@@ -61,9 +76,18 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - Revision-aware MCP `CacheableResult` fidelity for Resource examples: MCP 2026-07-28 completed read results require non-negative `ttlMs` and `public` or `private` `cacheScope`, while earlier revision examples reject those fields.
 - Literal MCP `_meta` semantics for supported declarations and named Tool and Resource result/content examples, including structural key grammar, revision-aware reserved-key context and value checks, warning-and-preserve handling for unknown reserved keys, and security guidance.
 - Experimental operation-level Elicitation Declarations for Tools, Resources, Resource Templates, and Prompts, with form and URL modes, nested protocol scopes, revision-aware restricted form schemas, and Effective Protocol View support, implementing Proposal 0007 while it remains under review.
+- Object-level `x-*` specification extensions on explicitly eligible MCP Description semantic objects, with strict excluded locations and projection, merge, preservation, and core-semantics boundaries, implementing Proposal 0011 while it remains under review.
+- JSON and restricted YAML as equally conforming serializations of one JSON-compatible data model, including YAML 1.2.2 JSON-schema scalar resolution, deterministic profile restrictions, serialization-specific capability claims, and file-extension and media-type guidance, implementing Proposal 0010 while it remains under review.
+- Repository-only strict raw-source decoding and isolated serialization fixtures for JSON/YAML equivalence, safe YAML parsing, single-document input, string and unique mapping keys, tag and alias rejection, disabled merge semantics, and finite numbers. The public `@mcpdesc/validator` API remains a parsed-value API.
+- Optional document-level provenance records, default attribution, primitive overrides, referential validation, descriptive-only semantic comparison, and provenance-preserving projection and merge behavior, implementing Proposal 0008 while it remains under review.
+- Optional typed `components` namespaces and local `$componentRef` Reference Objects for reusable Tool schemas, Elicitation schemas, and named Tool, Resource, and Resource Template examples, including contextual resolution, cycle detection, projection pruning, and collision-safe merge rewriting, implementing Proposal 0009 while it remains under review.
+- Optional non-empty primitive `clientRequirements` using revision-specific MCP `ClientCapabilities` shapes for unconditional Tool call, Resource read, Resource Template read, and Prompt get preconditions, including semantic validation, deprecation diagnostics, formal extension requirements, compatibility evaluation, and projection and merge behavior, implementing Proposal 0012 while it remains under review.
 
 ### Changed
 
+- Made `transports` optional and defined omission of an optional section as no declaration rather than evidence of runtime non-support.
+- Required ordinary declaration collections to be non-empty when present, while preserving `security: []`, `security: [{}]`, and empty Security Requirement scope arrays.
+- Required projection and merge to omit emptied ordinary collections and made transport coverage conditional on a present `transports` section.
 - Capability wording is no longer tied to MCP initialization or notification wire mechanisms.
 - `resources.subscribe` and `listChanged` fields retain their durable semantic meaning across protocol revisions.
 - Core Tasks in MCP 2025-11-25 and Tasks extensions in MCP 2026-07-28 are treated as distinct declarations.

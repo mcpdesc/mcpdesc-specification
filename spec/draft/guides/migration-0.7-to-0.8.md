@@ -2,6 +2,14 @@
 
 MCP Description 0.8.0 is intentionally breaking. Migration must preserve author intent and must not infer protocol revisions, Tool parameters, OAuth scopes, or hidden runtime surfaces from insufficient evidence.
 
+## Serialization
+
+JSON documents require no serialization migration and remain conforming as `.mcpdesc.json` with media type `application/mcp-description+json`.
+
+Version 0.8.0 also defines restricted YAML as an equally conforming serialization of the same JSON-compatible data model. Rename YAML descriptions to `.mcpdesc.yaml` or `.mcpdesc.yml`, with `.mcpdesc.yaml` preferred. Use `application/mcp-description+yaml`; generic tooling should use the RFC 9512 `application/yaml` media type when the project-specific type is unavailable or inappropriate.
+
+Before treating an existing YAML file as conforming, verify YAML 1.2.2 JSON-schema scalar resolution, exactly one document, string and unique mapping keys, no custom tags or aliases, no merge semantics, and finite JSON-compatible numbers. Apply the same 0.8.0 JSON Schema and semantic validation after decoding as for JSON. Conversion between JSON and YAML must preserve the decoded data model; comments, scalar style, and mapping order are not semantic.
+
 ## Protocol coverage
 
 Move `info.protocolVersion` to required root `protocolVersions` and remove the old field.
@@ -17,6 +25,14 @@ The value must be one of the MCP revisions supported by 0.8.0. If the 0.7.0 docu
 
 For a multi-revision description, declarations that apply to all root revisions omit their scope. Materially different declarations use disjoint `protocolVersions` variants. Transports must collectively cover every root revision; Capabilities Objects and same-identifier primitive variants must not overlap.
 
+## Optional sections and collection cardinality
+
+Version 0.8.0 requires only `mcpdesc`, `info`, and non-empty `protocolVersions` at the root. A migrated document MAY omit `transports` when connection details are unavailable, environment-specific, or intentionally undeclared. Omission makes no transport declaration and does not assert that the runtime has no transport. When `transports` is present, it MUST be non-empty and its effective scopes must still cover every root protocol revision.
+
+Remove any empty ordinary declaration property rather than inserting a placeholder. This applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. Projection and merge output must likewise omit an ordinary collection after its last entry is removed.
+
+Do not apply that normalization to security values. Preserve omitted `security`, `security: []`, `security: [{}]`, and empty scope arrays as distinct forms. Do not infer runtime non-support from an omitted security, capability, primitive, or tag section.
+
 ## Capabilities
 
 Wrap a present root Capabilities Object in an array:
@@ -30,6 +46,38 @@ Wrap a present root Capabilities Object in an array:
 ```
 
 Do not translate durable notification semantics into wire-message catalogues. Keep fields such as `resources.subscribe`. Do not copy 2025 core Tasks declarations into a 2026 view; represent a 2026 Tasks extension separately when authoritative metadata supports it.
+
+## Primitive client requirements
+
+No automatic migration is required because `clientRequirements` is optional and 0.7.0 has no equivalent. Add it only when authoritative design information confirms that successful Tool invocation, Resource read, concrete Resource Template read, or Prompt retrieval has an unconditional minimum dependency on client capabilities. Do not infer it from root server `capabilities`, every Elicitation Declaration, optional runtime feature use, security requirements, or one input-dependent failure observation.
+
+The object must be non-empty and valid under every revision in the primitive's effective scope. Split the primitive into disjoint protocol variants when the required shape changes, including core Tasks in MCP 2025-11-25 versus a formal Tasks extension in MCP 2026-07-28. Preserve unknown and experimental capabilities without inventing matching semantics. Treat non-empty formal extension settings as indeterminate unless the evaluator understands the extension specification.
+
+Migration tooling SHOULD require explicit author confirmation before converting runtime observations into unconditional requirements. Capability compatibility and authorization remain separate decisions, and requirements apply to call, read, or get rather than primitive listing.
+
+## Object-level specification extensions
+
+No migration is required for existing root `x-*` properties. Version 0.8.0 also permits `x-*` directly on eligible MCP Description-defined semantic objects. Organizations MAY move object-specific metadata from a root parallel map to the object it describes, but migration tooling SHOULD do so only when each source entry resolves unambiguously to one object and protocol-scoped variant.
+
+Preserve unknown object-level extensions without assigning them core semantics. Do not move extensions into domain maps, Security Requirement Objects, `capabilities.extensions`, embedded JSON Schemas, carried MCP payload/result/annotation/`_meta` objects, arbitrary values, or Reference Objects. A nested `protocolVersions` field inside an extension value belongs to that extension and does not scope the containing MCP Description object.
+
+Apply object-level extensions to the outer Components Object and eligible semantic example component values only. Component namespace maps, schemas, and Reference Objects remain closed to this mechanism. An `x-*` key inside a namespace map is a component name and its value must satisfy the namespace type.
+
+## Reusable components
+
+No migration is required because root `components` and `$componentRef` are optional. To deduplicate repeated complete schemas or named example objects, move the value into the matching `schemas`, `toolExamples`, `resourceExamples`, or `resourceTemplateExamples` namespace and replace each complete use-site value with a local Reference Object such as `{ "$componentRef": "#/components/schemas/SearchInput" }`.
+
+Do not replace JSON Schema `$ref` or `$defs`; those remain scoped to an embedded JSON Schema resource. Do not convert remote or relative-file references into `$componentRef`, add sibling properties to a Reference Object, add `protocolVersions` to a component, or use a component to bypass an inline use-site rule. Validate each referenced value under every Tool, Elicitation Declaration, Resource, Resource Template, and protocol scope where it is used.
+
+Migration and merge tooling must keep resolution within one document, reject missing or cyclic targets, and never retrieve component values from a network. When combining descriptions, deduplicate equivalent components or deterministically rename collisions and rewrite all affected `$componentRef` values. Projection may remove unused values only after retaining every transitive target.
+
+## Provenance records
+
+No provenance migration is required. To describe a homogeneous generated, observed, or curated source, add one root `provenance.records` entry and reference it through `defaultIds`. Use a primitive's non-empty `provenanceIds` only when its attribution replaces those defaults. Every ID is document-local and must resolve to the root registry.
+
+Experiments using inline provenance objects should move reusable facts into root records and replace each inline value with IDs. Remove producer-declared completeness, confidence, trust, and policy fields; 0.8.0 defines no replacement because consumers derive those conclusions under external policy. An old observation timestamp may become `recordedAt`, but it is supporting metadata rather than identity.
+
+Merge tooling must preserve effective attribution, deterministically remap colliding local IDs whose records differ, and combine contributing records for equivalent declarations in the same Effective Protocol View. Runtime compatibility checks ignore provenance-only differences, while representation-preserving conversion and round-tripping retain them. Provenance Registry, Record, Producer, and Artifact Objects may carry `x-*` extensions.
 
 ## Tool input schemas
 
@@ -128,7 +176,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 7. Generate and deduplicate named security schemes, preserving override placement.
 8. Add only authoritatively known instructions, scopes, revisions, and protocol variants.
 9. Validate against the 0.8.0 JSON Schema.
-10. Run semantic validation for protocol scopes, transport coverage, primitive and Elicitation Declaration uniqueness, security references, tags, revision applicability, elicitation modes and form schemas, literal `_meta`, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
+10. Run semantic validation for protocol scopes, transport coverage, primitive and Elicitation Declaration uniqueness, security and component references, tags, revision applicability, elicitation modes and form schemas, literal `_meta`, embedded Tool schemas and examples, unresolved external-reference warnings, and extension namespace warnings.
 
 A migration tool MUST report unresolved ambiguity instead of guessing.
 

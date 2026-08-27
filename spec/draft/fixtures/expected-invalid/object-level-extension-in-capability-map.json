@@ -1,0 +1,20 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "object-level-extension-in-capability-map",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "capabilities": [
+    {
+      "extensions": {
+        "x-example-policy": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}

@@ -72,6 +72,9 @@ tools:
   title: Analyze Chess Game
   description: Analyze a chess game from PGN notation. Returns centipawn evaluation,
     best move suggestions, and blunder detection with evaluation loss.
+  x-acme-governance:
+    risk: medium
+    reviewRequired: false
   inputSchema:
     type: object
     properties:

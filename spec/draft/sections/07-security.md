@@ -6,7 +6,7 @@ These declarations describe access requirements. They do not define token acquis
 
 ### 7.1 Named Security Schemes
 
-Root `securitySchemes` is a map from a local name to a Security Scheme Object. Every local name MUST match `^[A-Za-z0-9._-]+$`.
+Root `securitySchemes` is a map from a local name to a Security Scheme Object. When present, it MUST contain at least one entry. Every local name MUST match `^[A-Za-z0-9._-]+$`. Omission makes no security-scheme declaration and MUST NOT be interpreted as proof that the runtime uses no authentication or authorization mechanism.
 
 ```json
 {

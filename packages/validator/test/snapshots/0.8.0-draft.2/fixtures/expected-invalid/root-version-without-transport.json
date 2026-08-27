@@ -1,0 +1,21 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "coverage-gap",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "coverage-gap",
+      "protocolVersions": [
+        "2025-11-25"
+      ]
+    }
+  ]
+}

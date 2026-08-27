@@ -1,0 +1,33 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "deprecated-client-capability-requirements",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "resources": [
+    {
+      "uri": "workspace://current",
+      "name": "current_workspace",
+      "clientRequirements": {
+        "roots": {}
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "legacy_sampling",
+      "clientRequirements": {
+        "sampling": {
+          "context": {}
+        },
+        "extensions": {
+          "io.modelcontextprotocol/future-capability": {}
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "elicitation-example",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-06-18",
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "elicitation-example"
+    }
+  ],
+  "tools": [
+    {
+      "name": "assign_issue",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "issue": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "issue"
+        ],
+        "additionalProperties": false
+      },
+      "elicitations": [
+        {
+          "name": "choose_assignee",
+          "mode": "form",
+          "message": "Who should own this issue?",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "assignee": {
+                "type": "string",
+                "title": "Assignee",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "assignee"
+            ]
+          }
+        },
+        {
+          "name": "authorize_tracker",
+          "mode": "url",
+          "message": "Authorize access to the issue tracker.",
+          "when": "The current authorization grant is insufficient.",
+          "url": "https://auth.example.com/authorize",
+          "protocolVersions": [
+            "2025-11-25",
+            "2026-07-28"
+          ]
+        },
+        {
+          "name": "choose_labels",
+          "mode": "form",
+          "message": "Choose labels for this issue.",
+          "requestedSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "labels": {
+                "type": "array",
+                "title": "Labels",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "bug",
+                    "feature"
+                  ]
+                },
+                "default": [
+                  "bug"
+                ]
+              }
+            }
+          },
+          "protocolVersions": [
+            "2025-11-25",
+            "2026-07-28"
+          ]
+        }
+      ]
+    }
+  ]
+}

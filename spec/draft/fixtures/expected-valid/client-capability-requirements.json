@@ -1,0 +1,94 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "client-capability-requirements",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-06-18",
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "tools": [
+    {
+      "name": "rebuild",
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "clientRequirements": {
+        "tasks": {
+          "requests": {
+            "sampling": {
+              "createMessage": {}
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "rebuild",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "clientRequirements": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "workspace://current",
+      "name": "current_workspace",
+      "protocolVersions": [
+        "2025-06-18"
+      ],
+      "clientRequirements": {
+        "roots": {
+          "listChanged": true
+        }
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "workspace://{path}",
+      "name": "workspace_file",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "clientRequirements": {
+        "elicitation": {
+          "form": {}
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "review_with_model",
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "clientRequirements": {
+        "sampling": {
+          "tools": {}
+        },
+        "experimental": {
+          "com.example/review": {}
+        },
+        "futureCapability": {}
+      }
+    }
+  ]
+}

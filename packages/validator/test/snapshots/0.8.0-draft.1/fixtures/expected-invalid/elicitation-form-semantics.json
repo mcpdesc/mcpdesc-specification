@@ -1,0 +1,57 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-elicitation-form",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-elicitation-form"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "prepare_release",
+      "elicitations": [
+        {
+          "name": "release_channel",
+          "mode": "form",
+          "message": "Choose a release channel.",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "channel": {
+                "type": "string",
+                "enum": [
+                  "stable",
+                  "preview"
+                ],
+                "enumNames": [
+                  "Stable"
+                ],
+                "default": "nightly"
+              }
+            },
+            "required": [
+              "missing"
+            ]
+          }
+        },
+        {
+          "name": "release_channel",
+          "mode": "form",
+          "message": "Choose it again.",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ]
+    }
+  ]
+}

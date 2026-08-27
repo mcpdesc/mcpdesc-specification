@@ -1,0 +1,35 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "duplicate-mcp-header",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "duplicate-mcp-header"
+    }
+  ],
+  "tools": [
+    {
+      "name": "duplicate_headers",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string",
+            "x-mcp-header": "X-Region"
+          },
+          "fallbackRegion": {
+            "type": "string",
+            "x-mcp-header": "x-region"
+          }
+        }
+      }
+    }
+  ]
+}

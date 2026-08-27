@@ -4,26 +4,32 @@
 
 A conforming MCP Description document MUST:
 
-1. Be a valid JSON document (Section 15).
+1. Decode from one conforming JSON or restricted YAML serialization to the JSON-compatible MCP Description data model (Sections 3.1 and 15).
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
 4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.8.0 (Section 4).
-5. Include the `transports` array with at least one transport object and complete root protocol coverage (Section 6).
-6. Validate against the JSON Schema for the declared `mcpdesc` version.
-7. Satisfy semantic scope, identifier, Elicitation Declaration, security-reference, tag-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
-8. Not contain unknown properties at the root level except specification extensions matching `^x-`.
+5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
+6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
+7. Validate against the JSON Schema for the declared `mcpdesc` version.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, provenance-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
 ### 16.2 Implementation Conformance
 
 A conforming implementation (tool, validator, or platform) MUST:
 
-1. Accept and correctly parse documents conforming to this specification.
-2. Reject documents that fail the requirements in Section 16.1.
-3. Ignore unrecognized specification extensions without error (Section 14.4).
-4. Preserve specification extensions when processing and re-serializing documents (Section 14.4).
-5. Apply structural JSON Schema validation and the cross-object semantic requirements of this specification.
+1. Support at least one conforming serialization and declare JSON, YAML, or both for each applicable input or output capability.
+2. Accept and correctly parse conforming documents in every serialization for which it claims input support.
+3. Emit only conforming documents in every serialization for which it claims output support.
+4. Reject documents that fail the requirements in Section 16.1 or the restricted profile of a claimed input serialization.
+5. Ignore unrecognized specification extensions when interpreting core semantics and accept them without error at eligible locations (Section 14.4).
+6. Preserve root and object-level specification extensions when processing, projecting, merging, and reserializing documents unless explicitly requested to strip them (Sections 14.4 and 14.5).
+7. Apply the same structural JSON Schema validation and cross-object semantic requirements after decoding JSON or YAML.
+8. Use safe YAML parsing and reject unsupported YAML constructs when claiming YAML input support (Section 15.3).
+9. Apply reasonable document-size, nesting-depth, scalar-length, and collection-size limits to supported input serializations.
+10. Resolve `$componentRef` only within the same parsed document, without network access, before contextual semantic validation.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Elicitation Declarations, security references, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
@@ -81,6 +87,8 @@ The normative JSON Schema for this specification version is available at:
 - **[RFC 3986]** Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform Resource Identifier (URI): Generic Syntax", RFC 3986, January 2005.
 - **[RFC 6570]** Gregorio, J., Fielding, R., Hadley, M., Nottingham, M., and D. Orchard, "URI Template", RFC 6570, March 2012.
 - **[RFC 8259]** Bray, T., "The JavaScript Object Notation (JSON) Data Interchange Format", RFC 8259, December 2017.
+- **[RFC 9512]** Bormann, C., et al., "YAML Media Type", RFC 9512, February 2024.
+- **[YAML 1.2.2]** Ben-Kiki, O., Evans, C., and I. döt Net, "YAML Ain't Markup Language, Version 1.2.2", October 2021.
 - **[JSON Schema]** Wright, A., Andrews, H., Hutton, B., "JSON Schema: A Media Type for Describing JSON Documents", draft-bhutton-json-schema-01, June 2022.
 
 ### Informative References

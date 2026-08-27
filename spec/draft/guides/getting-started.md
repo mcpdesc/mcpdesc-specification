@@ -15,6 +15,8 @@ Every MCP Description needs `mcpdesc`, `info`, `protocolVersions`, and `transpor
 
 Create a file called `chess-coach.mcpdesc.yaml`:
 
+MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files use YAML 1.2.2 JSON-schema scalar resolution and exclude aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numbers.
+
 ```yaml
 $schema: https://mcpdesc.org/schema/0.8.0.json
 mcpdesc: 0.8.0
@@ -145,6 +147,41 @@ tools:
 
 Tool `examples` pair a named complete `tools/call` argument object with a completed Tool Result. Keep `content` even when `structuredContent` is present. Successful structured content must match `outputSchema`; execution errors use `isError: true` and omit `structuredContent`. For a no-argument Tool, write `input: {}` explicitly. Examples are untrusted, non-exhaustive documentation, not guarantees of live behavior; never include credentials or production data.
 
+When a Tool has an unconditional client capability precondition, add a revision-valid non-empty `clientRequirements` object. This applies to `tools/call`, not `tools/list`:
+
+```yaml
+tools:
+- name: full_rebuild
+  protocolVersions: ['2026-07-28']
+  inputSchema:
+    type: object
+    additionalProperties: false
+  clientRequirements:
+    extensions:
+      io.modelcontextprotocol/tasks: {}
+```
+
+Do not derive this field from server capabilities or conditional Elicitation Declarations. Split protocol-scoped variants when the requirement shape differs by MCP revision.
+
+When several declarations reuse a complete schema or named example, place it in the matching root `components` namespace and use a local `$componentRef`:
+
+```yaml
+components:
+  schemas:
+    PlayerLookup:
+      type: object
+      properties:
+        player_id:
+          type: string
+      required: [player_id]
+tools:
+  - name: get_player_rating
+    inputSchema:
+      $componentRef: '#/components/schemas/PlayerLookup'
+```
+
+References are local to one document, have no sibling properties, and inherit protocol applicability from each use site. Keep JSON Schema `$ref` for reuse inside an embedded schema. See [the reusable-components example](../examples/reusable-components.yaml).
+
 ## Step 4: Add Resources
 
 Resources are data the server exposes. Static resources have fixed URIs; templates have parameters:
@@ -201,7 +238,7 @@ prompts:
 
 ## Step 6: Validate
 
-To validate structure, use a JSON Schema 2020-12 validator against the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json). Complete conformance also requires semantic checks for protocol scopes, transport coverage, security and tag references, revision-specific fields, and Tool-example compatibility with embedded schemas.
+To validate structure, use a JSON Schema 2020-12 validator against the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json). Complete conformance also requires semantic checks for protocol scopes, transport coverage, security, tag, and component references, revision-specific fields, and Tool-example compatibility with resolved embedded schemas.
 
 ```bash
 # From a checkout of this specification repository

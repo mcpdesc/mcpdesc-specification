@@ -28,7 +28,11 @@ MCP Description adopts familiar description patterns where they fit, including s
 
 No. A description represents its declared server surface and may be authored from design metadata, generated from a runtime observation, or assembled from both. An observation can cover only the protocol revision, authorization context, and server state that were actually observed.
 
-Omitted primitives do not prove that no other revision or runtime context exposes them. Producers should record provenance in surrounding tooling or a documented extension when consumers need to assess freshness or authority.
+Omitted primitives do not prove that no other revision or runtime context exposes them. Producers can use root provenance records and primitive attribution to identify contributing evidence, while consumers assess freshness or authority under external policy.
+
+### Does provenance establish completeness or trust?
+
+No. Root provenance records and primitive attribution describe evidence sources only. They do not assert that every primitive was enumerated, assign confidence or trust, or select consumer policy. Consumers apply policy externally and treat records and referenced artifacts as untrusted unless independently verified.
 
 ## Versions and Views
 
@@ -58,7 +62,7 @@ Yes, when they describe compatible views of the same logical server. Merge tooli
 
 ### What is the minimum valid document?
 
-A document needs `mcpdesc`, `info` with `name` and `version`, a non-empty `protocolVersions` array, and one or more transports that collectively cover every declared revision. Tool, Resource, Resource Template, and Prompt collections are optional. See [the minimal example](../examples/minimal.yaml).
+A document needs `mcpdesc`, `info` with `name` and `version`, and a non-empty `protocolVersions` array. Transports and Tool, Resource, Resource Template, and Prompt collections are optional. When transports are present, they collectively cover every declared revision. See [the minimal example](../examples/minimal.yaml).
 
 ### Do I have to write it by hand?
 
@@ -79,7 +83,9 @@ For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/0.8.0.jso
 
 ### What file extension should be used?
 
-The recommended JSON extension is `.mcpdesc.json`; `.mcp-description.json` is also recognized by existing tooling. YAML may be used where tooling supports it.
+The recommended JSON extension is `.mcpdesc.json`. The recommended YAML extensions are `.mcpdesc.yaml` and `.mcpdesc.yml`, with `.mcpdesc.yaml` preferred. JSON and restricted YAML are equally conforming when supported by the producer and consumer.
+
+The recommended media types are `application/mcp-description+json` and `application/mcp-description+yaml`. The project-specific YAML media type is not registered by RFC 9512; generic tooling should use the registered `application/yaml` media type when the project-specific type is unavailable or inappropriate.
 
 ## Supplemental MCP Description Metadata
 
@@ -89,12 +95,24 @@ They describe authorization requirements known to the document author. They do n
 
 Within MCP Description, a primitive `security` value replaces a selected transport's value, which replaces root `security`. Omission inherits, `security: []` clears inherited requirements, and `security: [{}]` includes an explicit anonymous alternative.
 
+### What does `clientRequirements` mean?
+
+It is a non-empty, revision-specific declaration of unconditional minimum client capabilities needed to call a Tool, read a Resource or concrete Resource Template URI, or get a Prompt. All entries are required together. It does not apply to listing, inherit from root server capabilities, follow automatically from an Elicitation Declaration, or satisfy authorization.
+
+Use protocol-scoped primitive variants when requirements differ by MCP revision. Unknown or experimental requirements are preserved; generic tooling should report compatibility as indeterminate when it lacks matching semantics rather than assuming support.
+
 ### Do Tool or Resource examples define runtime behavior?
 
 No. Named examples are MCP Description metadata for documentation, contract tests, and deterministic mocks. They do not alter MCP schemas, guarantee live results, establish freshness, or define a default runtime response.
 
 Tool examples pair one complete input with a completed Tool Result. Static Resource examples use the Resource URI as the implicit read input; Resource Template examples record the exact concrete RFC 6570 expansion. Consumers must not execute Tools or dereference Resource URIs merely because an example exists.
 
+### What is the difference between `$componentRef` and JSON Schema `$ref`?
+
+`$componentRef` is an MCP Description Reference Object that points only to a typed value under the same document's root `components` object. It can replace a complete supported schema or named example value and is resolved before the containing use site's rules are applied. It never retrieves another document.
+
+JSON Schema `$ref` remains a JSON Schema keyword inside an embedded schema and follows that schema's dialect and resolution policy. Neither spelling is accepted as a substitute for the other.
+
 ### Can custom metadata be added?
 
-Yes. Root properties beginning with `x-` are specification extensions. Unrecognized extensions are ignored for interpretation and should be preserved when round-tripping. Extensions cannot override MCP or MCP Description requirements, and their authors should publish their schema, semantics, and versioning policy. See the [Vendor Extensions Guide](vendor-extensions-guide.md).
+Yes. Properties beginning with `x-` on the root or another explicitly eligible MCP Description semantic object are specification extensions. Unrecognized extensions are ignored for core interpretation and should be preserved when round-tripping. Extensions cannot override MCP or MCP Description requirements, and their authors should publish their schema, semantics, versioning policy, and eligible object locations. See the [Vendor Extensions Guide](vendor-extensions-guide.md).

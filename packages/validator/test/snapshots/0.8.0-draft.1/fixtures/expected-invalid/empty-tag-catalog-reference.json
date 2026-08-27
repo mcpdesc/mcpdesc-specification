@@ -1,0 +1,30 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "empty-tag-catalog",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "empty-tag-catalog"
+    }
+  ],
+  "tools": [
+    {
+      "name": "categorized",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "tags": [
+        "missing"
+      ]
+    }
+  ],
+  "tags": []
+}

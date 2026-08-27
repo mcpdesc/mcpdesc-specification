@@ -1,0 +1,23 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-security-name",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-security-name"
+    }
+  ],
+  "securitySchemes": {
+    "invalid name": {
+      "type": "http",
+      "scheme": "bearer"
+    }
+  }
+}

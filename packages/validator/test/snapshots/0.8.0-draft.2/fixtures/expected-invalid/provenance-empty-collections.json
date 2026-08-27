@@ -1,0 +1,24 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "provenance-empty-collections",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "provenance": {
+    "records": {},
+    "defaultIds": []
+  },
+  "tools": [
+    {
+      "name": "search",
+      "inputSchema": {
+        "type": "object"
+      },
+      "provenanceIds": []
+    }
+  ]
+}

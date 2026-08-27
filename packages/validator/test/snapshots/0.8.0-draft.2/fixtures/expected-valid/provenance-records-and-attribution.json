@@ -1,0 +1,87 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "provenance-records-and-attribution",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "provenance": {
+    "records": {
+      "generated-source": {
+        "kind": "generated",
+        "producer": {
+          "name": "description-generator",
+          "version": "2.1.0",
+          "x-example-team": "platform"
+        },
+        "method": "source-generation",
+        "artifact": {
+          "uri": "https://example.com/builds/42/description.json",
+          "digest": "sha256:7f83b1657ff1fc53",
+          "x-example-retention-days": 30
+        },
+        "recordedAt": "2026-08-26T12:30:00Z",
+        "x-example-reviewed": true
+      },
+      "runtime-inspection": {
+        "kind": "observed",
+        "producer": {
+          "name": "runtime-inspector"
+        },
+        "method": "dump",
+        "artifact": {
+          "uri": "urn:example:inspection:42"
+        }
+      },
+      "contract-review": {
+        "kind": "curated",
+        "producer": {
+          "name": "contract-team"
+        },
+        "method": "review"
+      }
+    },
+    "defaultIds": [
+      "generated-source"
+    ],
+    "x-example-profile": "public"
+  },
+  "tools": [
+    {
+      "name": "search",
+      "inputSchema": {
+        "type": "object"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "example://status",
+      "name": "status",
+      "provenanceIds": [
+        "runtime-inspection"
+      ]
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "example://items/{id}",
+      "name": "item",
+      "provenanceIds": [
+        "contract-review",
+        "generated-source"
+      ]
+    }
+  ],
+  "prompts": [
+    {
+      "name": "summarize",
+      "provenanceIds": [
+        "contract-review"
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-export type McpDescriptionSpecification = '0.8.0-draft.1';
+export type McpDescriptionSpecification = '0.8.0-draft.1' | '0.8.0-draft.2';
 
 export type SupportedProtocolVersion =
   | '2024-11-05'
@@ -26,11 +26,17 @@ export interface ValidateMcpDescriptionOptions {
 }
 
 export interface SpecificationProvenance {
-  readonly snapshotTag: 'v0.8.0-draft.1';
-  readonly schemaSha256: '4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4';
+  readonly '0.8.0-draft.1': {
+    readonly snapshotTag: 'v0.8.0-draft.1';
+    readonly schemaSha256: '4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4';
+  };
+  readonly '0.8.0-draft.2': {
+    readonly snapshotTag: 'v0.8.0-draft.2';
+    readonly schemaSha256: 'ab692c1a5a0f7e5f29be1940aa8c64a56d4620be0a19d00cf0a64680b7e517fa';
+  };
 }
 
-export declare const supportedSpecifications: readonly ['0.8.0-draft.1'];
+export declare const supportedSpecifications: readonly ['0.8.0-draft.1', '0.8.0-draft.2'];
 
 export declare const supportedProtocolVersions: readonly [
   '2024-11-05',
@@ -40,9 +46,7 @@ export declare const supportedProtocolVersions: readonly [
   '2026-07-28'
 ];
 
-export declare const specificationProvenance: Readonly<{
-  readonly '0.8.0-draft.1': Readonly<SpecificationProvenance>;
-}>;
+export declare const specificationProvenance: Readonly<SpecificationProvenance>;
 
 export declare function validateMcpDescription(
   document: unknown,

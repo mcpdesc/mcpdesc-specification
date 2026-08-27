@@ -1,0 +1,203 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "object-level-specification-extensions",
+    "version": "1.0.0",
+    "icons": [
+      {
+        "src": "https://example.com/icon.png",
+        "x-example-display": "compact"
+      }
+    ],
+    "contact": {
+      "name": "Platform Team",
+      "x-example-directory-id": 42
+    },
+    "license": {
+      "name": "Apache-2.0",
+      "x-example-reviewed": true
+    },
+    "x-example-owner": {
+      "team": "platform",
+      "protocolVersions": [
+        "extension-private-version"
+      ]
+    }
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "extension-server",
+      "x-example-runtime": "local"
+    }
+  ],
+  "securitySchemes": {
+    "oauth": {
+      "type": "oauth2",
+      "flows": {
+        "authorizationCode": {
+          "authorizationUrl": "https://example.com/authorize",
+          "tokenUrl": "https://example.com/token",
+          "scopes": {
+            "tools:read": "Use read-only tools"
+          },
+          "x-example-token-profile": null
+        },
+        "x-example-flow-policy": [
+          "interactive"
+        ]
+      },
+      "x-example-security-owner": "identity"
+    }
+  },
+  "capabilities": [
+    {
+      "tools": {
+        "listChanged": true,
+        "x-example-refresh-budget": 5
+      },
+      "resources": {
+        "subscribe": true,
+        "x-example-subscription-tier": "standard"
+      },
+      "prompts": {
+        "listChanged": false,
+        "x-example-curated": true
+      },
+      "x-example-capability-source": "curated"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "examples": {
+        "default": {
+          "input": {
+            "query": "example"
+          },
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "Example result"
+              }
+            ]
+          },
+          "x-example-confidence": 0.9
+        }
+      },
+      "elicitations": [
+        {
+          "name": "confirm_search",
+          "mode": "form",
+          "message": "Continue?",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "continue": {
+                "type": "boolean"
+              }
+            }
+          },
+          "x-example-review-class": "routine"
+        }
+      ],
+      "x-example-lifecycle": {
+        "status": "legacy"
+      }
+    },
+    {
+      "name": "search",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "x-example-lifecycle": {
+        "status": "current"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uri": "test://resource",
+      "name": "resource",
+      "examples": {
+        "current": {
+          "result": {
+            "resultType": "complete",
+            "ttlMs": 60,
+            "cacheScope": "private",
+            "contents": [
+              {
+                "uri": "test://resource",
+                "text": "Example resource"
+              }
+            ]
+          },
+          "x-example-origin": "curated"
+        }
+      },
+      "x-example-owner": "docs"
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "test://resource/{id}",
+      "name": "resource-template",
+      "x-example-owner": "docs"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "summarize",
+      "arguments": [
+        {
+          "name": "style",
+          "x-example-default-source": "profile"
+        }
+      ],
+      "x-example-owner": "prompts"
+    }
+  ],
+  "tags": [
+    {
+      "name": "search",
+      "x-example-color": "blue"
+    }
+  ],
+  "x-example-document-profile": {
+    "name": "governed"
+  }
+}

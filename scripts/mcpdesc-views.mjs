@@ -5,10 +5,11 @@
 // semantic normalization. Public operations validate their inputs and outputs
 // with both the v0.8.0 structural schema and its semantic rules.
 
-import { validateMcpDescription } from '@mcpdesc/validator';
+import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 const scopedCollections = ['transports', 'capabilities', 'tools', 'resources', 'resourceTemplates', 'prompts'];
 const primitiveCollections = new Set(['tools', 'resources', 'resourceTemplates', 'prompts']);
+const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples'];
 
 function clone(value) {
   return structuredClone(value);
@@ -43,11 +44,13 @@ function normalizeSecurity(owner) {
 
 function semanticCanonicalString(value) {
   const normalized = clone(value);
+  delete normalized.provenance;
   if (Array.isArray(normalized.protocolVersions)) normalized.protocolVersions.sort();
   normalizeSecurity(normalized);
   for (const collection of scopedCollections) {
     if (!Array.isArray(normalized[collection])) continue;
     for (const item of normalized[collection]) {
+      if (primitiveCollections.has(collection)) delete item.provenanceIds;
       if (Array.isArray(item.protocolVersions)) item.protocolVersions.sort();
       for (const elicitation of item.elicitations ?? []) {
         if (Array.isArray(elicitation.protocolVersions)) elicitation.protocolVersions.sort();
@@ -57,6 +60,19 @@ function semanticCanonicalString(value) {
     normalized[collection].sort((left, right) => canonicalString(left).localeCompare(canonicalString(right)));
   }
   return canonicalString(normalized);
+}
+
+function semanticDeclarationCanonicalString(value) {
+  const normalized = clone(value);
+  delete normalized.provenanceIds;
+  return semanticCanonicalString(normalized);
+}
+
+function mergeDeclarationCanonicalString(value) {
+  return canonicalString({
+    runtime: semanticDeclarationCanonicalString(value),
+    provenanceIds: Array.isArray(value.provenanceIds) ? [...value.provenanceIds].sort() : null
+  });
 }
 
 function withoutScope(value) {
@@ -69,16 +85,122 @@ function effectiveScope(item, rootScope) {
   return item.protocolVersions ?? rootScope;
 }
 
+function isReferenceObject(value) {
+  return value !== null
+    && typeof value === 'object'
+    && !Array.isArray(value)
+    && Object.keys(value).length === 1
+    && typeof value.$componentRef === 'string';
+}
+
+function visitReferenceObjects(document, visitor) {
+  for (const namespace of componentNamespaces) {
+    for (const value of Object.values(document.components?.[namespace] ?? {})) {
+      if (isReferenceObject(value)) visitor(value);
+    }
+  }
+  for (const [collection, declarations] of Object.entries({
+    tools: document.tools,
+    resources: document.resources,
+    resourceTemplates: document.resourceTemplates
+  })) {
+    for (const declaration of declarations ?? []) {
+      if (collection === 'tools') {
+        for (const field of ['inputSchema', 'outputSchema']) {
+          if (isReferenceObject(declaration[field])) visitor(declaration[field]);
+        }
+      }
+      for (const value of Object.values(declaration.examples ?? {})) {
+        if (isReferenceObject(value)) visitor(value);
+      }
+    }
+  }
+  for (const collection of primitiveCollections) {
+    for (const declaration of document[collection] ?? []) {
+      for (const elicitation of declaration.elicitations ?? []) {
+        if (isReferenceObject(elicitation.requestedSchema)) visitor(elicitation.requestedSchema);
+      }
+    }
+  }
+}
+
+function pruneComponents(document) {
+  if (!document.components) return;
+  const retained = new Set();
+  const pending = [];
+  const enqueue = (reference) => {
+    if (!reference.startsWith('#/components/') || retained.has(reference)) return;
+    retained.add(reference);
+    pending.push(reference);
+  };
+
+  const declarationsOnly = clone(document);
+  delete declarationsOnly.components;
+  visitReferenceObjects(declarationsOnly, (reference) => enqueue(reference.$componentRef));
+  while (pending.length) {
+    const reference = pending.shift();
+    const [, , namespace, name] = reference.split('/');
+    const value = document.components?.[namespace]?.[name];
+    if (isReferenceObject(value)) enqueue(value.$componentRef);
+  }
+
+  const components = Object.fromEntries(
+    Object.entries(document.components).filter(([name]) => name.startsWith('x-'))
+  );
+  for (const namespace of componentNamespaces) {
+    const values = Object.fromEntries(
+      Object.entries(document.components[namespace] ?? {})
+        .filter(([name]) => retained.has(`#/components/${namespace}/${name}`))
+    );
+    if (Object.keys(values).length) components[namespace] = values;
+  }
+  if (Object.keys(components).length) document.components = components;
+  else delete document.components;
+}
+
+function pruneProvenance(document) {
+  if (!document.provenance) return;
+  const retained = new Set();
+  const defaultIds = document.provenance.defaultIds ?? [];
+  let defaultsAreUsed = false;
+
+  for (const collection of primitiveCollections) {
+    for (const declaration of document[collection] ?? []) {
+      if (Array.isArray(declaration.provenanceIds)) {
+        for (const id of declaration.provenanceIds) retained.add(id);
+      } else if (defaultIds.length) {
+        defaultsAreUsed = true;
+        for (const id of defaultIds) retained.add(id);
+      }
+    }
+  }
+
+  const records = Object.fromEntries(
+    Object.entries(document.provenance.records ?? {}).filter(([id]) => retained.has(id))
+  );
+  if (Object.keys(records).length === 0) {
+    delete document.provenance;
+    return;
+  }
+
+  document.provenance = {
+    records,
+    ...(defaultsAreUsed ? { defaultIds } : {}),
+    ...Object.fromEntries(
+      Object.entries(document.provenance).filter(([name]) => name.startsWith('x-'))
+    )
+  };
+}
+
 function assertConforming(document, label) {
-  const errors = validateMcpDescription(document, { specification: '0.8.0-draft.1' })
-    .diagnostics
+  const errors = validateMcpdesc08Document(document)
     .filter((diagnostic) => diagnostic.severity === 'error');
   if (errors.length) {
     throw new Error(`${label} is not a conforming mcpdesc 0.8.0 document: ${errors.map((diagnostic) => `[${diagnostic.code}] ${diagnostic.message}`).join(' | ')}`);
   }
 }
 
-function projectUnchecked(document, version, options = {}) {
+function projectUnchecked(document, version, pruneUnusedComponents = true, pruneUnusedProvenance = true) {
   const rootScope = document.protocolVersions;
   const result = clone(document);
   result.protocolVersions = [version];
@@ -91,29 +213,37 @@ function projectUnchecked(document, version, options = {}) {
         const itemScope = effectiveScope(item, rootScope);
         const projectedItem = withoutScope(item);
         if (Array.isArray(item.elicitations)) {
-          projectedItem.elicitations = item.elicitations
+          const projectedElicitations = item.elicitations
             .filter((elicitation) => effectiveScope(elicitation, itemScope).includes(version))
             .map(withoutScope);
+          if (projectedElicitations.length) {
+            projectedItem.elicitations = projectedElicitations;
+          } else {
+            delete projectedItem.elicitations;
+          }
         }
         return projectedItem;
       });
-    if (projected.length || (primitiveCollections.has(collection) && !options.omitEmptyPrimitiveCollections)) {
+    if (projected.length) {
       result[collection] = projected;
     } else {
       delete result[collection];
     }
   }
 
+  if (pruneUnusedProvenance) pruneProvenance(result);
+  if (pruneUnusedComponents) pruneComponents(result);
+
   return result;
 }
 
-export function projectProtocolView(document, version, options = {}) {
+export function projectProtocolView(document, version) {
   const rootScope = document?.protocolVersions;
   if (!Array.isArray(rootScope) || !rootScope.includes(version)) {
     throw new Error(`Cannot project MCP protocol revision ${JSON.stringify(version)} because it is absent from root protocolVersions`);
   }
   assertConforming(document, 'Projection source');
-  const result = projectUnchecked(document, version, options);
+  const result = projectUnchecked(document, version);
   assertConforming(result, `Projection result for MCP ${version}`);
   return result;
 }
@@ -125,6 +255,180 @@ function unscopedDocumentPart(view) {
   return result;
 }
 
+function sameStringSet(left, right) {
+  return canonicalString([...left].sort()) === canonicalString([...right].sort());
+}
+
+function mergeProvenance(documents) {
+  const records = {};
+  const registryExtensions = {};
+  const idMaps = [];
+  const mappedDefaults = [];
+
+  documents.forEach((document, documentIndex) => {
+    const registry = document.provenance;
+    const idMap = new Map();
+    for (const [id, record] of Object.entries(registry?.records ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
+      let mappedId = id;
+      if (Object.hasOwn(records, mappedId) && canonicalString(records[mappedId]) !== canonicalString(record)) {
+        const suffix = `~${documentIndex + 1}`;
+        mappedId = `${id}${suffix}`;
+        let collision = 2;
+        while (Object.hasOwn(records, mappedId)) {
+          if (canonicalString(records[mappedId]) === canonicalString(record)) break;
+          mappedId = `${id}${suffix}-${collision}`;
+          collision += 1;
+        }
+      }
+      if (!Object.hasOwn(records, mappedId)) records[mappedId] = clone(record);
+      idMap.set(id, mappedId);
+    }
+
+    for (const [name, value] of Object.entries(registry ?? {}).filter(([name]) => name.startsWith('x-'))) {
+      if (Object.hasOwn(registryExtensions, name) && canonicalString(registryExtensions[name]) !== canonicalString(value)) {
+        throw new Error(`Conflicting provenance registry extension ${JSON.stringify(name)} cannot be preserved during merge`);
+      }
+      registryExtensions[name] = clone(value);
+    }
+
+    idMaps.push(idMap);
+    mappedDefaults.push((registry?.defaultIds ?? []).map((id) => idMap.get(id)));
+  });
+
+  const firstDefaults = mappedDefaults[0] ?? [];
+  const defaultIds = firstDefaults.length > 0 && mappedDefaults.every((ids) => sameStringSet(ids, firstDefaults))
+    ? [...firstDefaults]
+    : [];
+  const provenance = Object.keys(records).length > 0
+    ? { records, ...(defaultIds.length ? { defaultIds } : {}), ...registryExtensions }
+    : undefined;
+
+  const normalizedDocuments = documents.map((document, documentIndex) => {
+    const normalized = clone(document);
+    const sourceDefaults = document.provenance?.defaultIds ?? [];
+    const idMap = idMaps[documentIndex];
+    for (const collection of primitiveCollections) {
+      for (const [primitiveIndex, primitive] of (normalized[collection] ?? []).entries()) {
+        const sourcePrimitive = document[collection][primitiveIndex];
+        const hadOverride = Array.isArray(sourcePrimitive.provenanceIds);
+        const effectiveIds = (sourcePrimitive.provenanceIds ?? sourceDefaults).map((id) => idMap.get(id));
+        if (hadOverride || !sameStringSet(effectiveIds, defaultIds)) {
+          if (effectiveIds.length) primitive.provenanceIds = effectiveIds;
+          else delete primitive.provenanceIds;
+        } else {
+          delete primitive.provenanceIds;
+        }
+      }
+    }
+    if (provenance) normalized.provenance = clone(provenance);
+    else delete normalized.provenance;
+    return normalized;
+  });
+
+  return normalizedDocuments;
+}
+
+function mergeComponents(documents) {
+  const components = {};
+  const extensions = {};
+  const referenceMaps = [];
+
+  documents.forEach((document, documentIndex) => {
+    const referenceMap = new Map();
+    for (const [name, value] of Object.entries(document.components ?? {}).filter(([name]) => name.startsWith('x-'))) {
+      if (Object.hasOwn(extensions, name) && canonicalString(extensions[name]) !== canonicalString(value)) {
+        throw new Error(`Conflicting Components Object extension ${JSON.stringify(name)} cannot be preserved during merge`);
+      }
+      extensions[name] = clone(value);
+    }
+    for (const namespace of componentNamespaces) {
+      const targetNamespace = components[namespace] ??= {};
+      for (const [name, value] of Object.entries(document.components?.[namespace] ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
+        let mappedName = name;
+        if (Object.hasOwn(targetNamespace, mappedName)
+          && (isReferenceObject(value) || canonicalString(targetNamespace[mappedName]) !== canonicalString(value))) {
+          const suffix = `-${documentIndex + 1}`;
+          mappedName = `${name}${suffix}`;
+          let collision = 2;
+          while (Object.hasOwn(targetNamespace, mappedName)) {
+            mappedName = `${name}${suffix}-${collision}`;
+            collision += 1;
+          }
+        }
+        referenceMap.set(
+          `#/components/${namespace}/${name}`,
+          `#/components/${namespace}/${mappedName}`
+        );
+        if (!Object.hasOwn(targetNamespace, mappedName)) targetNamespace[mappedName] = clone(value);
+      }
+    }
+    referenceMaps.push(referenceMap);
+  });
+
+  documents.forEach((document, documentIndex) => {
+    const referenceMap = referenceMaps[documentIndex];
+    for (const namespace of componentNamespaces) {
+      for (const [name, value] of Object.entries(document.components?.[namespace] ?? {})) {
+        const mappedReference = referenceMap.get(`#/components/${namespace}/${name}`);
+        const mappedName = mappedReference?.split('/').at(-1);
+        if (mappedName && isReferenceObject(value)) {
+          components[namespace][mappedName] = {
+            $componentRef: referenceMap.get(value.$componentRef) ?? value.$componentRef
+          };
+        }
+      }
+    }
+  });
+
+  for (const namespace of componentNamespaces) {
+    if (Object.keys(components[namespace] ?? {}).length === 0) delete components[namespace];
+  }
+  const combined = Object.keys(components).length || Object.keys(extensions).length
+    ? { ...components, ...extensions }
+    : undefined;
+
+  return documents.map((document, documentIndex) => {
+    const normalized = clone(document);
+    visitReferenceObjects(normalized, (reference) => {
+      reference.$componentRef = referenceMaps[documentIndex].get(reference.$componentRef) ?? reference.$componentRef;
+    });
+    if (combined) normalized.components = clone(combined);
+    else delete normalized.components;
+    return normalized;
+  });
+}
+
+function effectiveProvenanceIds(view, declaration) {
+  return declaration.provenanceIds ?? view.provenance?.defaultIds ?? [];
+}
+
+function combineEquivalentViews(previous, incoming) {
+  const combined = clone(previous);
+  const defaultIds = combined.provenance?.defaultIds ?? [];
+  for (const collection of primitiveCollections) {
+    const declarations = new Map(
+      (combined[collection] ?? []).map((declaration) => [semanticDeclarationCanonicalString(declaration), declaration])
+    );
+    for (const incomingDeclaration of incoming[collection] ?? []) {
+      const key = semanticDeclarationCanonicalString(incomingDeclaration);
+      const declaration = declarations.get(key);
+      if (!declaration) continue;
+      const ids = [...new Set([
+        ...effectiveProvenanceIds(previous, declaration),
+        ...effectiveProvenanceIds(incoming, incomingDeclaration)
+      ])].sort();
+      const preserveOverride = Array.isArray(declaration.provenanceIds) || Array.isArray(incomingDeclaration.provenanceIds);
+      if (preserveOverride || !sameStringSet(ids, defaultIds)) {
+        if (ids.length) declaration.provenanceIds = ids;
+        else delete declaration.provenanceIds;
+      } else {
+        delete declaration.provenanceIds;
+      }
+    }
+  }
+  return combined;
+}
+
 function collectProtocolViews(documents, inputsValidated = false) {
   const byVersion = new Map();
   documents.forEach((document, documentIndex) => {
@@ -133,13 +437,13 @@ function collectProtocolViews(documents, inputsValidated = false) {
     }
     if (!inputsValidated) assertConforming(document, `Merge input ${documentIndex + 1}`);
     for (const version of document.protocolVersions) {
-      const view = projectUnchecked(document, version);
+      const view = projectUnchecked(document, version, false, false);
       assertConforming(view, `Merge input ${documentIndex + 1} projection for MCP ${version}`);
       const previous = byVersion.get(version);
       if (previous && !semanticallyEquivalent(previous, view)) {
         throw new Error(`Conflicting Effective Protocol Views for MCP ${version}`);
       }
-      byVersion.set(version, view);
+      byVersion.set(version, previous ? combineEquivalentViews(previous, view) : view);
     }
   });
   return byVersion;
@@ -150,7 +454,7 @@ function mergeCollection(views, collection, allVersions) {
   for (const [version, view] of views) {
     for (const declaration of view[collection] ?? []) {
       const unscoped = withoutScope(declaration);
-      const key = semanticCanonicalString(unscoped);
+      const key = mergeDeclarationCanonicalString(unscoped);
       const existing = declarations.get(key) ?? { declaration: unscoped, versions: [] };
       existing.versions.push(version);
       declarations.set(key, existing);
@@ -172,7 +476,8 @@ export function mergeProtocolDescriptions(documents) {
   }
 
   documents.forEach((document, index) => assertConforming(document, `Merge input ${index + 1}`));
-  const views = collectProtocolViews(documents, true);
+  const normalizedDocuments = mergeProvenance(mergeComponents(documents));
+  const views = collectProtocolViews(normalizedDocuments, true);
   const versions = [...views.keys()].sort();
   const firstView = views.values().next().value;
   const expectedUnscoped = semanticCanonicalString(unscopedDocumentPart(firstView));

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "future-version",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2027-01-01"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "future-version"
+    }
+  ]
+}

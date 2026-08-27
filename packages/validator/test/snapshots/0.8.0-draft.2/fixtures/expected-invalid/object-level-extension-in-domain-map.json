@@ -1,0 +1,16 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "object-level-extension-in-domain-map",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "securitySchemes": {
+    "x-example-policy": {
+      "owner": "identity"
+    }
+  }
+}

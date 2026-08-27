@@ -4,9 +4,9 @@
 
 An Elicitation Declaration documents that fulfillment of a Tool, Resource, Resource Template, or Prompt may require additional interaction with the user through the MCP client.
 
-Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
+Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. The array MUST contain at least one declaration when present. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
 
-An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it.
+An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it. A conditional or optional Elicitation Declaration MUST NOT by itself be interpreted as an unconditional `clientRequirements.elicitation` capability requirement.
 
 ### 12.2 Elicitation Declaration Object
 
@@ -16,7 +16,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 | `mode` | `"form"` or `"url"` | **Yes** | Canonical elicitation mode. |
 | `message` | string | **Yes** | Representative user-facing explanation of the interaction. |
 | `when` | string | No | Human-readable description of when the interaction may occur. |
-| `requestedSchema` | object | Conditional | Restricted MCP form-response schema. |
+| `requestedSchema` | object or Reference Object | Conditional | Inline or reusable restricted MCP form-response schema. |
 | `url` | string (URI) | No | Static URL when known at description-authoring time. |
 | `onDecline` | string | No | Human-readable expected behavior after explicit decline. |
 | `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
@@ -37,6 +37,8 @@ For `mode: "form"`:
 - `requestedSchema` is REQUIRED;
 - `url` MUST NOT appear; and
 - `requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+
+`requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 
 The schema is limited to a flat object whose properties use MCP elicitation primitive schemas. Nested objects and arrays other than MCP-supported multi-select enumeration forms are invalid. Unsupported keywords and unsupported string formats are invalid.
 
@@ -70,11 +72,11 @@ Complete revision-specific validation begins with MCP 2025-06-18:
 
 A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
 
-MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.4. Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
+MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.5. Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
 
 ### 12.6 Static-Description Boundary
 
-The applicable MCP revision remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior.
+The applicable MCP revision remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior. Static primitive `clientRequirements` may record an unconditional minimum elicitation capability without defining any of that choreography.
 
 A mock, gateway, documentation tool, or client MAY use a declaration to render its message, collect a form response matching `requestedSchema`, or present a known URL. The declaration alone does not define when a mock triggers the interaction, how it selects among declarations, how responses modify state, or which final primitive result follows.
 

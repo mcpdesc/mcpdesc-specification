@@ -1,0 +1,37 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-elicitation-scope",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-elicitation-scope"
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "example:///items/{id}",
+      "name": "item",
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "elicitations": [
+        {
+          "name": "authorize",
+          "mode": "url",
+          "message": "Authorize item access.",
+          "protocolVersions": [
+            "2026-07-28"
+          ]
+        }
+      ]
+    }
+  ]
+}

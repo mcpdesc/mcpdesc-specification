@@ -1,0 +1,38 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-resource-annotations",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2024-11-05"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-resource-annotations"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "test://resource",
+      "name": "resource",
+      "annotations": {
+        "lastModified": "2026-08-24T10:00:00Z"
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "test://resource/{id}",
+      "name": "resource_by_id",
+      "annotations": {
+        "audience": [
+          "operator"
+        ],
+        "priority": 2
+      }
+    }
+  ]
+}

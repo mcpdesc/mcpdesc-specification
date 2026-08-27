@@ -2,7 +2,14 @@
 
 Isomorphic structural and semantic validation for immutable MCP Description specification snapshots.
 
-The initial implementation supports exactly MCP Description `0.8.0-draft.1`, bound to tag `v0.8.0-draft.1` and the embedded `schemas/mcp-description/0.8.0.json` SHA-256 digest `4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4`.
+Version `0.2.0` cumulatively supports these immutable snapshots:
+
+| Selector | Tag | Embedded schema SHA-256 |
+|---|---|---|
+| `0.8.0-draft.1` | `v0.8.0-draft.1` | `4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4` |
+| `0.8.0-draft.2` | `v0.8.0-draft.2` | `ab692c1a5a0f7e5f29be1940aa8c64a56d4620be0a19d00cf0a64680b7e517fa` |
+
+This cumulative release is intended to receive the npm `latest` dist-tag after the Draft 2 tag and tarball are reviewed. Repository changes alone do not publish the package or create either tag.
 
 ## Usage
 
@@ -10,7 +17,7 @@ The initial implementation supports exactly MCP Description `0.8.0-draft.1`, bou
 import { validateMcpDescription } from '@mcpdesc/validator';
 
 const result = validateMcpDescription(parsedDocument, {
-  specification: '0.8.0-draft.1'
+  specification: '0.8.0-draft.2'
 });
 
 if (!result.valid) {
@@ -44,9 +51,24 @@ Structural paths start with AJV's instance path. A `required` error appends its 
 
 ## Support metadata
 
-The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. npm package SemVer tracks implementation releases independently from specification snapshot identity. A future draft snapshot must use a sibling implementation and selector rather than changing Draft 1 behavior.
+The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. Public validation dispatches through a registry keyed by exact specification selectors. The current selector set is `0.8.0-draft.1` and `0.8.0-draft.2`; the protocol-version export is the deduplicated union supported by those snapshots.
+
+npm package SemVer tracks implementation releases independently from specification snapshot identity. Adding a later snapshot is additive: it must use a sibling implementation and selector rather than changing an existing snapshot's schema, semantics, metadata, fixtures, or results.
 
 The runtime bundles its schema, performs no network fetches for external schema references, and imports no Node.js built-ins. Unresolved external Tool-schema references produce incomplete-validation warnings and are preserved. The same ESM entry point supports Node.js 20 or later and browser bundlers.
+
+## Snapshot lifecycle
+
+For each approved specification snapshot, maintainers:
+
+1. Add a versioned implementation under `src/snapshots/<selector>/` with its exact selector, snapshot tag, embedded schema, schema SHA-256 digest, and semantic rules. Existing snapshot directories remain unchanged.
+2. Freeze the matching fixture corpus under `test/snapshots/<selector>/fixtures/`. Package tests must not read mutable `spec/draft/fixtures/` for an already published selector.
+3. Add the exact selector to the runtime registry and update support metadata, TypeScript declarations, tests, and expected package contents. Unqualified versions, aliases, ranges, and not-yet-published selectors remain unsupported.
+4. Run the package and repository validation suites. The schema digest, immutable metadata, fixture behavior, browser bundle, declarations, and tarball contents must all pass.
+
+The test snapshots are repository-only development assets and are excluded from the npm tarball. Runtime snapshot implementations and embedded schemas do ship so installed packages remain self-contained.
+
+Supporting code does not authorize publication. During release review, a maintainer explicitly decides the validator package version and intended npm dist-tag so the reviewed specification-tag commit contains the chosen package metadata. Only after that specification snapshot is tagged does a maintainer review the tarball from the tag and run `npm publish`. CI and repository scripts do not choose versions, create tags, move dist-tags, or publish packages. No package version or publication choice for a later draft is made by this lifecycle description.
 
 ## Development checks
 
@@ -59,4 +81,4 @@ npm run test:browser --workspace @mcpdesc/validator
 npm run test:package --workspace @mcpdesc/validator
 ```
 
-The package test covers every official Draft 1 valid, invalid, and warning fixture. The other checks compile the declarations, build for a browser target, and inspect `npm pack --dry-run --json` against the intended tarball contents.
+The package test runs each immutable snapshot against its own frozen valid, invalid, and warning fixture corpus. YAML source fixtures are decoded by the test harness before validation; the public API continues to accept parsed JavaScript values only. The other checks compile the declarations, build both runtime snapshots for a browser target, and inspect `npm pack --dry-run --json` against the intended tarball contents, including both runtime snapshots and exclusion of test snapshots.

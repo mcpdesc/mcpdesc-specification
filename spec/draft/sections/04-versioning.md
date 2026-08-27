@@ -69,7 +69,7 @@ A conforming single-version projection tool MUST:
 4. retain applicable transports, capabilities, primitives, and nested declarations;
 5. remove `protocolVersions` from retained declarations because applicability is unambiguous;
 6. preserve semantically significant empty values and inheritance, including security declarations;
-7. optionally omit empty primitive collections; and
+7. omit every ordinary declaration collection from which projection removes the last entry; and
 8. validate the projected document structurally and semantically for `V`.
 
 Projection produces an ordinary conforming MCP Description document, not a second format. It MUST NOT materialize transport-dependent inherited values onto a primitive unless the operation also selects a transport and defines that resolution.
@@ -89,4 +89,6 @@ P_V(merge(D_1, ..., D_n)) is semantically equivalent to D_V
 ```
 
 Semantic equivalence need not preserve property order, redundant scopes, array order where semantically insignificant, or the original choice between an omitted scope and an explicit full-parent scope. Merge tools MUST preserve the distinction among omitted `security`, `security: []`, and `security: [{}]`.
+
+Omission contributes no entries to an ordinary declaration collection during merge. A merge result MUST omit an ordinary declaration collection when it has no entries. Merge output MUST satisfy transport protocol coverage whenever it contains `transports`.
 
