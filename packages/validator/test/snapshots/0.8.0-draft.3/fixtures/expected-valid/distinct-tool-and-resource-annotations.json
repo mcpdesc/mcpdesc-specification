@@ -1,0 +1,61 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "annotation-types",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "annotation-types"
+    }
+  ],
+  "tools": [
+    {
+      "name": "inspect",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Inspect",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "futureToolHint": "preserved"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "test://resource",
+      "name": "resource",
+      "annotations": {
+        "audience": [
+          "user",
+          "assistant"
+        ],
+        "priority": 0.8,
+        "lastModified": "2026-08-24T10:00:00Z",
+        "futureResourceHint": "preserved"
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "test://resource/{id}",
+      "name": "resource_by_id",
+      "annotations": {
+        "audience": [
+          "assistant"
+        ],
+        "priority": 0.5
+      }
+    }
+  ]
+}

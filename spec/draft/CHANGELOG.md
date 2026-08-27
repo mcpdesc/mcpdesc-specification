@@ -36,7 +36,8 @@ Draft 3 incorporates editorial and presentation feedback from review of Draft 2.
 - Added a concise inline Reference Object example with a link to the complete validated example.
 - Clarified that normative text and the versioned JSON Schema define conformance, examples are informative but expected to validate when presented as valid, and fixtures are test artifacts rather than independent requirements.
 - Removed the obsolete local `spec/draft/materials` ignore rule.
-- Preserved the immutable Draft 1 and Draft 2 validator snapshots and public API. Draft 3 does not add a validator selector.
+- Preserved the immutable Draft 1 and Draft 2 validator snapshots and added the sibling `0.8.0-draft.3` runtime and frozen test snapshot.
+- Selected cumulative validator version `0.3.0` for npm `latest`, subject to review of the Draft 3 tag and package tarball before publication.
 
 #### Community Working Draft 2 — 2026-08-26 (`v0.8.0-draft.2`)
 

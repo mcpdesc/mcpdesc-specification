@@ -1,0 +1,31 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "unresolved-local-tool-ref",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "unresolved-local-tool-ref"
+    }
+  ],
+  "tools": [
+    {
+      "name": "missing_local_definition",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "$ref": "#/$defs/identifier"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "schema-laboratory",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "schema-laboratory"
+    },
+    {
+      "type": "streamable-http",
+      "url": "https://schema-laboratory.example.com/mcp",
+      "protocolVersions": [
+        "2026-07-28"
+      ]
+    }
+  ],
+  "capabilities": [
+    {
+      "tools": {
+        "listChanged": true
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "closed_no_parameters",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "open_unspecified_parameters",
+      "inputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "name": "declared_parameters",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "full_2020_12_schema",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "$defs": {
+          "target": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "id"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "lookup",
+              "search"
+            ]
+          },
+          "region": {
+            "type": "string",
+            "x-mcp-header": "Region"
+          },
+          "target": {
+            "$ref": "#/$defs/target"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "mode": {
+                  "const": "lookup"
+                }
+              },
+              "required": [
+                "mode"
+              ]
+            },
+            "then": {
+              "required": [
+                "target"
+              ]
+            },
+            "else": {
+              "required": [
+                "region"
+              ]
+            }
+          }
+        ],
+        "required": [
+          "mode"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "result": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "result"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

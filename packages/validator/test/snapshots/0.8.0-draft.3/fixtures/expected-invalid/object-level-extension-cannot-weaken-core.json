@@ -1,0 +1,19 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "object-level-extension-cannot-weaken-core",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "x-example-relaxed-validation": {
+        "inputSchemaOptional": true
+      }
+    }
+  ]
+}

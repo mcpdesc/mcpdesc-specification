@@ -1,0 +1,50 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "malformed-tool-examples", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [{ "type": "stdio", "command": "fixture" }],
+  "tools": [
+    {
+      "name": "empty_map",
+      "inputSchema": { "type": "object" },
+      "examples": {}
+    },
+    {
+      "name": "invalid_name",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "contains spaces": {
+          "input": {},
+          "result": { "resultType": "complete", "content": [] }
+        }
+      }
+    },
+    {
+      "name": "missing_input",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "missing": {
+          "result": { "resultType": "complete", "content": [] }
+        }
+      }
+    },
+    {
+      "name": "non_object_input",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "array": {
+          "input": [],
+          "result": { "resultType": "complete", "content": [] }
+        }
+      }
+    },
+    {
+      "name": "missing_result",
+      "inputSchema": { "type": "object" },
+      "examples": {
+        "missing": { "input": {} }
+      }
+    }
+  ]
+}

@@ -28,3 +28,17 @@ test('preserves the immutable Draft 2 schema digest and metadata', () => {
     schemaSha256: draft2SchemaSha256
   });
 });
+
+test('binds Draft 3 to the exact canonical schema bytes and metadata', () => {
+  const canonical = fs.readFileSync(new URL('../../../schemas/mcp-description/0.8.0.json', import.meta.url));
+  const embedded = fs.readFileSync(new URL('../src/snapshots/0.8.0-draft.3/schema.json', import.meta.url));
+  const draft3SchemaSha256 = '8823c1f1946360b2a44d00920e2092e5e4acd139a1964befad4eb0bf3ce96002';
+  const digest = createHash('sha256').update(embedded).digest('hex');
+
+  assert.deepEqual(embedded, canonical);
+  assert.equal(digest, draft3SchemaSha256);
+  assert.deepEqual(specificationProvenance['0.8.0-draft.3'], {
+    snapshotTag: 'v0.8.0-draft.3',
+    schemaSha256: draft3SchemaSha256
+  });
+});

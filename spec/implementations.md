@@ -22,7 +22,7 @@ The following companion tools are published under the [`@cisco_open`](https://ww
 
 | Validator | Description | Link |
 |---|---|---|
-| **@mcpdesc/validator** | Isomorphic structural and semantic validation for the immutable `0.8.0-draft.1` and `0.8.0-draft.2` snapshots. The cumulative `0.2.0` package is intended for the npm `latest` dist-tag after release review. Diagnostics include stable codes, severities, and structured document paths. | [`packages/validator`](../packages/validator/) |
+| **@mcpdesc/validator** | Isomorphic structural and semantic validation for the immutable `0.8.0-draft.1`, `0.8.0-draft.2`, and `0.8.0-draft.3` snapshots. The cumulative `0.3.0` package is intended for the npm `latest` dist-tag after release review. Diagnostics include stable codes, severities, and structured document paths. | [`packages/validator`](../packages/validator/) |
 
 Any JSON Schema validator can perform structural validation using a versioned schema such as [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json). Draft conformance also includes semantic rules that JSON Schema alone cannot express; consumers should use `@mcpdesc/validator` with an exact snapshot selector for the combined result. External Tool-schema references are never fetched automatically and produce warnings when complete offline validation is unavailable.
 
