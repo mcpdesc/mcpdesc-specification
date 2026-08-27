@@ -45,7 +45,7 @@ The specification allows vendor-specific metadata using the `x-` prefix conventi
 - Runtime observation metadata
 - Platform-specific annotations
 - Governance and compliance attributes
-- Generation provenance
+- Generation and observation metadata
 
 The core specification remains vendor-neutral while extensions evolve independently.
 
@@ -66,10 +66,10 @@ The specification distinguishes between:
 | Layer | Purpose | Example |
 |-------|---------|---------|
 | **Described surface** | Durable, externally relevant server semantics | Tools, resources, prompts |
-| **Metadata** | Who built it and how | Authors, generation provenance |
+| **Metadata** | Who built it and how | Authors, generation metadata |
 | **Observation** | What was discovered at runtime | Latency, CORS support, session behavior |
 
-Server-surface declarations and portable evidence attribution live in the core specification. Source-specific runtime diagnostics belong in vendor extensions such as `x-cisco-metadata`. An observed view need not claim a server's exhaustive surface, and provenance does not establish completeness or trust.
+Server-surface declarations live in the core specification. Source-specific generation metadata and runtime diagnostics belong in extensions such as `x-cisco-metadata`. An observed view need not claim a server's exhaustive surface.
 
 ## 7. Offline-First
 

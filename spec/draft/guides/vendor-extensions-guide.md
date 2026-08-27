@@ -45,7 +45,7 @@ Use `x-*` on the outer Components Object and eligible semantic Tool, Resource, a
 
 ## Do Not Confuse Extension Mechanisms
 
-Root and object-level `x-*` properties extend the MCP Description document format. Literal `_meta` belongs to a particular MCP declaration, result, or content object and follows the applicable MCP revision's key and context rules. `capabilities.extensions` advertises server protocol extensions, while `clientRequirements.extensions` declares required client protocol extensions for one primitive. Root provenance records and primitive `provenanceIds` attribute descriptive evidence. These mechanisms are independent: tooling must preserve each one and must not automatically copy, project, or reinterpret data between them.
+Root and object-level `x-*` properties extend the MCP Description document format. Literal `_meta` belongs to a particular MCP declaration, result, or content object and follows the applicable MCP revision's key and context rules. `capabilities.extensions` advertises server protocol extensions, while `clientRequirements.extensions` declares required client protocol extensions for one primitive. These mechanisms are independent: tooling must preserve each one and must not automatically copy, project, or reinterpret data between them.
 
 Use `x-*` for static description-format metadata that is not part of MCP, placing object-specific data on its eligible owner. Use `_meta` only where MCP defines it on the represented object. Use `capabilities.extensions` only to advertise an MCP protocol extension supported by the server in that Effective Protocol View, and `clientRequirements.extensions` only for an unconditional extension capability required from the client by one primitive.
 

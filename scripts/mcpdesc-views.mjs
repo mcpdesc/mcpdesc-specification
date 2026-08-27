@@ -44,13 +44,11 @@ function normalizeSecurity(owner) {
 
 function semanticCanonicalString(value) {
   const normalized = clone(value);
-  delete normalized.provenance;
   if (Array.isArray(normalized.protocolVersions)) normalized.protocolVersions.sort();
   normalizeSecurity(normalized);
   for (const collection of scopedCollections) {
     if (!Array.isArray(normalized[collection])) continue;
     for (const item of normalized[collection]) {
-      if (primitiveCollections.has(collection)) delete item.provenanceIds;
       if (Array.isArray(item.protocolVersions)) item.protocolVersions.sort();
       for (const elicitation of item.elicitations ?? []) {
         if (Array.isArray(elicitation.protocolVersions)) elicitation.protocolVersions.sort();
@@ -63,16 +61,11 @@ function semanticCanonicalString(value) {
 }
 
 function semanticDeclarationCanonicalString(value) {
-  const normalized = clone(value);
-  delete normalized.provenanceIds;
-  return semanticCanonicalString(normalized);
+  return semanticCanonicalString(value);
 }
 
 function mergeDeclarationCanonicalString(value) {
-  return canonicalString({
-    runtime: semanticDeclarationCanonicalString(value),
-    provenanceIds: Array.isArray(value.provenanceIds) ? [...value.provenanceIds].sort() : null
-  });
+  return semanticDeclarationCanonicalString(value);
 }
 
 function withoutScope(value) {
@@ -158,40 +151,6 @@ function pruneComponents(document) {
   else delete document.components;
 }
 
-function pruneProvenance(document) {
-  if (!document.provenance) return;
-  const retained = new Set();
-  const defaultIds = document.provenance.defaultIds ?? [];
-  let defaultsAreUsed = false;
-
-  for (const collection of primitiveCollections) {
-    for (const declaration of document[collection] ?? []) {
-      if (Array.isArray(declaration.provenanceIds)) {
-        for (const id of declaration.provenanceIds) retained.add(id);
-      } else if (defaultIds.length) {
-        defaultsAreUsed = true;
-        for (const id of defaultIds) retained.add(id);
-      }
-    }
-  }
-
-  const records = Object.fromEntries(
-    Object.entries(document.provenance.records ?? {}).filter(([id]) => retained.has(id))
-  );
-  if (Object.keys(records).length === 0) {
-    delete document.provenance;
-    return;
-  }
-
-  document.provenance = {
-    records,
-    ...(defaultsAreUsed ? { defaultIds } : {}),
-    ...Object.fromEntries(
-      Object.entries(document.provenance).filter(([name]) => name.startsWith('x-'))
-    )
-  };
-}
-
 function assertConforming(document, label) {
   const errors = validateMcpdesc08Document(document)
     .filter((diagnostic) => diagnostic.severity === 'error');
@@ -200,7 +159,7 @@ function assertConforming(document, label) {
   }
 }
 
-function projectUnchecked(document, version, pruneUnusedComponents = true, pruneUnusedProvenance = true) {
+function projectUnchecked(document, version, pruneUnusedComponents = true) {
   const rootScope = document.protocolVersions;
   const result = clone(document);
   result.protocolVersions = [version];
@@ -231,7 +190,6 @@ function projectUnchecked(document, version, pruneUnusedComponents = true, prune
     }
   }
 
-  if (pruneUnusedProvenance) pruneProvenance(result);
   if (pruneUnusedComponents) pruneComponents(result);
 
   return result;
@@ -257,75 +215,6 @@ function unscopedDocumentPart(view) {
 
 function sameStringSet(left, right) {
   return canonicalString([...left].sort()) === canonicalString([...right].sort());
-}
-
-function mergeProvenance(documents) {
-  const records = {};
-  const registryExtensions = {};
-  const idMaps = [];
-  const mappedDefaults = [];
-
-  documents.forEach((document, documentIndex) => {
-    const registry = document.provenance;
-    const idMap = new Map();
-    for (const [id, record] of Object.entries(registry?.records ?? {}).sort(([left], [right]) => left.localeCompare(right))) {
-      let mappedId = id;
-      if (Object.hasOwn(records, mappedId) && canonicalString(records[mappedId]) !== canonicalString(record)) {
-        const suffix = `~${documentIndex + 1}`;
-        mappedId = `${id}${suffix}`;
-        let collision = 2;
-        while (Object.hasOwn(records, mappedId)) {
-          if (canonicalString(records[mappedId]) === canonicalString(record)) break;
-          mappedId = `${id}${suffix}-${collision}`;
-          collision += 1;
-        }
-      }
-      if (!Object.hasOwn(records, mappedId)) records[mappedId] = clone(record);
-      idMap.set(id, mappedId);
-    }
-
-    for (const [name, value] of Object.entries(registry ?? {}).filter(([name]) => name.startsWith('x-'))) {
-      if (Object.hasOwn(registryExtensions, name) && canonicalString(registryExtensions[name]) !== canonicalString(value)) {
-        throw new Error(`Conflicting provenance registry extension ${JSON.stringify(name)} cannot be preserved during merge`);
-      }
-      registryExtensions[name] = clone(value);
-    }
-
-    idMaps.push(idMap);
-    mappedDefaults.push((registry?.defaultIds ?? []).map((id) => idMap.get(id)));
-  });
-
-  const firstDefaults = mappedDefaults[0] ?? [];
-  const defaultIds = firstDefaults.length > 0 && mappedDefaults.every((ids) => sameStringSet(ids, firstDefaults))
-    ? [...firstDefaults]
-    : [];
-  const provenance = Object.keys(records).length > 0
-    ? { records, ...(defaultIds.length ? { defaultIds } : {}), ...registryExtensions }
-    : undefined;
-
-  const normalizedDocuments = documents.map((document, documentIndex) => {
-    const normalized = clone(document);
-    const sourceDefaults = document.provenance?.defaultIds ?? [];
-    const idMap = idMaps[documentIndex];
-    for (const collection of primitiveCollections) {
-      for (const [primitiveIndex, primitive] of (normalized[collection] ?? []).entries()) {
-        const sourcePrimitive = document[collection][primitiveIndex];
-        const hadOverride = Array.isArray(sourcePrimitive.provenanceIds);
-        const effectiveIds = (sourcePrimitive.provenanceIds ?? sourceDefaults).map((id) => idMap.get(id));
-        if (hadOverride || !sameStringSet(effectiveIds, defaultIds)) {
-          if (effectiveIds.length) primitive.provenanceIds = effectiveIds;
-          else delete primitive.provenanceIds;
-        } else {
-          delete primitive.provenanceIds;
-        }
-      }
-    }
-    if (provenance) normalized.provenance = clone(provenance);
-    else delete normalized.provenance;
-    return normalized;
-  });
-
-  return normalizedDocuments;
 }
 
 function mergeComponents(documents) {
@@ -398,37 +287,6 @@ function mergeComponents(documents) {
   });
 }
 
-function effectiveProvenanceIds(view, declaration) {
-  return declaration.provenanceIds ?? view.provenance?.defaultIds ?? [];
-}
-
-function combineEquivalentViews(previous, incoming) {
-  const combined = clone(previous);
-  const defaultIds = combined.provenance?.defaultIds ?? [];
-  for (const collection of primitiveCollections) {
-    const declarations = new Map(
-      (combined[collection] ?? []).map((declaration) => [semanticDeclarationCanonicalString(declaration), declaration])
-    );
-    for (const incomingDeclaration of incoming[collection] ?? []) {
-      const key = semanticDeclarationCanonicalString(incomingDeclaration);
-      const declaration = declarations.get(key);
-      if (!declaration) continue;
-      const ids = [...new Set([
-        ...effectiveProvenanceIds(previous, declaration),
-        ...effectiveProvenanceIds(incoming, incomingDeclaration)
-      ])].sort();
-      const preserveOverride = Array.isArray(declaration.provenanceIds) || Array.isArray(incomingDeclaration.provenanceIds);
-      if (preserveOverride || !sameStringSet(ids, defaultIds)) {
-        if (ids.length) declaration.provenanceIds = ids;
-        else delete declaration.provenanceIds;
-      } else {
-        delete declaration.provenanceIds;
-      }
-    }
-  }
-  return combined;
-}
-
 function collectProtocolViews(documents, inputsValidated = false) {
   const byVersion = new Map();
   documents.forEach((document, documentIndex) => {
@@ -443,7 +301,7 @@ function collectProtocolViews(documents, inputsValidated = false) {
       if (previous && !semanticallyEquivalent(previous, view)) {
         throw new Error(`Conflicting Effective Protocol Views for MCP ${version}`);
       }
-      byVersion.set(version, previous ? combineEquivalentViews(previous, view) : view);
+      byVersion.set(version, previous ?? view);
     }
   });
   return byVersion;
@@ -476,7 +334,7 @@ export function mergeProtocolDescriptions(documents) {
   }
 
   documents.forEach((document, index) => assertConforming(document, `Merge input ${index + 1}`));
-  const normalizedDocuments = mergeProvenance(mergeComponents(documents));
+  const normalizedDocuments = mergeComponents(documents);
   const views = collectProtocolViews(normalizedDocuments, true);
   const versions = [...views.keys()].sort();
   const firstView = views.values().next().value;

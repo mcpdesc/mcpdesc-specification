@@ -116,7 +116,9 @@ if (fs.existsSync(sectionDir) && fs.existsSync(path.join(root, 'spec/draft/mcp-d
     .sort()
     .map((filename) => fs.readFileSync(path.join(sectionDir, filename), 'utf8').trimEnd())
     .join('\n\n')
-    .replaceAll('../../implementations.md', '../implementations.md');
+    .replaceAll('../../implementations.md', '../implementations.md')
+    .replaceAll('../examples/', 'examples/')
+    .replaceAll('../../../schemas/', '../../schemas/');
   if (readText('spec/draft/mcp-description.md').trimEnd() !== assembledFromSections) {
     fail('spec/draft/mcp-description.md: assembled specification is out of sync with spec/draft/sections');
   }

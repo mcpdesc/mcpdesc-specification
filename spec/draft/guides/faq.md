@@ -28,11 +28,7 @@ MCP Description adopts familiar description patterns where they fit, including s
 
 No. A description represents its declared server surface and may be authored from design metadata, generated from a runtime observation, or assembled from both. An observation can cover only the protocol revision, authorization context, and server state that were actually observed.
 
-Omitted primitives do not prove that no other revision or runtime context exposes them. Producers can use root provenance records and primitive attribution to identify contributing evidence, while consumers assess freshness or authority under external policy.
-
-### Does provenance establish completeness or trust?
-
-No. Root provenance records and primitive attribution describe evidence sources only. They do not assert that every primitive was enumerated, assign confidence or trust, or select consumer policy. Consumers apply policy externally and treat records and referenced artifacts as untrusted unless independently verified.
+Omitted primitives do not prove that no other revision or runtime context exposes them. Producers may use documented specification extensions to identify generation or observation metadata, while consumers assess freshness or authority under external policy.
 
 ## Versions and Views
 

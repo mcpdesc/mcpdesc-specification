@@ -13,26 +13,6 @@ securitySchemes:
     x-example-rotation: managed
 security:
   - api-key: []
-provenance:
-  records:
-    source:
-      kind: generated
-      producer:
-        name: description-generator
-        version: 2.0.0
-        x-example-team: platform
-      artifact:
-        uri: https://example.com/builds/42/description.yaml
-        digest: sha256:7f83b1657ff1fc53
-        x-example-retention-days: 30
-      recordedAt: "2026-08-26T12:30:00Z"
-      x-example-reviewed: true
-    unused:
-      kind: observed
-      producer:
-        name: unused-inspector
-  defaultIds: [source]
-  x-example-profile: public
 components:
   schemas:
     Input:
@@ -67,7 +47,6 @@ tools:
     clientRequirements:
       elicitation:
         form: {}
-    provenanceIds: [source]
     security: []
     x-example-stability: stable
   - name: status

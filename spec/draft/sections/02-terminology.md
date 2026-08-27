@@ -51,3 +51,11 @@ The MCP protocol revisions to which a declaration applies, determined from its e
 **Security Requirement**
 A declaration of one or more named security schemes and, where applicable, authorization scopes that must be satisfied to access a transport or primitive.
 
+### 2.3 Normative and Informative Content
+
+The requirements in this document and the versioned JSON Schema are normative. They jointly define conformance; an inconsistency between them is a specification defect.
+
+Examples, code excerpts, guides, and other companion documents are informative unless explicitly identified as normative. A complete example presented as valid is expected to conform, but it does not create requirements or override normative text or schema constraints.
+
+Repository fixtures are test artifacts rather than independent sources of requirements. Their directory identifies whether the repository validator expects them to be valid, invalid, or valid with warnings. If a fixture conflicts with the specification, the fixture or implementation must be corrected.
+
