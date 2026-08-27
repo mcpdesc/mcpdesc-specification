@@ -1,0 +1,56 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "catalog",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-06-18"
+  ],
+  "transports": [
+    {
+      "type": "streamable-http",
+      "url": "https://catalog.example.com/mcp"
+    }
+  ],
+  "tags": [
+    {
+      "name": "reference",
+      "description": "Reference material"
+    },
+    {
+      "name": "search",
+      "description": "Search operations"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search_docs",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "tags": [
+        "search"
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "uri": "docs://home",
+      "name": "home",
+      "tags": [
+        "reference"
+      ]
+    }
+  ]
+}

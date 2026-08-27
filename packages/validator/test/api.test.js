@@ -11,7 +11,8 @@ import {
 
 const fixtureRoots = {
   '0.8.0-draft.1': new URL('./snapshots/0.8.0-draft.1/fixtures/', import.meta.url),
-  '0.8.0-draft.2': new URL('./snapshots/0.8.0-draft.2/fixtures/', import.meta.url)
+  '0.8.0-draft.2': new URL('./snapshots/0.8.0-draft.2/fixtures/', import.meta.url),
+  '0.8.0-draft.3': new URL('./snapshots/0.8.0-draft.3/fixtures/', import.meta.url)
 };
 
 function fixture(group, name, specification = '0.8.0-draft.1') {
@@ -24,7 +25,7 @@ function validate(document, specification = '0.8.0-draft.1') {
 
 test('exports the cumulative validator API', () => {
   assert.equal(typeof validateMcpDescription, 'function');
-  assert.deepEqual(supportedSpecifications, ['0.8.0-draft.1', '0.8.0-draft.2']);
+  assert.deepEqual(supportedSpecifications, ['0.8.0-draft.1', '0.8.0-draft.2', '0.8.0-draft.3']);
   assert.deepEqual(supportedProtocolVersions, [
     '2024-11-05',
     '2025-03-26',
@@ -40,6 +41,10 @@ test('exports the cumulative validator API', () => {
     '0.8.0-draft.2': {
       snapshotTag: 'v0.8.0-draft.2',
       schemaSha256: 'ab692c1a5a0f7e5f29be1940aa8c64a56d4620be0a19d00cf0a64680b7e517fa'
+    },
+    '0.8.0-draft.3': {
+      snapshotTag: 'v0.8.0-draft.3',
+      schemaSha256: '8823c1f1946360b2a44d00920e2092e5e4acd139a1964befad4eb0bf3ce96002'
     }
   });
 });
@@ -53,8 +58,8 @@ test('requires an explicit exact specification selector', () => {
     /Unsupported MCP Description specification: 0\.8\.0/
   );
   assert.throws(
-    () => validateMcpDescription(document, { specification: '0.8.0-draft.3' }),
-    /Unsupported MCP Description specification: 0\.8\.0-draft\.3/
+    () => validateMcpDescription(document, { specification: '0.8.0-draft.4' }),
+    /Unsupported MCP Description specification: 0\.8\.0-draft\.4/
   );
   assert.throws(
     () => validateMcpDescription(document, { specification: { toString: () => '0.8.0-draft.1' } }),
@@ -112,6 +117,7 @@ test('exports immutable support and provenance data', () => {
   assert.ok(Object.isFrozen(specificationProvenance));
   assert.ok(Object.isFrozen(specificationProvenance['0.8.0-draft.1']));
   assert.ok(Object.isFrozen(specificationProvenance['0.8.0-draft.2']));
+  assert.ok(Object.isFrozen(specificationProvenance['0.8.0-draft.3']));
   assert.throws(() => supportedSpecifications.push('0.8.0'));
   assert.throws(() => supportedProtocolVersions.pop());
   assert.throws(() => {
@@ -119,6 +125,9 @@ test('exports immutable support and provenance data', () => {
   });
   assert.throws(() => {
     specificationProvenance['0.8.0-draft.2'].snapshotTag = 'changed';
+  });
+  assert.throws(() => {
+    specificationProvenance['0.8.0-draft.3'].snapshotTag = 'changed';
   });
 });
 

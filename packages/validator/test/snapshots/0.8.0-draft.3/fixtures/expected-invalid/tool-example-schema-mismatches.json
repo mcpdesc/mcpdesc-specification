@@ -1,0 +1,32 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "tool-example-schema-mismatches", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "transports": [{ "type": "stdio", "command": "fixture" }],
+  "tools": [
+    {
+      "name": "mismatched_values",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "count": { "type": "integer" } },
+        "required": ["count"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": { "total": { "type": "integer" } },
+        "required": ["total"]
+      },
+      "examples": {
+        "wrong-types": {
+          "input": { "count": "one" },
+          "result": {
+            "resultType": "complete",
+            "content": [{ "type": "text", "text": "one" }],
+            "structuredContent": { "total": "one" }
+          }
+        }
+      }
+    }
+  ]
+}

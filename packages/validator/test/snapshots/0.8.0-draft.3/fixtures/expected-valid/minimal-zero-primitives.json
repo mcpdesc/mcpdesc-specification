@@ -1,0 +1,12 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "empty-server",
+    "version": "0.1.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "instructions": "This server is under construction. Connection details and primitives are not declared."
+}

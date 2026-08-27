@@ -1,0 +1,17 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "empty-client-capability-requirements",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "prompts": [
+    {
+      "name": "empty_requirement",
+      "clientRequirements": {}
+    }
+  ]
+}

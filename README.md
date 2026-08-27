@@ -13,7 +13,7 @@ A portable, machine-readable contract format for describing Model Context Protoc
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
-Draft 3 is the current in-review interoperability snapshot of v0.8.0. It remains subject to further review and incompatible change; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact design-input revisions represented and excluded after review. The published `@mcpdesc/validator` package continues to support the immutable Draft 1 and Draft 2 snapshots; Draft 3 does not add a validator selector.
+Draft 3 is the current in-review interoperability snapshot of v0.8.0. It remains subject to further review and incompatible change; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact design-input revisions represented and excluded after review. The cumulative `@mcpdesc/validator` 0.3.0 package supports the immutable Draft 1, Draft 2, and Draft 3 snapshots and is intended for npm `latest` after tag and tarball review.
 
 ## Repository roles
 

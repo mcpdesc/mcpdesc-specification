@@ -1,0 +1,112 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "security-composition",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "streamable-http",
+      "url": "https://security-composition.example.com/mcp",
+      "security": [
+        {
+          "oauth": [
+            "records:read"
+          ],
+          "api-key": []
+        }
+      ]
+    }
+  ],
+  "securitySchemes": {
+    "oauth": {
+      "type": "oauth2",
+      "flows": {
+        "authorizationCode": {
+          "authorizationUrl": "https://auth.example.com/authorize",
+          "tokenUrl": "https://auth.example.com/token",
+          "scopes": {
+            "records:read": "Read records",
+            "records:write": "Modify records"
+          }
+        }
+      }
+    },
+    "api-key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
+    },
+    "oidc": {
+      "type": "openIdConnect",
+      "openIdConnectUrl": "https://id.example.com/.well-known/openid-configuration"
+    }
+  },
+  "security": [
+    {},
+    {
+      "oauth": [
+        "records:read"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "inherited_transport_requirement",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "combined_primitive_override",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "security": [
+        {
+          "oauth": [
+            "records:write"
+          ],
+          "api-key": []
+        }
+      ]
+    },
+    {
+      "name": "cleared_requirement",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "security": []
+    },
+    {
+      "name": "anonymous_only",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "security": [
+        {}
+      ]
+    },
+    {
+      "name": "anonymous_or_openid",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "security": [
+        {},
+        {
+          "oidc": []
+        }
+      ]
+    }
+  ]
+}

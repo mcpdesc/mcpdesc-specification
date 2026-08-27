@@ -1,6 +1,6 @@
 {
   "name": "@mcpdesc/validator",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Structural and semantic validation for MCP Description snapshots",
   "type": "module",
   "types": "./index.d.ts",

@@ -17,7 +17,7 @@ if (nodeInputs.length > 0) {
 }
 
 const inputs = Object.keys(result.metafile.inputs);
-for (const selector of ['0.8.0-draft.1', '0.8.0-draft.2']) {
+for (const selector of ['0.8.0-draft.1', '0.8.0-draft.2', '0.8.0-draft.3']) {
   if (!inputs.some((input) => input.includes(`/snapshots/${selector}/`))) {
     throw new Error(`Browser bundle is missing runtime snapshot ${selector}`);
   }

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "resource-example-consistency-warnings",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "resource-example-consistency-warnings"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "collection:///items",
+      "name": "items",
+      "mimeType": "application/json",
+      "size": 100,
+      "examples": {
+        "collection-snapshot": {
+          "result": {
+            "contents": [
+              {
+                "uri": "collection:///items/one",
+                "mimeType": "application/vnd.example.item+json",
+                "text": "{\"id\":1}"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "uri": "test://single",
+      "name": "single",
+      "mimeType": "application/json",
+      "size": 100,
+      "examples": {
+        "different-observation": {
+          "result": {
+            "contents": [
+              {
+                "uri": "test://single",
+                "mimeType": "text/plain",
+                "text": "short"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
