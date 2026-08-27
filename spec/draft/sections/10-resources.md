@@ -24,7 +24,6 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 | `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required for `resources/read`; does not apply to resource listing. |
-| `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Resource (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 #### 10.1.2 Resource URI
 
@@ -53,7 +52,6 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `_meta` | object | No | Literal MCP metadata on the Resource Template declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 | `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required to read a concrete URI produced from the template; does not apply to template listing. |
-| `provenanceIds` | non-empty array\<string\> | No | Provenance records replacing root defaults for this Resource Template (see [Section 17](#17-provenance-records-and-primitive-attribution)). |
 
 ### 10.3 Resource Annotations
 

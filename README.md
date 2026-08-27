@@ -9,11 +9,11 @@ A portable, machine-readable contract format for describing Model Context Protoc
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
-| 0.8.0 | Community Working Draft 2 (`v0.8.0-draft.2`; unreleased) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
+| 0.8.0 | Community Working Draft 3 (`v0.8.0-draft.3`; unreleased) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
-Draft 2 is the current public interoperability snapshot of v0.8.0. It remains subject to proposal review and incompatible change; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact design-input revisions represented. The cumulative `@mcpdesc/validator` 0.2.0 package supports Draft 1 and Draft 2 and is intended to receive npm `latest` only after Draft 2 tag and tarball review; this repository assembly does not publish it.
+Draft 3 is the current in-review interoperability snapshot of v0.8.0. It remains subject to further review and incompatible change; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact design-input revisions represented and excluded after review. The published `@mcpdesc/validator` package continues to support the immutable Draft 1 and Draft 2 snapshots; Draft 3 does not add a validator selector.
 
 ## Repository roles
 

@@ -26,6 +26,18 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 
 ### Draft snapshots
 
+#### Community Working Draft 3 — 2026-08-27 (`v0.8.0-draft.3`)
+
+Draft 3 incorporates editorial and presentation feedback from review of Draft 2. It remains unreleased and under active review.
+
+- Simplified the normative `_meta` section by delegating key grammar, reserved namespaces, contexts, and value shapes to each applicable MCP protocol revision while preserving existing conformance behavior.
+- Removed the experimental native provenance registry and primitive attribution model from Draft 3 after review of Proposal 0008. A competing project-defined extension design is being evaluated separately.
+- Moved reusable components before the appendices in the assembled specification and corrected companion-document links.
+- Added a concise inline Reference Object example with a link to the complete validated example.
+- Clarified that normative text and the versioned JSON Schema define conformance, examples are informative but expected to validate when presented as valid, and fixtures are test artifacts rather than independent requirements.
+- Removed the obsolete local `spec/draft/materials` ignore rule.
+- Preserved the immutable Draft 1 and Draft 2 validator snapshots and public API. Draft 3 does not add a validator selector.
+
 #### Community Working Draft 2 — 2026-08-26 (`v0.8.0-draft.2`)
 
 Draft 2 is the second public interoperability snapshot of v0.8.0. It remains unreleased: the snapshot identifier does not change the `mcpdesc` value from `0.8.0`, update `schemas/latest.json`, accept any proposal, or publish the validator package.
@@ -79,7 +91,6 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - Object-level `x-*` specification extensions on explicitly eligible MCP Description semantic objects, with strict excluded locations and projection, merge, preservation, and core-semantics boundaries, implementing Proposal 0011 while it remains under review.
 - JSON and restricted YAML as equally conforming serializations of one JSON-compatible data model, including YAML 1.2.2 JSON-schema scalar resolution, deterministic profile restrictions, serialization-specific capability claims, and file-extension and media-type guidance, implementing Proposal 0010 while it remains under review.
 - Repository-only strict raw-source decoding and isolated serialization fixtures for JSON/YAML equivalence, safe YAML parsing, single-document input, string and unique mapping keys, tag and alias rejection, disabled merge semantics, and finite numbers. The public `@mcpdesc/validator` API remains a parsed-value API.
-- Optional document-level provenance records, default attribution, primitive overrides, referential validation, descriptive-only semantic comparison, and provenance-preserving projection and merge behavior, implementing Proposal 0008 while it remains under review.
 - Optional typed `components` namespaces and local `$componentRef` Reference Objects for reusable Tool schemas, Elicitation schemas, and named Tool, Resource, and Resource Template examples, including contextual resolution, cycle detection, projection pruning, and collision-safe merge rewriting, implementing Proposal 0009 while it remains under review.
 - Optional non-empty primitive `clientRequirements` using revision-specific MCP `ClientCapabilities` shapes for unconditional Tool call, Resource read, Resource Template read, and Prompt get preconditions, including semantic validation, deprecation diagnostics, formal extension requirements, compatibility evaluation, and projection and merge behavior, implementing Proposal 0012 while it remains under review.
 

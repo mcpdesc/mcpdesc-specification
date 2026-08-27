@@ -71,14 +71,6 @@ Do not replace JSON Schema `$ref` or `$defs`; those remain scoped to an embedded
 
 Migration and merge tooling must keep resolution within one document, reject missing or cyclic targets, and never retrieve component values from a network. When combining descriptions, deduplicate equivalent components or deterministically rename collisions and rewrite all affected `$componentRef` values. Projection may remove unused values only after retaining every transitive target.
 
-## Provenance records
-
-No provenance migration is required. To describe a homogeneous generated, observed, or curated source, add one root `provenance.records` entry and reference it through `defaultIds`. Use a primitive's non-empty `provenanceIds` only when its attribution replaces those defaults. Every ID is document-local and must resolve to the root registry.
-
-Experiments using inline provenance objects should move reusable facts into root records and replace each inline value with IDs. Remove producer-declared completeness, confidence, trust, and policy fields; 0.8.0 defines no replacement because consumers derive those conclusions under external policy. An old observation timestamp may become `recordedAt`, but it is supporting metadata rather than identity.
-
-Merge tooling must preserve effective attribution, deterministically remap colliding local IDs whose records differ, and combine contributing records for equivalent declarations in the same Effective Protocol View. Runtime compatibility checks ignore provenance-only differences, while representation-preserving conversion and round-tripping retain them. Provenance Registry, Record, Producer, and Artifact Objects may carry `x-*` extensions.
-
 ## Tool input schemas
 
 Every 0.8.0 Tool requires `inputSchema`. A migration tool MUST require author intervention for a Tool that omitted it in 0.7.0.

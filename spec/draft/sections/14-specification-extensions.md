@@ -22,7 +22,6 @@ A specification extension MAY appear directly on the root MCP Description Object
 - the Capabilities Object, Client Capability Requirements Object, and MCP Description-defined capability declaration objects;
 - Tool, Resource, Resource Template, Prompt, Prompt Argument, and Elicitation Declaration Objects; and
 - MCP Description-defined named Tool, Resource, and Resource Template Example wrapper objects; and
-- Provenance Registry, Provenance Record, Provenance Producer, and Provenance Artifact Objects; and
 - the outer Components Object and semantic Tool, Resource, and Resource Template Example component values.
 
 Eligibility follows the object's specification-defined role, not the fact that a serialized value is a JSON object. A map value that is an eligible object MAY carry extensions, but the containing map does not thereby gain an extension slot.
