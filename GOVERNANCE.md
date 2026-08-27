@@ -19,7 +19,7 @@ The MCP Toolkit and `mcpcontract` implementation remain in `cisco-open/mcptoolki
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | `cisco-open/mcptoolkit-contract` |
-| 0.8.0 | Community Working Draft 2 (`v0.8.0-draft.2`; unreleased) | `mcpdesc/mcpdesc-specification` |
+| 0.8.0 | Community Working Draft 3 (`v0.8.0-draft.3`; unreleased) | `mcpdesc/mcpdesc-specification` |
 
 The v0.8.0 draft is not a stable specification release. Draft snapshot tags publish specific review and interoperability baselines without satisfying the stable-release approval requirements.
 
@@ -125,7 +125,7 @@ The `@mcpdesc/validator` package uses implementation SemVer independently from i
 
 The reviewed specification assembly records the chosen package version, exact selector metadata, schema digests, and intended npm dist-tag. A maintainer creates the specification snapshot tag first, then reviews `npm pack --dry-run --json` from that tag. Publishing an annotated `validator-v<semver>` tag explicitly authorizes the trusted-publishing workflow to publish that exact package version. A SemVer prerelease is published with the npm `next` dist-tag; a stable SemVer is published with `latest`. Repository scripts and other CI workflows MUST NOT create release tags, move npm dist-tags, select package versions, or publish packages.
 
-For Community Working Draft 2, validator `0.2.0` cumulatively supports `0.8.0-draft.1` and `0.8.0-draft.2` and is intended to receive npm `latest` after tag and tarball review. This intent is not publication authorization.
+Validator `0.3.0` cumulatively supports `0.8.0-draft.1`, `0.8.0-draft.2`, and `0.8.0-draft.3` and is published with npm `latest`. Future publication still requires an explicit `validator-v<semver>` tag after specification-tag and tarball review.
 
 ## Intellectual property and contributions
 

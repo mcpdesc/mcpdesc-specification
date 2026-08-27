@@ -14,6 +14,7 @@ import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
+import { assembleDraft } from './draft-assembly.mjs';
 import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 function createValidatorForDialect(dialect) {
@@ -111,15 +112,8 @@ for (const rel of ['ORIGIN.md', 'README.md', 'NOTICE']) {
 
 const sectionDir = path.join(root, 'spec', 'draft', 'sections');
 if (fs.existsSync(sectionDir) && fs.existsSync(path.join(root, 'spec/draft/mcp-description.md'))) {
-  const assembledFromSections = fs.readdirSync(sectionDir)
-    .filter((filename) => /^\d{2}-.+\.md$/.test(filename))
-    .sort()
-    .map((filename) => fs.readFileSync(path.join(sectionDir, filename), 'utf8').trimEnd())
-    .join('\n\n')
-    .replaceAll('../../implementations.md', '../implementations.md')
-    .replaceAll('../examples/', 'examples/')
-    .replaceAll('../../../schemas/', '../../schemas/');
-  if (readText('spec/draft/mcp-description.md').trimEnd() !== assembledFromSections) {
+  const { content: assembledFromSections } = assembleDraft(root);
+  if (readText('spec/draft/mcp-description.md') !== assembledFromSections) {
     fail('spec/draft/mcp-description.md: assembled specification is out of sync with spec/draft/sections');
   }
 }

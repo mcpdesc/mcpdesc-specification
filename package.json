@@ -9,7 +9,10 @@
   "type": "module",
   "scripts": {
     "test": "npm test --workspace @mcpdesc/validator && node scripts/test-serializations.mjs && node scripts/validate-repository.mjs && node scripts/test-views.mjs",
-    "validate": "node scripts/validate-repository.mjs"
+    "validate": "node scripts/validate-repository.mjs",
+    "assemble:draft": "node scripts/assemble-draft.mjs",
+    "release:check": "node scripts/check-release.mjs",
+    "release:prepare": "node scripts/prepare-release.mjs"
   },
   "engines": {
     "node": ">=20"
