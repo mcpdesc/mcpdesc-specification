@@ -11,7 +11,7 @@
 
 Define provenance as the project-defined `x-mcpdesc-provenance` specification extension instead of adding native `provenance` and `provenanceIds` fields to the MCP Description 0.8.0 core.
 
-The extension retains reusable evidence records, document defaults, and primitive-specific attribution from Proposal 0008. Extension-aware tooling can validate references and provide specialized projection, merge, and comparison behavior. Generic MCP Description tooling treats the value as an ordinary `x-*` extension: it preserves the extension on retained owners but does not infer provenance semantics.
+The extension retains reusable evidence records, document defaults, primitive-specific attribution, and named-example attribution. Example-level ownership lets a discovered declaration and an observed invocation or read identify their actual evidence independently. Extension-aware tooling can validate references and provide specialized projection, merge, and comparison behavior. Generic MCP Description tooling treats the value as an ordinary `x-*` extension: it preserves the extension on retained owners but does not infer provenance semantics.
 
 Proposal 0014 and Proposal 0008 are competing designs. Acceptance of one rejects or supersedes the other for MCP Description 0.8.0.
 
@@ -27,6 +27,7 @@ Draft 2 experimentally implemented Proposal 0008. Draft 3 review found that the 
 
 - Preserve a portable project-defined vocabulary for curated, observed, and generated evidence.
 - Support reusable document-level records, systemic defaults, primitive overrides, and multiple contributing records.
+- Attribute a named primitive example independently from its containing declaration.
 - Keep provenance separate from MCP protocol fields and runtime semantics.
 - Allow provenance to evolve without changing the MCP Description core schema.
 - Let implementations that do not use provenance remain conforming without provenance-specific behavior.
@@ -66,11 +67,12 @@ The extension property name is `x-mcpdesc-provenance`.
 It MAY appear on:
 
 - the root MCP Description Object, as a Provenance Registry Extension Object; and
-- a Tool, Resource, Resource Template, or Prompt Object, as a Primitive Provenance Extension Object.
+- a Tool, Resource, Resource Template, or Prompt Object, as a Provenance Attribution Extension Object; and
+- a named Tool, Resource, Resource Template, or Prompt Example Object defined by the containing MCP Description version, as a Provenance Attribution Extension Object.
 
 It MUST NOT appear at another location unless a later extension version explicitly adds that location. The extension MUST NOT appear inside MCP `_meta`, MCP protocol payloads, embedded JSON Schemas, Reference Objects, or component namespace maps.
 
-A document using primitive provenance MUST contain a root registry using the same extension version.
+A document using primitive or example provenance MUST contain a root registry using the same extension version.
 
 ### 2. Provenance Registry Extension Object
 
@@ -102,15 +104,19 @@ A Producer Object MUST contain a non-empty `name` and MAY contain a non-empty `v
 
 Records, producers, and artifacts MAY contain nested `x-*` properties and MUST NOT contain other undefined properties. They do not define completeness, confidence, trust, precedence, or consumer policy.
 
-### 4. Primitive Provenance Extension Object
+### 4. Provenance Attribution Extension Object
 
-A primitive extension value contains exactly one property:
+A primitive or named-example extension value contains exactly one property:
 
 | Property | Type | Required | Description |
 | --- | --- | --- | --- |
 | `ids` | non-empty array of unique strings | Yes | Records replacing root defaults for this primitive. |
 
 Every ID MUST resolve to the root extension registry. A present primitive extension replaces, rather than extends, `defaultIds`. Omission inherits `defaultIds` when present. Omission of both makes no portable provenance attribution.
+
+Primitive attribution applies to the primitive declaration and its ordinary declaration fields, but not to a nested named Example Object. A named example is an independently attributable object. A present example extension identifies evidence for that example and replaces any systemic default; omission means that the extension makes no example-specific attribution. Primitive IDs and `defaultIds` MUST NOT be interpreted as evidence for a nested example merely because it is stored within that primitive.
+
+This boundary prevents over-attribution when discovery establishes a Tool declaration and a later invocation establishes only one named Tool Example. The Tool can identify discovery evidence while the example identifies invocation evidence, without claiming that the invocation established the Tool's name, schemas, annotations, or other declaration fields.
 
 Multiple IDs mean that evidence from multiple records contributed to the declaration. Their order MUST NOT imply precedence, confidence, trust, or merge order.
 
@@ -134,13 +140,13 @@ An implementation claiming `x-mcpdesc-provenance` support MUST validate:
 - non-empty records and ID arrays;
 - record kinds, producer and artifact shapes, date-time values, and digest syntax;
 - uniqueness of ID arrays; and
-- resolution of every default and primitive ID to the root registry.
+- resolution of every default, primitive, and example ID to the root registry.
 
 It MUST distinguish extension-profile conformance from baseline MCP Description conformance in its API or diagnostics.
 
 ### 7. Extension-aware projection
 
-An extension-aware single-version projection MUST preserve the effective attribution of every retained primitive and every referenced record. It MAY prune records unused by retained primitives. It MUST NOT synthesize records or change attribution.
+An extension-aware single-version projection MUST preserve the effective attribution of every retained primitive, every retained named example, and every referenced record. It MAY prune records unused by retained attributable objects. It MUST NOT synthesize records or change attribution.
 
 Generic projection remains conforming when it preserves the complete root extension and each retained primitive extension without interpreting them.
 
@@ -148,7 +154,7 @@ Generic projection remains conforming when it preserves the complete root extens
 
 An extension-aware merge SHOULD preserve records and effective attribution from every contributing document. When different records use the same document-local ID, it MUST either deterministically remap one ID and every affected reference or report a conflict. It MUST NOT silently bind one ID to different records.
 
-When equivalent declarations receive evidence from multiple inputs, extension-aware tooling SHOULD retain all contributing records. It MUST NOT infer completeness, confidence, precedence, or trust from record count or metadata.
+When equivalent declarations or named examples receive evidence from multiple inputs, extension-aware tooling SHOULD retain all contributing records at the corresponding ownership location. It MUST NOT move example evidence to the containing primitive merely to simplify merge, and MUST NOT infer completeness, confidence, precedence, or trust from record count or metadata.
 
 Generic merge tooling is not required to perform ID remapping or attribution combination. It follows the ordinary extension conflict rules and MAY report a conflict when distinct extension values cannot be represented losslessly.
 
@@ -166,7 +172,7 @@ The project SHOULD publish a versioned extension JSON Schema with a stable `$id`
 
 `https://mcpdesc.org/extensions/x-mcpdesc-provenance/0.1.0/schema.json`
 
-The schema SHOULD define the root registry value, primitive attribution value, records, producers, and artifacts. Because the same extension name has location-specific shapes, extension-aware validators must select the applicable definition from the containing MCP Description object type. Cross-object ID resolution remains semantic validation.
+The schema SHOULD define the root registry value, attribution value, records, producers, and artifacts. Because the same extension name has location-specific shapes, extension-aware validators must select the applicable definition from the containing MCP Description object type. Cross-object ID resolution remains semantic validation.
 
 ## Examples
 
@@ -222,6 +228,46 @@ tools:
 
 The second excerpt omits unrelated required root fields for brevity.
 
+### Declaration and example attribution
+
+```yaml
+x-mcpdesc-provenance:
+  version: 0.1.0
+  records:
+    discovery:
+      kind: observed
+      producer:
+        name: example-inspector
+      method: session.discovery
+    invocation:
+      kind: observed
+      producer:
+        name: example-inspector
+      method: session.tool-example
+tools:
+  - name: echo
+    inputSchema:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+    examples:
+      observed-001:
+        input:
+          message: hello
+        result:
+          content:
+            - type: text
+              text: 'Echo: hello'
+        x-mcpdesc-provenance:
+          ids: [invocation]
+    x-mcpdesc-provenance:
+      ids: [discovery]
+```
+
+The Tool attribution describes evidence for the declaration. The nested attribution describes evidence for only `observed-001`; neither is implicitly copied to the other owner.
+
 ## Compatibility
 
 The extension is additive to MCP Description 0.8.0. Documents without it are unchanged. Baseline implementations accept it through existing `x-*` rules and need not implement provenance semantics.
@@ -238,6 +284,8 @@ A document using Draft 2 native provenance can migrate mechanically:
 - add `version: 0.1.0` to the root extension value;
 - replace each primitive `provenanceIds: [...]` with `x-mcpdesc-provenance: { ids: [...] }`; and
 - validate the result with an extension-aware validator.
+
+When migrating a generated document that combined discovery and traffic evidence at primitive level, producers SHOULD move invocation- or read-specific IDs onto the named examples they actually support. They MUST NOT retain broader attribution merely to avoid distinguishing declaration and example evidence.
 
 A consumer that requires Proposal 0008's specialized merge, projection, or comparison guarantees must enable an extension-aware profile. Baseline validation alone is insufficient.
 
@@ -284,11 +332,11 @@ Inline records avoid document-local references but duplicate systemic metadata a
 ## Implementation and validation plan
 
 1. Publish extension documentation under `spec/draft/extensions/x-mcpdesc-provenance/` only after acceptance.
-2. Publish a versioned extension JSON Schema with root and primitive definitions.
-3. Add conforming root-default and primitive-override examples.
+2. Publish a versioned extension JSON Schema with root and attribution definitions.
+3. Add conforming root-default, primitive-override, and named-example examples.
 4. Add extension-profile fixtures for malformed values and unresolved IDs.
-5. Add extension-aware projection tests for effective attribution and optional record pruning.
-6. Add extension-aware merge tests for ID collisions, remapping, multi-source attribution, and generic-tool conflict behavior.
+5. Add extension-aware projection tests for primitive and named-example attribution and optional record pruning.
+6. Add extension-aware merge tests for ID collisions, remapping, ownership-preserving multi-source attribution, and generic-tool conflict behavior.
 7. Add migration coverage from immutable Draft 2 native provenance documents.
 8. Document separate baseline and extension-profile conformance claims.
 9. Gather implementation experience before considering native promotion.
@@ -296,3 +344,5 @@ Inline records avoid document-local references but duplicate systemic metadata a
 ## Decision record
 
 Pending community review. Reviewers should compare this proposal directly with Proposal 0008 and select at most one provenance model for MCP Description 0.8.0.
+
+- 2026-08-28: Added independent named-example attribution after Inspector sessions demonstrated that primitive-only IDs over-attribute invocation and read evidence.
