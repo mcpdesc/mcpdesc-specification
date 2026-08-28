@@ -130,13 +130,16 @@ if (latest && latest['mcp-description'] !== '0.7.0') fail('schemas/latest.json m
 
 if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
   const draft = readJson('schemas/draft.json');
+  const activeDraftSchema = draft?.schema ? readJson(draft.schema) : null;
   if (draft && draft['mcp-description'] !== '0.8.0') fail('schemas/draft.json must identify draft 0.8.0');
   if (draft && draft.iteration !== status?.draft?.iteration) fail('schemas/draft.json iteration must match specification-status.json');
   if (draft && draft.snapshotTag !== status?.draft?.snapshotTag) fail('schemas/draft.json snapshotTag must match specification-status.json');
   if (draft && draft.snapshotDate !== status?.draft?.snapshotDate) fail('schemas/draft.json snapshotDate must match specification-status.json');
   if (draft && draft.released !== false) fail('schemas/draft.json must remain unreleased while v0.8.0 is a draft');
   if (draft && draft.branch !== status?.draft?.branch) fail('schemas/draft.json branch must match specification-status.json');
-  if (draft && draft.$id !== 'https://mcpdesc.org/schema/0.8.0.json') fail('schemas/draft.json must record the canonical 0.8.0 schema $id');
+  if (draft && draft.schemaId !== 'https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json') fail('schemas/draft.json must record the canonical Draft 4 schema ID');
+  if (draft && activeDraftSchema && draft.schemaId !== activeDraftSchema.$id) fail('schemas/draft.json schemaId must match the active draft schema root $id');
+  if (draft && Object.hasOwn(draft, '$id')) fail('schemas/draft.json is a status manifest and must not declare a JSON Schema $id');
   if (draft && latest && draft['mcp-description'] === latest['mcp-description']) fail('schemas/draft.json must not equal the released schemas/latest.json version');
 }
 
@@ -152,7 +155,11 @@ const proposalSnapshots = [
   ['0010-json-yaml-serialization.md', '2171023d01a7f24d97510c6185d464c32ef8ba09', 'proposals/0010-json-yaml-serialization.md', '2d11a529ba94041c390c1e3dab80b56c9408be260c881873db7341c6f4718291'],
   ['0011-primitive-specification-extensions.md', 'de79bcd28da06b4355668f5403b84ac276f7ae7e', 'proposals/0011-primitive-specification-extensions.md', '4b2dd0c29a520e9bfe00b6571bc6a486e70f17ee2e368797d655e747351a3f12'],
   ['0012-primitive-client-capability-requirements.md', '45e033975e22b699b3c3f2f0eeb160f9678e4369', 'proposals/0012-primitive-client-capability-requirements.md', '4bc568e6374af3745a62ce7892d574171e0fefac091a133ecca0ed77899c86f8'],
-  ['0013-optional-sections-non-empty-collections.md', 'e6243738ef685f5da5fa9418269cfe4317fe7b12', 'proposals/0013-optional-sections-non-empty-collections.md', '47fe7d3380ba92d3ad10ae719a29017221868d99c4336011fd2f2bdd2aa36a83']
+  ['0013-optional-sections-non-empty-collections.md', 'e6243738ef685f5da5fa9418269cfe4317fe7b12', 'proposals/0013-optional-sections-non-empty-collections.md', '47fe7d3380ba92d3ad10ae719a29017221868d99c4336011fd2f2bdd2aa36a83'],
+  ['0015-prompt-examples.md', 'f5cd5a5b62f4b074702f6405d209cee3e7b683d0', 'proposals/0015-prompt-examples.md', 'e2c74d3b4615ad4898a82c6918e919e3e9f337ec0e870dac32d9281900e67eed'],
+  ['0016-completion-examples.md', '81393cf4b232c71a25d828f09a6836dc1ff316a6', 'proposals/0016-completion-examples.md', '0196662c57b7bed2a4ef2720e7acf5d74b2cc17bdecd2cbb027349fa3d480fe9'],
+  ['0017-tool-interaction-examples.md', '067788c14c1361f4994ed1f819df388a29c9e978', 'proposals/0017-tool-interaction-examples.md', 'b4ad04ce763256e14b0f59cfbcd0fe10414d9d71fe4ec67ddb75e2289f7e90ed'],
+  ['0019-schema-identity-publication.md', '9680328d5aeb2e446a62e2eb4dec03ee028cfa60', 'proposals/0019-schema-identity-publication.md', 'c7a6b08f7851b49b1f324fc4c5d19b9eb180bd3f0302f0c1b122f4490be0f2bd']
 ];
 const proposalManifest = fs.existsSync(path.join(root, 'spec/draft/PROPOSALS.md')) ? readText('spec/draft/PROPOSALS.md') : '';
 if (!proposalManifest) fail('missing required file: spec/draft/PROPOSALS.md');

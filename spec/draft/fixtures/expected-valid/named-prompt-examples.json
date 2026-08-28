@@ -1,0 +1,90 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "prompt-example-fixture",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2025-11-25", "2026-07-28"],
+  "components": {
+    "promptExamples": {
+      "default-greeting": {
+        "arguments": {},
+        "result": {
+          "resultType": "complete",
+          "messages": [
+            {
+              "role": "assistant",
+              "content": { "type": "text", "text": "Hello." }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "prompts": [
+    {
+      "name": "greeting",
+      "protocolVersions": ["2026-07-28"],
+      "examples": {
+        "default": {
+          "$componentRef": "#/components/promptExamples/default-greeting"
+        }
+      }
+    },
+    {
+      "name": "greeting",
+      "protocolVersions": ["2025-11-25"],
+      "examples": {
+        "default": {
+          "result": {
+            "messages": [
+              {
+                "role": "assistant",
+                "content": { "type": "text", "text": "Hello." }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "city_briefing",
+      "protocolVersions": ["2026-07-28"],
+      "arguments": [
+        { "name": "city", "required": true },
+        { "name": "audience" }
+      ],
+      "examples": {
+        "paris-engineering": {
+          "arguments": {
+            "city": "Paris",
+            "audience": "engineering"
+          },
+          "result": {
+            "resultType": "complete",
+            "description": "Engineering briefing for Paris",
+            "messages": [
+              {
+                "role": "user",
+                "content": {
+                  "type": "text",
+                  "text": "Summarize current engineering considerations for Paris."
+                }
+              },
+              {
+                "role": "assistant",
+                "content": {
+                  "type": "resource_link",
+                  "uri": "briefing://paris/engineering",
+                  "name": "Paris engineering briefing",
+                  "mimeType": "text/markdown"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

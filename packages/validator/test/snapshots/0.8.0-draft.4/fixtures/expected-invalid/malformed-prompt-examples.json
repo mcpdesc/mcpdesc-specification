@@ -1,0 +1,53 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "malformed-prompt-examples", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "prompts": [
+    {
+      "name": "empty_map",
+      "examples": {}
+    },
+    {
+      "name": "invalid_name",
+      "examples": {
+        "contains spaces": {
+          "result": {
+            "resultType": "complete",
+            "messages": []
+          }
+        }
+      }
+    },
+    {
+      "name": "bad_arguments_shape",
+      "examples": {
+        "array": {
+          "arguments": [],
+          "result": {
+            "resultType": "complete",
+            "messages": []
+          }
+        }
+      }
+    },
+    {
+      "name": "missing_result",
+      "examples": {
+        "missing": { "arguments": {} }
+      }
+    },
+    {
+      "name": "non_string_argument",
+      "examples": {
+        "number": {
+          "arguments": { "count": 1 },
+          "result": {
+            "resultType": "complete",
+            "messages": []
+          }
+        }
+      }
+    }
+  ]
+}

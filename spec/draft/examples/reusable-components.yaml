@@ -1,4 +1,4 @@
-$schema: https://mcpdesc.org/schema/0.8.0.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
 mcpdesc: 0.8.0
 info:
   name: reusable-search
@@ -33,6 +33,16 @@ components:
         structuredContent:
           count: 1
       x-example-source: documentation
+  promptExamples:
+    default-greeting:
+      arguments: {}
+      result:
+        resultType: complete
+        messages:
+          - role: assistant
+            content:
+              type: text
+              text: Hello.
 tools:
   - name: search
     inputSchema:
@@ -42,3 +52,8 @@ tools:
     examples:
       basic:
         $componentRef: '#/components/toolExamples/basic-search'
+prompts:
+  - name: greeting
+    examples:
+      default:
+        $componentRef: '#/components/promptExamples/default-greeting'

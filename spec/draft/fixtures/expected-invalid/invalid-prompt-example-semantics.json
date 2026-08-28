@@ -1,0 +1,96 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-prompt-example-semantics", "version": "1.0.0" },
+  "protocolVersions": ["2025-03-26", "2025-11-25", "2026-07-28"],
+  "prompts": [
+    {
+      "name": "city_briefing",
+      "protocolVersions": ["2026-07-28"],
+      "arguments": [
+        { "name": "city", "required": true },
+        { "name": "audience" }
+      ],
+      "examples": {
+        "unknown-and-missing": {
+          "arguments": {
+            "audience": "engineering",
+            "rogue": "oops"
+          },
+          "result": {
+            "messages": [
+              {
+                "role": "user",
+                "content": { "type": "text", "text": "Summarize Paris." }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "legacy-result-type",
+      "protocolVersions": ["2025-11-25"],
+      "examples": {
+        "bad-version": {
+          "result": {
+            "resultType": "complete",
+            "messages": [
+              {
+                "role": "assistant",
+                "content": { "type": "text", "text": "Hello." }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "json-rpc-envelope",
+      "protocolVersions": ["2026-07-28"],
+      "examples": {
+        "bad-envelope": {
+          "result": {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "resultType": "complete",
+            "messages": []
+          }
+        }
+      }
+    },
+    {
+      "name": "incomplete-workflow",
+      "protocolVersions": ["2026-07-28"],
+      "examples": {
+        "task-state": {
+          "result": {
+            "resultType": "complete",
+            "messages": [],
+            "task": { "taskId": "task-example" }
+          }
+        }
+      }
+    },
+    {
+      "name": "legacy-content-shape",
+      "protocolVersions": ["2025-03-26"],
+      "examples": {
+        "resource-link-too-new": {
+          "result": {
+            "messages": [
+              {
+                "role": "assistant",
+                "content": {
+                  "type": "resource_link",
+                  "uri": "briefing://example",
+                  "name": "Example"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -80,7 +80,7 @@ The applicable MCP revision remains authoritative for execution. MCP Description
 
 A mock, gateway, documentation tool, or client MAY use a declaration to render its message, collect a form response matching `requestedSchema`, or present a known URL. The declaration alone does not define when a mock triggers the interaction, how it selects among declarations, how responses modify state, or which final primitive result follows.
 
-Elicitation Declarations are distinct from named primitive examples. Tool Examples pair a complete invocation with a completed Tool Result, and Resource Examples contain completed read results. They MUST NOT contain `InputRequiredResult`, `elicitation/create`, MRTR rounds, retries, or other incomplete workflows. MCP Description 0.8.0 does not define an elicitation transcript or workflow language.
+Elicitation Declarations are distinct from named primitive examples. Tool Examples pair a complete invocation with a completed Tool Result, Tool `interactionExamples` add ordered semantic client-input steps for one Tool invocation, and Resource Examples contain completed read results. None of these models preserve JSON-RPC envelopes, MRTR request state, retries, timing, or a general executable workflow language.
 
 The applicable MCP elicitation specification remains authoritative for runtime security and privacy requirements. MCP Description validation does not inspect or certify runtime behavior, privacy compliance, or security conformance and defines no sensitive-field diagnostic.
 

@@ -2,12 +2,12 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "description": "Identifies the in-progress MCP Description draft version. This is NOT a released-version pointer; released versions are tracked in latest.json.",
   "mcp-description": "0.8.0",
-  "iteration": 3,
-  "snapshotTag": "v0.8.0-draft.3",
-  "snapshotDate": "2026-08-27",
+  "iteration": 4,
+  "snapshotTag": "v0.8.0-draft.4",
+  "snapshotDate": "2026-08-28",
   "released": false,
   "branch": "main",
   "schema": "schemas/mcp-description/0.8.0.json",
-  "$id": "https://mcpdesc.org/schema/0.8.0.json",
-  "note": "v0.8.0-draft.3 identifies Community Working Draft 3, not a stable release or a distinct mcpdesc conformance version. schemas/latest.json remains pinned to the stable 0.7.0 release."
+  "schemaId": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "note": "v0.8.0-draft.4 identifies Community Working Draft 4, not a stable release or a distinct mcpdesc conformance version. schemas/latest.json remains pinned to the stable 0.7.0 release."
 }

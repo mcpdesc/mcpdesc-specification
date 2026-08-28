@@ -45,6 +45,7 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `mimeType` | string | No | MIME type of the resource content. |
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Template Example Object](#1043-resource-template-example-object)\> | No | Named concrete URI and completed read-result examples. |
+| `completionExamples` | map\<string, [Completion Example Object](#1046-resource-template-completion-examples)\> | No | Named `completion/complete` request-result observations for template variables. |
 | `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
 | `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading an expanded Resource (see [Section 12](#12-elicitation-declarations)). |
@@ -117,6 +118,26 @@ Documentation tooling SHOULD preserve names, concrete template URIs, result fiel
 Resource examples are MCP Description metadata, not fields of MCP Resource or Resource Template list values. Projection to MCP list values MUST omit `examples` unless an independent MCP extension defines a destination. Effective Protocol View projection preserves the selected declaration's map and MUST NOT combine maps from declarations with disjoint scopes. MCP Description round-tripping MUST preserve example names and values.
 
 Examples and their URIs are untrusted. Authors MUST NOT include secrets and SHOULD use conspicuously fictitious content. Consumers MUST NOT dereference URIs automatically, MUST render content safely, MUST treat MIME types as untrusted hints, and SHOULD impose encoded-size, decoded-size, and processing limits. Binary fixtures SHOULD be decoded and inspected before publication.
+
+#### 10.4.6 Resource Template Completion Examples
+
+A Resource Template Object MAY contain `completionExamples`, a local non-empty map from an example name to an inline Completion Example Object. Unlike Resource Template `examples`, `completionExamples` do not support a component namespace or `$componentRef`; the containing Resource Template supplies the completion target identity.
+
+Each name MUST match `^[A-Za-z0-9._-]+$`, is case-sensitive, and is scoped to the containing Resource Template declaration. Entry order is not semantically significant. A Completion Example Object MAY carry `x-*` specification extensions and contains these properties:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `argument` | object | **Yes** | The selected template variable being completed, with required string `name` and `value`. |
+| `context` | object | No | Optional contextual `arguments` map of already-supplied variable values. |
+| `result` | object | **Yes** | Completed applicable MCP `completion/complete` result payload, excluding the JSON-RPC envelope. |
+
+The Completion Example Object MUST NOT contain other unprefixed properties. The `argument` object MUST contain required string properties `name` and `value`. `argument.name` MUST identify one RFC 6570 variable in the containing `uriTemplate`. Every `context.arguments` key MUST identify another RFC 6570 variable from the same template, and the completed argument MUST NOT also appear in context. Variable identity is determined by parsing RFC 6570 expressions: operators and modifiers do not change the variable name, so `{+path}` identifies `path`, `{id:3}` identifies `id`, and `{owner,repository}` identifies both `owner` and `repository`.
+
+`context` MAY be omitted. When present, it MUST contain a non-empty `arguments` map whose values are strings. An empty context MUST be omitted rather than represented as an empty object.
+
+`result` MUST contain `completion.values`, an ordered array of string candidates. It MAY preserve native `completion.total`, `completion.hasMore`, and revision-supported result `_meta`. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. JSON-RPC envelope fields, errors, and incomplete workflows are not completion examples. Resource Template completion examples are valid only in an effective protocol scope where MCP defines completion and every represented field.
+
+Completion examples are illustrative and non-exhaustive. They do not create enums, defaults, authorization grants, or a promise that a future request yields the same candidates, ordering, total, or pagination state. Projection to MCP Resource Template list values MUST omit `completionExamples` unless an independent MCP extension defines a destination. Effective Protocol View projection and round-tripping MUST preserve the selected declaration's `completionExamples` map and MUST NOT merge maps from disjoint protocol variants.
 
 ### 10.5 Protocol Variants and Security
 

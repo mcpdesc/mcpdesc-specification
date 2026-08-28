@@ -1,0 +1,213 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-completion-example-semantics",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2024-11-05",
+    "2025-03-26",
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "invalid-completion-example-semantics"
+    }
+  ],
+  "prompts": [
+    {
+      "protocolVersions": [
+        "2024-11-05"
+      ],
+      "name": "legacy_prompt",
+      "arguments": [
+        {
+          "name": "topic"
+        }
+      ],
+      "completionExamples": {
+        "unsupported-version": {
+          "argument": {
+            "name": "topic",
+            "value": "ch"
+          },
+          "result": {
+            "completion": {
+              "values": [
+                "chess"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2025-03-26"
+      ],
+      "name": "team_lead",
+      "arguments": [
+        {
+          "name": "department",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        }
+      ],
+      "completionExamples": {
+        "context-too-early": {
+          "argument": {
+            "name": "name",
+            "value": "a"
+          },
+          "context": {
+            "arguments": {
+              "department": "engineering"
+            }
+          },
+          "result": {
+            "completion": {
+              "values": [
+                "Ada"
+              ]
+            },
+            "_meta": {
+              "captured": true
+            }
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "name": "team_lead",
+      "arguments": [
+        {
+          "name": "department",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        }
+      ],
+      "completionExamples": {
+        "bad-membership": {
+          "argument": {
+            "name": "nickname",
+            "value": "a"
+          },
+          "context": {
+            "arguments": {
+              "nickname": "Ada",
+              "region": "emea"
+            }
+          },
+          "result": {
+            "resultType": "complete",
+            "completion": {
+              "values": [
+                "Ada"
+              ]
+            },
+            "jsonrpc": "2.0"
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "name": "team_lead",
+      "arguments": [
+        {
+          "name": "department",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        }
+      ],
+      "completionExamples": {
+        "missing-result-type": {
+          "argument": {
+            "name": "name",
+            "value": "a"
+          },
+          "result": {
+            "completion": {
+              "values": [
+                "Ada"
+              ],
+              "hasMore": false
+            }
+          }
+        }
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uriTemplate": "repo://{owner/{repository}/issues/{issue}",
+      "name": "broken_template",
+      "completionExamples": {
+        "bad-template": {
+          "argument": {
+            "name": "issue",
+            "value": "12"
+          },
+          "result": {
+            "resultType": "complete",
+            "completion": {
+              "values": [
+                "120"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uriTemplate": "repo://{owner}/{repository}/issues/{issue}",
+      "name": "repository_issue",
+      "completionExamples": {
+        "bad-variables": {
+          "argument": {
+            "name": "ticket",
+            "value": "12"
+          },
+          "context": {
+            "arguments": {
+              "issue": "12",
+              "workspace": "docs"
+            }
+          },
+          "result": {
+            "resultType": "complete",
+            "completion": {
+              "values": [
+                "120"
+              ]
+            },
+            "requestState": "input-required"
+          }
+        }
+      }
+    }
+  ]
+}

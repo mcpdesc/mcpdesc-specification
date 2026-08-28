@@ -1,0 +1,29 @@
+{
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-component-context", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "components": {
+    "schemas": {
+      "NonObjectInput": { "type": "string" },
+      "NestedForm": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "object",
+            "properties": { "name": { "type": "string" } }
+          }
+        }
+      }
+    }
+  },
+  "tools": [{
+    "name": "invalid",
+    "inputSchema": { "$componentRef": "#/components/schemas/NonObjectInput" },
+    "elicitations": [{
+      "name": "profile",
+      "mode": "form",
+      "message": "Provide a profile",
+      "requestedSchema": { "$componentRef": "#/components/schemas/NestedForm" }
+    }]
+  }]
+}

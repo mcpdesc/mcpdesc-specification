@@ -1,0 +1,15 @@
+{
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-component-shapes", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "components": {
+    "schemas": {}
+  },
+  "tools": [{
+    "name": "search",
+    "inputSchema": {
+      "$componentRef": "https://example.com/components.json#/schemas/Input",
+      "x-forbidden-sibling": true
+    }
+  }]
+}

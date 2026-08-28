@@ -65,7 +65,7 @@ This extension follows the MCP Description [specification extension mechanism](.
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
   "mcpdesc": "0.8.0",
   "info": { "name": "my-server", "version": "1.0.0" },
   "protocolVersions": ["2025-06-18"],

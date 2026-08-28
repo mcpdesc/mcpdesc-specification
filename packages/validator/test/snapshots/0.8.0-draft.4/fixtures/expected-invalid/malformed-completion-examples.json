@@ -1,0 +1,39 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "malformed-completion-examples",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "prompts": [
+    {
+      "name": "team_lead",
+      "completionExamples": {}
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "repo://{owner}/{repository}/issues/{issue}",
+      "name": "repository_issue",
+      "completionExamples": {
+        "bad": {
+          "argument": {
+            "name": "issue"
+          },
+          "context": {},
+          "result": {
+            "completion": {
+              "values": [
+                12
+              ]
+            }
+          },
+          "$componentRef": "#/components/completionExamples/bad"
+        }
+      }
+    }
+  ]
+}

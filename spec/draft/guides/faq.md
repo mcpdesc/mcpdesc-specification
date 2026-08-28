@@ -38,6 +38,12 @@ Omitted primitives do not prove that no other revision or runtime context expose
 
 For example, one document conforming to MCP Description 0.8.0 can describe both MCP 2025-11-25 and MCP 2026-07-28.
 
+### What is the difference between `$schema` and `mcpdesc`?
+
+`$schema` identifies one structural JSON Schema resource for editor tooling and instance-shape validation. `mcpdesc` identifies the MCP Description format and conformance version of the instance document itself.
+
+For the current unreleased Draft 4 work, the recommended `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`, while `mcpdesc` remains `0.8.0`. A future stable 0.8.0 release will change the recommended `$schema` URI to the stable canonical schema without changing the role of `mcpdesc`.
+
 ### How can one document describe multiple MCP revisions?
 
 The root `protocolVersions` declares total coverage. Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts can narrow their applicability with their own `protocolVersions`.
@@ -75,7 +81,11 @@ Generation does not make a description complete or authoritative. Generators mus
 
 Use the schema for the declared `mcpdesc` version and apply that version's semantic validation rules. Schema validation alone cannot enforce cross-object rules such as protocol coverage, scoped uniqueness, revision-specific fields, security references, or example consistency.
 
-For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/0.8.0.json"` for editor support and use the repository validation workflow for complete validation.
+For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json"` for editor support and use the repository validation workflow for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional.
+
+### Should a consumer automatically retrieve any `$schema` URL it sees?
+
+No. `$schema` helps select a structural schema, but a consumer should not fetch arbitrary URLs from untrusted documents without an explicit network policy. Implementations that allow retrieval should restrict schemes and destinations, bound redirects and response sizes, validate media type and schema structure, and apply normal SSRF and cache-safety controls.
 
 ### What file extension should be used?
 
@@ -97,11 +107,15 @@ It is a non-empty, revision-specific declaration of unconditional minimum client
 
 Use protocol-scoped primitive variants when requirements differ by MCP revision. Unknown or experimental requirements are preserved; generic tooling should report compatibility as indeterminate when it lacks matching semantics rather than assuming support.
 
-### Do Tool or Resource examples define runtime behavior?
+### Do Tool, Resource, or Prompt examples define runtime behavior?
 
 No. Named examples are MCP Description metadata for documentation, contract tests, and deterministic mocks. They do not alter MCP schemas, guarantee live results, establish freshness, or define a default runtime response.
 
 Tool examples pair one complete input with a completed Tool Result. Static Resource examples use the Resource URI as the implicit read input; Resource Template examples record the exact concrete RFC 6570 expansion. Consumers must not execute Tools or dereference Resource URIs merely because an example exists.
+
+Prompt examples pair one complete `prompts/get` argument map with one completed Prompt result. An omitted `arguments` property and `arguments: {}` both represent a no-argument invocation. Consumers must not treat any example as proof that a live server will return identical messages.
+
+Prompt and Resource Template `completionExamples` are likewise illustrative metadata. They pair one selected completion target, optional prior arguments, and one completed native completion result; they do not assert capability advertisement, authorize a candidate, or promise stable ordering, totals, or future availability.
 
 ### What is the difference between `$componentRef` and JSON Schema `$ref`?
 

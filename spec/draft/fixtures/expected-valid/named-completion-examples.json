@@ -1,0 +1,172 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "completion-example-catalogue",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "completion-example-catalogue"
+    }
+  ],
+  "capabilities": [
+    {
+      "protocolVersions": [
+        "2025-11-25",
+        "2026-07-28"
+      ],
+      "completions": {}
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "uriTemplate": "repo://{owner}/{repository}/issues/{issue}",
+      "name": "repository_issue",
+      "completionExamples": {
+        "issue-prefix": {
+          "argument": {
+            "name": "issue",
+            "value": "12"
+          },
+          "result": {
+            "completion": {
+              "values": [
+                "120",
+                "121",
+                "129"
+              ],
+              "hasMore": true,
+              "total": 14
+            }
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "uriTemplate": "repo://{owner}/{repository}/issues/{issue}",
+      "name": "repository_issue",
+      "completionExamples": {
+        "issue-prefix": {
+          "argument": {
+            "name": "issue",
+            "value": "12"
+          },
+          "context": {
+            "arguments": {
+              "owner": "example",
+              "repository": "widgets"
+            }
+          },
+          "result": {
+            "resultType": "complete",
+            "completion": {
+              "values": [
+                "120",
+                "121",
+                "129"
+              ],
+              "hasMore": true,
+              "total": 14
+            },
+            "_meta": {
+              "captured": "inspector"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "name": "team_lead",
+      "arguments": [
+        {
+          "name": "department",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        }
+      ],
+      "completionExamples": {
+        "engineering-a": {
+          "argument": {
+            "name": "name",
+            "value": "a"
+          },
+          "context": {
+            "arguments": {
+              "department": "engineering"
+            }
+          },
+          "result": {
+            "completion": {
+              "values": [
+                "Ada",
+                "Alan"
+              ],
+              "total": 2,
+              "hasMore": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "name": "team_lead",
+      "arguments": [
+        {
+          "name": "department",
+          "required": true
+        },
+        {
+          "name": "name",
+          "required": true
+        }
+      ],
+      "completionExamples": {
+        "engineering-a": {
+          "argument": {
+            "name": "name",
+            "value": "a"
+          },
+          "context": {
+            "arguments": {
+              "department": "engineering"
+            }
+          },
+          "result": {
+            "resultType": "complete",
+            "completion": {
+              "values": [
+                "Ada",
+                "Alan"
+              ],
+              "total": 2,
+              "hasMore": false
+            }
+          }
+        }
+      }
+    }
+  ]
+}

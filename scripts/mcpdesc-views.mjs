@@ -9,7 +9,7 @@ import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 const scopedCollections = ['transports', 'capabilities', 'tools', 'resources', 'resourceTemplates', 'prompts'];
 const primitiveCollections = new Set(['tools', 'resources', 'resourceTemplates', 'prompts']);
-const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples'];
+const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples', 'promptExamples'];
 
 function clone(value) {
   return structuredClone(value);
@@ -95,7 +95,8 @@ function visitReferenceObjects(document, visitor) {
   for (const [collection, declarations] of Object.entries({
     tools: document.tools,
     resources: document.resources,
-    resourceTemplates: document.resourceTemplates
+    resourceTemplates: document.resourceTemplates,
+    prompts: document.prompts
   })) {
     for (const declaration of declarations ?? []) {
       if (collection === 'tools') {
@@ -103,6 +104,7 @@ function visitReferenceObjects(document, visitor) {
           if (isReferenceObject(declaration[field])) visitor(declaration[field]);
         }
       }
+      if (collection !== 'tools' && collection !== 'resources' && collection !== 'resourceTemplates' && collection !== 'prompts') continue;
       for (const value of Object.values(declaration.examples ?? {})) {
         if (isReferenceObject(value)) visitor(value);
       }

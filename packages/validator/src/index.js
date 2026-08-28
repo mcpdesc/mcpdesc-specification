@@ -1,11 +1,13 @@
 import * as draft1 from './snapshots/0.8.0-draft.1/index.js';
 import * as draft2 from './snapshots/0.8.0-draft.2/index.js';
 import * as draft3 from './snapshots/0.8.0-draft.3/index.js';
+import * as draft4 from './snapshots/0.8.0-draft.4/index.js';
 
 const snapshots = Object.freeze({
   [draft1.specification]: draft1,
   [draft2.specification]: draft2,
-  [draft3.specification]: draft3
+  [draft3.specification]: draft3,
+  [draft4.specification]: draft4
 });
 
 export const supportedSpecifications = Object.freeze(Object.keys(snapshots));

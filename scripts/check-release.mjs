@@ -3,6 +3,7 @@
 //
 // Usage:
 //   node scripts/check-release.mjs draft
+//   node scripts/check-release.mjs draft-publication
 //   node scripts/check-release.mjs validator
 //   node scripts/check-release.mjs stable 0.8.0
 //   node scripts/check-release.mjs all
@@ -12,14 +13,23 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import {
+  loadDraftSchemaPublicationExpectation,
+  verifySchemaPublication
+} from './schema-publication.mjs';
 
 const root = process.cwd();
 const mode = process.argv[2] ?? 'all';
 const requestedVersion = process.argv[3];
 const errors = [];
+const warnings = [];
 
 function fail(message) {
   errors.push(message);
+}
+
+function warn(message) {
+  warnings.push(message);
 }
 
 function readText(rel) {
@@ -105,6 +115,33 @@ function checkDraft() {
   console.log(`Checked draft ${version} iteration ${iteration} (${snapshotTag}).`);
 }
 
+async function checkDraftPublication() {
+  let expectation;
+  try {
+    expectation = loadDraftSchemaPublicationExpectation(root);
+  } catch (error) {
+    fail(`draft publication setup failed: ${error.message}`);
+    return;
+  }
+
+  for (const message of expectation.localErrors) fail(`draft publication: ${message}`);
+  if (expectation.localErrors.length > 0) return;
+
+  let result;
+  try {
+    result = await verifySchemaPublication(expectation);
+  } catch (error) {
+    fail(`draft publication fetch failed: ${error.message}`);
+    return;
+  }
+
+  for (const message of result.errors) fail(`draft publication: ${message}`);
+  for (const message of result.warnings) warn(`draft publication: ${message}`);
+  if (result.errors.length === 0) {
+    console.log(`Checked draft publication ${expectation.requestedUrl} (${result.observed.actualDigest}).`);
+  }
+}
+
 function checkValidator() {
   const packageJson = readJson('packages/validator/package.json');
   const lock = readJson('package-lock.json');
@@ -172,18 +209,28 @@ function checkStable() {
   console.log(`Checked stable release ${requestedVersion}.`);
 }
 
-if (!['all', 'draft', 'validator', 'stable'].includes(mode)) {
-  fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, validator, or stable`);
-} else {
-  if (mode === 'all' || mode === 'draft') checkDraft();
-  if (mode === 'all' || mode === 'validator') checkValidator();
-  if (mode === 'stable') checkStable();
+async function main() {
+  if (!['all', 'draft', 'draft-publication', 'validator', 'stable'].includes(mode)) {
+    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, validator, or stable`);
+  } else {
+    if (mode === 'all' || mode === 'draft') checkDraft();
+    if (mode === 'draft-publication') await checkDraftPublication();
+    if (mode === 'all' || mode === 'validator') checkValidator();
+    if (mode === 'stable') checkStable();
+  }
+
+  if (warnings.length > 0) {
+    console.warn(`Release checks warnings (${warnings.length}):`);
+    for (const warning of warnings) console.warn(`- ${warning}`);
+  }
+
+  if (errors.length > 0) {
+    console.error(`Release checks failed (${errors.length}):`);
+    for (const error of errors) console.error(`- ${error}`);
+    process.exitCode = 1;
+  } else {
+    console.log('Release checks passed.');
+  }
 }
 
-if (errors.length > 0) {
-  console.error(`Release checks failed (${errors.length}):`);
-  for (const error of errors) console.error(`- ${error}`);
-  process.exitCode = 1;
-} else {
-  console.log('Release checks passed.');
-}
+await main();
