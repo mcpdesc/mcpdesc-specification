@@ -9,7 +9,7 @@
 
 ## Summary
 
-Add an optional `examples` map to each Prompt Object. Every named Prompt Example pairs one complete Prompt argument object with one completed MCP `GetPromptResult`, excluding the JSON-RPC envelope.
+Add an optional `examples` map to each Prompt Object. Every named Prompt Example pairs one Prompt invocation with one completed MCP `GetPromptResult`, excluding the JSON-RPC envelope.
 
 The design extends the named-example model already used by Tools, Resources, and Resource Templates. It also adds a `components.promptExamples` namespace so Prompt examples can participate in the existing local-reference model.
 
@@ -22,7 +22,7 @@ The missing request/result pair prevents documentation, contract review, determi
 ## Goals
 
 - Represent multiple named argument/result examples for a Prompt.
-- Give no-argument Prompts one explicit canonical example shape.
+- Support both protocol-valid encodings of a no-argument Prompt invocation.
 - Validate argument names, required arguments, string values, and completed results.
 - Preserve every Prompt message and supported content type in order.
 - Apply protocol-revision rules through the containing Prompt's effective scope.
@@ -62,12 +62,12 @@ Prompt declarations with the same `name` in disjoint protocol scopes have indepe
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `arguments` | map of string values | Yes | Complete `params.arguments` value for `prompts/get`. |
+| `arguments` | map of string values | No | Complete supplied `params.arguments` value for `prompts/get`; omission means no arguments. |
 | `result` | object | Yes | Completed applicable `GetPromptResult`, without a JSON-RPC envelope. |
 
 The object MAY contain `x-*` specification extensions and MUST NOT contain other properties.
 
-`arguments` MUST be present even when empty. A no-argument example uses `arguments: {}`. Every key MUST identify an argument declared by the containing Prompt, every declared argument with `required: true` MUST be present, and every value MUST be a string. Optional arguments MAY be omitted.
+`arguments` MAY be omitted. An omitted `arguments` property and an empty `arguments: {}` map both represent an invocation supplying no Prompt arguments. When present, `arguments` MUST be an object whose values are strings; `null` is invalid. Every key MUST identify an argument declared by the containing Prompt, and every declared argument with `required: true` MUST be present. Optional arguments MAY be omitted from the map.
 
 The map intentionally differs from the single `{ name, value }` argument selected by a completion request: Prompt retrieval supplies the complete set of arguments at once, while completion identifies one current argument and carries other values separately as context.
 
@@ -139,7 +139,7 @@ prompts:
                 text: Summarize current engineering considerations for Paris.
 ```
 
-A reusable no-argument example:
+A reusable no-argument example using the explicit empty-map form:
 
 ```yaml
 components:
@@ -158,6 +158,22 @@ prompts:
     examples:
       default:
         $componentRef: '#/components/promptExamples/default-greeting'
+```
+
+The same no-argument invocation MAY omit `arguments`:
+
+```yaml
+prompts:
+  - name: greeting
+    examples:
+      default:
+        result:
+          resultType: complete
+          messages:
+            - role: user
+              content:
+                type: text
+                text: Say hello.
 ```
 
 The excerpts use MCP 2026-07-28. A Prompt scoped to an earlier revision uses that revision's completed result shape.
@@ -183,7 +199,7 @@ Consumers MUST render content as data, apply size and media-processing limits, a
 - **Root operation-example registry:** rejected because the containing Prompt already supplies identity and scope; root ownership adds dangling-target and merge complexity.
 - **Result-only examples:** rejected because they cannot preserve or validate the observed argument/result relationship.
 - **No reusable components:** simpler, but inconsistent with other named primitive examples and needlessly duplicates large message results.
-- **Omit empty `arguments`:** rejected because explicit `{}` distinguishes a complete no-argument invocation from missing data.
+- **Require explicit empty `arguments`:** rejected because MCP permits `params.arguments` to be omitted, and omission is unambiguous in a completed no-argument Prompt Example. Both omission and `{}` represent the same invocation semantics.
 
 ## Open questions
 
@@ -205,3 +221,4 @@ After acceptance:
 ## Decision record
 
 - 2026-08-28: Initial Review proposal selects named contextual argument/result examples with explicit empty arguments and reusable local components.
+- 2026-08-28: Review revision permits either omitted `arguments` or `arguments: {}` for no-argument Prompt invocations, matching MCP request optionality; `null` remains invalid.
