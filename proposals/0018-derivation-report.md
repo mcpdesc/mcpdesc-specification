@@ -1,15 +1,15 @@
-# Proposal 0018: MCP Description Derivation Report
+# Proposal 0018: MCP Description Derivation
 
 - Status: Review
 - Author: Stève Sfartz
 - Created: 2026-08-28
-- Target version: Companion format for MCP Description 0.8.0 tooling
+- Target version: MCP Description Derivation 0.1.0 companion format
 - Related issues: https://github.com/mcpdesc/mcpdesc-specification/issues/42
 - Review period: 2026-08-28 through 2026-09-27
 
 ## Summary
 
-Define `modelcontextprotocol.mcpdesc-derivation-report` as an independent, versioned JSON/YAML companion format. A report binds source artifacts and one generated MCP Description by digest, then records contributions, derivation decisions, omissions, conflicts, redactions, and diagnostics for that exact output.
+Define MCP Description Derivation as an independent, versioned JSON/YAML companion format. A conforming MCP Description derivation report binds source artifacts and one generated MCP Description by digest, then records contributions, derivation decisions, omissions, conflicts, redactions, and diagnostics for that exact output.
 
 The report is not part of MCP Description conformance and is not embedded in the reusable server contract. `x-mcpdesc-provenance` may summarize durable evidence on retained description objects; the report explains one production run in auditable detail.
 
@@ -50,6 +50,7 @@ The supplied Inspector artifacts contain useful session metadata and redaction d
 ## Background and primary references
 
 - Proposal 0014, project-defined provenance extension: https://github.com/mcpdesc/mcpdesc-specification/pull/37
+- Proposal 0019, versioned schema identity and publication: https://github.com/mcpdesc/mcpdesc-specification/pull/48
 - RFC 6901, JSON Pointer: https://www.rfc-editor.org/rfc/rfc6901
 - RFC 8785, JSON Canonicalization Scheme: https://www.rfc-editor.org/rfc/rfc8785
 - W3C PROV overview: https://www.w3.org/TR/prov-overview/
@@ -59,19 +60,21 @@ JSON Pointer is appropriate only because each pointer is interpreted against one
 
 ## Proposed normative behavior
 
-This proposal is normative for implementations claiming support for derivation report version `0.1.0`. It adds no requirements to baseline MCP Description implementations.
+This proposal is normative for implementations claiming support for MCP Description Derivation `0.1.0`. It adds no requirements to baseline MCP Description implementations.
 
 ### 1. Format identity
 
-The root contains:
+The root contains the required format and conformance-version discriminator:
 
 ```yaml
-format:
-  id: modelcontextprotocol.mcpdesc-derivation-report
-  version: 0.1.0
+mcpdesc-derivation: 0.1.0
 ```
 
-The root object has required `format`, `producer`, `createdAt`, `sources`, `output`, and `contributions`. Optional collections are `decisions`, `omissions`, `conflicts`, `redactions`, and `diagnostics`.
+`mcpdesc-derivation` MUST equal `0.1.0`. The root object has required `mcpdesc-derivation`, `producer`, `createdAt`, `sources`, `output`, and `contributions`. Optional collections are `decisions`, `omissions`, `conflicts`, `redactions`, and `diagnostics`.
+
+An optional `$schema` identifies the structural schema resource but does not replace `mcpdesc-derivation`. Under Proposal 0019, a 0.1.0 report SHOULD use:
+
+`https://mcpdesc.org/schema/mcpdesc-derivation/0.1.0.json`
 
 Unknown unprefixed fields are invalid. Eligible objects MAY carry `x-*` extensions.
 
@@ -155,18 +158,17 @@ Projection or merge of the MCP Description invalidates the report unless a tool 
 
 ## Schema impact
 
-This proposal does not modify the MCP Description core schema. The project publishes an independent schema, for example:
+This proposal does not modify the MCP Description core schema. Following Proposal 0019, the project publishes the independent MCP Description Derivation 0.1.0 schema at:
 
-`https://mcpdesc.org/derivation-report/0.1.0/schema.json`
+`https://mcpdesc.org/schema/mcpdesc-derivation/0.1.0.json`
 
-The schema validates report structure. Semantic validation verifies source ID resolution, pointer resolution against the digest-matched parsed output, uniqueness, digest syntax, and cross-field relationships.
+The schema uses that URI as its root `$id` and validates report structure. Semantic validation verifies source ID resolution, pointer resolution against the digest-matched parsed output, uniqueness, digest syntax, and cross-field relationships. Schema identity, live publication, immutability, and alias behavior follow Proposal 0019.
 
 ## Examples
 
 ```yaml
-format:
-  id: modelcontextprotocol.mcpdesc-derivation-report
-  version: 0.1.0
+$schema: https://mcpdesc.org/schema/mcpdesc-derivation/0.1.0.json
+mcpdesc-derivation: 0.1.0
 producer:
   name: MCP Inspector
   version: 2.3.0
@@ -212,7 +214,7 @@ The digest values are illustrative. A conforming report uses digests of the actu
 
 ## Compatibility
 
-The companion format is additive and independent. Existing MCP Description documents and implementations remain unchanged. A report can accompany Draft 3, Draft 4, stable 0.7.0, or another explicitly identified output version.
+MCP Description Derivation is additive and independent. Existing MCP Description documents and implementations remain unchanged. A report can accompany Draft 3, Draft 4, stable 0.7.0, or another explicitly identified output version.
 
 ## Migration
 
@@ -230,6 +232,7 @@ Consumers MUST NOT automatically retrieve artifact URIs, MUST treat report text 
 
 - **Expand `x-mcpdesc-provenance`:** rejected because run diagnostics and output pointers should not become durable server contract metadata.
 - **Inspector-specific reports:** insufficient for portable review and common auditing tools.
+- **Nested `format.id` and `format.version`:** rejected because `mcpdesc-derivation` directly identifies the independent format and its conformance version, matching the root-version pattern used by MCP Description and OpenAPI. The former reverse-DNS identifier also implied ownership by the Model Context Protocol project.
 - **OpenTelemetry or logs:** useful transport mechanisms, but they do not define binding and output-location semantics.
 - **Canonicalize every artifact before digesting:** rejected for 0.1.0 because YAML canonicalization and round-trip expectations are not uniform; exact bytes are unambiguous.
 
@@ -249,8 +252,9 @@ After acceptance:
 4. add stale-output, redaction, conflict, omission, and processing-limit tests;
 5. document Inspector and `x-mcpdesc-provenance` integration;
 6. add a complete sanitized Everything Server example; and
-7. keep all MCP Description Draft 1-3 artifacts unchanged.
+7. publish and verify the immutable 0.1.0 schema according to Proposal 0019 while keeping all MCP Description Draft 1-3 artifacts unchanged.
 
 ## Decision record
 
 - 2026-08-28: Initial Review proposal selects an independent exact-byte digest-bound companion report with output pointers valid only for that artifact.
+- 2026-08-28: Review revision names the independent format MCP Description Derivation, replaces nested reverse-DNS format metadata with `mcpdesc-derivation: 0.1.0`, and adopts Proposal 0019's format-qualified schema URI.
