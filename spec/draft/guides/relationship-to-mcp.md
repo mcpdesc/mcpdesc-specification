@@ -25,7 +25,7 @@ For each declared protocol revision, that revision's normative MCP specification
 
 A description does not execute Tools, contain Resource content, retrieve Prompts, enforce authorization, manage sessions, or define runtime error handling. Servers and clients continue to follow the applicable MCP revision.
 
-Elicitation Declarations document that fulfilling a primitive may require additional user interaction. They do not reproduce `elicitation/create`, Multi Round-Trip Request state, retries, correlation, capability negotiation, or lifecycle messages. The applicable MCP revision determines how a declared form or URL interaction is executed. Named Tool and Resource examples remain completed results rather than elicitation transcripts.
+Elicitation Declarations document that fulfilling a primitive may require additional user interaction. Tool `interactionExamples` can additionally record ordered semantic elicitation, sampling, and roots steps for one Tool invocation. Neither model reproduces JSON-RPC envelopes, Multi Round-Trip Request state, retries, correlation, capability negotiation, or lifecycle messages. The applicable MCP revision determines how the described interaction is executed on the wire.
 
 Primitive `clientRequirements` describes the opposite direction from root server `capabilities`: it records unconditional minimum client capabilities for call, read, or get of one primitive. It does not apply to listing, inherit from another object, imply authorization, or turn a conditional Elicitation Declaration into a hard requirement. MCP remains authoritative for how the client advertises those capabilities at runtime.
 

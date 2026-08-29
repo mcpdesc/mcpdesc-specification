@@ -26,6 +26,18 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 
 ### Draft snapshots
 
+#### Community Working Draft 4 — 2026-08-28 (`v0.8.0-draft.4`)
+
+Draft 4 adds the reviewed revisions of Proposals 0015, 0016, 0017, and 0019 as experimental design inputs. It remains unreleased and under active review.
+
+- Added named Prompt invocation and completed-result examples, including reusable `components.promptExamples` entries.
+- Added declaration-local completion examples for Prompt arguments and Resource Template variables.
+- Added declaration-local Tool interaction examples with ordered elicitation, sampling, and roots steps.
+- Assigned Draft 4 an immutable format-qualified schema identity and added an opt-in live-publication release check.
+- Preserved Draft 3 behavior and proposal inputs; Proposals 0006, 0014, and 0018 remain explicitly excluded.
+- Added an immutable `0.8.0-draft.4` validator selector. Validator package version selection, tagging, and npm publication remain a separate approval step.
+- Require the exact Draft 4 schema bytes to be served directly from the canonical URI and pass publication checks before the snapshot is tagged or announced.
+
 #### Community Working Draft 3 — 2026-08-27 (`v0.8.0-draft.3`)
 
 Draft 3 incorporates editorial and presentation feedback from review of Draft 2. It remains unreleased and under active review.
@@ -76,7 +88,8 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - Root `instructions` for durable model-facing server guidance.
 - Formal MCP `capabilities.extensions` declarations.
 - Primitive-level security overrides, OAuth/OpenID Connect scopes, anonymous alternatives, and explicit clearing.
-- Structural 0.8.0 JSON Schema at `schemas/mcp-description/0.8.0.json` using the canonical `$id` `https://mcpdesc.org/schema/0.8.0.json`.
+- Structural 0.8.0 JSON Schema at `schemas/mcp-description/0.8.0.json` using the canonical `$id` `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`.
+- Canonical MCP Description schema URI families under `https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json`, with distinct roles for instance `$schema`, schema `$id`, and schema-dialect `$schema`.
 - Semantic validation for protocol coverage, scope containment and overlap, security references, tags, and revision-specific fields.
 - Shared structural and semantic validation used by repository checks, projection, and merge tooling, including validation of every view input and output.
 - Explicit support for zero-primitive descriptions.
@@ -84,9 +97,11 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - A concise multi-version example showing common declarations and protocol-scoped capability variants across MCP 2025-11-25 and MCP 2026-07-28.
 - Optional named Tool `examples` that pair complete invocation arguments with completed MCP Tool Results for documentation, contract tests, and deterministic mocks.
 - Structural and semantic validation for Tool-example names, revision-specific result/content shapes, execution-error constraints, and input/output schema compatibility.
+- Optional declaration-local Tool `interactionExamples` for ordered semantic elicitation, sampling, and roots scenarios attached to one Tool invocation, with terminal completed Tool Results and no new component namespace.
 - Optional named Resource and Resource Template `examples` containing completed MCP Resource read results for documentation, contract tests, and deterministic mocks.
 - Structural and semantic validation for Resource-example names, RFC 6570 expansions, completed result revisions, content URIs, base64 data, MIME-type consistency, and raw-size diagnostics.
 - Revision-aware MCP `CacheableResult` fidelity for Resource examples: MCP 2026-07-28 completed read results require non-negative `ttlMs` and `public` or `private` `cacheScope`, while earlier revision examples reject those fields.
+- Optional named Prompt `examples` containing complete `prompts/get` argument maps and completed Prompt results, with local `components.promptExamples` reuse and no-argument support via omitted or empty `arguments`.
 - Literal MCP `_meta` semantics for supported declarations and named Tool and Resource result/content examples, including structural key grammar, revision-aware reserved-key context and value checks, warning-and-preserve handling for unknown reserved keys, and security guidance.
 - Experimental operation-level Elicitation Declarations for Tools, Resources, Resource Templates, and Prompts, with form and URL modes, nested protocol scopes, revision-aware restricted form schemas, and Effective Protocol View support, implementing Proposal 0007 while it remains under review.
 - Object-level `x-*` specification extensions on explicitly eligible MCP Description semantic objects, with strict excluded locations and projection, merge, preservation, and core-semantics boundaries, implementing Proposal 0011 while it remains under review.
@@ -108,10 +123,14 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - Corrected `info.description` protocol applicability to MCP 2025-11-25 and later.
 - Corrected Tool `execution` applicability to MCP 2025-11-25 only and added embedded Tool schema and MCP 2026 `x-mcp-header` semantic validation.
 - Added Tool schema dialect, unresolved external-reference warning-and-preserve, output-root, transport-revision, legacy SSE warning, and OAuth flow endpoint checks.
+- Defined immutable canonical schema publication, direct-serving and alias rules, legacy Draft 1-3 and stable 0.7.0 archival treatment, retrieval-security boundaries, and an opt-in draft publication release check that verifies live bytes and headers before tagging.
 - Defined shape-only Tool schema validation before MCP 2025-11-25 rather than inferring a dialect from the enclosing generated MCP schema.
 - Defined warning-and-preserve handling for unrecognized extension identifiers under MCP-reserved prefixes.
 - Distinguished MCP Tool Annotations from Resource Annotations, defined Resource Annotation fields and revision applicability, and aligned Resource, Resource Template, and embedded content schemas with the applicable MCP types.
 - Clarified that Resource and Resource Template annotations describe discovery declarations, while named Resource examples contain native completed read results and do not define per-example Resource Annotations.
+- Defined Prompt-example argument membership and required-argument semantics, revision-aware completed Prompt result validation, and Effective Protocol View preservation for Prompt example maps.
+- Added Prompt and Resource Template `completionExamples` with local target binding, exact MCP completion request-result shapes, RFC 6570 variable membership checks, revision-aware context/result validation, and Effective Protocol View preservation.
+- Added Tool `interactionExamples` semantic validation for initial Tool input and terminal Tool result compatibility, elicitation declaration linkage, revision-aware sampling and roots fields, explicit `clientRequirements` contradiction warnings, and Effective Protocol View preservation.
 - Refocused the FAQ on MCP Description authority, multi-revision coverage, Effective Protocol Views, merge behavior, validation, and supplemental metadata; clarified that normative MCP specifications remain authoritative for runtime behavior.
 - Defined MCP 2025-06-18 as the floor for complete revision-specific semantic conformance; MCP 2024-11-05 and MCP 2025-03-26 remain recognized legacy compatibility revisions with incomplete-validation diagnostics.
 - Distinguished literal MCP `_meta` from root `x-*` specification extensions and MCP `capabilities.extensions`; reusable metadata schemas remain outside Proposal 0002.

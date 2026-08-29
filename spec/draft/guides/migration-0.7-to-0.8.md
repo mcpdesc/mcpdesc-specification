@@ -10,6 +10,14 @@ Version 0.8.0 also defines restricted YAML as an equally conforming serializatio
 
 Before treating an existing YAML file as conforming, verify YAML 1.2.2 JSON-schema scalar resolution, exactly one document, string and unique mapping keys, no custom tags or aliases, no merge semantics, and finite JSON-compatible numbers. Apply the same 0.8.0 JSON Schema and semantic validation after decoding as for JSON. Conversion between JSON and YAML must preserve the decoded data model; comments, scalar style, and mapping order are not semantic.
 
+## Schema identity and publication
+
+Draft 4 introduces a new canonical MCP Description schema family under `https://mcpdesc.org/schema/mcp-description/`. When a migrated 0.8.0 draft document emits `$schema`, use `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json` and keep `mcpdesc: 0.8.0` unchanged.
+
+Do not rewrite frozen stable 0.7.0 or published Draft 1-3 documents merely to change their embedded schema identifiers. Stable 0.7.0 retains the historical Cisco root `$id`, and Draft 1-3 retain the historical short URI family. Exact historical validation of those snapshots should use the corresponding bundled validator selector rather than guessing from a rewritten URL.
+
+Network retrieval remains optional. Offline validators may bundle known schema resources and resolve their canonical URIs locally.
+
 ## Protocol coverage
 
 Move `info.protocolVersion` to required root `protocolVersions` and remove the old field.
@@ -29,7 +37,7 @@ For a multi-revision description, declarations that apply to all root revisions 
 
 Version 0.8.0 requires only `mcpdesc`, `info`, and non-empty `protocolVersions` at the root. A migrated document MAY omit `transports` when connection details are unavailable, environment-specific, or intentionally undeclared. Omission makes no transport declaration and does not assert that the runtime has no transport. When `transports` is present, it MUST be non-empty and its effective scopes must still cover every root protocol revision.
 
-Remove any empty ordinary declaration property rather than inserting a placeholder. This applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. Projection and merge output must likewise omit an ordinary collection after its last entry is removed.
+Remove any empty ordinary declaration property rather than inserting a placeholder. This applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps. Projection and merge output must likewise omit an ordinary collection after its last entry is removed.
 
 Do not apply that normalization to security values. Preserve omitted `security`, `security: []`, `security: [{}]`, and empty scope arrays as distinct forms. Do not infer runtime non-support from an omitted security, capability, primitive, or tag section.
 
@@ -67,7 +75,7 @@ Apply object-level extensions to the outer Components Object and eligible semant
 
 No migration is required because root `components` and `$componentRef` are optional. To deduplicate repeated complete schemas or named example objects, move the value into the matching `schemas`, `toolExamples`, `resourceExamples`, or `resourceTemplateExamples` namespace and replace each complete use-site value with a local Reference Object such as `{ "$componentRef": "#/components/schemas/SearchInput" }`.
 
-Do not replace JSON Schema `$ref` or `$defs`; those remain scoped to an embedded JSON Schema resource. Do not convert remote or relative-file references into `$componentRef`, add sibling properties to a Reference Object, add `protocolVersions` to a component, or use a component to bypass an inline use-site rule. Validate each referenced value under every Tool, Elicitation Declaration, Resource, Resource Template, and protocol scope where it is used.
+Do not replace JSON Schema `$ref` or `$defs`; those remain scoped to an embedded JSON Schema resource. Do not convert remote or relative-file references into `$componentRef`, add sibling properties to a Reference Object, add `protocolVersions` to a component, or use a component to bypass an inline use-site rule. Validate each referenced value under every Tool, Elicitation Declaration, Resource, Resource Template, Prompt, and protocol scope where it is used.
 
 Migration and merge tooling must keep resolution within one document, reject missing or cyclic targets, and never retrieve component values from a network. When combining descriptions, deduplicate equivalent components or deterministically rename collisions and rewrite all affected `$componentRef` values. Projection may remove unused values only after retaining every transitive target.
 
@@ -97,6 +105,16 @@ Copy the exact `tools/call` `arguments` object to `input`, using `{}` explicitly
 
 Do not pair independently observed inputs and results without authoritative evidence that they came from the same invocation. Do not infer complete Tool Examples by combining unrelated schema annotations. Redact credentials, tokens, personal or customer data, internal hostnames, and production identifiers. Protocol-scoped Tool variants may need different example maps because their completed-result and content-block shapes differ.
 
+## Tool interaction examples
+
+No migration is required because Tool `interactionExamples` is optional. Use a named interaction scenario only when one authoritative Tool invocation needs ordered semantic elicitation, sampling, or roots steps in addition to a terminal completed Tool Result.
+
+Copy the exact initial `tools/call` arguments object to `input`, preserve each semantic client-input exchange in `steps`, and copy only the terminal completed Tool Result payload to `result`. Do not copy JSON-RPC envelopes, `InputRequiredResult`, `inputRequests`, `inputResponses`, `requestState`, task state, retries, timing, or session identifiers. Interaction scenarios are not wire transcripts.
+
+If a step names an Elicitation Declaration, keep it declaration-local to the same Tool and ensure the request mode and schema or known URL remain compatible. A form acceptance response must match the shown request schema. For sampling, keep the native `sampling/createMessage` request and completed response field names for the applicable MCP revisions. For roots, keep the native ordered `roots` response object and use `file://` URIs.
+
+Interaction scenarios do not create `clientRequirements`. When a Tool already declares explicit unconditional `clientRequirements`, review the scenario for contradiction instead of silently broadening the requirement set. Sanitize prompts, URLs, roots, generated content, and results before publication; use conspicuously fictitious values and remove credentials, opaque state, and live identifiers.
+
 ## Resource examples
 
 No migration is required because Resource and Resource Template `examples` are optional. For a static Resource, create a named example and copy the completed payload inside a correlated `resources/read` response's `result` member to `result`; the declaration's `uri` is the implicit request URI. For a Resource Template, also copy the exact concrete `resources/read.params.uri` to the example's `uri` and verify that it is an RFC 6570 expansion of `uriTemplate`.
@@ -104,6 +122,20 @@ No migration is required because Resource and Resource Template `examples` are o
 Preserve content order, URIs, text, base64 binary data, MIME types, and applicable result metadata. MCP 2026-07-28 Resource read results require non-negative `ttlMs` and `cacheScope` equal to `public` or `private`; retain both in an example for that revision. Earlier revisions do not define these fields. Do not copy the JSON-RPC envelope or errors. Verify each content entry has exactly one of `text` or `blob`, and redact credentials, personal data, internal paths, and proprietary content. Examples are illustrative snapshots, not statements of freshness or live equality.
 
 A capture tool MUST NOT associate independently observed Resource requests and results without authoritative correlation. Protocol-scoped Resource variants need different example maps when they span MCP 2026-07-28 and an earlier revision: 2026 completed read results require `resultType: "complete"`, `ttlMs`, and `cacheScope`, while earlier revisions do not define those fields.
+
+## Prompt examples
+
+No migration is required because Prompt `examples` is optional. Use a named Prompt Example when a complete `prompts/get` argument map must be paired with one completed Prompt result. Copy the exact `params.arguments` object to `arguments`; for a no-argument invocation, either omit `arguments` or use `arguments: {}`. Every key must match a declared Prompt argument, every required argument must be present, and every value must remain a string.
+
+Copy only the completed payload inside the JSON-RPC response's `result` member to `result`; do not copy JSON-RPC envelope fields, request metadata, or incomplete workflow states. Preserve the ordered `messages` array and any native `description`. MCP 2026-07-28 Prompt results require `resultType: "complete"`; earlier revisions do not define that field. Split protocol-scoped Prompt variants when one logical Prompt needs revision-incompatible example shapes.
+
+## Completion examples
+
+No migration is required because Prompt and Resource Template `completionExamples` are optional. Use a named completion example when one observed `completion/complete` request-result pair should be preserved without copying the MCP reference object into a separate registry.
+
+Copy the selected request argument to `argument.name` and `argument.value`. Put any already-supplied other Prompt arguments or RFC 6570 template variables in `context.arguments`; omit `context` entirely when none were supplied. Do not repeat the completed target in context, and do not represent an empty context as `{}`.
+
+Copy only the completed payload inside the JSON-RPC response's `result` member to `result`. Preserve `completion.values` order and any native `total`, `hasMore`, and revision-supported `_meta`. MCP 2026-07-28 completion results require `resultType: "complete"`; earlier revisions do not define that field. MCP 2025-03-26 does not define completion context, so split protocol-scoped variants when context is needed. Validate Prompt target names against declared Prompt arguments and Resource Template target names against RFC 6570 variable names parsed from `uriTemplate`.
 
 ## MCP `_meta`
 
@@ -161,7 +193,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 
 1. Parse and validate the 0.7.0 source.
 2. Copy unchanged identity, transport, primitive, tag, and extension fields.
-3. Set `mcpdesc` and `$schema` to the 0.8.0 values.
+3. Set `mcpdesc` to `0.8.0` and, when emitting it, set `$schema` to `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`.
 4. Move `info.protocolVersion` to root `protocolVersions`; require input if absent or unsupported.
 5. Wrap a present Capabilities Object in a one-item array.
 6. Resolve every missing Tool `inputSchema` through author review.

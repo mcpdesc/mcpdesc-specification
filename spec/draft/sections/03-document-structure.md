@@ -30,11 +30,13 @@ The root of an MCP Description document is an object with the following structur
 | `prompts` | non-empty array\<[Prompt Object](#11-prompts)\> | No | Prompts declared by the document |
 | `tags` | non-empty array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 
+The optional `$schema` property selects a JSON Schema resource for structural validation and editor tooling. It does not replace the required `mcpdesc` format discriminator or the document's declared MCP protocol coverage.
+
 ### 3.3 Optional Sections and Ordinary Collections
 
 Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section. Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
 
-An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
+An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
 
 An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
 
@@ -72,7 +74,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
   "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-rating-server",

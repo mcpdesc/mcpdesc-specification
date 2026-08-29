@@ -1,4 +1,4 @@
-$schema: https://mcpdesc.org/schema/0.8.0.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
 mcpdesc: 0.8.0
 info:
   name: chess-coach
@@ -161,6 +161,75 @@ tools:
             black: 95.8
           blunders: []
         isError: false
+  interactionExamples:
+    reviewed-analysis:
+      input:
+        pgn: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+        depth: 28
+        annotate: true
+      steps:
+      - type: roots
+        request: {}
+        response:
+          roots:
+          - uri: file:///workspace/chess-study
+            name: Study workspace
+      - type: sampling
+        request:
+          messages:
+          - role: user
+            content:
+              type: text
+              text: Summarize whether deep analysis is justified for this opening line.
+          tools:
+          - name: fetch_opening_summary
+            description: Retrieve known opening characteristics.
+            inputSchema:
+              type: object
+              properties:
+                eco:
+                  type: string
+              required:
+              - eco
+          toolChoice:
+            mode: auto
+          maxTokens: 180
+        response:
+          role: assistant
+          content:
+            type: text
+            text: This Ruy Lopez line is stable enough for quick review unless the caller requested annotation.
+          model: claude-3-sonnet-20240229
+          stopReason: endTurn
+      - type: elicitation
+        declaration: confirm_deep_analysis
+        request:
+          mode: form
+          message: Continue with deep analysis?
+          requestedSchema:
+            type: object
+            properties:
+              continue:
+                type: boolean
+                title: Continue
+                default: true
+            required:
+            - continue
+        response:
+          action: accept
+          content:
+            continue: true
+      result:
+        content:
+        - type: text
+          text: Deep analysis completed with annotations for the sampled opening line.
+        structuredContent:
+          evaluation: 31
+          best_move: Ba4
+          accuracy:
+            white: 96.8
+            black: 95.8
+          blunders: []
   annotations:
     readOnlyHint: true
     destructiveHint: false
@@ -371,6 +440,18 @@ resourceTemplates:
         - uri: chess://games/example-1234
           mimeType: application/json
           text: '{"id":"example-1234","result":"1-0"}'
+  completionExamples:
+    game-prefix:
+      argument:
+        name: game_id
+        value: example-1
+      result:
+        completion:
+          values:
+          - example-1234
+          - example-1567
+          total: 2
+          hasMore: false
   tags:
   - games
 - uriTemplate: chess://players/{player_id}/games
@@ -443,6 +524,21 @@ prompts:
     title: Color
     description: Study as 'white' or 'black'
     required: false
+  completionExamples:
+    sicilian-prefix:
+      argument:
+        name: opening_name
+        value: sic
+      context:
+        arguments:
+          player_rating: '1800'
+      result:
+        completion:
+          values:
+          - Sicilian Defense
+          - Sicilian Najdorf
+          total: 2
+          hasMore: false
   tags:
   - reference
 tags:

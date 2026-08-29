@@ -1,8 +1,10 @@
 // Validate the current 0.8.0 working tree by layering draft additions over
 // immutable snapshot base semantics.
 
+import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import { UriTemplateMatcher } from 'uri-template-matcher';
 import schema from '../schemas/mcp-description/0.8.0.json' with { type: 'json' };
 import {
   semanticValidateDocument as validateBaseSemantics,
@@ -11,13 +13,17 @@ import {
 
 export { supportedProtocolVersions };
 
+const TOOL_INTERACTION_SENTINEL = '__interaction_example__';
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
+const ajvDraft7 = new Ajv({ allErrors: true, strict: false });
+addFormats(ajvDraft7);
 const validateStructure = ajv.compile(schema);
 const primitiveCollections = ['tools', 'resources', 'resourceTemplates', 'prompts'];
-const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples'];
+const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples', 'promptExamples'];
 const knownClientCapabilities = new Set(['roots', 'sampling', 'elicitation', 'tasks', 'extensions', 'experimental']);
 const knownReservedCapabilityExtensions = new Set(['io.modelcontextprotocol/tasks']);
+const protocolOrder = new Map(supportedProtocolVersions.map((version, index) => [version, index]));
 
 const clientCapabilitiesByVersion = {
   '2024-11-05': new Set(['roots', 'sampling', 'experimental']),
@@ -110,7 +116,8 @@ export function resolveComponentReferences(document, rel = 'document') {
   for (const [collection, declarations] of Object.entries({
     tools: document?.tools,
     resources: document?.resources,
-    resourceTemplates: document?.resourceTemplates
+    resourceTemplates: document?.resourceTemplates,
+    prompts: document?.prompts
   })) {
     for (const [declarationIndex, declaration] of (declarations ?? []).entries()) {
       const resolvedDeclaration = resolved[collection][declarationIndex];
@@ -124,7 +131,11 @@ export function resolveComponentReferences(document, rel = 'document') {
 
       const exampleNamespace = collection === 'tools'
         ? 'toolExamples'
-        : collection === 'resources' ? 'resourceExamples' : 'resourceTemplateExamples';
+        : collection === 'resources'
+          ? 'resourceExamples'
+          : collection === 'resourceTemplates'
+            ? 'resourceTemplateExamples'
+            : 'promptExamples';
       for (const [name, example] of Object.entries(declaration.examples ?? {})) {
         if (isReferenceObject(example)) {
           resolvedDeclaration.examples[name] = resolve(
@@ -174,6 +185,292 @@ function structuralDiagnostics(document) {
     message: `does not validate against 0.8.0: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
     path: structuralPath(document, error)
   }));
+}
+
+function canonicalize(value) {
+  if (Array.isArray(value)) return value.map(canonicalize);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, child]) => [key, canonicalize(child)])
+    );
+  }
+  return value;
+}
+
+function canonicalString(value) {
+  return JSON.stringify(canonicalize(value));
+}
+
+function remapSyntheticToolExampleDiagnostic(diagnostic, toolIndex, exampleName) {
+  if (!Array.isArray(diagnostic.path)) return diagnostic;
+  const prefix = ['tools', 0, 'examples', TOOL_INTERACTION_SENTINEL];
+  const matches = prefix.every((segment, index) => diagnostic.path[index] === segment);
+  if (!matches) return diagnostic;
+  return {
+    ...diagnostic,
+    message: diagnostic.message.replace(
+      `tools[0].examples[${JSON.stringify(TOOL_INTERACTION_SENTINEL)}]`,
+      `tools[${toolIndex}].interactionExamples[${JSON.stringify(exampleName)}]`
+    ),
+    path: ['tools', toolIndex, 'interactionExamples', exampleName, ...diagnostic.path.slice(prefix.length)]
+  };
+}
+
+function validateToolInteractionInputAndResult(tool, toolIndex, exampleName, example, scope) {
+  const synthetic = {
+    mcpdesc: '0.8.0',
+    info: { name: 'tool-interaction-validation', version: '1.0.0' },
+    protocolVersions: [...scope],
+    tools: [
+      {
+        name: tool.name,
+        inputSchema: structuredClone(tool.inputSchema),
+        ...(tool.outputSchema ? { outputSchema: structuredClone(tool.outputSchema) } : {}),
+        examples: {
+          [TOOL_INTERACTION_SENTINEL]: {
+            input: structuredClone(example.input),
+            result: structuredClone(example.result)
+          }
+        }
+      }
+    ]
+  };
+  return validateBaseSemantics(synthetic)
+    .map((diagnostic) => remapSyntheticToolExampleDiagnostic(diagnostic, toolIndex, exampleName))
+    .filter((diagnostic) => diagnostic.path?.[0] === 'tools' && diagnostic.path?.[1] === toolIndex && diagnostic.path?.[2] === 'interactionExamples');
+}
+
+function validateAgainstRequestedSchema(schemaValue, value, location, path, diagnostics) {
+  try {
+    const validate = ajv.compile(schemaValue);
+    if (!validate(value)) {
+      const details = validate.errors?.map((error) => `${error.instancePath || '/'} ${error.message}`).join('; ') ?? 'unknown validation error';
+      diagnostics.push(semanticDiagnostic(
+        'interaction-example-elicitation-content-schema-mismatch',
+        'error',
+        `${location} does not validate against the elicitation request schema: ${details}`,
+        path
+      ));
+    }
+  } catch {
+    try {
+      const validate = ajvDraft7.compile(schemaValue);
+      if (!validate(value)) {
+        const details = validate.errors?.map((error) => `${error.instancePath || '/'} ${error.message}`).join('; ') ?? 'unknown validation error';
+        diagnostics.push(semanticDiagnostic(
+          'interaction-example-elicitation-content-schema-mismatch',
+          'error',
+          `${location} does not validate against the elicitation request schema: ${details}`,
+          path
+        ));
+      }
+    } catch {
+      // The containing Elicitation Declaration schema validator reports malformed schemas.
+    }
+  }
+}
+
+function warnClientRequirementsContradiction(tool, step, stepLocation, stepPath, diagnostics) {
+  const requirements = tool.clientRequirements;
+  if (!requirements || typeof requirements !== 'object' || Array.isArray(requirements)) return;
+
+  function warn(message, path) {
+    diagnostics.push(semanticDiagnostic(
+      'interaction-example-client-requirements-contradiction',
+      'warning',
+      `${stepLocation} ${message}`,
+      path
+    ));
+  }
+
+  if (step.type === 'roots') {
+    if (!Object.hasOwn(requirements, 'roots')) {
+      warn('illustrates roots input, but the Tool clientRequirements do not declare roots', [...stepPath, 'type']);
+    }
+    return;
+  }
+
+  if (step.type === 'sampling') {
+    if (!Object.hasOwn(requirements, 'sampling')) {
+      warn('illustrates sampling input, but the Tool clientRequirements do not declare sampling', [...stepPath, 'type']);
+      return;
+    }
+    const sampling = requirements.sampling ?? {};
+    if ((Object.hasOwn(step.request, 'tools') || Object.hasOwn(step.request, 'toolChoice')) && !Object.hasOwn(sampling, 'tools')) {
+      warn('illustrates sampling Tool use, but the Tool clientRequirements do not declare sampling.tools', [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice']);
+    }
+    if (step.request.includeContext && step.request.includeContext !== 'none' && !Object.hasOwn(sampling, 'context')) {
+      warn('illustrates sampling context inclusion, but the Tool clientRequirements do not declare sampling.context', [...stepPath, 'request', 'includeContext']);
+    }
+    return;
+  }
+
+  if (step.type === 'elicitation') {
+    if (!Object.hasOwn(requirements, 'elicitation')) {
+      warn('illustrates elicitation input, but the Tool clientRequirements do not declare elicitation', [...stepPath, 'type']);
+      return;
+    }
+    const elicitation = requirements.elicitation ?? {};
+    if (step.request.mode === 'url' && !Object.hasOwn(elicitation, 'url')) {
+      warn('illustrates URL elicitation, but the Tool clientRequirements do not declare elicitation.url', [...stepPath, 'request', 'mode']);
+    }
+    if (step.request.mode === 'form' && Object.keys(elicitation).length > 0 && !Object.hasOwn(elicitation, 'form')) {
+      warn('illustrates form elicitation, but the Tool clientRequirements do not declare elicitation.form', [...stepPath, 'request', 'mode']);
+    }
+  }
+}
+
+function validateToolInteractionExamples(document) {
+  const diagnostics = [];
+  const rootScope = document.protocolVersions ?? [];
+
+  for (const [toolIndex, tool] of (document.tools ?? []).entries()) {
+    if (!tool.interactionExamples || typeof tool.interactionExamples !== 'object' || Array.isArray(tool.interactionExamples)) continue;
+    const scope = tool.protocolVersions ?? rootScope;
+
+    for (const [exampleName, example] of Object.entries(tool.interactionExamples)) {
+      if (!example || typeof example !== 'object' || Array.isArray(example)) continue;
+      const exampleLocation = `tools[${toolIndex}].interactionExamples[${JSON.stringify(exampleName)}]`;
+      const examplePath = ['tools', toolIndex, 'interactionExamples', exampleName];
+
+      diagnostics.push(...validateToolInteractionInputAndResult(tool, toolIndex, exampleName, example, scope));
+
+      for (const [stepIndex, step] of (example.steps ?? []).entries()) {
+        const stepLocation = `${exampleLocation}.steps[${stepIndex}]`;
+        const stepPath = [...examplePath, 'steps', stepIndex];
+        warnClientRequirementsContradiction(tool, step, stepLocation, stepPath, diagnostics);
+
+        if (step.type === 'elicitation') {
+          const request = step.request ?? {};
+          const response = step.response ?? {};
+          const declaration = typeof step.declaration === 'string'
+            ? (tool.elicitations ?? []).find((candidate) => candidate.name === step.declaration)
+            : undefined;
+
+          for (const version of scope) {
+            if (protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-version-mismatch',
+                'error',
+                `${stepLocation}.type is not defined for MCP ${version}`,
+                [...stepPath, 'type']
+              ));
+            }
+            if (request.mode === 'url' && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-version-mismatch',
+                'error',
+                `${stepLocation}.request.mode "url" is not defined for MCP ${version}`,
+                [...stepPath, 'request', 'mode']
+              ));
+            }
+          }
+
+          if (typeof step.declaration === 'string' && !declaration) {
+            diagnostics.push(semanticDiagnostic(
+              'unknown-elicitation-declaration',
+              'error',
+              `${stepLocation}.declaration identifies no Tool elicitation named ${JSON.stringify(step.declaration)}`,
+              [...stepPath, 'declaration']
+            ));
+          }
+
+          if (declaration) {
+            if (declaration.mode !== request.mode) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-elicitation-declaration-mismatch',
+                'error',
+                `${stepLocation}.request.mode ${JSON.stringify(request.mode)} is incompatible with elicitation declaration ${JSON.stringify(step.declaration)} mode ${JSON.stringify(declaration.mode)}`,
+                [...stepPath, 'request', 'mode']
+              ));
+            }
+            if (request.mode === 'form' && canonicalString(declaration.requestedSchema) !== canonicalString(request.requestedSchema)) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-elicitation-declaration-mismatch',
+                'error',
+                `${stepLocation}.request.requestedSchema is incompatible with elicitation declaration ${JSON.stringify(step.declaration)}`,
+                [...stepPath, 'request', 'requestedSchema']
+              ));
+            }
+            if (request.mode === 'url' && declaration.url !== undefined && declaration.url !== request.url) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-elicitation-declaration-mismatch',
+                'error',
+                `${stepLocation}.request.url is incompatible with elicitation declaration ${JSON.stringify(step.declaration)}`,
+                [...stepPath, 'request', 'url']
+              ));
+            }
+          }
+
+          if (request.mode === 'form') {
+            if (response.action === 'accept') {
+              if (!Object.hasOwn(response, 'content')) {
+                diagnostics.push(semanticDiagnostic(
+                  'interaction-example-elicitation-response-mismatch',
+                  'error',
+                  `${stepLocation}.response.content is required when a form elicitation is accepted`,
+                  [...stepPath, 'response', 'content']
+                ));
+              } else {
+                validateAgainstRequestedSchema(
+                  request.requestedSchema,
+                  response.content,
+                  `${stepLocation}.response.content`,
+                  [...stepPath, 'response', 'content'],
+                  diagnostics
+                );
+              }
+            } else if (Object.hasOwn(response, 'content')) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-elicitation-response-mismatch',
+                'error',
+                `${stepLocation}.response.content is not allowed when action is ${JSON.stringify(response.action)}`,
+                [...stepPath, 'response', 'content']
+              ));
+            }
+          } else if (Object.hasOwn(response, 'content')) {
+            diagnostics.push(semanticDiagnostic(
+              'interaction-example-elicitation-response-mismatch',
+              'error',
+              `${stepLocation}.response.content is not allowed for URL elicitation responses`,
+              [...stepPath, 'response', 'content']
+            ));
+          }
+        }
+
+        if (step.type === 'sampling') {
+          for (const version of scope) {
+            if ((Object.hasOwn(step.request, 'tools') || Object.hasOwn(step.request, 'toolChoice'))
+              && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-version-mismatch',
+                'error',
+                `${stepLocation}.request uses sampling Tool fields that are not defined for MCP ${version}`,
+                [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice']
+              ));
+            }
+          }
+        }
+
+        if (step.type === 'roots') {
+          for (const [rootIndex, root] of (step.response.roots ?? []).entries()) {
+            if (typeof root.uri === 'string' && !root.uri.startsWith('file://')) {
+              diagnostics.push(semanticDiagnostic(
+                'interaction-example-roots-uri',
+                'error',
+                `${stepLocation}.response.roots[${rootIndex}].uri must be a file:// URI`,
+                [...stepPath, 'response', 'roots', rootIndex, 'uri']
+              ));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return diagnostics;
 }
 
 function validateClientRequirements(document) {
@@ -300,6 +597,265 @@ function validateClientRequirements(document) {
   return diagnostics;
 }
 
+function validatePromptContentVersion(content, contentLocation, contentPath, version, diagnostics) {
+  if (content.type === 'audio' && protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type']));
+  }
+  if (content.type === 'resource_link' && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type']));
+  }
+  if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta']));
+  }
+  if (content.type === 'resource' && Object.hasOwn(content.resource ?? {}, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta']));
+  }
+  if (content.type === 'resource_link' && Array.isArray(content.icons) && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons']));
+  }
+  if (content.annotations?.lastModified !== undefined && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified']));
+  }
+}
+
+function validatePromptExamples(document) {
+  const diagnostics = [];
+  const rootScope = document.protocolVersions ?? [];
+
+  for (const [promptIndex, prompt] of (document.prompts ?? []).entries()) {
+    if (!prompt.examples || typeof prompt.examples !== 'object' || Array.isArray(prompt.examples)) continue;
+    const scope = prompt.protocolVersions ?? rootScope;
+    const declaredArguments = new Map((prompt.arguments ?? []).map((argument) => [argument.name, argument]));
+
+    for (const [exampleName, example] of Object.entries(prompt.examples)) {
+      if (!example || typeof example !== 'object' || Array.isArray(example)) continue;
+      const exampleLocation = `prompts[${promptIndex}].examples[${JSON.stringify(exampleName)}]`;
+      const examplePath = ['prompts', promptIndex, 'examples', exampleName];
+      const result = example.result ?? {};
+      const resultPath = [...examplePath, 'result'];
+      const argumentsValue = example.arguments;
+
+      if (argumentsValue && typeof argumentsValue === 'object' && !Array.isArray(argumentsValue)) {
+        for (const [argumentName] of Object.entries(argumentsValue)) {
+          if (!declaredArguments.has(argumentName)) {
+            diagnostics.push(semanticDiagnostic(
+              'prompt-example-unknown-argument',
+              'error',
+              `${exampleLocation}.arguments contains undeclared Prompt argument ${JSON.stringify(argumentName)}`,
+              [...examplePath, 'arguments', argumentName]
+            ));
+          }
+        }
+      }
+
+      for (const [argumentName, argument] of declaredArguments) {
+        if (argument.required === true && !Object.hasOwn(argumentsValue ?? {}, argumentName)) {
+          diagnostics.push(semanticDiagnostic(
+            'prompt-example-missing-required-argument',
+            'error',
+            `${exampleLocation}.arguments is missing required Prompt argument ${JSON.stringify(argumentName)}`,
+            [...examplePath, 'arguments', argumentName]
+          ));
+        }
+      }
+
+      for (const envelopeField of ['jsonrpc', 'id', 'error']) {
+        if (Object.hasOwn(result, envelopeField)) {
+          diagnostics.push(semanticDiagnostic('prompt-example-json-rpc-envelope', 'error', `${exampleLocation}.result must not contain JSON-RPC envelope field ${JSON.stringify(envelopeField)}`, [...resultPath, envelopeField]));
+        }
+      }
+      for (const incompleteField of ['task', 'inputRequests', 'requestState']) {
+        if (Object.hasOwn(result, incompleteField)) {
+          diagnostics.push(semanticDiagnostic('incomplete-prompt-example-result', 'error', `${exampleLocation}.result must not contain non-completed workflow field ${JSON.stringify(incompleteField)}`, [...resultPath, incompleteField]));
+        }
+      }
+
+      for (const version of scope) {
+        const resultLocation = `${exampleLocation}.result`;
+        if (version === '2026-07-28' && result.resultType !== 'complete') {
+          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType']));
+        }
+        if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
+          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType is not defined for MCP ${version}`, [...resultPath, 'resultType']));
+        }
+        if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}._meta is not defined for MCP ${version}`, [...resultPath, '_meta']));
+        }
+        (result.messages ?? []).forEach((message, messageIndex) => {
+          const contentLocation = `${resultLocation}.messages[${messageIndex}].content`;
+          const contentPath = [...resultPath, 'messages', messageIndex, 'content'];
+          validatePromptContentVersion(message.content ?? {}, contentLocation, contentPath, version, diagnostics);
+        });
+      }
+    }
+  }
+
+  return diagnostics;
+}
+
+function extractUriTemplateVariables(uriTemplate) {
+  const matcher = new UriTemplateMatcher();
+  matcher.add(uriTemplate);
+  return new Set(
+    matcher.templates.flatMap((template) => template.parts)
+      .filter((part) => part.type === 'expression')
+      .flatMap((part) => part.expressions.map((expression) => expression.name))
+  );
+}
+
+function validateCompletionExampleResult(result, exampleLocation, examplePath, version, diagnostics) {
+  const resultLocation = `${exampleLocation}.result`;
+  const resultPath = [...examplePath, 'result'];
+
+  for (const envelopeField of ['jsonrpc', 'id', 'error']) {
+    if (Object.hasOwn(result, envelopeField)) {
+      diagnostics.push(semanticDiagnostic(
+        'completion-example-json-rpc-envelope',
+        'error',
+        `${resultLocation} must not contain JSON-RPC envelope field ${JSON.stringify(envelopeField)}`,
+        [...resultPath, envelopeField]
+      ));
+    }
+  }
+  for (const incompleteField of ['task', 'inputRequests', 'requestState']) {
+    if (Object.hasOwn(result, incompleteField)) {
+      diagnostics.push(semanticDiagnostic(
+        'incomplete-completion-example-result',
+        'error',
+        `${resultLocation} must not contain non-completed workflow field ${JSON.stringify(incompleteField)}`,
+        [...resultPath, incompleteField]
+      ));
+    }
+  }
+  if (version === '2026-07-28' && result.resultType !== 'complete') {
+    diagnostics.push(semanticDiagnostic(
+      'completion-example-result-version-mismatch',
+      'error',
+      `${resultLocation}.resultType must be "complete" for MCP ${version}`,
+      [...resultPath, 'resultType']
+    ));
+  }
+  if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
+    diagnostics.push(semanticDiagnostic(
+      'completion-example-result-version-mismatch',
+      'error',
+      `${resultLocation}.resultType is not defined for MCP ${version}`,
+      [...resultPath, 'resultType']
+    ));
+  }
+  if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+    diagnostics.push(semanticDiagnostic(
+      'completion-example-result-version-mismatch',
+      'error',
+      `${resultLocation}._meta is not defined for MCP ${version}`,
+      [...resultPath, '_meta']
+    ));
+  }
+}
+
+function validateCompletionExamples(document) {
+  const diagnostics = [];
+  const rootScope = document.protocolVersions ?? [];
+
+  for (const [kind, items] of [
+    ['prompts', document.prompts ?? []],
+    ['resourceTemplates', document.resourceTemplates ?? []]
+  ]) {
+    for (const [ownerIndex, owner] of items.entries()) {
+      if (!owner.completionExamples || typeof owner.completionExamples !== 'object' || Array.isArray(owner.completionExamples)) continue;
+      const scope = owner.protocolVersions ?? rootScope;
+      const ownerLocation = `${kind}[${ownerIndex}]`;
+      let allowedNames;
+
+      if (kind === 'prompts') {
+        allowedNames = new Set((owner.arguments ?? []).map((argument) => argument.name));
+      } else {
+        try {
+          allowedNames = extractUriTemplateVariables(owner.uriTemplate);
+        } catch (error) {
+          diagnostics.push(semanticDiagnostic(
+            'resource-template-completion-example-invalid-template',
+            'error',
+            `${ownerLocation}.uriTemplate is not a valid RFC 6570 template: ${error.message}`,
+            [kind, ownerIndex, 'uriTemplate']
+          ));
+          allowedNames = undefined;
+        }
+      }
+
+      for (const [exampleName, example] of Object.entries(owner.completionExamples)) {
+        if (!example || typeof example !== 'object' || Array.isArray(example)) continue;
+        const exampleLocation = `${ownerLocation}.completionExamples[${JSON.stringify(exampleName)}]`;
+        const examplePath = [kind, ownerIndex, 'completionExamples', exampleName];
+        const targetName = example.argument?.name;
+        const contextArguments = example.context?.arguments;
+
+        if (typeof targetName === 'string' && allowedNames && !allowedNames.has(targetName)) {
+          diagnostics.push(semanticDiagnostic(
+            kind === 'prompts'
+              ? 'prompt-completion-example-unknown-argument'
+              : 'resource-template-completion-example-unknown-variable',
+            'error',
+            kind === 'prompts'
+              ? `${exampleLocation}.argument.name identifies undeclared Prompt argument ${JSON.stringify(targetName)}`
+              : `${exampleLocation}.argument.name identifies no RFC 6570 variable in ${JSON.stringify(owner.uriTemplate)}`,
+            [...examplePath, 'argument', 'name']
+          ));
+        }
+
+        if (contextArguments && typeof contextArguments === 'object' && !Array.isArray(contextArguments)) {
+          for (const argumentName of Object.keys(contextArguments)) {
+            if (allowedNames && !allowedNames.has(argumentName)) {
+              diagnostics.push(semanticDiagnostic(
+                kind === 'prompts'
+                  ? 'prompt-completion-example-context-unknown-argument'
+                  : 'resource-template-completion-example-context-unknown-variable',
+                'error',
+                kind === 'prompts'
+                  ? `${exampleLocation}.context.arguments contains undeclared Prompt argument ${JSON.stringify(argumentName)}`
+                  : `${exampleLocation}.context.arguments contains no RFC 6570 variable ${JSON.stringify(argumentName)} from ${JSON.stringify(owner.uriTemplate)}`,
+                [...examplePath, 'context', 'arguments', argumentName]
+              ));
+            }
+            if (argumentName === targetName) {
+              diagnostics.push(semanticDiagnostic(
+                'completion-example-duplicate-target-context',
+                'error',
+                `${exampleLocation}.context.arguments MUST NOT repeat the completed argument ${JSON.stringify(argumentName)}`,
+                [...examplePath, 'context', 'arguments', argumentName]
+              ));
+            }
+          }
+        }
+
+        const result = example.result ?? {};
+        for (const version of scope) {
+          if (protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
+            diagnostics.push(semanticDiagnostic(
+              'completion-example-version-mismatch',
+              'error',
+              `${exampleLocation} is not defined for MCP ${version}`,
+              examplePath
+            ));
+            continue;
+          }
+          if (Object.hasOwn(example, 'context') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+            diagnostics.push(semanticDiagnostic(
+              'completion-example-context-version-mismatch',
+              'error',
+              `${exampleLocation}.context is not defined for MCP ${version}`,
+              [...examplePath, 'context']
+            ));
+          }
+          validateCompletionExampleResult(result, exampleLocation, examplePath, version, diagnostics);
+        }
+      }
+    }
+  }
+
+  return diagnostics;
+}
+
 export function evaluateClientRequirements(requirements, clientCapabilities, version) {
   if (!supportedProtocolVersions.includes(version)) {
     throw new Error(`Unsupported MCP protocol revision ${JSON.stringify(version)}`);
@@ -384,6 +940,9 @@ export function semanticValidateDocument(document, rel = 'document') {
     ...(resolution.diagnostics.length || resolvedStructureDiagnostics.length
       ? []
       : validateBaseSemantics(resolution.document, rel)),
+    ...validateToolInteractionExamples(resolution.document),
+    ...validatePromptExamples(resolution.document),
+    ...validateCompletionExamples(resolution.document),
     ...validateClientRequirements(document)
   ];
   const filtered = Object.hasOwn(document, 'transports')

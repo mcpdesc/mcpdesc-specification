@@ -101,8 +101,10 @@ String values MUST be valid JSON strings after decoding. URI values MUST conform
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
+For the current unreleased 0.8.0 Draft 4 working schema, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`. A future stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
+
 ```yaml
-$schema: https://mcpdesc.org/schema/0.8.0.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
 mcpdesc: 0.8.0
 ```
 

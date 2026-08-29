@@ -1,12 +1,12 @@
 ---
 title: MCP Description Specification
 version: 0.8.0
-status: Community working draft 3
-draft-iteration: 3
-snapshot-tag: v0.8.0-draft.3
+status: Community working draft 4
+draft-iteration: 4
+snapshot-tag: v0.8.0-draft.4
 released: false
 baseline: 0.7.0
-date: 2026-08-27
+date: 2026-08-28
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
@@ -18,13 +18,13 @@ editors:
 
 # MCP Description Specification
 
-**Version**: 0.8.0 (community working draft 3; `v0.8.0-draft.3`)
+**Version**: 0.8.0 (community working draft 4; `v0.8.0-draft.4`)
 
-**Status**: Community working draft 3 — not released
+**Status**: Community working draft 4 — not released
 
 **Baseline**: v0.7.0
 
-**Date**: 2026-08-27
+**Date**: 2026-08-28
 
 ## Abstract
 
@@ -34,7 +34,7 @@ An MCP Description declares supported MCP protocol revisions, instructions, tran
 
 ## Status of This Document
 
-This document is **Community Working Draft 3** for MCP Description v0.8.0, identified by snapshot tag `v0.8.0-draft.3`. The snapshot label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a released specification and may change during proposal review, implementation, and interoperability testing. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by this draft are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is **Community Working Draft 4** for MCP Description v0.8.0, identified by snapshot tag `v0.8.0-draft.4`. The snapshot label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a released specification and may change during proposal review, implementation, and interoperability testing. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by this draft are recorded in the [proposal revision manifest](../PROPOSALS.md).
 
 ## 1. Introduction
 
@@ -184,11 +184,13 @@ The root of an MCP Description document is an object with the following structur
 | `prompts` | non-empty array\<[Prompt Object](#11-prompts)\> | No | Prompts declared by the document |
 | `tags` | non-empty array\<[Tag Object](#13-tags)\> | No | Document-wide flat tag catalogue for primitive categorization |
 
+The optional `$schema` property selects a JSON Schema resource for structural validation and editor tooling. It does not replace the required `mcpdesc` format discriminator or the document's declared MCP protocol coverage.
+
 ### 3.3 Optional Sections and Ordinary Collections
 
 Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section. Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
 
-An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; and named Tool, Resource, and Resource Template example maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
+An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
 
 An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
 
@@ -226,7 +228,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/0.8.0.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
   "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-rating-server",
@@ -260,7 +262,70 @@ The specification uses [Semantic Versioning](https://semver.org/) for its own ve
 - **Minor** version changes add features and, before 1.0.0, MAY include breaking changes
 - **Patch** version changes address errata or clarifications without structural changes
 
-### 4.3 Version Compatibility
+### 4.3 Identifier Roles
+
+The root `$schema` property, when present, identifies the JSON Schema resource against which the document's normalized JSON-compatible data model can be structurally validated. It does not replace the instance format discriminator.
+
+The root `$schema` property remains optional. When present, it SHOULD identify the exact stable version or public draft snapshot used to produce or validate the document. Omitting `$schema` does not make an otherwise conforming document invalid; a validator MAY select an applicable bundled schema through its API, surrounding metadata, or explicit user configuration.
+
+The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
+
+```yaml
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
+mcpdesc: 0.8.0
+```
+
+The draft snapshot label in `$schema` does not change the MCP Description conformance version. Draft 4 documents remain `mcpdesc: 0.8.0`.
+
+### 4.4 Canonical Schema URI Families
+
+The project controls canonical schema URIs under:
+
+```text
+https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
+```
+
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public draft snapshot uses the target version followed by its draft iteration, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`.
+
+Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
+
+### 4.5 Unique and Immutable Schema Resources
+
+Every canonical schema URI MUST identify exactly one immutable sequence of schema bytes. A schema published at a canonical URI MUST declare that exact URI as its root `$id`.
+
+Once publicly published, a canonical schema resource MUST NOT be replaced with different bytes, even to correct an error or non-normative description. Every byte change requires a new stable version, draft snapshot, or separately versioned errata resource according to the governing format's compatibility policy.
+
+Draft 4 and every later public draft snapshot MUST use a snapshot-specific root `$id`. The eventual stable 0.8.0 schema MUST use `https://mcpdesc.org/schema/mcp-description/0.8.0.json` and MUST NOT reuse a draft URI or the legacy short URI.
+
+### 4.6 Live Publication and Aliases
+
+A canonical mcpdesc.org schema URI MUST use HTTPS, return HTTP 200 for `GET`, serve the exact immutable schema bytes directly without redirect, and return a syntactically valid JSON Schema document rather than an HTML fallback. The response MUST declare the request URI as the root `$id` and MUST be retrievable cross-origin for browser-hosted editors and tools.
+
+Canonical responses MUST return a JSON-compatible media type and SHOULD use `application/schema+json`. They MUST return `Cache-Control` including `public`, `max-age=31536000`, and `immutable`, and SHOULD include a strong `ETag`.
+
+The project MAY also publish mutable convenience aliases such as `https://mcpdesc.org/schema/mcp-description/latest.json` for the latest stable release and `https://mcpdesc.org/schema/mcp-description/draft.json` for the active community draft. An alias SHOULD redirect to its selected immutable canonical resource. An alias MUST NOT be declared as a schema `$id`, and normative examples SHOULD use immutable canonical URIs instead.
+
+The repository files `schemas/latest.json` and `schemas/draft.json` remain version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
+
+### 4.7 Legacy Draft 1-3 and Stable 0.7.0 Treatment
+
+Stable 0.7.0 and published Draft 1, Draft 2, and Draft 3 artifacts MUST remain byte-for-byte unchanged.
+
+The project SHOULD publish the exact Draft 3 schema at `https://mcpdesc.org/schema/0.8.0.json` because Draft 3 is the final snapshot whose embedded `$id` used that legacy short URI. The project MAY also publish exact Draft 1 and Draft 2 bytes at `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.1.json` and `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.2.json`, and Draft 3 bytes at `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.3.json`, as archival retrieval mirrors.
+
+Those archival copies retain their frozen embedded `$id` values. They are retrieval mirrors, not corrected self-identifying canonical schema resources, and consumers MUST NOT treat their request URLs as corrected schema identities. Exact historical validation of Draft 1, Draft 2, and Draft 3 remains anchored on the corresponding bundled validator selectors.
+
+Stable 0.7.0 likewise retains the historical Cisco root `$id`, `https://developer.cisco.com/mcp-description/schema/0.7.0`, and Cisco Open as its canonical source. The project MAY publish the exact stable 0.7.0 bytes at `https://mcpdesc.org/schema/mcp-description/0.7.0.json` as an archival mirror only. That mirror MUST preserve attribution, licensing, schema content, and origin records.
+
+### 4.8 Retrieval and Security Boundary
+
+MCP Description conformance MUST NOT require network retrieval. A validator MAY bundle known schema resources and resolve their canonical URIs locally.
+
+Consumers MUST NOT automatically retrieve an arbitrary `$schema` URI from an untrusted document without an explicit network policy. Implementations that permit retrieval SHOULD restrict schemes and destinations, bound redirects and response sizes, validate media type and schema structure, and mitigate SSRF and cache-poisoning risks.
+
+The `$schema` property assists structural schema selection and editor integration. It does not make a structurally valid document semantically conforming and does not supersede protocol-revision or cross-object validation.
+
+### 4.9 Version Compatibility
 
 Implementations SHOULD support the latest specification version. Implementations MAY support multiple versions.
 
@@ -269,7 +334,7 @@ When processing a document, implementations MUST check the `mcpdesc` value and:
 - Accept documents with a recognized `mcpdesc` version
 - Reject documents with an unrecognized `mcpdesc` version or provide a clear warning
 
-### 4.4 MCP Protocol Coverage
+### 4.10 MCP Protocol Coverage
 
 The root `protocolVersions` array identifies the MCP protocol revisions described by the document. It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
@@ -283,7 +348,7 @@ An unknown or later MCP revision is invalid under mcpdesc 0.8.0 because this spe
 
 Root coverage states which revisions the document describes. It does not prove that the server supports no other revisions.
 
-### 4.5 Protocol Scopes and Inheritance
+### 4.11 Protocol Scopes and Inheritance
 
 Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts MAY declare `protocolVersions`.
 
@@ -293,11 +358,11 @@ For a nested scoped declaration, the effective scope is its explicit `protocolVe
 
 Omission therefore means the complete effective parent scope; it does not mean unknown applicability.
 
-### 4.6 Relationship Between Version Fields
+### 4.12 Relationship Between Version Fields
 
-The `mcpdesc` version identifies this description format. Root and declaration-level `protocolVersions` identify MCP protocol applicability. These version dimensions are independent.
+The `mcpdesc` version identifies this description format. Root and declaration-level `protocolVersions` identify MCP protocol applicability. The optional root `$schema` identifies a structural validation schema resource. These version dimensions are independent.
 
-### 4.7 Effective Protocol Views and Projection
+### 4.13 Effective Protocol Views and Projection
 
 For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration.
 
@@ -314,7 +379,7 @@ A conforming single-version projection tool MUST:
 
 Projection produces an ordinary conforming MCP Description document, not a second format. It MUST NOT materialize transport-dependent inherited values onto a primitive unless the operation also selects a transport and defines that resolution.
 
-### 4.8 Merge
+### 4.14 Merge
 
 A merge tool MAY construct an aggregate from single-version or multi-version descriptions. It MUST validate every input and MUST report a conflict rather than guess when inputs cannot be represented faithfully.
 
@@ -636,6 +701,8 @@ The optional `capabilities` array declares protocol-scoped, durable server featu
 
 Capabilities represent externally relevant server behavior beyond primitive inventories. They describe semantics, not the RPC or notification mechanism used to expose them.
 
+Completion examples on Prompt and Resource Template declarations are descriptive metadata about observed `completion/complete` behavior. They do not themselves assert that the server advertises the `completions` capability in every deployment or Effective Protocol View.
+
 ### 8.2 Properties
 
 | Property | Type | Description |
@@ -697,7 +764,7 @@ For MCP 2026-07-28, `extensions` MUST be a non-empty map whose keys satisfy the 
 
 A compatibility tool comparing `clientRequirements` with a client capability profile for one revision SHOULD report `satisfied` when every requirement is known to be satisfied, `unsatisfied` when any requirement is known not to be satisfied, and `indeterminate` when none is known to fail but at least one cannot be evaluated. An omitted property means that the description makes no primitive-level hard-requirement claim; it does not prove that no runtime path can optionally use a capability.
 
-Server `capabilities`, primitive `clientRequirements`, Elicitation Declarations, and `security` are independent. Tooling MUST NOT infer or copy one from another. In particular, a conditional elicitation does not imply an unconditional elicitation requirement, and capability compatibility is not an authorization decision.
+Server `capabilities`, primitive `clientRequirements`, Elicitation Declarations, Tool `interactionExamples`, and `security` are independent. Tooling MUST NOT infer or copy one from another. In particular, a conditional elicitation or an illustrative interaction scenario does not imply an unconditional client-capability requirement, and capability compatibility is not an authorization decision.
 
 A single-version projection MUST preserve `clientRequirements` on every retained primitive and MUST NOT synthesize requirements. Merge tooling MAY collapse otherwise equivalent declarations with equivalent requirements. It MUST NOT select or union materially different requirements over overlapping protocol scope; it MUST preserve distinct non-overlapping variants where representable or report a conflict.
 
@@ -745,6 +812,7 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `annotations` | [Tool Annotations Object](#95-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
 | `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
+| `interactionExamples` | map&lt;string, Tool Interaction Example Object&gt; | No | Named ordered semantic client-input scenarios attached to one Tool invocation. |
 | `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
 | `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while fulfilling the Tool (see [Section 12](#12-elicitation-declarations)). |
@@ -808,7 +876,47 @@ Examples are untrusted descriptive content. Authors MUST NOT include secrets and
 
 Tool Examples are MCP Description metadata, not fields of the MCP Tool type. Projection to an MCP `tools/list` Tool value MUST omit `examples` unless an independently specified MCP extension defines a destination. MCP Description round-tripping and protocol-version projection MUST preserve each selected Tool declaration's example map and MUST NOT merge maps from disjoint variants with the same Tool name.
 
-### 9.4 Protocol Variants and Security
+### 9.4 Tool Interaction Examples
+
+A Tool Object MAY contain `interactionExamples`, a non-empty map from a local scenario name to a Tool Interaction Example Object. Each name MUST match `^[A-Za-z0-9._-]+$`, is case-sensitive, and is scoped to the containing Tool declaration. The map is declaration-local: 0.8.0 defines no `components` namespace for interaction scenarios.
+
+Tool `interactionExamples` are separate from completed Tool `examples`. A producer MUST NOT place an incomplete workflow, semantic interaction step, or non-terminal Tool result in the completed `examples` map.
+
+A Tool Interaction Example Object contains these core properties and MAY carry `x-*` specification extensions:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `input` | object | **Yes** | Complete initial `tools/call.params.arguments` object. |
+| `steps` | non-empty array\<Tool Interaction Step Object\> | **Yes** | Ordered semantic client-input exchanges for this illustrated invocation. |
+| `result` | object | **Yes** | Terminal completed Tool Result payload, excluding the JSON-RPC envelope. |
+
+`input` follows the same schema-compatibility rules as Tool Example `input`. `result` follows the same completed success and execution-error rules as Tool Example `result`. The scenario is illustrative and non-exhaustive: it asserts only that the shown steps occur in the displayed order in this example. It does not define branching, retries, correlation IDs, task state, transport framing, timing, or behavior for responses not shown.
+
+Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. The first 0.8.0 draft defines three step kinds:
+
+| `type` | Request payload | Response payload |
+|--------|-----------------|------------------|
+| `elicitation` | Canonical elicitation request fields | Canonical elicitation response action and optional form content |
+| `sampling` | Native `sampling/createMessage` parameters | Native completed sampling result |
+| `roots` | Empty object | Native ordered `roots` result object |
+
+Steps MAY carry `x-*` specification extensions and MUST NOT contain other additional fields except those defined for their step kind. A step is semantic MCP Description metadata, not a native MCP wire object. An implementation MUST NOT serialize a Tool Interaction Step directly onto an MCP connection.
+
+An `elicitation` step MAY contain `declaration`, naming an Elicitation Declaration on the same Tool. When present, the request mode and the request schema or known URL MUST be compatible with that declaration after local reference resolution. For `mode: "form"`, an accepted response MUST contain `content` conforming to the request schema; declined and cancelled responses MUST NOT contain `content`. For `mode: "url"`, the response MUST omit `content`.
+
+A `sampling` step request uses the native `sampling/createMessage` parameter field names and constraints of every MCP revision in the containing Tool's effective protocol scope, excluding JSON-RPC, transport, task, and MRTR framing. This includes required `messages` and `maxTokens`, and MAY include revision-supported model preferences, system prompt, context inclusion, stop sequences, temperature, metadata, and Tool-related fields. Its response uses the native completed sampling result field names and constraints of every applicable revision, excluding JSON-RPC and task framing.
+
+A `roots` step request is an empty object. Its response contains the ordered native `roots` declarations returned by the client for this illustration. Roots are descriptive input only; they do not authorize filesystem access.
+
+The containing Tool's effective protocol scope controls validation. Every represented semantic field MUST be valid in every applicable revision. A Tool spanning materially incompatible interaction shapes MUST be split into disjoint protocol-scoped variants. `interactionExamples` themselves do not carry `protocolVersions`.
+
+Tool `interactionExamples` do not add server capabilities, `clientRequirements`, or Elicitation Declarations. Validators SHOULD warn when a scenario contradicts an explicit primitive `clientRequirements` declaration, but MUST NOT infer a requirement when the Tool declares none.
+
+Tool Interaction Examples are MCP Description metadata, not fields of the MCP Tool type. Projection to an MCP `tools/list` Tool value MUST omit `interactionExamples` unless an independently specified MCP extension defines a destination. Effective Protocol View projection MUST preserve the selected Tool declaration's scenario map without combining disjoint variants. Merge tooling MUST NOT concatenate step arrays or guess how to combine unequal same-name scenarios.
+
+Interaction scenarios are untrusted descriptive content. Authors MUST use fictitious or sanitized values and MUST NOT include secrets, credentials, opaque runtime request state, task handles, or live session identifiers. Consumers MUST treat URLs, prompts, roots, and generated content as data and MUST NOT navigate, execute, or trust them merely because a scenario exists.
+
+### 9.5 Protocol Variants and Security
 
 Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root revisions and overlaps every scoped Tool with the same name.
 
@@ -816,7 +924,7 @@ Tool `security` describes statically known authorization required to call the To
 
 Tool `clientRequirements` applies only to invocation through `tools/call`. It does not state that a client needs those capabilities to discover the Tool through `tools/list`.
 
-### 9.5 Tool Annotations
+### 9.6 Tool Annotations
 
 Tool Annotations provide hints about Tool behavior. They are distinct from the Resource Annotations used by Resources, Resource Templates, and content blocks (see [Section 10.3](#103-resource-annotations)). A Tool `annotations` object MUST use the fields and semantics in this section; Resource Annotation fields such as `audience`, `priority`, and `lastModified` do not acquire those semantics when placed on a Tool.
 
@@ -832,13 +940,13 @@ All Tool Annotation properties are advisory. They are not guaranteed to describe
 
 The Tool Annotations object allows additional properties for forward compatibility. Consumers MUST preserve unrecognized properties where round-tripping is required and MUST NOT assign them the semantics of Resource Annotations.
 
-### 9.6 Execution Object
+### 9.7 Execution Object
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `taskSupport` | string | `"forbidden"` | Whether the tool supports task-augmented execution: `"forbidden"`, `"optional"`, or `"required"` |
 
-### 9.7 Example
+### 9.8 Example
 
 ```json
 {
@@ -990,6 +1098,7 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `mimeType` | string | No | MIME type of the resource content. |
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Template Example Object](#1043-resource-template-example-object)\> | No | Named concrete URI and completed read-result examples. |
+| `completionExamples` | map\<string, [Completion Example Object](#1046-resource-template-completion-examples)\> | No | Named `completion/complete` request-result observations for template variables. |
 | `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
 | `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while reading an expanded Resource (see [Section 12](#12-elicitation-declarations)). |
@@ -1062,6 +1171,26 @@ Documentation tooling SHOULD preserve names, concrete template URIs, result fiel
 Resource examples are MCP Description metadata, not fields of MCP Resource or Resource Template list values. Projection to MCP list values MUST omit `examples` unless an independent MCP extension defines a destination. Effective Protocol View projection preserves the selected declaration's map and MUST NOT combine maps from declarations with disjoint scopes. MCP Description round-tripping MUST preserve example names and values.
 
 Examples and their URIs are untrusted. Authors MUST NOT include secrets and SHOULD use conspicuously fictitious content. Consumers MUST NOT dereference URIs automatically, MUST render content safely, MUST treat MIME types as untrusted hints, and SHOULD impose encoded-size, decoded-size, and processing limits. Binary fixtures SHOULD be decoded and inspected before publication.
+
+#### 10.4.6 Resource Template Completion Examples
+
+A Resource Template Object MAY contain `completionExamples`, a local non-empty map from an example name to an inline Completion Example Object. Unlike Resource Template `examples`, `completionExamples` do not support a component namespace or `$componentRef`; the containing Resource Template supplies the completion target identity.
+
+Each name MUST match `^[A-Za-z0-9._-]+$`, is case-sensitive, and is scoped to the containing Resource Template declaration. Entry order is not semantically significant. A Completion Example Object MAY carry `x-*` specification extensions and contains these properties:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `argument` | object | **Yes** | The selected template variable being completed, with required string `name` and `value`. |
+| `context` | object | No | Optional contextual `arguments` map of already-supplied variable values. |
+| `result` | object | **Yes** | Completed applicable MCP `completion/complete` result payload, excluding the JSON-RPC envelope. |
+
+The Completion Example Object MUST NOT contain other unprefixed properties. The `argument` object MUST contain required string properties `name` and `value`. `argument.name` MUST identify one RFC 6570 variable in the containing `uriTemplate`. Every `context.arguments` key MUST identify another RFC 6570 variable from the same template, and the completed argument MUST NOT also appear in context. Variable identity is determined by parsing RFC 6570 expressions: operators and modifiers do not change the variable name, so `{+path}` identifies `path`, `{id:3}` identifies `id`, and `{owner,repository}` identifies both `owner` and `repository`.
+
+`context` MAY be omitted. When present, it MUST contain a non-empty `arguments` map whose values are strings. An empty context MUST be omitted rather than represented as an empty object.
+
+`result` MUST contain `completion.values`, an ordered array of string candidates. It MAY preserve native `completion.total`, `completion.hasMore`, and revision-supported result `_meta`. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. JSON-RPC envelope fields, errors, and incomplete workflows are not completion examples. Resource Template completion examples are valid only in an effective protocol scope where MCP defines completion and every represented field.
+
+Completion examples are illustrative and non-exhaustive. They do not create enums, defaults, authorization grants, or a promise that a future request yields the same candidates, ordering, total, or pagination state. Projection to MCP Resource Template list values MUST omit `completionExamples` unless an independent MCP extension defines a destination. Effective Protocol View projection and round-tripping MUST preserve the selected declaration's `completionExamples` map and MUST NOT merge maps from disjoint protocol variants.
 
 ### 10.5 Protocol Variants and Security
 
@@ -1196,6 +1325,8 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable prompt description. |
 | `arguments` | non-empty array\<[Prompt Argument](#112-prompt-argument-object)\> | No | Prompt arguments. |
+| `examples` | map<string, Prompt Example Object> | No | Named complete Prompt invocation/result pairs. |
+| `completionExamples` | map<string, Completion Example Object> | No | Named `completion/complete` request-result observations for Prompt arguments. |
 | `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
 | `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while retrieving the Prompt (see [Section 12](#12-elicitation-declarations)). |
@@ -1217,74 +1348,118 @@ Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It 
 | `description` | string | No | Argument description. |
 | `required` | boolean | No | Whether the argument is required. |
 
-### 11.3 Example
+### 11.3 Named Prompt Examples
+
+A Prompt Object MAY contain `examples`, a map from a local example name to an inline Prompt Example Object or a Reference Object targeting `#/components/promptExamples/<name>`. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Prompt declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant. A referenced example MUST be resolved before applying every contextual requirement of the containing Prompt and effective protocol scope.
+
+A Prompt Example Object contains these core properties and MAY carry `x-*` specification extensions:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `arguments` | map<string, string> | No | Complete `prompts/get.params.arguments` value; omission and `{}` both mean no arguments. |
+| `result` | object | **Yes** | Complete applicable completed `GetPromptResult` payload, excluding the JSON-RPC envelope. |
+
+The Prompt Example Object MUST NOT contain other additional properties.
+
+`arguments` MAY be omitted. When present, it MUST be an object whose values are strings. Every key MUST identify an argument declared by the containing Prompt, and every declared argument with `required: true` MUST be present. Optional arguments MAY be omitted. The example MUST NOT contain transport metadata, JSON-RPC IDs, method names, or request `_meta`.
+
+`result` MUST preserve the ordered `messages` array and MUST have the completed Prompt result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. It MAY preserve the native result `description`. Task, input-required, streaming, partial, and JSON-RPC error forms are not Prompt Examples.
+
+Revision-supported `_meta` on the completed result and message content is literal illustrative metadata governed by [Section 3.5](#35-mcp-_meta). It is not request metadata or a schema declaration. Message `content` MAY use any content-block form supported by every applicable revision.
+
+Prompt examples are illustrative and non-exhaustive. They do not change Prompt arguments, capabilities, security, client requirements, or runtime behavior, and they do not guarantee deterministic or current output. Documentation tooling SHOULD preserve example names and argument/result pairing. Mock or contract-test tooling MAY permit explicit selection by name but MUST NOT present an unnamed selection as a prediction of live behavior.
+
+Examples are untrusted descriptive content. Authors MUST NOT include secrets and SHOULD use conspicuously fictitious values. Consumers MUST validate values, render content as data, and apply appropriate size and evaluation limits. They MUST NOT treat examples as authorization, proof of behavior, or safe executable instructions.
+
+Prompt Examples are MCP Description metadata, not fields of the MCP Prompt type. Projection to an MCP `prompts/list` Prompt value MUST omit `examples` unless an independently specified MCP extension defines a destination. MCP Description round-tripping and protocol-version projection MUST preserve each selected Prompt declaration's example map and MUST NOT merge maps from disjoint variants with the same Prompt name.
+
+### 11.4 Prompt Completion Examples
+
+A Prompt Object MAY contain `completionExamples`, a local non-empty map from an example name to an inline Completion Example Object. Completion examples do not use `#/components/promptExamples` or any other component namespace; the containing Prompt declaration supplies the completion target identity.
+
+Each name MUST match `^[A-Za-z0-9._-]+$`, is case-sensitive, and is scoped to the containing Prompt declaration. Entry order is not semantically significant. A Completion Example Object MAY carry `x-*` specification extensions and contains these properties:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `argument` | object | **Yes** | The selected Prompt argument being completed, with required string `name` and `value`. |
+| `context` | object | No | Optional contextual `arguments` map of already-supplied Prompt argument values. |
+| `result` | object | **Yes** | Completed applicable MCP `completion/complete` result payload, excluding the JSON-RPC envelope. |
+
+The Completion Example Object MUST NOT contain other unprefixed properties. The `argument` object MUST contain required string properties `name` and `value`. `argument.name` MUST identify one declared Prompt Argument. Every `context.arguments` key MUST identify another declared Prompt Argument, and the completed argument MUST NOT also occur in context. Context MAY be partial: omission of a required Prompt argument means only that the illustrated completion request did not provide it.
+
+`context` MAY be omitted. When present, it MUST contain a non-empty `arguments` map whose values are strings. An empty context MUST be omitted rather than represented as an empty object. MCP 2025-03-26 does not define completion context, so a Prompt completion example spanning that revision and a later revision MUST be split into disjoint protocol-scoped Prompt declarations when context is needed.
+
+`result` MUST contain `completion.values`, an ordered array of string candidates. It MAY preserve native `completion.total`, `completion.hasMore`, and revision-supported result `_meta`. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. JSON-RPC envelope fields, errors, and incomplete workflows are not Prompt completion examples. Prompt completion examples are valid only in an effective protocol scope where MCP defines completion and every represented field.
+
+Completion examples are illustrative and non-exhaustive. They do not change Prompt arguments, retrieval requirements, capabilities, security, or runtime behavior, and they do not convert candidates into enums, defaults, or claims of future availability. Projection to an MCP Prompt list value MUST omit `completionExamples` unless an independently specified MCP extension defines a destination. MCP Description round-tripping and protocol-version projection MUST preserve each selected Prompt declaration's `completionExamples` map and MUST NOT merge maps from disjoint variants with the same Prompt name.
+
+### 11.5 Protocol Variants and Security
 
 ```json
 {
   "prompts": [
     {
-      "name": "analyze_position",
-      "title": "Analyze Position",
-      "description": "Generate a detailed positional analysis for a chess position",
+      "name": "city_briefing",
+      "title": "City Briefing",
+      "description": "Generate a role-specific city briefing",
+      "protocolVersions": ["2026-07-28"],
       "arguments": [
         {
-          "name": "fen",
-          "title": "FEN String",
-          "description": "Position in Forsyth-Edwards Notation",
+          "name": "city",
           "required": true
         },
         {
-          "name": "perspective",
-          "title": "Analysis Perspective",
-          "description": "Analyze from white or black perspective",
-          "required": false
+          "name": "audience"
         }
       ],
-      "tags": ["analysis", "position"]
+      "examples": {
+        "paris-engineering": {
+          "arguments": {
+            "city": "Paris",
+            "audience": "engineering"
+          },
+          "result": {
+            "resultType": "complete",
+            "description": "Engineering briefing for Paris",
+            "messages": [
+              {
+                "role": "user",
+                "content": {
+                  "type": "text",
+                  "text": "Summarize current engineering considerations for Paris."
+                }
+              }
+            ]
+          }
+        }
+      }
     },
     {
-      "name": "game_summary",
-      "title": "Game Summary",
-      "description": "Generate a narrative summary of a completed chess game",
-      "arguments": [
-        {
-          "name": "game_id",
-          "title": "Game ID",
-          "description": "Identifier of the game to summarize",
-          "required": true
-        },
-        {
-          "name": "detail_level",
-          "title": "Detail Level",
-          "description": "Level of detail: 'brief', 'standard', or 'comprehensive'",
-          "required": false
+      "name": "greeting",
+      "protocolVersions": ["2025-11-25"],
+      "examples": {
+        "default": {
+          "result": {
+            "messages": [
+              {
+                "role": "assistant",
+                "content": {
+                  "type": "text",
+                  "text": "Hello."
+                }
+              }
+            ]
+          }
         }
-      ],
-      "tags": ["game", "summary"]
-    },
-    {
-      "name": "opening_guide",
-      "title": "Opening Repertoire Guide",
-      "description": "Generate a study guide for a specific chess opening",
-      "arguments": [
-        {
-          "name": "opening_name",
-          "title": "Opening Name",
-          "description": "Name of the chess opening (e.g., 'Sicilian Defense', 'Queen's Gambit')",
-          "required": true
-        },
-        {
-          "name": "player_rating",
-          "title": "Player Rating",
-          "description": "Player's approximate rating to tailor complexity",
-          "required": false
-        }
-      ],
-      "tags": ["opening", "study"]
+      }
     }
   ]
 }
 ```
+
+Prompt declarations with the same `name` MUST have pairwise-disjoint effective protocol scopes. Prompt `security` describes statically known authorization required to retrieve the Prompt and replaces inherited transport or root security in full.
+
+Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It does not state that a client needs those capabilities to discover the Prompt through `prompts/list`.
 
 ## 12. Elicitation Declarations
 
@@ -1368,7 +1543,7 @@ The applicable MCP revision remains authoritative for execution. MCP Description
 
 A mock, gateway, documentation tool, or client MAY use a declaration to render its message, collect a form response matching `requestedSchema`, or present a known URL. The declaration alone does not define when a mock triggers the interaction, how it selects among declarations, how responses modify state, or which final primitive result follows.
 
-Elicitation Declarations are distinct from named primitive examples. Tool Examples pair a complete invocation with a completed Tool Result, and Resource Examples contain completed read results. They MUST NOT contain `InputRequiredResult`, `elicitation/create`, MRTR rounds, retries, or other incomplete workflows. MCP Description 0.8.0 does not define an elicitation transcript or workflow language.
+Elicitation Declarations are distinct from named primitive examples. Tool Examples pair a complete invocation with a completed Tool Result, Tool `interactionExamples` add ordered semantic client-input steps for one Tool invocation, and Resource Examples contain completed read results. None of these models preserve JSON-RPC envelopes, MRTR request state, retries, timing, or a general executable workflow language.
 
 The applicable MCP elicitation specification remains authoritative for runtime security and privacy requirements. MCP Description validation does not inspect or certify runtime behavior, privacy compliance, or security conformance and defines no sensitive-field diagnostic.
 
@@ -1664,8 +1839,10 @@ String values MUST be valid JSON strings after decoding. URI values MUST conform
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
+For the current unreleased 0.8.0 Draft 4 working schema, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`. A future stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
+
 ```yaml
-$schema: https://mcpdesc.org/schema/0.8.0.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
 mcpdesc: 0.8.0
 ```
 
@@ -1738,10 +1915,11 @@ The root MCP Description Object MAY contain a `components` property. A Component
 | `toolExamples` | non-empty map\<string, Tool Example Object or Reference Object\> | Reusable Tool examples. |
 | `resourceExamples` | non-empty map\<string, Resource Example Object or Reference Object\> | Reusable static Resource examples. |
 | `resourceTemplateExamples` | non-empty map\<string, Resource Template Example Object or Reference Object\> | Reusable Resource Template examples. |
+| `promptExamples` | non-empty map\<string, Prompt Example Object or Reference Object\> | Reusable Prompt examples. |
 
 Every present namespace map MUST contain at least one entry. Each component name MUST match `^[A-Za-z0-9._-]+$`. Names are case-sensitive and unique only within their namespace.
 
-The outer Components Object MAY carry `x-*` specification extensions and MUST NOT contain other properties. Namespace maps are closed component-name maps rather than extension locations. Schema component values follow JSON Schema, including its extension-keyword rules. Tool, Resource, and Resource Template Example component values are eligible semantic objects and MAY carry the same `x-*` specification extensions as their inline forms. Components and component values MUST NOT declare MCP Description `protocolVersions`; protocol applicability is inherited exclusively from each use site.
+The outer Components Object MAY carry `x-*` specification extensions and MUST NOT contain other properties. Namespace maps are closed component-name maps rather than extension locations. Schema component values follow JSON Schema, including its extension-keyword rules. Tool, Resource, Resource Template, and Prompt Example component values are eligible semantic objects and MAY carry the same `x-*` specification extensions as their inline forms. Components and component values MUST NOT declare MCP Description `protocolVersions`; protocol applicability is inherited exclusively from each use site.
 
 ### 17.2 Reference Object
 
@@ -1751,13 +1929,13 @@ A Reference Object contains exactly one required property:
 |----------|------|-------------|
 | `$componentRef` | string | Local JSON Pointer to one named value in the compatible `#/components` namespace. |
 
-No sibling property, including an `x-*` property, is permitted. The pointer MUST have the form `#/components/<namespace>/<name>`, where `<namespace>` is one of the four namespaces in Section 17.1 and `<name>` follows the component-name grammar. Remote URIs, relative-file references, pointers outside `#/components`, missing targets, and targets in an incompatible namespace are invalid.
+No sibling property, including an `x-*` property, is permitted. The pointer MUST have the form `#/components/<namespace>/<name>`, where `<namespace>` is one of the five namespaces in Section 17.1 and `<name>` follows the component-name grammar. Remote URIs, relative-file references, pointers outside `#/components`, missing targets, and targets in an incompatible namespace are invalid.
 
 A `$componentRef` is an MCP Description reference only at a use site that permits a Reference Object. JSON Schema `$ref` remains governed exclusively by the applicable embedded JSON Schema dialect. Implementations MUST NOT accept `$ref` as an MCP Description component reference and MUST NOT reinterpret a `$componentRef` nested inside an embedded JSON Schema.
 
 ### 17.3 Use Sites and Contextual Validation
 
-Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; and Resource Template `examples` values MAY reference `resourceTemplateExamples`.
+Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; Resource Template `examples` values MAY reference `resourceTemplateExamples`; and Prompt `examples` values MAY reference `promptExamples`.
 
 Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output revision rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
 
@@ -1832,7 +2010,10 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.8.0.json](../../schemas/mcp-description/0.8.0.json)
-- `https://mcpdesc.org/schema/0.8.0.json`
+- `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json` for the current Draft 4 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.8.0.json` for the future stable 0.8.0 canonical schema resource
+
+Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.
 
 ---
 

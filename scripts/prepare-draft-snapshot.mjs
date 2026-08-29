@@ -71,3 +71,5 @@ execFileSync(process.execPath, ['scripts/assemble-draft.mjs'], { cwd: root, stdi
 console.log('Draft metadata prepared. Update README/status prose, PROPOSALS.md, and CHANGELOG.md, then run:');
 console.log('  npm run release:check -- draft');
 console.log('  npm test');
+console.log('Before tagging a public Draft 4-or-later snapshot whose canonical schema URL is live, also run:');
+console.log('  npm run release:check -- draft-publication');

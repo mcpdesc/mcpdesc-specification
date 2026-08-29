@@ -66,12 +66,15 @@ for (const [label, document] of [
   ['tool.icons', { ...partial, tools: [{ name: 'tool', inputSchema: emptyInputSchema, icons: [] }] }],
   ['tool.tags', { ...partial, tools: [{ name: 'tool', inputSchema: emptyInputSchema, tags: [] }] }],
   ['tool.elicitations', { ...partial, tools: [{ name: 'tool', inputSchema: emptyInputSchema, elicitations: [] }] }],
+  ['tool.interactionExamples', { ...partial, tools: [{ name: 'tool', inputSchema: emptyInputSchema, interactionExamples: {} }] }],
   ['resource.tags', { ...partial, resources: [{ uri: 'test://resource', name: 'resource', tags: [] }] }],
   ['resource.elicitations', { ...partial, resources: [{ uri: 'test://resource', name: 'resource', elicitations: [] }] }],
   ['resourceTemplate.tags', { ...partial, resourceTemplates: [{ uriTemplate: 'test://resource/{id}', name: 'template', tags: [] }] }],
+  ['resourceTemplate.completionExamples', { ...partial, resourceTemplates: [{ uriTemplate: 'test://resource/{id}', name: 'template', completionExamples: {} }] }],
   ['resourceTemplate.elicitations', { ...partial, resourceTemplates: [{ uriTemplate: 'test://resource/{id}', name: 'template', elicitations: [] }] }],
   ['prompt.tags', { ...partial, prompts: [{ name: 'prompt', tags: [] }] }],
   ['prompt.arguments', { ...partial, prompts: [{ name: 'prompt', arguments: [] }] }],
+  ['prompt.completionExamples', { ...partial, prompts: [{ name: 'prompt', completionExamples: {} }] }],
   ['prompt.elicitations', { ...partial, prompts: [{ name: 'prompt', elicitations: [] }] }],
   ['prompt.clientRequirements', { ...partial, prompts: [{ name: 'prompt', clientRequirements: {} }] }]
 ]) {
@@ -338,12 +341,102 @@ const mergedResourceExamples = mergeProtocolDescriptions([resourceExampleView]);
 assert.deepEqual(mergedResourceExamples.resources[0].examples, resourceExampleView.resources[0].examples);
 assert.deepEqual(mergedResourceExamples.resourceTemplates[0].examples, resourceExampleView.resourceTemplates[0].examples);
 
+const promptExampleSource = fixture('spec/draft/fixtures/expected-valid/named-prompt-examples.json');
+const promptExampleView2025 = projectProtocolView(promptExampleSource, '2025-11-25');
+const promptExampleView2026 = projectProtocolView(promptExampleSource, '2026-07-28');
+const promptGreeting2025 = promptExampleView2025.prompts.find((prompt) => prompt.name === 'greeting');
+const promptGreeting2026 = promptExampleView2026.prompts.find((prompt) => prompt.name === 'greeting');
+assert.deepEqual(promptGreeting2025.examples, promptExampleSource.prompts[1].examples);
+assert.deepEqual(promptGreeting2026.examples, promptExampleSource.prompts[0].examples);
+assert.equal(Object.hasOwn(promptGreeting2025.examples.default.result, 'resultType'), false);
+assert.equal(promptGreeting2026.examples.default.$componentRef, '#/components/promptExamples/default-greeting');
+const resolvedPromptGreeting2026 = resolveComponentReferences(promptExampleView2026).document.prompts.find((prompt) => prompt.name === 'greeting');
+assert.equal(resolvedPromptGreeting2026.examples.default.result.resultType, 'complete');
+const mergedPromptExamples = mergeProtocolDescriptions([promptExampleView2025, promptExampleView2026]);
+assert.equal(mergedPromptExamples.prompts.length, 3);
+assert.deepEqual(
+  projectProtocolView(mergedPromptExamples, '2025-11-25').prompts.find((prompt) => prompt.name === 'greeting').examples,
+  promptGreeting2025.examples
+);
+assert.deepEqual(
+  projectProtocolView(mergedPromptExamples, '2026-07-28').prompts.find((prompt) => prompt.name === 'greeting').examples,
+  promptGreeting2026.examples
+);
+
+const completionExampleSource = fixture('spec/draft/fixtures/expected-valid/named-completion-examples.json');
+const completionExampleView202511 = projectProtocolView(completionExampleSource, '2025-11-25');
+const completionExampleView2026 = projectProtocolView(completionExampleSource, '2026-07-28');
+const completionTemplate202511 = completionExampleView202511.resourceTemplates.find((template) => template.name === 'repository_issue');
+const completionTemplate2026 = completionExampleView2026.resourceTemplates.find((template) => template.name === 'repository_issue');
+const completionPrompt202511 = completionExampleView202511.prompts.find((prompt) => prompt.name === 'team_lead');
+const completionPrompt2026 = completionExampleView2026.prompts.find((prompt) => prompt.name === 'team_lead');
+assert.deepEqual(
+  completionTemplate202511.completionExamples,
+  completionExampleSource.resourceTemplates.find((template) => template.protocolVersions?.includes('2025-11-25')).completionExamples
+);
+assert.equal(Object.hasOwn(completionTemplate202511.completionExamples['issue-prefix'].result, 'resultType'), false);
+assert.deepEqual(
+  completionPrompt202511.completionExamples,
+  completionExampleSource.prompts.find((prompt) => prompt.protocolVersions?.includes('2025-11-25')).completionExamples
+);
+assert.equal(Object.hasOwn(completionPrompt202511.completionExamples['engineering-a'].result, 'resultType'), false);
+assert.deepEqual(
+  completionPrompt2026.completionExamples,
+  completionExampleSource.prompts.find((prompt) => prompt.protocolVersions?.includes('2026-07-28')).completionExamples
+);
+assert.equal(completionPrompt2026.completionExamples['engineering-a'].result.resultType, 'complete');
+assert.equal(completionTemplate2026.completionExamples['issue-prefix'].result.resultType, 'complete');
+const mergedCompletionExamples = mergeProtocolDescriptions([
+  completionExampleView202511,
+  completionExampleView2026
+]);
+assert.deepEqual(
+  projectProtocolView(mergedCompletionExamples, '2025-11-25').prompts.find((prompt) => prompt.name === 'team_lead').completionExamples,
+  completionPrompt202511.completionExamples
+);
+assert.deepEqual(
+  projectProtocolView(mergedCompletionExamples, '2025-11-25').resourceTemplates.find((template) => template.name === 'repository_issue').completionExamples,
+  completionTemplate202511.completionExamples
+);
+assert.deepEqual(
+  projectProtocolView(mergedCompletionExamples, '2026-07-28').prompts.find((prompt) => prompt.name === 'team_lead').completionExamples,
+  completionPrompt2026.completionExamples
+);
+
+const interactionExampleSource = fixture('spec/draft/fixtures/expected-valid/named-tool-interaction-examples.json');
+const interactionExampleView202511 = projectProtocolView(interactionExampleSource, '2025-11-25');
+const interactionExampleView2026 = projectProtocolView(interactionExampleSource, '2026-07-28');
+const interactionTool202511 = interactionExampleView202511.tools.find((tool) => tool.name === 'prepare_release');
+const interactionTool2026 = interactionExampleView2026.tools.find((tool) => tool.name === 'prepare_release');
+assert.deepEqual(
+  interactionTool202511.interactionExamples,
+  interactionExampleSource.tools.find((tool) => tool.protocolVersions?.includes('2025-11-25')).interactionExamples
+);
+assert.deepEqual(
+  interactionTool2026.interactionExamples,
+  interactionExampleSource.tools.find((tool) => tool.protocolVersions?.includes('2026-07-28')).interactionExamples
+);
+const mergedInteractionExamples = mergeProtocolDescriptions([
+  interactionExampleView202511,
+  interactionExampleView2026
+]);
+assert.equal(mergedInteractionExamples.tools.length, 2);
+assert.deepEqual(
+  projectProtocolView(mergedInteractionExamples, '2025-11-25').tools.find((tool) => tool.name === 'prepare_release').interactionExamples,
+  interactionTool202511.interactionExamples
+);
+assert.deepEqual(
+  projectProtocolView(mergedInteractionExamples, '2026-07-28').tools.find((tool) => tool.name === 'prepare_release').interactionExamples,
+  interactionTool2026.interactionExamples
+);
+
 const componentSource = fixture('spec/draft/fixtures/expected-valid/reusable-components.json');
 assertStructurallyConforming(componentSource);
 assert.deepEqual(validateMcpdesc08Document(componentSource).filter((diagnostic) => diagnostic.severity === 'error'), []);
 const resolvedComponents = resolveComponentReferences(componentSource).document;
 assert.deepEqual(resolvedComponents.tools[0].inputSchema, componentSource.components.schemas.Input);
 assert.deepEqual(resolvedComponents.tools[0].examples.basic, componentSource.components.toolExamples.basic);
+assert.deepEqual(resolvedComponents.prompts[0].examples.default, componentSource.components.promptExamples.default);
 assert.equal(
   resolvedComponents.components.schemas.Input.properties.query.$componentRef,
   undefined,
@@ -391,11 +484,13 @@ assert.ok(referencedExampleDiagnostics.some(
   (diagnostic) => diagnostic.code === 'tool-example-schema-mismatch' && diagnostic.path.at(-1) === 'structuredContent'
 ));
 assert.ok(referencedExampleDiagnostics.some((diagnostic) => diagnostic.code === 'resource-template-example-invalid-expansion'));
+assert.ok(referencedExampleDiagnostics.some((diagnostic) => diagnostic.code === 'prompt-example-unknown-argument'));
 const inlineInvalidExamples = structuredClone(invalidComponentExamples);
 inlineInvalidExamples.tools[0].examples.bad = structuredClone(inlineInvalidExamples.components.toolExamples['bad-input']);
 inlineInvalidExamples.resourceTemplates[0].examples.bad = structuredClone(
   inlineInvalidExamples.components.resourceTemplateExamples['bad-uri']
 );
+inlineInvalidExamples.prompts[0].examples.bad = structuredClone(inlineInvalidExamples.components.promptExamples['bad-arguments']);
 assert.deepEqual(
   semanticValidateDocument(inlineInvalidExamples).map(({ code, path }) => ({ code, path })),
   referencedExampleDiagnostics.map(({ code, path }) => ({ code, path }))
@@ -414,9 +509,11 @@ assert.equal(componentProtocolDiagnostics.some(
 const componentProjectionSource = structuredClone(componentSource);
 componentProjectionSource.components.schemas.Unused = { type: 'object' };
 componentProjectionSource.components.toolExamples.Unused = structuredClone(componentSource.components.toolExamples.basic);
+componentProjectionSource.components.promptExamples.Unused = structuredClone(componentSource.components.promptExamples.default);
 const projectedComponents = projectProtocolView(componentProjectionSource, '2026-07-28');
 assert.deepEqual(Object.keys(projectedComponents.components.schemas), ['Input', 'InputAlias', 'Output', 'Form']);
 assert.deepEqual(Object.keys(projectedComponents.components.toolExamples), ['basic']);
+assert.deepEqual(Object.keys(projectedComponents.components.promptExamples), ['default']);
 assert.equal(projectedComponents.components['x-example-owner'], 'documentation');
 
 const integratedSource = fixture('spec/draft/fixtures/expected-valid/integrated-draft2-features.yaml');
@@ -480,6 +577,21 @@ assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code =
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is required')));
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.ttlMs is not defined')));
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is not defined')));
+
+const invalidInteractionExamples = fixture('spec/draft/fixtures/expected-invalid/invalid-tool-interaction-example-semantics.json');
+const invalidInteractionDiagnostics = semanticValidateDocument(invalidInteractionExamples);
+assert.ok(invalidInteractionDiagnostics.some((diagnostic) => diagnostic.code === 'unknown-elicitation-declaration'));
+assert.ok(invalidInteractionDiagnostics.some((diagnostic) => diagnostic.code === 'interaction-example-elicitation-declaration-mismatch'));
+assert.ok(invalidInteractionDiagnostics.some((diagnostic) => diagnostic.code === 'interaction-example-elicitation-content-schema-mismatch'));
+assert.ok(invalidInteractionDiagnostics.some((diagnostic) => diagnostic.code === 'interaction-example-version-mismatch'));
+assert.ok(invalidInteractionDiagnostics.some((diagnostic) => diagnostic.code === 'interaction-example-roots-uri'));
+
+const warningInteractionExamples = fixture('spec/draft/fixtures/expected-warning/tool-interaction-client-requirements-contradictions.json');
+const warningInteractionDiagnostics = semanticValidateDocument(warningInteractionExamples)
+  .filter((diagnostic) => diagnostic.severity === 'warning');
+const contradictionWarnings = warningInteractionDiagnostics
+  .filter((diagnostic) => diagnostic.code === 'interaction-example-client-requirements-contradiction');
+assert.ok(contradictionWarnings.length >= 4);
 
 const elicitationSource = fixture('spec/draft/fixtures/expected-valid/elicitation-declarations.json');
 const filteredElicitationSource = structuredClone(elicitationSource);

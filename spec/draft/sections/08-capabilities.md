@@ -6,6 +6,8 @@ The optional `capabilities` array declares protocol-scoped, durable server featu
 
 Capabilities represent externally relevant server behavior beyond primitive inventories. They describe semantics, not the RPC or notification mechanism used to expose them.
 
+Completion examples on Prompt and Resource Template declarations are descriptive metadata about observed `completion/complete` behavior. They do not themselves assert that the server advertises the `completions` capability in every deployment or Effective Protocol View.
+
 ### 8.2 Properties
 
 | Property | Type | Description |
@@ -67,7 +69,7 @@ For MCP 2026-07-28, `extensions` MUST be a non-empty map whose keys satisfy the 
 
 A compatibility tool comparing `clientRequirements` with a client capability profile for one revision SHOULD report `satisfied` when every requirement is known to be satisfied, `unsatisfied` when any requirement is known not to be satisfied, and `indeterminate` when none is known to fail but at least one cannot be evaluated. An omitted property means that the description makes no primitive-level hard-requirement claim; it does not prove that no runtime path can optionally use a capability.
 
-Server `capabilities`, primitive `clientRequirements`, Elicitation Declarations, and `security` are independent. Tooling MUST NOT infer or copy one from another. In particular, a conditional elicitation does not imply an unconditional elicitation requirement, and capability compatibility is not an authorization decision.
+Server `capabilities`, primitive `clientRequirements`, Elicitation Declarations, Tool `interactionExamples`, and `security` are independent. Tooling MUST NOT infer or copy one from another. In particular, a conditional elicitation or an illustrative interaction scenario does not imply an unconditional client-capability requirement, and capability compatibility is not an authorization decision.
 
 A single-version projection MUST preserve `clientRequirements` on every retained primitive and MUST NOT synthesize requirements. Merge tooling MAY collapse otherwise equivalent declarations with equivalent requirements. It MUST NOT select or union materially different requirements over overlapping protocol scope; it MUST preserve distinct non-overlapping variants where representable or report a conflict.
 

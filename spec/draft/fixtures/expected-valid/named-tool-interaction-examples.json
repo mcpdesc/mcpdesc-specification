@@ -1,0 +1,258 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "tool-interaction-examples",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2025-11-25", "2026-07-28"],
+  "tools": [
+    {
+      "protocolVersions": ["2025-11-25"],
+      "name": "prepare_release",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "string" }
+        },
+        "required": ["version"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" }
+        },
+        "required": ["status"],
+        "additionalProperties": false
+      },
+      "elicitations": [
+        {
+          "name": "confirm",
+          "mode": "form",
+          "message": "Approve this release?",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "approved": { "type": "boolean" }
+            },
+            "required": ["approved"]
+          }
+        }
+      ],
+      "interactionExamples": {
+        "approved-release": {
+          "input": {
+            "version": "2.0.0"
+          },
+          "steps": [
+            {
+              "type": "roots",
+              "request": {},
+              "response": {
+                "roots": [
+                  {
+                    "uri": "file:///workspace/example",
+                    "name": "Example workspace"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "sampling",
+              "request": {
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": {
+                      "type": "text",
+                      "text": "Summarize the release plan."
+                    }
+                  }
+                ],
+                "tools": [
+                  {
+                    "name": "diff_summary",
+                    "description": "Summarize pending release changes.",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "branch": { "type": "string" }
+                      },
+                      "required": ["branch"]
+                    }
+                  }
+                ],
+                "toolChoice": {
+                  "mode": "auto"
+                },
+                "maxTokens": 180
+              },
+              "response": {
+                "role": "assistant",
+                "content": {
+                  "type": "text",
+                  "text": "Run smoke tests and confirm the changelog before publishing version 2.0.0."
+                },
+                "model": "claude-3-sonnet-20240229",
+                "stopReason": "endTurn"
+              }
+            },
+            {
+              "type": "elicitation",
+              "declaration": "confirm",
+              "request": {
+                "mode": "form",
+                "message": "Approve this release?",
+                "requestedSchema": {
+                  "type": "object",
+                  "properties": {
+                    "approved": { "type": "boolean" }
+                  },
+                  "required": ["approved"]
+                }
+              },
+              "response": {
+                "action": "accept",
+                "content": {
+                  "approved": true
+                }
+              }
+            }
+          ],
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "Release preparation completed."
+              }
+            ],
+            "structuredContent": {
+              "status": "prepared"
+            }
+          }
+        }
+      }
+    },
+    {
+      "protocolVersions": ["2026-07-28"],
+      "name": "prepare_release",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "string" }
+        },
+        "required": ["version"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" }
+        },
+        "required": ["status"],
+        "additionalProperties": false
+      },
+      "elicitations": [
+        {
+          "name": "authorize",
+          "mode": "url",
+          "message": "Authorize publication.",
+          "url": "https://mcp.example.com/release/connect"
+        }
+      ],
+      "interactionExamples": {
+        "authorized-release": {
+          "input": {
+            "version": "2.0.0"
+          },
+          "steps": [
+            {
+              "type": "roots",
+              "request": {},
+              "response": {
+                "roots": [
+                  {
+                    "uri": "file:///workspace/example",
+                    "name": "Example workspace"
+                  }
+                ]
+              }
+            },
+            {
+              "type": "sampling",
+              "request": {
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": {
+                      "type": "text",
+                      "text": "Check whether the release note wording is ready to publish."
+                    }
+                  }
+                ],
+                "includeContext": "thisServer",
+                "tools": [
+                  {
+                    "name": "inspect_notes",
+                    "description": "Inspect the draft release notes.",
+                    "inputSchema": {
+                      "type": "object",
+                      "properties": {
+                        "version": { "type": "string" }
+                      },
+                      "required": ["version"]
+                    }
+                  }
+                ],
+                "toolChoice": {
+                  "mode": "required"
+                },
+                "maxTokens": 220
+              },
+              "response": {
+                "role": "assistant",
+                "content": [
+                  {
+                    "type": "tool_use",
+                    "id": "call_notes_1",
+                    "name": "inspect_notes",
+                    "input": {
+                      "version": "2.0.0"
+                    }
+                  }
+                ],
+                "model": "claude-3-sonnet-20240229",
+                "stopReason": "toolUse"
+              }
+            },
+            {
+              "type": "elicitation",
+              "declaration": "authorize",
+              "request": {
+                "mode": "url",
+                "message": "Authorize publication.",
+                "url": "https://mcp.example.com/release/connect"
+              },
+              "response": {
+                "action": "accept"
+              }
+            }
+          ],
+          "result": {
+            "resultType": "complete",
+            "content": [
+              {
+                "type": "text",
+                "text": "Release preparation completed."
+              }
+            ],
+            "structuredContent": {
+              "status": "prepared"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

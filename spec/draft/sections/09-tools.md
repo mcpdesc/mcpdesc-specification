@@ -15,6 +15,7 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `annotations` | [Tool Annotations Object](#95-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
 | `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
+| `interactionExamples` | map&lt;string, Tool Interaction Example Object&gt; | No | Named ordered semantic client-input scenarios attached to one Tool invocation. |
 | `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
 | `tags` | non-empty array\<string\> | No | Categorization tags. When a root-level `tags` array is present, values MUST reference declared tag names (see [Section 13.3](#133-tag-references)). |
 | `elicitations` | non-empty array\<Elicitation Declaration Object\> | No | Additional user interactions that MAY be required while fulfilling the Tool (see [Section 12](#12-elicitation-declarations)). |
@@ -78,7 +79,47 @@ Examples are untrusted descriptive content. Authors MUST NOT include secrets and
 
 Tool Examples are MCP Description metadata, not fields of the MCP Tool type. Projection to an MCP `tools/list` Tool value MUST omit `examples` unless an independently specified MCP extension defines a destination. MCP Description round-tripping and protocol-version projection MUST preserve each selected Tool declaration's example map and MUST NOT merge maps from disjoint variants with the same Tool name.
 
-### 9.4 Protocol Variants and Security
+### 9.4 Tool Interaction Examples
+
+A Tool Object MAY contain `interactionExamples`, a non-empty map from a local scenario name to a Tool Interaction Example Object. Each name MUST match `^[A-Za-z0-9._-]+$`, is case-sensitive, and is scoped to the containing Tool declaration. The map is declaration-local: 0.8.0 defines no `components` namespace for interaction scenarios.
+
+Tool `interactionExamples` are separate from completed Tool `examples`. A producer MUST NOT place an incomplete workflow, semantic interaction step, or non-terminal Tool result in the completed `examples` map.
+
+A Tool Interaction Example Object contains these core properties and MAY carry `x-*` specification extensions:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `input` | object | **Yes** | Complete initial `tools/call.params.arguments` object. |
+| `steps` | non-empty array\<Tool Interaction Step Object\> | **Yes** | Ordered semantic client-input exchanges for this illustrated invocation. |
+| `result` | object | **Yes** | Terminal completed Tool Result payload, excluding the JSON-RPC envelope. |
+
+`input` follows the same schema-compatibility rules as Tool Example `input`. `result` follows the same completed success and execution-error rules as Tool Example `result`. The scenario is illustrative and non-exhaustive: it asserts only that the shown steps occur in the displayed order in this example. It does not define branching, retries, correlation IDs, task state, transport framing, timing, or behavior for responses not shown.
+
+Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. The first 0.8.0 draft defines three step kinds:
+
+| `type` | Request payload | Response payload |
+|--------|-----------------|------------------|
+| `elicitation` | Canonical elicitation request fields | Canonical elicitation response action and optional form content |
+| `sampling` | Native `sampling/createMessage` parameters | Native completed sampling result |
+| `roots` | Empty object | Native ordered `roots` result object |
+
+Steps MAY carry `x-*` specification extensions and MUST NOT contain other additional fields except those defined for their step kind. A step is semantic MCP Description metadata, not a native MCP wire object. An implementation MUST NOT serialize a Tool Interaction Step directly onto an MCP connection.
+
+An `elicitation` step MAY contain `declaration`, naming an Elicitation Declaration on the same Tool. When present, the request mode and the request schema or known URL MUST be compatible with that declaration after local reference resolution. For `mode: "form"`, an accepted response MUST contain `content` conforming to the request schema; declined and cancelled responses MUST NOT contain `content`. For `mode: "url"`, the response MUST omit `content`.
+
+A `sampling` step request uses the native `sampling/createMessage` parameter field names and constraints of every MCP revision in the containing Tool's effective protocol scope, excluding JSON-RPC, transport, task, and MRTR framing. This includes required `messages` and `maxTokens`, and MAY include revision-supported model preferences, system prompt, context inclusion, stop sequences, temperature, metadata, and Tool-related fields. Its response uses the native completed sampling result field names and constraints of every applicable revision, excluding JSON-RPC and task framing.
+
+A `roots` step request is an empty object. Its response contains the ordered native `roots` declarations returned by the client for this illustration. Roots are descriptive input only; they do not authorize filesystem access.
+
+The containing Tool's effective protocol scope controls validation. Every represented semantic field MUST be valid in every applicable revision. A Tool spanning materially incompatible interaction shapes MUST be split into disjoint protocol-scoped variants. `interactionExamples` themselves do not carry `protocolVersions`.
+
+Tool `interactionExamples` do not add server capabilities, `clientRequirements`, or Elicitation Declarations. Validators SHOULD warn when a scenario contradicts an explicit primitive `clientRequirements` declaration, but MUST NOT infer a requirement when the Tool declares none.
+
+Tool Interaction Examples are MCP Description metadata, not fields of the MCP Tool type. Projection to an MCP `tools/list` Tool value MUST omit `interactionExamples` unless an independently specified MCP extension defines a destination. Effective Protocol View projection MUST preserve the selected Tool declaration's scenario map without combining disjoint variants. Merge tooling MUST NOT concatenate step arrays or guess how to combine unequal same-name scenarios.
+
+Interaction scenarios are untrusted descriptive content. Authors MUST use fictitious or sanitized values and MUST NOT include secrets, credentials, opaque runtime request state, task handles, or live session identifiers. Consumers MUST treat URLs, prompts, roots, and generated content as data and MUST NOT navigate, execute, or trust them merely because a scenario exists.
+
+### 9.5 Protocol Variants and Security
 
 Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root revisions and overlaps every scoped Tool with the same name.
 
@@ -86,7 +127,7 @@ Tool `security` describes statically known authorization required to call the To
 
 Tool `clientRequirements` applies only to invocation through `tools/call`. It does not state that a client needs those capabilities to discover the Tool through `tools/list`.
 
-### 9.5 Tool Annotations
+### 9.6 Tool Annotations
 
 Tool Annotations provide hints about Tool behavior. They are distinct from the Resource Annotations used by Resources, Resource Templates, and content blocks (see [Section 10.3](#103-resource-annotations)). A Tool `annotations` object MUST use the fields and semantics in this section; Resource Annotation fields such as `audience`, `priority`, and `lastModified` do not acquire those semantics when placed on a Tool.
 
@@ -102,13 +143,13 @@ All Tool Annotation properties are advisory. They are not guaranteed to describe
 
 The Tool Annotations object allows additional properties for forward compatibility. Consumers MUST preserve unrecognized properties where round-tripping is required and MUST NOT assign them the semantics of Resource Annotations.
 
-### 9.6 Execution Object
+### 9.7 Execution Object
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
 | `taskSupport` | string | `"forbidden"` | Whether the tool supports task-augmented execution: `"forbidden"`, `"optional"`, or `"required"` |
 
-### 9.7 Example
+### 9.8 Example
 
 ```json
 {

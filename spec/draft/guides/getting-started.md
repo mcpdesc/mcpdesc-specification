@@ -18,7 +18,7 @@ Create a file called `chess-coach.mcpdesc.yaml`:
 MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files use YAML 1.2.2 JSON-schema scalar resolution and exclude aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numbers.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/0.8.0.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
 mcpdesc: 0.8.0
 info:
   name: chess-rating-server
@@ -45,6 +45,8 @@ tools:
 ```
 
 That's a valid MCP Description. It declares a server with one tool accessible via stdio.
+
+The sample `$schema` value points to the exact Draft 4 schema resource for structural validation and editor tooling. The `mcpdesc` field still carries the MCP Description conformance version, so Draft 4 documents remain `mcpdesc: 0.8.0`.
 
 ## Step 2: Add Richer Info
 
@@ -234,7 +236,23 @@ prompts:
   - name: detail_level
     description: "'brief', 'standard', or 'comprehensive'"
     required: false
+  examples:
+    standard:
+      arguments:
+        game_id: example-2026-08-24
+        detail_level: standard
+      result:
+        resultType: complete
+        messages:
+        - role: user
+          content:
+            type: text
+            text: Summarize the game with key turning points.
 ```
+
+Prompt `examples` pair a complete `prompts/get` argument map with one completed Prompt result. When no arguments are supplied, either omit `arguments` or write `arguments: {}`. Keep only the payload from the JSON-RPC response's `result` member. For MCP 2026-07-28, include `resultType: complete`; earlier revisions omit it. Examples are descriptive snapshots, not guarantees of deterministic live output.
+
+Tool `interactionExamples` are for the case where one Tool invocation needs more than a terminal result. Put the initial `tools/call` arguments in `input`, record each elicitation, sampling, or roots exchange as one ordered semantic step, and keep the terminal completed Tool Result in `result`. Do not copy JSON-RPC envelopes, `InputRequiredResult`, `requestState`, task handles, or other runtime correlation data. Split protocol-scoped Tool variants when one interaction shape uses revision-specific fields such as sampling Tool use or MCP 2026-07-28 result fields.
 
 ## Step 6: Validate
 

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "invalid-tool-interaction-example-semantics",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2025-06-18"],
+  "tools": [
+    {
+      "name": "prepare_release",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "version": { "type": "string" }
+        },
+        "required": ["version"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" }
+        },
+        "required": ["status"],
+        "additionalProperties": false
+      },
+      "elicitations": [
+        {
+          "name": "confirm",
+          "mode": "form",
+          "message": "Approve this release?",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "approved": { "type": "boolean" }
+            },
+            "required": ["approved"]
+          }
+        }
+      ],
+      "interactionExamples": {
+        "broken": {
+          "input": {
+            "version": "2.0.0"
+          },
+          "steps": [
+            {
+              "type": "elicitation",
+              "declaration": "missing",
+              "request": {
+                "mode": "url",
+                "message": "Authorize publication.",
+                "url": "https://mcp.example.com/release/connect"
+              },
+              "response": {
+                "action": "accept",
+                "content": {
+                  "approved": true
+                }
+              }
+            },
+            {
+              "type": "elicitation",
+              "declaration": "confirm",
+              "request": {
+                "mode": "form",
+                "message": "Approve this release?",
+                "requestedSchema": {
+                  "type": "object",
+                  "properties": {
+                    "approved": { "type": "string" }
+                  },
+                  "required": ["approved"]
+                }
+              },
+              "response": {
+                "action": "accept",
+                "content": {
+                  "approved": true
+                }
+              }
+            },
+            {
+              "type": "sampling",
+              "request": {
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": {
+                      "type": "text",
+                      "text": "Summarize the release plan."
+                    }
+                  }
+                ],
+                "tools": [
+                  {
+                    "name": "diff_summary",
+                    "inputSchema": {
+                      "type": "object"
+                    }
+                  }
+                ],
+                "maxTokens": 120
+              },
+              "response": {
+                "role": "assistant",
+                "content": {
+                  "type": "text",
+                  "text": "Check the changelog first."
+                },
+                "model": "claude-3-sonnet-20240229",
+                "stopReason": "endTurn"
+              }
+            },
+            {
+              "type": "roots",
+              "request": {},
+              "response": {
+                "roots": [
+                  {
+                    "uri": "https://example.com/not-a-file-root"
+                  }
+                ]
+              }
+            }
+          ],
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "Release preparation completed."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

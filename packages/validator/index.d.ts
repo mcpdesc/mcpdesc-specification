@@ -1,4 +1,4 @@
-export type McpDescriptionSpecification = '0.8.0-draft.1' | '0.8.0-draft.2' | '0.8.0-draft.3';
+export type McpDescriptionSpecification = '0.8.0-draft.1' | '0.8.0-draft.2' | '0.8.0-draft.3' | '0.8.0-draft.4';
 
 export type SupportedProtocolVersion =
   | '2024-11-05'
@@ -38,9 +38,13 @@ export interface SpecificationProvenance {
     readonly snapshotTag: 'v0.8.0-draft.3';
     readonly schemaSha256: '8823c1f1946360b2a44d00920e2092e5e4acd139a1964befad4eb0bf3ce96002';
   };
+  readonly '0.8.0-draft.4': {
+    readonly snapshotTag: 'v0.8.0-draft.4';
+    readonly schemaSha256: '93ed03f74059b5b3ce7509a96b59161bdab2c3cf7734397a9bec5a7588d0b03b';
+  };
 }
 
-export declare const supportedSpecifications: readonly ['0.8.0-draft.1', '0.8.0-draft.2', '0.8.0-draft.3'];
+export declare const supportedSpecifications: readonly ['0.8.0-draft.1', '0.8.0-draft.2', '0.8.0-draft.3', '0.8.0-draft.4'];
 
 export declare const supportedProtocolVersions: readonly [
   '2024-11-05',

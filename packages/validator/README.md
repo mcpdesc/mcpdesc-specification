@@ -2,15 +2,16 @@
 
 Isomorphic structural and semantic validation for immutable MCP Description specification snapshots.
 
-Version `0.3.0` cumulatively supports these immutable snapshots:
+The current repository working tree cumulatively supports these immutable snapshots. Version `0.3.0` is the latest published package metadata; selecting and publishing the next package version requires separate release approval.
 
 | Selector | Tag | Embedded schema SHA-256 |
 |---|---|---|
 | `0.8.0-draft.1` | `v0.8.0-draft.1` | `4ceb6042c3fd31703199cd3db869ec5c35c17d2fe9ab7b2f5b96a2a3af0cebe4` |
 | `0.8.0-draft.2` | `v0.8.0-draft.2` | `ab692c1a5a0f7e5f29be1940aa8c64a56d4620be0a19d00cf0a64680b7e517fa` |
 | `0.8.0-draft.3` | `v0.8.0-draft.3` | `8823c1f1946360b2a44d00920e2092e5e4acd139a1964befad4eb0bf3ce96002` |
+| `0.8.0-draft.4` | `v0.8.0-draft.4` | `93ed03f74059b5b3ce7509a96b59161bdab2c3cf7734397a9bec5a7588d0b03b` |
 
-This cumulative release is intended to receive the npm `latest` dist-tag after the Draft 3 tag and tarball are reviewed. Repository changes alone do not publish the package or create either tag.
+Repository changes alone do not publish the package or create specification or validator tags.
 
 ## Usage
 
@@ -18,7 +19,7 @@ This cumulative release is intended to receive the npm `latest` dist-tag after t
 import { validateMcpDescription } from '@mcpdesc/validator';
 
 const result = validateMcpDescription(parsedDocument, {
-  specification: '0.8.0-draft.3'
+  specification: '0.8.0-draft.4'
 });
 
 if (!result.valid) {
@@ -52,7 +53,7 @@ Structural paths start with AJV's instance path. A `required` error appends its 
 
 ## Support metadata
 
-The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. Public validation dispatches through a registry keyed by exact specification selectors. The current selector set is `0.8.0-draft.1`, `0.8.0-draft.2`, and `0.8.0-draft.3`; the protocol-version export is the deduplicated union supported by those snapshots.
+The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. Public validation dispatches through a registry keyed by exact specification selectors. The current repository selector set is `0.8.0-draft.1`, `0.8.0-draft.2`, `0.8.0-draft.3`, and `0.8.0-draft.4`; the protocol-version export is the deduplicated union supported by those snapshots.
 
 npm package SemVer tracks implementation releases independently from specification snapshot identity. Adding a later snapshot is additive: it must use a sibling implementation and selector rather than changing an existing snapshot's schema, semantics, metadata, fixtures, or results.
 
