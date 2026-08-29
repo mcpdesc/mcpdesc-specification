@@ -2,7 +2,7 @@
 
 Isomorphic structural and semantic validation for immutable MCP Description specification snapshots.
 
-The current repository working tree cumulatively supports these immutable snapshots. Version `0.3.0` is the latest published package metadata; selecting and publishing the next package version requires separate release approval.
+Version `0.4.0` cumulatively supports these immutable snapshots and is intended for npm `latest` after the Draft 4 specification tag and package tarball are reviewed.
 
 | Selector | Tag | Embedded schema SHA-256 |
 |---|---|---|

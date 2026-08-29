@@ -35,7 +35,7 @@ Draft 4 adds the reviewed revisions of Proposals 0015, 0016, 0017, and 0019 as e
 - Added declaration-local Tool interaction examples with ordered elicitation, sampling, and roots steps.
 - Assigned Draft 4 an immutable format-qualified schema identity and added an opt-in live-publication release check.
 - Preserved Draft 3 behavior and proposal inputs; Proposals 0006, 0014, and 0018 remain explicitly excluded.
-- Added an immutable `0.8.0-draft.4` validator selector. Validator package version selection, tagging, and npm publication remain a separate approval step.
+- Added an immutable `0.8.0-draft.4` validator selector and selected cumulative validator version `0.4.0` for npm `latest`, subject to review of the Draft 4 specification tag and package tarball before publication.
 - Require the exact Draft 4 schema bytes to be served directly from the canonical URI and pass publication checks before the snapshot is tagged or announced.
 
 #### Community Working Draft 3 — 2026-08-27 (`v0.8.0-draft.3`)
