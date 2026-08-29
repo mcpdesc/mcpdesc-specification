@@ -126,7 +126,7 @@ The `@mcpdesc/validator` package uses implementation SemVer independently from i
 
 The reviewed specification assembly records the chosen package version, exact selector metadata, schema digests, and intended npm dist-tag. A maintainer creates the specification snapshot tag first, then reviews `npm pack --dry-run --json` from that tag. Publishing an annotated `validator-v<semver>` tag explicitly authorizes the trusted-publishing workflow to publish that exact package version. A SemVer prerelease is published with the npm `next` dist-tag; a stable SemVer is published with `latest`. Repository scripts and other CI workflows MUST NOT create release tags, move npm dist-tags, select package versions, or publish packages.
 
-Validator `0.3.0` cumulatively supports `0.8.0-draft.1`, `0.8.0-draft.2`, and `0.8.0-draft.3` and is published with npm `latest`. Future publication still requires an explicit `validator-v<semver>` tag after specification-tag and tarball review.
+Validator `0.3.0` cumulatively supports `0.8.0-draft.1`, `0.8.0-draft.2`, and `0.8.0-draft.3` and is published with npm `latest`. Validator `0.4.0` adds `0.8.0-draft.4` and is intended for npm `latest`; publication still requires the Draft 4 specification tag, tarball review, and an explicit `validator-v0.4.0` tag.
 
 ## Intellectual property and contributions
 
