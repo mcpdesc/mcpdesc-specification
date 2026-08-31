@@ -1,7 +1,13 @@
 import { execFileSync } from 'node:child_process';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const packageRoot = fileURLToPath(new URL('..', import.meta.url));
+const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const changelog = fs.readFileSync(new URL('../CHANGELOG.md', import.meta.url), 'utf8');
+if (!changelog.includes(`## [${packageJson.version}] - `)) {
+  throw new Error(`CHANGELOG.md has no dated ${packageJson.version} release section`);
+}
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const output = execFileSync(
   npm,
@@ -18,6 +24,7 @@ if (actual.some((filename) => filename.startsWith('scripts/'))) {
 }
 
 const expected = [
+  'CHANGELOG.md',
   'LICENSE',
   'MODIFICATIONS.md',
   'NOTICE',
@@ -25,6 +32,7 @@ const expected = [
   'README.md',
   'index.d.ts',
   'package.json',
+  'standalone.js',
   'src/index.js',
   'src/snapshots/0.8.0-draft.1/index.js',
   'src/snapshots/0.8.0-draft.1/schema.json',
@@ -40,7 +48,11 @@ const expected = [
   'src/snapshots/0.8.0-draft.4/base.js',
   'src/snapshots/0.8.0-draft.4/index.js',
   'src/snapshots/0.8.0-draft.4/schema.json',
-  'src/snapshots/0.8.0-draft.4/semantic.js'
+  'src/snapshots/0.8.0-draft.4/semantic.js',
+  'src/snapshots/0.8.0-rc.1/base.js',
+  'src/snapshots/0.8.0-rc.1/index.js',
+  'src/snapshots/0.8.0-rc.1/schema.json',
+  'src/snapshots/0.8.0-rc.1/semantic.js'
 ].sort();
 
 if (JSON.stringify(actual) !== JSON.stringify(expected)) {

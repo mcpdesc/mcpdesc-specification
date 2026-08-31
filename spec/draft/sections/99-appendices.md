@@ -26,8 +26,8 @@ See [examples/full-featured.yaml](../examples/full-featured.yaml) for a complete
 The normative JSON Schema for this specification version is available at:
 
 - [../../../schemas/mcp-description/0.8.0.json](../../../schemas/mcp-description/0.8.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json` for the current Draft 4 canonical schema resource
-- `https://mcpdesc.org/schema/mcp-description/0.8.0.json` for the future stable 0.8.0 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json` for the Release Candidate 1 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.8.0.json` for the stable 0.8.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.
 

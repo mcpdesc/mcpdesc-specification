@@ -1,6 +1,6 @@
 {
   "name": "@mcpdesc/validator",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Structural and semantic validation for MCP Description snapshots",
   "type": "module",
   "types": "./index.d.ts",
@@ -17,12 +17,18 @@
     ".": {
       "types": "./index.d.ts",
       "import": "./src/index.js"
+    },
+    "./standalone": {
+      "types": "./index.d.ts",
+      "import": "./standalone.js"
     }
   },
   "files": [
     "src/index.js",
     "src/snapshots",
+    "standalone.js",
     "index.d.ts",
+    "CHANGELOG.md",
     "README.md",
     "LICENSE",
     "NOTICE",
@@ -30,12 +36,14 @@
     "MODIFICATIONS.md"
   ],
   "scripts": {
-    "test": "node --test test/*.test.js && npm run test:types && npm run test:browser && npm run test:package",
+    "build:standalone": "node scripts/build-standalone.mjs",
+    "test": "npm run build:standalone && node --test test/*.test.js && npm run test:types && npm run test:browser && npm run test:package",
     "test:browser": "node scripts/check-browser-bundle.mjs",
     "test:package": "node scripts/check-package.mjs",
     "test:types": "tsc --project test/types/tsconfig.json && node scripts/check-declarations.mjs"
   },
   "dependencies": {
+    "@cfworker/json-schema": "^4.1.1",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "uri-template-matcher": "^1.1.2"

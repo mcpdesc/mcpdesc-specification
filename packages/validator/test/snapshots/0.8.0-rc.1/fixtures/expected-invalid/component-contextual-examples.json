@@ -1,0 +1,64 @@
+{
+  "mcpdesc": "0.8.0",
+  "info": { "name": "invalid-component-examples", "version": "1.0.0" },
+  "protocolVersions": ["2026-07-28"],
+  "components": {
+    "schemas": {
+      "Input": {
+        "type": "object",
+        "properties": { "query": { "type": "string" } },
+        "required": ["query"]
+      },
+      "Output": {
+        "type": "object",
+        "properties": { "count": { "type": "integer" } },
+        "required": ["count"]
+      }
+    },
+    "toolExamples": {
+      "bad-input": {
+        "input": { "query": 42 },
+        "result": {
+          "resultType": "complete",
+          "content": [],
+          "structuredContent": { "count": "one" }
+        }
+      }
+    },
+    "resourceTemplateExamples": {
+      "bad-uri": {
+        "uri": "data://other/1",
+        "result": {
+          "resultType": "complete",
+          "ttlMs": 1,
+          "cacheScope": "private",
+          "contents": [{ "uri": "data://other/1", "text": "wrong" }]
+        }
+      }
+    },
+    "promptExamples": {
+      "bad-arguments": {
+        "arguments": { "rogue": "oops" },
+        "result": {
+          "resultType": "complete",
+          "messages": [{ "role": "user", "content": { "type": "text", "text": "Hello." } }]
+        }
+      }
+    }
+  },
+  "tools": [{
+    "name": "search",
+    "inputSchema": { "$componentRef": "#/components/schemas/Input" },
+    "outputSchema": { "$componentRef": "#/components/schemas/Output" },
+    "examples": { "bad": { "$componentRef": "#/components/toolExamples/bad-input" } }
+  }],
+  "resourceTemplates": [{
+    "uriTemplate": "data://items/{id}",
+    "name": "item",
+    "examples": { "bad": { "$componentRef": "#/components/resourceTemplateExamples/bad-uri" } }
+  }],
+  "prompts": [{
+    "name": "greeting",
+    "examples": { "bad": { "$componentRef": "#/components/promptExamples/bad-arguments" } }
+  }]
+}

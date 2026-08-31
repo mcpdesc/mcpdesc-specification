@@ -1,4 +1,4 @@
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json
 mcpdesc: 0.8.0
 info:
   name: chess-coach
@@ -548,39 +548,3 @@ tags:
   description: Game records, history, leaderboards, and search
 - name: reference
   description: Reference material, openings, and study guides
-x-cisco-metadata:
-  version: 0.2.0
-  dump:
-    toolName: mcpcontract
-    toolVersion: 0.8.0
-    createdAt: '2026-03-15T14:30:00Z'
-    serverConfig:
-      name: chess-coach
-      transport: streamable-http
-      url: https://chess-coach.example.com/mcp
-    runtimeObservations:
-      mcpProtocolUsed: '2025-06-18'
-      sessionIdSupported: true
-      sessionIdHeader: Mcp-Session-Id
-      pingSupported: true
-      pingLatencyMs: 42
-      instructions: Chess Coach MCP Server - analyze games, track ratings, explore game
-        history. Use analyze_game for PGN analysis, get_player_rating for Elo lookups.
-    cors:
-      browserReady: true
-      responseHeaders:
-        accessControlAllowOrigin: "*"
-        accessControlExposeHeaders:
-        - Mcp-Session-Id
-      preflight:
-        tested: true
-        status: 204
-        accessControlAllowOrigin: "*"
-        accessControlAllowMethods:
-        - GET
-        - POST
-        - DELETE
-        accessControlAllowHeaders:
-        - Content-Type
-        - Authorization
-        - Mcp-Session-Id

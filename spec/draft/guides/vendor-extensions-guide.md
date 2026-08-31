@@ -15,8 +15,8 @@ x-{organization}-{feature}
 ```
 
 Examples:
-- `x-cisco-metadata` — Cisco runtime observations
 - `x-acme-deployment` — deployment metadata
+- `x-example-runtime-observations` — runtime observations
 - `x-myorg-compliance` — governance tags
 
 ## Where Extensions Go
@@ -100,13 +100,9 @@ Implementations that encounter extensions they don't recognize:
 - **MUST NOT** infer core semantics from or modify values they don't understand
 - **MUST** preserve them on retained owners during projection and must not silently discard conflicting values during merge
 
-## Known Extensions
+## Extension Registries
 
-| Extension | Maintainer | Purpose |
-|-----------|-----------|---------|
-| `x-cisco-metadata` | Cisco DevNet | Runtime observations, CORS detection, dump provenance |
-
-See [extensions/](../extensions/) for full specifications of registered extensions.
+The core specification does not register or endorse particular vendor extensions. Extension authors may publish schemas and documentation independently at stable URLs.
 
 ## Best Practices
 

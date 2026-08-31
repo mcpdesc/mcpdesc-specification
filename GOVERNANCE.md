@@ -19,7 +19,7 @@ The MCP Toolkit and `mcpcontract` implementation remain in `cisco-open/mcptoolki
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | `cisco-open/mcptoolkit-contract` |
-| 0.8.0 | Community Working Draft 4 (`v0.8.0-draft.4`; unreleased) | `mcpdesc/mcpdesc-specification` |
+| 0.8.0 | Release Candidate 1 (`v0.8.0-rc.1`; prerelease) | `mcpdesc/mcpdesc-specification` |
 
 The v0.8.0 draft is not a stable specification release. Draft snapshot tags publish specific review and interoperability baselines without satisfying the stable-release approval requirements.
 
@@ -117,6 +117,7 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 - `schemas/latest.json` identifies the latest stable schema, not the active draft.
 - Draft status may be represented separately in `schemas/draft.json` and `specification-status.json`.
 - Maintainers may publish annotated draft snapshot tags named `v<version>-draft.<iteration>` for community feedback. A draft snapshot does not change the `mcpdesc` conformance version, freeze `spec/draft/`, update `schemas/latest.json`, or satisfy the approval requirements for a stable release.
+- Maintainers may publish annotated release-candidate tags named `v<version>-rc.<iteration>` after selecting a draft baseline for final interoperability and release review. A release candidate remains a prerelease: it does not update `schemas/latest.json`, freeze a stable version folder, or imply acceptance of review-stage proposals. Each candidate uses its own immutable schema identity and must pass the same publication checks as Draft 4 and later snapshots before tagging.
 - For Draft 4 and later, once the canonical schema URL is live, maintainers MUST run `npm run release:check -- draft-publication` before tagging a public draft snapshot so the canonical URI, immutable bytes, direct-serving policy, and required publication metadata are verified.
 - Releases require passing validation, updated normative text and schemas, examples, changelog and migration guidance, an explicit maintainer decision, and an annotated version tag.
 
@@ -126,7 +127,9 @@ The `@mcpdesc/validator` package uses implementation SemVer independently from i
 
 The reviewed specification assembly records the chosen package version, exact selector metadata, schema digests, and intended npm dist-tag. A maintainer creates the specification snapshot tag first, then reviews `npm pack --dry-run --json` from that tag. Publishing an annotated `validator-v<semver>` tag explicitly authorizes the trusted-publishing workflow to publish that exact package version. A SemVer prerelease is published with the npm `next` dist-tag; a stable SemVer is published with `latest`. Repository scripts and other CI workflows MUST NOT create release tags, move npm dist-tags, select package versions, or publish packages.
 
-Validator `0.3.0` cumulatively supports `0.8.0-draft.1`, `0.8.0-draft.2`, and `0.8.0-draft.3` and is published with npm `latest`. Validator `0.4.0` adds `0.8.0-draft.4` and is intended for npm `latest`; publication still requires the Draft 4 specification tag, tarball review, and an explicit `validator-v0.4.0` tag.
+Validator `0.4.0` cumulatively supports `0.8.0-draft.1` through `0.8.0-draft.4` and was published with npm `latest` on 2026-08-29. Later validator changes require a separately reviewed package version and publication tag.
+
+Validator `0.5.0` adds the immutable `0.8.0-rc.1` selector, schema-identity resolution, and the strict-CSP standalone entry. It is prepared for npm `latest` after the RC.1 specification tag, tarball review, and explicit `validator-v0.5.0` publication tag.
 
 ## Intellectual property and contributions
 

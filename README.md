@@ -9,18 +9,18 @@ A portable, machine-readable contract format for describing Model Context Protoc
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
-| 0.8.0 | Community Working Draft 4 (`v0.8.0-draft.4`; unreleased) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
+| 0.8.0 | Release Candidate 1 (`v0.8.0-rc.1`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
-Draft 4 is the current in-review interoperability snapshot of v0.8.0. It remains subject to further review and incompatible change; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact design-input revisions represented and excluded after review. The cumulative `@mcpdesc/validator` 0.4.0 package supports the immutable Draft 1 through Draft 4 snapshots and is intended for npm `latest` after the Draft 4 specification tag and tarball are reviewed.
+Release Candidate 1 is based on the Draft 4 interoperability snapshot plus editorial cleanup. It remains a prerelease and does not update `schemas/latest.json`; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact Draft 4 design-input revisions represented and excluded after review. The cumulative `@mcpdesc/validator` 0.5.0 package is prepared with immutable Draft 1 through Draft 4 and RC.1 selectors plus a strict-CSP standalone entry.
 
 ## Repository roles
 
 - `main` is the integration branch and the default view of the project. It carries every released specification version as a folder under `spec/`, plus the in-progress `spec/draft/`, so work in progress is visible without switching branches.
 - Feature branches (for example `feature/support-meta` or `feature/support-mcp-2026-07-28`) target `main` via pull request and change `spec/draft/`.
 - Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`); `spec/draft/` is then re-initialized from that snapshot.
-- `schemas/latest.json` continues to identify v0.7.0 until v0.8.0 is explicitly released.
+- `schemas/latest.json` continues to identify v0.7.0 until stable v0.8.0 is explicitly released.
 
 ## Project identity
 

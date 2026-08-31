@@ -24,6 +24,18 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 This section tracks changes for the MCP Description v0.8.0 Community Working Draft. It is under active proposal review, implementation, and interoperability testing and is **not** a released specification. The current stable release remains v0.7.0, whose canonical source is `cisco-open/mcptoolkit-contract`. `schemas/latest.json` remains pinned to 0.7.0.
 
+### Release candidates
+
+#### Release Candidate 1 — 2026-08-31 (`v0.8.0-rc.1`)
+
+Release Candidate 1 selects Community Working Draft 4 as its baseline for final interoperability and release review. It adds no normative features.
+
+- Removed the bundled Cisco-specific extension documentation and CLI dump metadata from active draft examples; current specification examples use vendor-neutral extension identifiers.
+- Assigned the immutable release-candidate schema identity `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json` while keeping `mcpdesc: 0.8.0` and `schemas/latest.json` on stable 0.7.0.
+- Added release-candidate preparation, metadata validation, and canonical schema publication checks. Exact schema bytes must be published and verified before the candidate is tagged.
+- Added an `@mcpdesc/validator/standalone` browser entry for strict Content Security Policies, without runtime code generation or network schema retrieval.
+- Added the immutable `0.8.0-rc.1` validator selector and selected cumulative validator version `0.5.0` for npm `latest`, subject to RC.1 tagging and package tarball review before publication.
+
 ### Draft snapshots
 
 #### Community Working Draft 4 — 2026-08-28 (`v0.8.0-draft.4`)
@@ -88,7 +100,7 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - Root `instructions` for durable model-facing server guidance.
 - Formal MCP `capabilities.extensions` declarations.
 - Primitive-level security overrides, OAuth/OpenID Connect scopes, anonymous alternatives, and explicit clearing.
-- Structural 0.8.0 JSON Schema at `schemas/mcp-description/0.8.0.json` using the canonical `$id` `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`.
+- Structural 0.8.0 JSON Schema at `schemas/mcp-description/0.8.0.json`; each public prerelease assigns its own immutable canonical `$id`.
 - Canonical MCP Description schema URI families under `https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json`, with distinct roles for instance `$schema`, schema `$id`, and schema-dialect `$schema`.
 - Semantic validation for protocol coverage, scope containment and overlap, security references, tags, and revision-specific fields.
 - Shared structural and semantic validation used by repository checks, projection, and merge tooling, including validation of every view input and output.
@@ -135,6 +147,7 @@ The [proposal revision manifest](PROPOSALS.md) records the exact proposal conten
 - Defined MCP 2025-06-18 as the floor for complete revision-specific semantic conformance; MCP 2024-11-05 and MCP 2025-03-26 remain recognized legacy compatibility revisions with incomplete-validation diagnostics.
 - Distinguished literal MCP `_meta` from root `x-*` specification extensions and MCP `capabilities.extensions`; reusable metadata schemas remain outside Proposal 0002.
 - Clarified that tags are document-wide supplemental metadata, remain unscoped across Effective Protocol Views, and do not extend to nested Elicitation Declarations; corrected explicit empty tag catalogues to reject all tag references.
+- Removed the bundled vendor-specific extension package and CLI dump metadata from active draft examples; the core specification remains vendor-neutral and does not register or endorse particular extensions.
 
 ### Deferred
 

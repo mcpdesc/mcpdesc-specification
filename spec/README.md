@@ -7,8 +7,8 @@ A portable, machine-readable contract format for [Model Context Protocol (MCP)](
 > Open [`mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec)
 > repository, which also provides the reference tooling (`mcpcontract`). This
 > repository, [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification),
-> is the development home for the **0.8.0 Community Working Draft 4**
-> (`v0.8.0-draft.4`). Implementations
+> is the development home for the **0.8.0 Release Candidate 1**
+> (`v0.8.0-rc.1`). Implementations
 > vendor a single schema version from [`../schemas/mcp-description/`](../schemas/mcp-description/)
 > and upgrade when the format advances.
 
@@ -23,7 +23,7 @@ Think of it as **OpenAPI for MCP servers**: a static contract that enables disco
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
-| 0.8.0 | Community Working Draft 4 (`v0.8.0-draft.4`; unreleased) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) (experimental) |
+| 0.8.0 | Release Candidate 1 (`v0.8.0-rc.1`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) (prerelease) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
 The exact proposal revisions represented by Draft 4 are recorded in its [`draft/PROPOSALS.md`](draft/PROPOSALS.md) manifest.
@@ -63,7 +63,7 @@ lives in `draft/`; when it is released it is frozen into a version folder
 
 ```
 spec/
-  draft/               In-progress working draft (currently 0.8.0)
+  draft/               Active prerelease (currently 0.8.0-rc.1)
     mcp-description.md  Assembled normative specification text
     sections/          Normative specification, section by section
     guides/            Rationale, tutorials, and comparisons (non-normative)
@@ -97,7 +97,7 @@ Versioned JSON Schemas live at the repository root under
 
 ## Specification Extensions
 
-Vendors can attach additional metadata using the `x-{vendor}-{feature}` convention. See [draft/extensions/](draft/extensions/) for registered extensions.
+Vendors can attach additional metadata using the `x-{vendor}-{feature}` convention. The core specification does not register or endorse particular extensions.
 
 ## Contributing
 

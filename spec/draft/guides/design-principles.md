@@ -69,7 +69,7 @@ The specification distinguishes between:
 | **Metadata** | Who built it and how | Authors, generation metadata |
 | **Observation** | What was discovered at runtime | Latency, CORS support, session behavior |
 
-Server-surface declarations live in the core specification. Source-specific generation metadata and runtime diagnostics belong in extensions such as `x-cisco-metadata`. An observed view need not claim a server's exhaustive surface.
+Server-surface declarations live in the core specification. Source-specific generation metadata and runtime diagnostics belong in extensions such as `x-example-runtime-observations`. An observed view need not claim a server's exhaustive surface.
 
 ## 7. Offline-First
 

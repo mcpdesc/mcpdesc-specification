@@ -2,7 +2,7 @@
 
 Isomorphic structural and semantic validation for immutable MCP Description specification snapshots.
 
-Version `0.4.0` cumulatively supports these immutable snapshots and is intended for npm `latest` after the Draft 4 specification tag and package tarball are reviewed.
+Version `0.5.0` cumulatively supports these immutable snapshots and is prepared for npm `latest` after the RC.1 specification tag and package tarball are reviewed.
 
 | Selector | Tag | Embedded schema SHA-256 |
 |---|---|---|
@@ -10,6 +10,7 @@ Version `0.4.0` cumulatively supports these immutable snapshots and is intended 
 | `0.8.0-draft.2` | `v0.8.0-draft.2` | `ab692c1a5a0f7e5f29be1940aa8c64a56d4620be0a19d00cf0a64680b7e517fa` |
 | `0.8.0-draft.3` | `v0.8.0-draft.3` | `8823c1f1946360b2a44d00920e2092e5e4acd139a1964befad4eb0bf3ce96002` |
 | `0.8.0-draft.4` | `v0.8.0-draft.4` | `93ed03f74059b5b3ce7509a96b59161bdab2c3cf7734397a9bec5a7588d0b03b` |
+| `0.8.0-rc.1` | `v0.8.0-rc.1` | `936a0f24ade501fcabf3d6498c0440c445daa672a575573a35954cee49430ac4` |
 
 Repository changes alone do not publish the package or create specification or validator tags.
 
@@ -19,7 +20,7 @@ Repository changes alone do not publish the package or create specification or v
 import { validateMcpDescription } from '@mcpdesc/validator';
 
 const result = validateMcpDescription(parsedDocument, {
-  specification: '0.8.0-draft.4'
+  specification: '0.8.0-rc.1'
 });
 
 if (!result.valid) {
@@ -29,7 +30,50 @@ if (!result.valid) {
 
 Callers provide an already parsed JavaScript value. JSON and YAML parsing are outside this package.
 
-The `options` argument and exact `specification` selector are required. The unqualified selector `0.8.0` is intentionally unsupported because draft iterations are immutable compatibility contracts.
+The `options` argument and exact `specification` selector are required. The unqualified selector `0.8.0` is intentionally unsupported because draft and release-candidate iterations are immutable compatibility contracts.
+
+### Strict CSP browsers
+
+Browser applications that prohibit dynamic code generation can use the CSP-safe standalone entry:
+
+```js
+import { validateMcpDescription } from '@mcpdesc/validator/standalone';
+```
+
+It has the same synchronous API, selectors, diagnostics, and offline external-reference behavior as the default entry. Fixed MCP Description schemas and JSON Schema meta-schemas are precompiled during package development; document-provided Tool and Elicitation schemas use the package's interpreted JSON Schema dependency, so the shipped file contains no `eval` or `new Function`. This compatibility entry is larger and slower than the default AJV-based entry and is JavaScript, not WASM.
+
+## Snapshot resolution
+
+`resolveMcpDescriptionSpecification` resolves an exact validator selector from
+the document's `$schema` identity or checks a caller-supplied exact selector:
+
+```js
+import { resolveMcpDescriptionSpecification } from '@mcpdesc/validator';
+
+const resolution = resolveMcpDescriptionSpecification(parsedDocument);
+if (resolution.status === 'resolved') {
+  console.log(resolution.specification, resolution.provenance);
+} else {
+  console.error(resolution.diagnostics);
+}
+```
+
+Resolution is pure and performs no network retrieval. It does not validate the
+document and never infers a draft snapshot from `mcpdesc: "0.8.0"` alone.
+Draft 4's format-qualified schema URI resolves uniquely. Drafts 1 through 3
+share the legacy `https://mcpdesc.org/schema/0.8.0.json` URI, so that URI is
+ambiguous unless the caller supplies a consistent exact selector:
+
+```js
+const resolution = resolveMcpDescriptionSpecification(parsedDocument, {
+  specification: '0.8.0-draft.3'
+});
+```
+
+Unresolved results distinguish missing, invalid, unknown, ambiguous, and
+contradictory identity, as well as unsupported caller selectors. A supplied
+selector can resolve a document with no `$schema`; when `$schema` is present it
+must match the selected snapshot's recorded schema URI.
 
 ## Result
 
@@ -53,11 +97,11 @@ Structural paths start with AJV's instance path. A `required` error appends its 
 
 ## Support metadata
 
-The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. Public validation dispatches through a registry keyed by exact specification selectors. The current repository selector set is `0.8.0-draft.1`, `0.8.0-draft.2`, `0.8.0-draft.3`, and `0.8.0-draft.4`; the protocol-version export is the deduplicated union supported by those snapshots.
+The package exports frozen `supportedSpecifications`, `supportedProtocolVersions`, and `specificationProvenance` values. Provenance records include the snapshot tag, recorded schema URI, and embedded schema SHA-256 digest. Public validation dispatches through a registry keyed by exact specification selectors. The current repository selector set is `0.8.0-draft.1`, `0.8.0-draft.2`, `0.8.0-draft.3`, `0.8.0-draft.4`, and `0.8.0-rc.1`; the protocol-version export is the deduplicated union supported by those snapshots.
 
 npm package SemVer tracks implementation releases independently from specification snapshot identity. Adding a later snapshot is additive: it must use a sibling implementation and selector rather than changing an existing snapshot's schema, semantics, metadata, fixtures, or results.
 
-The runtime bundles its schema, performs no network fetches for external schema references, and imports no Node.js built-ins. Unresolved external Tool-schema references produce incomplete-validation warnings and are preserved. The same ESM entry point supports Node.js 20 or later and browser bundlers.
+The runtime bundles its schema, performs no network fetches for external schema references, and imports no Node.js built-ins. Unresolved external Tool-schema references produce incomplete-validation warnings and are preserved. Both ESM entry points support Node.js 20 or later and browser bundlers.
 
 ## Snapshot lifecycle
 
@@ -65,7 +109,7 @@ For each approved specification snapshot, maintainers:
 
 1. Add a versioned implementation under `src/snapshots/<selector>/` with its exact selector, snapshot tag, embedded schema, schema SHA-256 digest, and semantic rules. Existing snapshot directories remain unchanged.
 2. Freeze the matching fixture corpus under `test/snapshots/<selector>/fixtures/`. Package tests must not read mutable `spec/draft/fixtures/` for an already published selector.
-3. Add the exact selector to the runtime registry and update support metadata, TypeScript declarations, tests, and expected package contents. Unqualified versions, aliases, ranges, and not-yet-published selectors remain unsupported.
+3. Add the exact selector to the runtime registry and update support metadata, TypeScript declarations, tests, the package changelog, and expected package contents. Unqualified versions, aliases, ranges, and not-yet-published selectors remain unsupported.
 4. Run the package and repository validation suites. The schema digest, immutable metadata, fixture behavior, browser bundle, declarations, and tarball contents must all pass.
 
 The test snapshots are repository-only development assets and are excluded from the npm tarball. Runtime snapshot implementations and embedded schemas do ship so installed packages remain self-contained.
