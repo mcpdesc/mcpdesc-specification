@@ -42,7 +42,7 @@ For example, one document conforming to MCP Description 0.8.0 can describe both 
 
 `$schema` identifies one structural JSON Schema resource for editor tooling and instance-shape validation. `mcpdesc` identifies the MCP Description format and conformance version of the instance document itself.
 
-For the current unreleased Draft 4 work, the recommended `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`, while `mcpdesc` remains `0.8.0`. A future stable 0.8.0 release will change the recommended `$schema` URI to the stable canonical schema without changing the role of `mcpdesc`.
+For Release Candidate 1, the recommended `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`, while `mcpdesc` remains `0.8.0`. The stable 0.8.0 release will change the recommended `$schema` URI to the stable canonical schema without changing the role of `mcpdesc`.
 
 ### How can one document describe multiple MCP revisions?
 
@@ -81,7 +81,7 @@ Generation does not make a description complete or authoritative. Generators mus
 
 Use the schema for the declared `mcpdesc` version and apply that version's semantic validation rules. Schema validation alone cannot enforce cross-object rules such as protocol coverage, scoped uniqueness, revision-specific fields, security references, or example consistency.
 
-For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json"` for editor support and use the repository validation workflow for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional.
+For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json"` for editor support and use the repository validation workflow for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional.
 
 ### Should a consumer automatically retrieve any `$schema` URL it sees?
 

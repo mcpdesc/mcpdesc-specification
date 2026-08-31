@@ -1,12 +1,13 @@
 ---
 title: MCP Description Specification
 version: 0.8.0
-status: Community working draft 4
-draft-iteration: 4
-snapshot-tag: v0.8.0-draft.4
+status: Release candidate 1
+release-candidate-iteration: 1
+snapshot-tag: v0.8.0-rc.1
 released: false
 baseline: 0.7.0
-date: 2026-08-28
+baseline-snapshot: v0.8.0-draft.4
+date: 2026-08-31
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
@@ -18,13 +19,13 @@ editors:
 
 # MCP Description Specification
 
-**Version**: 0.8.0 (community working draft 4; `v0.8.0-draft.4`)
+**Version**: 0.8.0 (release candidate 1; `v0.8.0-rc.1`)
 
-**Status**: Community working draft 4 — not released
+**Status**: Release candidate 1 — prerelease
 
 **Baseline**: v0.7.0
 
-**Date**: 2026-08-28
+**Date**: 2026-08-31
 
 ## Abstract
 
@@ -34,7 +35,7 @@ An MCP Description declares supported MCP protocol revisions, instructions, tran
 
 ## Status of This Document
 
-This document is **Community Working Draft 4** for MCP Description v0.8.0, identified by snapshot tag `v0.8.0-draft.4`. The snapshot label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a released specification and may change during proposal review, implementation, and interoperability testing. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by this draft are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is **Release Candidate 1** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.1` and based on Community Working Draft 4. The prerelease label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a stable release and may change before final release as review and interoperability testing conclude. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by the Draft 4 baseline are recorded in the [proposal revision manifest](../PROPOSALS.md).
 
 ## 1. Introduction
 
@@ -228,7 +229,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json",
   "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-rating-server",
@@ -254,7 +255,7 @@ Every MCP Description document MUST include a `mcpdesc` property at the root lev
 
 ### 4.2 Version Format
 
-The `mcpdesc` value MUST identify the specification version against which conformance is assessed. This Community Working Draft uses `"0.8.0"` and is not a stable release.
+The `mcpdesc` value MUST identify the specification version against which conformance is assessed. This release candidate uses `"0.8.0"` and is not a stable release.
 
 The specification uses [Semantic Versioning](https://semver.org/) for its own version numbers. Before 1.0.0, a minor release MAY contain breaking changes; after 1.0.0, ordinary Semantic Versioning compatibility rules apply.
 
@@ -271,11 +272,11 @@ The root `$schema` property remains optional. When present, it SHOULD identify t
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json
 mcpdesc: 0.8.0
 ```
 
-The draft snapshot label in `$schema` does not change the MCP Description conformance version. Draft 4 documents remain `mcpdesc: 0.8.0`.
+The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 1 documents remain `mcpdesc: 0.8.0`.
 
 ### 4.4 Canonical Schema URI Families
 
@@ -285,7 +286,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public draft snapshot uses the target version followed by its draft iteration, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -295,7 +296,7 @@ Every canonical schema URI MUST identify exactly one immutable sequence of schem
 
 Once publicly published, a canonical schema resource MUST NOT be replaced with different bytes, even to correct an error or non-normative description. Every byte change requires a new stable version, draft snapshot, or separately versioned errata resource according to the governing format's compatibility policy.
 
-Draft 4 and every later public draft snapshot MUST use a snapshot-specific root `$id`. The eventual stable 0.8.0 schema MUST use `https://mcpdesc.org/schema/mcp-description/0.8.0.json` and MUST NOT reuse a draft URI or the legacy short URI.
+Draft 4 and every later public prerelease MUST use a prerelease-specific root `$id`. The stable 0.8.0 schema MUST use `https://mcpdesc.org/schema/mcp-description/0.8.0.json` and MUST NOT reuse a prerelease URI or the legacy short URI.
 
 ### 4.6 Live Publication and Aliases
 
@@ -1660,7 +1661,7 @@ Specification extension properties MUST match the pattern `^x-`. Names are case-
 x-{organization}-{feature}
 ```
 
-Authors SHOULD use lowercase organization prefixes. Examples include `x-cisco-metadata`, `x-acme-owner`, and `x-example-cost-profile`.
+Authors SHOULD use lowercase organization prefixes. Examples include `x-acme-owner`, `x-example-runtime-observations`, and `x-example-cost-profile`.
 
 ### 14.2 Extension Placement
 
@@ -1839,10 +1840,10 @@ String values MUST be valid JSON strings after decoding. URI values MUST conform
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For the current unreleased 0.8.0 Draft 4 working schema, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`. A future stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
+For 0.8.0 Release Candidate 1, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`. The stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json
 mcpdesc: 0.8.0
 ```
 
@@ -2010,8 +2011,8 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.8.0.json](../../schemas/mcp-description/0.8.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json` for the current Draft 4 canonical schema resource
-- `https://mcpdesc.org/schema/mcp-description/0.8.0.json` for the future stable 0.8.0 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json` for the Release Candidate 1 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.8.0.json` for the stable 0.8.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.
 

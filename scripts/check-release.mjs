@@ -4,6 +4,8 @@
 // Usage:
 //   node scripts/check-release.mjs draft
 //   node scripts/check-release.mjs draft-publication
+//   node scripts/check-release.mjs rc
+//   node scripts/check-release.mjs rc-publication
 //   node scripts/check-release.mjs validator
 //   node scripts/check-release.mjs stable 0.8.0
 //   node scripts/check-release.mjs all
@@ -77,16 +79,18 @@ function expectIncludes(source, value, label) {
   if (!source.includes(value)) fail(`${label}: missing ${JSON.stringify(value)}`);
 }
 
-function checkDraft() {
+function checkPrerelease(expectedStatus) {
   const status = readJson('specification-status.json');
   const draft = readJson('schemas/draft.json');
   const section = frontMatter('spec/draft/sections/00-front-matter.md');
   const assembled = frontMatter('spec/draft/mcp-description.md');
   if (!status?.draft || !draft) return;
 
-  const { version, iteration, snapshotTag, snapshotDate } = status.draft;
+  const { version, status: prereleaseStatus, iteration, snapshotTag, snapshotDate, baselineTag } = status.draft;
+  expectEqual(prereleaseStatus, expectedStatus, 'specification-status.json draft status');
   const iterationText = String(iteration);
-  const expectedTag = `v${version}-draft.${iteration}`;
+  const isReleaseCandidate = prereleaseStatus === 'release-candidate';
+  const expectedTag = `v${version}-${isReleaseCandidate ? 'rc' : 'draft'}.${iteration}`;
   expectEqual(snapshotTag, expectedTag, 'specification-status.json draft snapshotTag');
   expectEqual(status.draft.released, false, 'specification-status.json draft released');
   expectEqual(draft['mcp-description'], version, 'schemas/draft.json mcp-description');
@@ -94,25 +98,30 @@ function checkDraft() {
   expectEqual(draft.snapshotTag, snapshotTag, 'schemas/draft.json snapshotTag');
   expectEqual(draft.snapshotDate, snapshotDate, 'schemas/draft.json snapshotDate');
   expectEqual(draft.released, false, 'schemas/draft.json released');
+  expectEqual(draft.status, prereleaseStatus, 'schemas/draft.json status');
+  if (isReleaseCandidate) expectEqual(draft.baselineTag, baselineTag, 'schemas/draft.json baselineTag');
 
   for (const [label, metadata] of [
     ['spec/draft/sections/00-front-matter.md', section],
     ['spec/draft/mcp-description.md', assembled]
   ]) {
     expectEqual(metadata.version, version, `${label} version`);
-    expectEqual(metadata['draft-iteration'], iterationText, `${label} draft-iteration`);
+    const iterationField = isReleaseCandidate ? 'release-candidate-iteration' : 'draft-iteration';
+    expectEqual(metadata[iterationField], iterationText, `${label} ${iterationField}`);
     expectEqual(metadata['snapshot-tag'], snapshotTag, `${label} snapshot-tag`);
     expectEqual(metadata.released, 'false', `${label} released`);
     expectEqual(metadata.date, snapshotDate, `${label} date`);
   }
 
-  const statusLabel = `Community Working Draft ${iteration}`;
-  expectIncludes(readText('README.md'), `${statusLabel} (\`${snapshotTag}\`; unreleased)`, 'README.md');
-  expectIncludes(readText('spec/README.md'), `${statusLabel} (\`${snapshotTag}\`; unreleased)`, 'spec/README.md');
-  expectIncludes(readText('GOVERNANCE.md'), `${statusLabel} (\`${snapshotTag}\`; unreleased)`, 'GOVERNANCE.md');
-  expectIncludes(readText('spec/draft/PROPOSALS.md'), `MCP Description ${version} Draft ${iteration}`, 'spec/draft/PROPOSALS.md');
+  const statusLabel = isReleaseCandidate ? `Release Candidate ${iteration}` : `Community Working Draft ${iteration}`;
+  const releaseLabel = isReleaseCandidate ? 'prerelease' : 'unreleased';
+  expectIncludes(readText('README.md'), `${statusLabel} (\`${snapshotTag}\`; ${releaseLabel})`, 'README.md');
+  expectIncludes(readText('spec/README.md'), `${statusLabel} (\`${snapshotTag}\`; ${releaseLabel})`, 'spec/README.md');
+  expectIncludes(readText('GOVERNANCE.md'), `${statusLabel} (\`${snapshotTag}\`; ${releaseLabel})`, 'GOVERNANCE.md');
+  const baselineIteration = isReleaseCandidate ? Number(/-draft\.(\d+)$/.exec(baselineTag ?? '')?.[1]) : iteration;
+  expectIncludes(readText('spec/draft/PROPOSALS.md'), `MCP Description ${version} Draft ${baselineIteration}`, 'spec/draft/PROPOSALS.md');
   expectIncludes(readText('spec/draft/CHANGELOG.md'), `${statusLabel} — ${snapshotDate} (\`${snapshotTag}\`)`, 'spec/draft/CHANGELOG.md');
-  console.log(`Checked draft ${version} iteration ${iteration} (${snapshotTag}).`);
+  console.log(`Checked ${statusLabel.toLowerCase()} for ${version} (${snapshotTag}).`);
 }
 
 async function checkDraftPublication() {
@@ -210,11 +219,13 @@ function checkStable() {
 }
 
 async function main() {
-  if (!['all', 'draft', 'draft-publication', 'validator', 'stable'].includes(mode)) {
-    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, validator, or stable`);
+  if (!['all', 'draft', 'draft-publication', 'rc', 'rc-publication', 'validator', 'stable'].includes(mode)) {
+    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, rc, rc-publication, validator, or stable`);
   } else {
-    if (mode === 'all' || mode === 'draft') checkDraft();
-    if (mode === 'draft-publication') await checkDraftPublication();
+    if (mode === 'draft') checkPrerelease('community-working-draft');
+    if (mode === 'rc') checkPrerelease('release-candidate');
+    if (mode === 'all') checkPrerelease(readJson('specification-status.json')?.draft?.status);
+    if (mode === 'draft-publication' || mode === 'rc-publication') await checkDraftPublication();
     if (mode === 'all' || mode === 'validator') checkValidator();
     if (mode === 'stable') checkStable();
   }

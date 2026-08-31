@@ -12,7 +12,7 @@ Every MCP Description document MUST include a `mcpdesc` property at the root lev
 
 ### 4.2 Version Format
 
-The `mcpdesc` value MUST identify the specification version against which conformance is assessed. This Community Working Draft uses `"0.8.0"` and is not a stable release.
+The `mcpdesc` value MUST identify the specification version against which conformance is assessed. This release candidate uses `"0.8.0"` and is not a stable release.
 
 The specification uses [Semantic Versioning](https://semver.org/) for its own version numbers. Before 1.0.0, a minor release MAY contain breaking changes; after 1.0.0, ordinary Semantic Versioning compatibility rules apply.
 
@@ -29,11 +29,11 @@ The root `$schema` property remains optional. When present, it SHOULD identify t
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json
 mcpdesc: 0.8.0
 ```
 
-The draft snapshot label in `$schema` does not change the MCP Description conformance version. Draft 4 documents remain `mcpdesc: 0.8.0`.
+The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 1 documents remain `mcpdesc: 0.8.0`.
 
 ### 4.4 Canonical Schema URI Families
 
@@ -43,7 +43,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public draft snapshot uses the target version followed by its draft iteration, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -53,7 +53,7 @@ Every canonical schema URI MUST identify exactly one immutable sequence of schem
 
 Once publicly published, a canonical schema resource MUST NOT be replaced with different bytes, even to correct an error or non-normative description. Every byte change requires a new stable version, draft snapshot, or separately versioned errata resource according to the governing format's compatibility policy.
 
-Draft 4 and every later public draft snapshot MUST use a snapshot-specific root `$id`. The eventual stable 0.8.0 schema MUST use `https://mcpdesc.org/schema/mcp-description/0.8.0.json` and MUST NOT reuse a draft URI or the legacy short URI.
+Draft 4 and every later public prerelease MUST use a prerelease-specific root `$id`. The stable 0.8.0 schema MUST use `https://mcpdesc.org/schema/mcp-description/0.8.0.json` and MUST NOT reuse a prerelease URI or the legacy short URI.
 
 ### 4.6 Live Publication and Aliases
 

@@ -50,15 +50,19 @@ The helpers automate only reproducible file generation and consistency checks:
 
 ```bash
 npm run release:prepare -- draft.4 2026-09-15
+npm run release:prepare -- rc.1 2026-09-30
 npm run release:prepare -- validator 0.8.0-draft.4
+npm run release:prepare -- validator 0.8.0-rc.1
 npm run release:prepare -- stable 0.8.0
 
 npm run release:check -- draft
+npm run release:check -- rc
+npm run release:check -- rc-publication
 npm run release:check -- draft-publication
 npm run release:check -- validator
 npm run release:check -- stable 0.8.0
 ```
 
-Draft preparation updates structured status, front matter, and assembled output. Validator preparation creates new sibling runtime and frozen fixture directories but deliberately leaves registry, declarations, tests, package SemVer, and release prose for review. Stable preparation freezes `spec/draft/` and prints the pointer and status updates that remain.
+Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation creates new sibling runtime and frozen fixture directories but deliberately leaves registry, declarations, tests, package SemVer, and release prose for review. Stable preparation freezes `spec/draft/` and prints the pointer and status updates that remain.
 
 The commands do not create branches or pull requests, merge changes, create or move tags, publish GitHub releases, alter npm dist-tags, or publish packages. `draft-publication` is intentionally opt-in and networked; ordinary `npm test` remains deterministic and offline. Run the release checks on a release branch, review every generated change, run `npm test`, and use annotated tags only after explicit maintainer approval.

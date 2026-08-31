@@ -1,0 +1,1 @@
+export { Ajv2020Adapter as default } from './ajv-adapter.js';

@@ -3,6 +3,7 @@
 //
 // Usage:
 //   node scripts/prepare-release.mjs draft.<iteration> <YYYY-MM-DD>
+//   node scripts/prepare-release.mjs rc.<iteration> <YYYY-MM-DD>
 //   node scripts/prepare-release.mjs validator <selector>
 //   node scripts/prepare-release.mjs stable <version>
 
@@ -16,6 +17,9 @@ let args;
 if (/^draft\.\d+$/.test(target ?? '')) {
   script = 'scripts/prepare-draft-snapshot.mjs';
   args = [target.split('.')[1], value];
+} else if (/^rc\.\d+$/.test(target ?? '')) {
+  script = 'scripts/prepare-release-candidate.mjs';
+  args = [target.split('.')[1], value];
 } else if (target === 'validator') {
   script = 'scripts/prepare-validator-snapshot.mjs';
   args = [value];
@@ -25,6 +29,7 @@ if (/^draft\.\d+$/.test(target ?? '')) {
 } else {
   console.error('Usage:');
   console.error('  npm run release:prepare -- draft.<iteration> <YYYY-MM-DD>');
+  console.error('  npm run release:prepare -- rc.<iteration> <YYYY-MM-DD>');
   console.error('  npm run release:prepare -- validator <selector>');
   console.error('  npm run release:prepare -- stable <version>');
   process.exit(1);

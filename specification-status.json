@@ -7,12 +7,13 @@
   },
   "draft": {
     "version": "0.8.0",
-    "status": "community-working-draft",
-    "iteration": 4,
-    "snapshotTag": "v0.8.0-draft.4",
-    "snapshotDate": "2026-08-28",
+    "status": "release-candidate",
+    "iteration": 1,
+    "snapshotTag": "v0.8.0-rc.1",
+    "snapshotDate": "2026-08-31",
+    "baselineTag": "v0.8.0-draft.4",
     "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
-    "branch": "main",
+    "branch": "release/0.8.0-rc.1",
     "path": "spec/draft",
     "released": false
   }

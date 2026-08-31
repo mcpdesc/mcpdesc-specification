@@ -123,7 +123,13 @@ const latest = readJson('schemas/latest.json');
 if (status && status.stable?.version !== '0.7.0') fail('stable status must remain 0.7.0 during bootstrap');
 if (status && status.draft?.version !== '0.8.0') fail('draft status must identify 0.8.0');
 if (status && !Number.isInteger(status.draft?.iteration)) fail('draft status iteration must be an integer');
-if (status && status.draft?.snapshotTag !== `v${status.draft?.version}-draft.${status.draft?.iteration}`) fail('draft status snapshot tag must match its version and iteration');
+if (status && !['community-working-draft', 'release-candidate'].includes(status.draft?.status)) fail('draft status must identify a community working draft or release candidate');
+if (status) {
+  const prereleaseLabel = status.draft?.status === 'release-candidate' ? 'rc' : 'draft';
+  if (status.draft?.snapshotTag !== `v${status.draft?.version}-${prereleaseLabel}.${status.draft?.iteration}`) {
+    fail('draft status snapshot tag must match its status, version, and iteration');
+  }
+}
 if (status && !/^\d{4}-\d{2}-\d{2}$/.test(status.draft?.snapshotDate ?? '')) fail('draft status snapshot date must use YYYY-MM-DD');
 if (status && status.draft?.released !== false) fail('v0.8.0 must remain unreleased during bootstrap');
 if (latest && latest['mcp-description'] !== '0.7.0') fail('schemas/latest.json must remain on 0.7.0 until release');
@@ -137,7 +143,8 @@ if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
   if (draft && draft.snapshotDate !== status?.draft?.snapshotDate) fail('schemas/draft.json snapshotDate must match specification-status.json');
   if (draft && draft.released !== false) fail('schemas/draft.json must remain unreleased while v0.8.0 is a draft');
   if (draft && draft.branch !== status?.draft?.branch) fail('schemas/draft.json branch must match specification-status.json');
-  if (draft && draft.schemaId !== 'https://mcpdesc.org/schema/mcp-description/0.8.0-draft.4.json') fail('schemas/draft.json must record the canonical Draft 4 schema ID');
+  if (draft && draft.status !== status?.draft?.status) fail('schemas/draft.json status must match specification-status.json');
+  if (draft && draft.schemaId !== `https://mcpdesc.org/schema/mcp-description/${draft.snapshotTag?.slice(1)}.json`) fail('schemas/draft.json must record the canonical prerelease schema ID');
   if (draft && activeDraftSchema && draft.schemaId !== activeDraftSchema.$id) fail('schemas/draft.json schemaId must match the active draft schema root $id');
   if (draft && Object.hasOwn(draft, '$id')) fail('schemas/draft.json is a status manifest and must not declare a JSON Schema $id');
   if (draft && latest && draft['mcp-description'] === latest['mcp-description']) fail('schemas/draft.json must not equal the released schemas/latest.json version');

@@ -10,7 +10,7 @@ Specification extension properties MUST match the pattern `^x-`. Names are case-
 x-{organization}-{feature}
 ```
 
-Authors SHOULD use lowercase organization prefixes. Examples include `x-cisco-metadata`, `x-acme-owner`, and `x-example-cost-profile`.
+Authors SHOULD use lowercase organization prefixes. Examples include `x-acme-owner`, `x-example-runtime-observations`, and `x-example-cost-profile`.
 
 ### 14.2 Extension Placement
 

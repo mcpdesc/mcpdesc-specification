@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// Freeze current draft validator inputs into a new immutable sibling snapshot.
+// Freeze current prerelease validator inputs into a new immutable sibling snapshot.
 // Registry, declarations, package version, tests, tags, and publication remain manual.
 //
-// Usage: node scripts/prepare-validator-snapshot.mjs <selector>
+// Usage: node scripts/prepare-validator-snapshot.mjs <x.y.z-draft.n|x.y.z-rc.n>
 
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
@@ -17,7 +17,7 @@ function die(message) {
   process.exit(1);
 }
 
-if (!/^\d+\.\d+\.\d+-draft\.\d+$/.test(selector ?? '')) die('selector must use x.y.z-draft.n');
+if (!/^\d+\.\d+\.\d+-(?:draft|rc)\.\d+$/.test(selector ?? '')) die('selector must use x.y.z-draft.n or x.y.z-rc.n');
 
 const runtimeRoot = path.join(root, 'packages', 'validator', 'src', 'snapshots');
 const testRoot = path.join(root, 'packages', 'validator', 'test', 'snapshots');
@@ -25,11 +25,14 @@ const runtimeTarget = path.join(runtimeRoot, selector);
 const testTarget = path.join(testRoot, selector);
 if (fs.existsSync(runtimeTarget) || fs.existsSync(testTarget)) die(`${selector} already exists; snapshots are immutable`);
 
-const version = selector.split('-draft.')[0];
+const version = selector.split(/-(?:draft|rc)\./)[0];
 const previousSelectors = fs.readdirSync(runtimeRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && entry.name.startsWith(`${version}-draft.`))
+  .filter((entry) => entry.isDirectory() && new RegExp(`^${version.replaceAll('.', '\\.')}-(?:draft|rc)\\.\\d+$`).test(entry.name))
   .map((entry) => entry.name)
-  .sort((left, right) => Number(left.split('.').at(-1)) - Number(right.split('.').at(-1)));
+  .sort((left, right) => {
+    const stageDifference = Number(left.includes('-rc.')) - Number(right.includes('-rc.'));
+    return stageDifference || Number(left.split('.').at(-1)) - Number(right.split('.').at(-1));
+  });
 const previous = previousSelectors.at(-1);
 if (!previous) die(`no previous ${version} validator snapshot found`);
 
