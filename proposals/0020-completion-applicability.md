@@ -18,7 +18,7 @@ The declaration distinguishes supported, conditionally supported, explicitly uns
 
 MCP Description 0.8.0 Release Candidate 1 can advertise the server-level `completions` capability and preserve successful completion observations as `completionExamples`. It cannot declare which Prompt arguments or Resource Template variables actually support completion.
 
-A server may advertise completion while implementing it for only a subset of its targets. Static consumers therefore cannot determine whether completion is supported for a particular target, depends on previously resolved arguments, is conditionally available, or is explicitly unsupported.
+A server may advertise completion while implementing it for only a subset of its targets. Static consumers therefore cannot determine whether completion is supported for a particular target, is conditionally available, or is explicitly unsupported.
 
 Examples cannot safely fill this gap. Their absence means only that no example was supplied, and their presence records an illustrative observation rather than a durable support contract.
 
@@ -38,7 +38,6 @@ This represents an applicable completion request with no matching candidates. It
 
 - Declare completion applicability for individual Prompt arguments and Resource Template variables.
 - Distinguish supported, conditional, unsupported, and undescribed applicability.
-- Express dependencies on sibling arguments or URI-template variables.
 - Preserve the observational and non-exhaustive semantics of `completionExamples`.
 - Validate declarations against their containing primitive and Effective Protocol View.
 - Keep server-level capability discovery distinct from target-level applicability.
@@ -50,7 +49,8 @@ This represents an applicable completion request with no matching candidates. It
 - Define a JSON-RPC error or other wire representation for an unsupported target.
 - Infer completion support from `completionExamples`.
 - Turn completion candidates into enums or guarantee deterministic results.
-- Define an executable condition language for conditional applicability.
+- Describe or encode the conditions governing `conditional` applicability.
+- Express dependencies on sibling arguments or URI-template variables.
 - Require every Prompt argument or Resource Template variable to have a declaration.
 - Change Prompt argument requirements, URI-template expansion, authorization, or user-interface ordering.
 
@@ -64,7 +64,7 @@ This represents an applicable completion request with no matching candidates. It
 - Completion examples proposal: https://github.com/mcpdesc/mcpdesc-specification/pull/44
 - Completion applicability issue: https://github.com/mcpdesc/mcpdesc-specification/issues/52
 
-MCP advertises completion as a server capability. A completion request then identifies a Prompt or Resource Template reference and one argument. MCP completion context may carry previously resolved arguments that influence candidate generation.
+MCP advertises completion as a server capability. A completion request then identifies a Prompt or Resource Template reference and one argument.
 
 Server capability, target applicability, and observed examples answer different questions:
 
@@ -96,8 +96,6 @@ Omission of the map or a target entry means that the description makes no comple
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `availability` | string enum | Yes | One of `supported`, `conditional`, or `unsupported`. |
-| `dependsOn` | non-empty array of unique strings | No | Sibling targets whose resolved values are expected to materially influence completion. |
-| `when` | string | Conditional | Human-readable condition under which completion is expected to be available; required for `conditional`. |
 | `x-*` | any JSON-compatible value | No | Specification extensions. |
 
 The object MUST NOT contain other unprefixed properties.
@@ -108,7 +106,7 @@ The object MUST NOT contain other unprefixed properties.
 
 `supported` declares that the server supports completion for this target for valid completion requests in the described protocol scope. It does not guarantee that a particular request returns candidates. An empty native `completion.values` array is compatible with `supported`.
 
-`conditional` declares that completion is supported only under conditions that cannot be represented as unconditional target-level support. A non-empty `when` property MUST be present. `when` is descriptive natural language; consumers MUST NOT interpret it as an executable condition or authorization rule.
+`conditional` declares that completion is supported only under conditions that are not represented by this proposal. Consumers MUST NOT infer a particular condition, dependency, or authorization rule from this value.
 
 `unsupported` explicitly declares that completion is not supported for the target. It is distinct from omission.
 
@@ -117,27 +115,11 @@ The resulting descriptive states are:
 ```text
 omitted       no declaration
 supported     completion is expected to be applicable
-conditional   applicability depends on the described condition
+conditional   applicability depends on conditions not represented here
 unsupported   completion is explicitly not supported
 ```
 
-### 4. Dependencies
-
-`dependsOn` identifies other targets in the same containing primitive whose resolved values are expected to materially influence completion candidates for the declared target.
-
-For a Prompt Object, every member MUST identify another Prompt Argument declared by the containing Prompt. For a Resource Template Object, every member MUST identify another RFC 6570 variable in the containing `uriTemplate`.
-
-The declared target MUST NOT occur in its own `dependsOn` array, and entries MUST be unique. Validators SHOULD warn when declarations form a dependency cycle.
-
-`dependsOn` describes a completion relationship only. It MUST NOT:
-
-- make a referenced Prompt argument required;
-- change URI-template expansion requirements;
-- create an enumeration;
-- imply a user-interface ordering; or
-- guarantee that every referenced value is included in every runtime completion request.
-
-### 5. Relationship to server capabilities
+### 4. Relationship to server capabilities
 
 Presence of `capabilities.completions` declares that the server implements the MCP completion mechanism. It MUST NOT imply that every Prompt argument or Resource Template variable supports completion.
 
@@ -147,7 +129,7 @@ If no applicable Capabilities Object is present, the primitive declaration remai
 
 An `unsupported` target MAY coexist with an advertised server-level completion capability.
 
-### 6. Relationship to completion examples
+### 5. Relationship to completion examples
 
 Completion declarations and completion examples have independent semantics. A Completion Example MUST NOT implicitly create a Completion Declaration, and a declaration does not require an example.
 
@@ -157,15 +139,13 @@ A successful Completion Example MUST NOT target an argument or variable declared
 
 Consumers MUST NOT infer `unsupported` from an empty `completion.values` array. A Completion Example with no candidates MAY illustrate a supported request for which no values matched the supplied value and context.
 
-### 7. Protocol applicability and variants
+### 6. Protocol applicability and variants
 
 Completion declarations MUST appear only in an Effective Protocol View where MCP defines completion for the corresponding Prompt or Resource Template reference type.
 
-`dependsOn` describes use of previously resolved completion arguments and therefore MUST appear only in Effective Protocol Views where the applicable MCP completion request supports completion context.
-
 When declarations differ materially between MCP revisions, the containing Prompt or Resource Template MUST use pairwise-disjoint protocol-scoped variants under the existing protocol-variant rules.
 
-### 8. Projection, merge, and round-tripping
+### 7. Projection, merge, and round-tripping
 
 `completions` is MCP Description metadata. Projection to MCP `prompts/list` or `resources/templates/list` values MUST omit it unless an independently specified MCP extension defines a destination.
 
@@ -175,9 +155,9 @@ Effective Protocol View projection and MCP Description round-tripping MUST prese
 
 The schema adds a `completions` property to Prompt and Resource Template Objects and a Completion Declaration Object definition.
 
-Structural JSON Schema validates non-empty maps, the closed declaration shape, availability values, non-empty unique `dependsOn` arrays, non-empty `when` strings, and the requirement for `when` when availability is `conditional`.
+Structural JSON Schema validates non-empty maps, the closed declaration shape, and availability values.
 
-Semantic validation checks Prompt argument or parsed RFC 6570 variable membership, self-dependencies, dependency cycles, Effective Protocol View applicability, completion-context revision support, capability consistency, and conflicts with `completionExamples`.
+Semantic validation checks Prompt argument or parsed RFC 6570 variable membership, Effective Protocol View applicability, capability consistency, and conflicts with `completionExamples`.
 
 No reusable component namespace is added initially because declaration validity depends on sibling targets in the containing primitive.
 
@@ -199,7 +179,6 @@ prompts:
         availability: supported
       framework:
         availability: supported
-        dependsOn: [language]
       tone:
         availability: unsupported
 ```
@@ -216,11 +195,8 @@ resourceTemplates:
         availability: supported
       repository:
         availability: supported
-        dependsOn: [owner]
       path:
         availability: conditional
-        dependsOn: [owner, repository]
-        when: Path enumeration is available for the selected repository and caller.
 ```
 
 A complete document may combine declarations and examples without making the examples contractual:
@@ -252,7 +228,6 @@ prompts:
         availability: supported
       framework:
         availability: supported
-        dependsOn: [language]
       tone:
         availability: unsupported
     completionExamples:
@@ -285,15 +260,13 @@ No existing document requires migration.
 
 Producers may add declarations incrementally. They MUST NOT translate absence of a `completionExample` into `unsupported`, and they SHOULD emit `unsupported` only when they have an explicit negative applicability contract.
 
-Existing producer-specific completion metadata can migrate target by target after validating local target identity, protocol scope, dependencies, and capability consistency.
+Existing producer-specific completion metadata can migrate target by target after validating local target identity, protocol scope, and capability consistency.
 
 ## Security and privacy considerations
 
-Completion applicability can reveal that private namespaces, repositories, identities, or other resources are enumerable under some conditions. Authors SHOULD avoid conditions that disclose sensitive implementation details.
+Completion applicability can reveal that private namespaces, repositories, identities, or other resources are enumerable under some conditions. Consumers MUST NOT treat a declaration as granting access, proving that a caller is authorized, or guaranteeing that candidates are safe to request or dereference. Security requirements remain represented through MCP Description security declarations.
 
-`when` is descriptive text, not authorization logic. Consumers MUST NOT treat a declaration as granting access, proving that a caller is authorized, or guaranteeing that candidates are safe to request or dereference. Security requirements remain represented through MCP Description security declarations.
-
-Dependencies reveal relationships between inputs but do not expose their values. Completion examples retain Proposal 0016's separate guidance concerning sensitive candidate data.
+Completion examples retain Proposal 0016's separate guidance concerning sensitive candidate data.
 
 ## Alternatives considered
 
@@ -303,7 +276,11 @@ Treat targets with completion examples as completion-capable. Rejected because e
 
 ### Boolean completion flag
 
-Add a simple `supported: true` property. Rejected because it cannot represent conditional applicability or distinguish a described condition from unconditional support.
+Add a simple `supported: true` property. Rejected because it cannot distinguish conditional applicability from unconditional support.
+
+### Dependency and condition properties
+
+Add `dependsOn` for sibling target dependencies and `when` for human-readable conditions. Deferred until implementation experience demonstrates demand from users or tooling. The initial model records conditional applicability without standardizing its cause or expression.
 
 ### Put declarations on Prompt Arguments
 
@@ -319,8 +296,7 @@ Possible for individual producers, but it would not provide portable semantics, 
 
 ## Open questions
 
-- Should dependency cycles remain warning-level because contextual influence can be mutual, or should some cycle forms be invalid?
-- Should `when` be permitted on `supported` or `unsupported` declarations as explanatory text, or remain specific to `conditional` declarations?
+- What implementation experience would justify a future machine-readable dependency or human-readable condition property?
 - Should 0.8.0 include this compatible addition before stable release, or should implementation target the next compatible revision?
 
 ## Implementation and validation plan
@@ -329,7 +305,7 @@ After acceptance:
 
 1. update the Prompt, Resource Template, capability, completion-example, projection, and Effective Protocol View normative text;
 2. add structural schemas for completion maps and declarations;
-3. add semantic validation for target membership, dependencies, cycles, protocol scope, capabilities, and example consistency;
+3. add semantic validation for target membership, protocol scope, capabilities, and example consistency;
 4. add positive, negative, warning, projection, merge, and round-trip fixtures;
 5. update focused and full-featured examples;
 6. update the changelog, migration guide, and authoring guidance;
@@ -338,4 +314,5 @@ After acceptance:
 
 ## Decision record
 
-- 2026-09-02: Initial Review proposal selects declaration-local `completions` maps with four descriptive states, sibling dependencies, and no MCP wire-level changes.
+- 2026-09-02: Initial Review revision included declaration-local `completions` maps with four descriptive states and sibling dependency metadata, with no MCP wire-level changes.
+- 2026-09-02: Deferred `dependsOn` and `when` until implementation experience demonstrates demand from users or tooling; `conditional` remains an explicit applicability state without a standardized condition representation.
