@@ -13,7 +13,7 @@ A portable, machine-readable contract format for describing Model Context Protoc
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
-Release Candidate 1 is based on the Draft 4 interoperability snapshot plus editorial cleanup. It remains a prerelease and does not update `schemas/latest.json`; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact Draft 4 design-input revisions represented and excluded after review. The cumulative `@mcpdesc/validator` 0.5.0 package is prepared with immutable Draft 1 through Draft 4 and RC.1 selectors plus a strict-CSP standalone entry.
+Release Candidate 1 is based on the Draft 4 interoperability snapshot plus editorial cleanup. It remains a prerelease and does not update `schemas/latest.json`; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact Draft 4 design-input revisions represented and excluded after review. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
 
 ## Repository roles
 
@@ -32,7 +32,6 @@ Cisco employees may participate in the project, subject to Cisco's applicable co
 
 ```text
 spec/                         Per-version specification folders (draft/ + frozen releases)
-packages/validator/           Reusable structural and semantic validator package
 schemas/mcp-description/      Versioned MCP Description JSON Schemas
 proposals/                    Specification change proposals
 scripts/                      Repository validation and maintenance scripts

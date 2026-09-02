@@ -9,7 +9,7 @@ import schema from '../schemas/mcp-description/0.8.0.json' with { type: 'json' }
 import {
   semanticValidateDocument as validateBaseSemantics,
   supportedProtocolVersions
-} from '../packages/validator/src/internal.js';
+} from './validator-base.mjs';
 
 export { supportedProtocolVersions };
 

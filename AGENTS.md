@@ -29,6 +29,12 @@ For every normative change, update all affected artifacts:
 
 Do not silently make the schema more or less permissive than the normative text.
 
+The `mcpdesc/core` repository owns the published `@mcpdesc/validator` package,
+immutable runtime snapshots, and frozen validator fixtures. This repository
+owns mutable candidate semantics and exports approved, tagged snapshot bundles
+for manifest-verified intake there. Do not recreate a published validator
+package or publication workflow here.
+
 Use RFC 2119/8174 key words only for genuine normative requirements and keep capitalization consistent.
 
 ## Draft workflow

@@ -6,12 +6,9 @@
 //   node scripts/check-release.mjs draft-publication
 //   node scripts/check-release.mjs rc
 //   node scripts/check-release.mjs rc-publication
-//   node scripts/check-release.mjs validator
 //   node scripts/check-release.mjs stable 0.8.0
 //   node scripts/check-release.mjs all
 
-import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -52,10 +49,6 @@ function readJson(rel) {
     fail(`${rel}: invalid JSON: ${error.message}`);
     return null;
   }
-}
-
-function sha256(rel) {
-  return createHash('sha256').update(fs.readFileSync(path.join(root, rel))).digest('hex');
 }
 
 function frontMatter(rel) {
@@ -151,51 +144,6 @@ async function checkDraftPublication() {
   }
 }
 
-function checkValidator() {
-  const packageJson = readJson('packages/validator/package.json');
-  const lock = readJson('package-lock.json');
-  if (!packageJson || !lock) return;
-  expectEqual(lock.packages?.['packages/validator']?.version, packageJson.version, 'package-lock.json validator version');
-
-  const snapshotRoot = path.join(root, 'packages/validator/src/snapshots');
-  const selectors = fs.readdirSync(snapshotRoot, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .sort();
-  const runtimeIndex = readText('packages/validator/src/index.js');
-  const declarations = readText('packages/validator/index.d.ts');
-  const packageReadme = readText('packages/validator/README.md');
-
-  expectIncludes(packageReadme, `Version \`${packageJson.version}\``, 'packages/validator/README.md');
-  for (const selector of selectors) {
-    const base = `packages/validator/src/snapshots/${selector}`;
-    const index = readText(`${base}/index.js`);
-    const metadataSelector = /export const specification = '([^']+)'/.exec(index)?.[1];
-    const snapshotTag = /export const snapshotTag = '([^']+)'/.exec(index)?.[1];
-    const recordedDigest = /export const schemaSha256 = '([a-f0-9]{64})'/.exec(index)?.[1];
-    expectEqual(metadataSelector, selector, `${base}/index.js specification`);
-    expectEqual(snapshotTag, `v${selector}`, `${base}/index.js snapshotTag`);
-    if (!recordedDigest) {
-      fail(`${base}/index.js: missing or malformed schemaSha256 export`);
-    } else {
-      expectEqual(recordedDigest, sha256(`${base}/schema.json`), `${base}/index.js schemaSha256`);
-    }
-    expectIncludes(runtimeIndex, `./snapshots/${selector}/index.js`, 'packages/validator/src/index.js');
-    expectIncludes(declarations, `'${selector}'`, 'packages/validator/index.d.ts');
-    expectIncludes(packageReadme, `| \`${selector}\` | \`${snapshotTag}\` | \`${recordedDigest}\` |`, 'packages/validator/README.md');
-    if (!fs.existsSync(path.join(root, `packages/validator/test/snapshots/${selector}/fixtures`))) {
-      fail(`missing frozen fixtures for ${selector}`);
-    }
-  }
-
-  try {
-    execFileSync(process.execPath, ['packages/validator/scripts/check-package.mjs'], { cwd: root, stdio: 'inherit' });
-  } catch {
-    fail('validator package tarball check failed');
-  }
-  console.log(`Checked validator ${packageJson.version} with ${selectors.length} immutable selector(s).`);
-}
-
 function checkStable() {
   if (!requestedVersion || !/^\d+\.\d+\.\d+$/.test(requestedVersion)) {
     fail('stable mode requires an x.y.z version argument');
@@ -219,14 +167,13 @@ function checkStable() {
 }
 
 async function main() {
-  if (!['all', 'draft', 'draft-publication', 'rc', 'rc-publication', 'validator', 'stable'].includes(mode)) {
-    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, rc, rc-publication, validator, or stable`);
+  if (!['all', 'draft', 'draft-publication', 'rc', 'rc-publication', 'stable'].includes(mode)) {
+    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, rc, rc-publication, or stable`);
   } else {
     if (mode === 'draft') checkPrerelease('community-working-draft');
     if (mode === 'rc') checkPrerelease('release-candidate');
     if (mode === 'all') checkPrerelease(readJson('specification-status.json')?.draft?.status);
     if (mode === 'draft-publication' || mode === 'rc-publication') await checkDraftPublication();
-    if (mode === 'all' || mode === 'validator') checkValidator();
     if (mode === 'stable') checkStable();
   }
 

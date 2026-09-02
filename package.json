@@ -2,13 +2,10 @@
   "name": "@mcpdesc/specification",
   "version": "0.0.0-private",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "description": "Development and validation tooling for the MCP Description specification",
   "type": "module",
   "scripts": {
-    "test": "npm test --workspace @mcpdesc/validator && node scripts/test-serializations.mjs && node scripts/test-schema-publication.mjs && node scripts/validate-repository.mjs && node scripts/test-views.mjs",
+    "test": "node scripts/test-serializations.mjs && node scripts/test-schema-publication.mjs && node scripts/validate-repository.mjs && node scripts/test-views.mjs",
     "test:publication": "node scripts/test-schema-publication.mjs",
     "validate": "node scripts/validate-repository.mjs",
     "assemble:draft": "node scripts/assemble-draft.mjs",

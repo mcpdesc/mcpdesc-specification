@@ -121,15 +121,19 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 - For Draft 4 and later, once the canonical schema URL is live, maintainers MUST run `npm run release:check -- draft-publication` before tagging a public draft snapshot so the canonical URI, immutable bytes, direct-serving policy, and required publication metadata are verified.
 - Releases require passing validation, updated normative text and schemas, examples, changelog and migration guidance, an explicit maintainer decision, and an annotated version tag.
 
-### Validator snapshot publication
+### Validator snapshot export
 
-The `@mcpdesc/validator` package uses implementation SemVer independently from immutable specification snapshot selectors. Each selector has sibling runtime and frozen test snapshot directories; publishing support for a later draft MUST NOT alter an earlier selector's schema, semantics, metadata, fixtures, or expected results.
+The `@mcpdesc/validator` package is maintained and published from
+`mcpdesc/core`. This repository owns normative text, canonical schemas, mutable
+fixtures, and candidate semantic validation. After an approved specification
+tag identifies an exact clean commit, maintainers MAY export a manifest-verified
+snapshot bundle for review and additive intake in the tooling repository.
 
-The reviewed specification assembly records the chosen package version, exact selector metadata, schema digests, and intended npm dist-tag. A maintainer creates the specification snapshot tag first, then reviews `npm pack --dry-run --json` from that tag. Publishing an annotated `validator-v<semver>` tag explicitly authorizes the trusted-publishing workflow to publish that exact package version. A SemVer prerelease is published with the npm `next` dist-tag; a stable SemVer is published with `latest`. Repository scripts and other CI workflows MUST NOT create release tags, move npm dist-tags, select package versions, or publish packages.
-
-Validator `0.4.0` cumulatively supports `0.8.0-draft.1` through `0.8.0-draft.4` and was published with npm `latest` on 2026-08-29. Later validator changes require a separately reviewed package version and publication tag.
-
-Validator `0.5.0` adds the immutable `0.8.0-rc.1` selector, schema-identity resolution, and the strict-CSP standalone entry. It is prepared for npm `latest` after the RC.1 specification tag, tarball review, and explicit `validator-v0.5.0` publication tag.
+An exported bundle records the exact selector, specification tag and commit,
+embedded schema digest, snapshot-local semantic implementation, and frozen
+fixtures. Export does not choose a validator SemVer, npm dist-tag, or authorize
+package publication. Existing published selectors remain immutable in the
+tooling repository.
 
 ## Intellectual property and contributions
 
