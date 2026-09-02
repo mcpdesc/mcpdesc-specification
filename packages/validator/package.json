@@ -1,6 +1,6 @@
 {
   "name": "@mcpdesc/validator",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Structural and semantic validation for MCP Description snapshots",
   "type": "module",
   "types": "./index.d.ts",
@@ -17,6 +17,10 @@
     ".": {
       "types": "./index.d.ts",
       "import": "./src/index.js"
+    },
+    "./browser": {
+      "types": "./index.d.ts",
+      "import": "./standalone.js"
     },
     "./standalone": {
       "types": "./index.d.ts",
@@ -51,6 +55,7 @@
   "devDependencies": {
     "esbuild": "^0.25.0",
     "typescript": "^5.9.0",
+    "vite": "^6.4.3",
     "yaml": "^2.9.0"
   }
 }

@@ -7,6 +7,7 @@ import {
   type McpDescriptionDiagnostic,
   type McpDescriptionValidationResult
 } from '@mcpdesc/validator';
+import { validateMcpDescription as validateBrowser } from '@mcpdesc/validator/browser';
 import { validateMcpDescription as validateStandalone } from '@mcpdesc/validator/standalone';
 
 declare const document: unknown;
@@ -19,6 +20,9 @@ validateMcpDescription(document, { specification: '0.8.0-draft.3' });
 validateMcpDescription(document, { specification: '0.8.0-draft.4' });
 validateMcpDescription(document, { specification: '0.8.0-rc.1' });
 const standaloneResult: McpDescriptionValidationResult = validateStandalone(document, {
+  specification: '0.8.0-rc.1'
+});
+const browserResult: McpDescriptionValidationResult = validateBrowser(document, {
   specification: '0.8.0-rc.1'
 });
 const diagnostic: McpDescriptionDiagnostic | undefined = result.diagnostics[0];
@@ -51,6 +55,7 @@ void draft3Tag;
 void draft4Tag;
 void draft4SchemaUri;
 void rc1SchemaUri;
+void browserResult;
 void standaloneResult;
 
 // @ts-expect-error The options argument is required.

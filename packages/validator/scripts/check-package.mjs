@@ -22,6 +22,14 @@ if (actual.some((filename) => filename.startsWith('test/snapshots/'))) {
 if (actual.some((filename) => filename.startsWith('scripts/'))) {
   throw new Error('Mutable repository or package scripts must not ship in the package tarball');
 }
+for (const [entry, conditions] of Object.entries(packageJson.exports)) {
+  for (const [condition, target] of Object.entries(conditions)) {
+    const filename = target.replace(/^\.\//, '');
+    if (!actual.includes(filename)) {
+      throw new Error(`Export ${entry} condition ${condition} targets missing packed file ${filename}`);
+    }
+  }
+}
 
 const expected = [
   'CHANGELOG.md',

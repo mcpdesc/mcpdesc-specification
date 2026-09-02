@@ -2,7 +2,7 @@
 
 Isomorphic structural and semantic validation for immutable MCP Description specification snapshots.
 
-Version `0.5.0` cumulatively supports these immutable snapshots and is prepared for npm `latest` after the RC.1 specification tag and package tarball are reviewed.
+Version `0.6.0` cumulatively supports these immutable snapshots.
 
 | Selector | Tag | Embedded schema SHA-256 |
 |---|---|---|
@@ -32,15 +32,23 @@ Callers provide an already parsed JavaScript value. JSON and YAML parsing are ou
 
 The `options` argument and exact `specification` selector are required. The unqualified selector `0.8.0` is intentionally unsupported because draft and release-candidate iterations are immutable compatibility contracts.
 
-### Strict CSP browsers
+### Entry points
 
-Browser applications that prohibit dynamic code generation can use the CSP-safe standalone entry:
+| Entry | Strict CSP without `unsafe-eval` | Fixed MCP Description schemas | Document-provided schemas |
+|---|---|---|---|
+| `@mcpdesc/validator` | No | Compiled by AJV at runtime | Compiled or interpreted at runtime |
+| `@mcpdesc/validator/browser` | Yes | Precompiled during package development | Interpreted at runtime |
+| `@mcpdesc/validator/standalone` | Yes | Precompiled during package development | Interpreted at runtime |
+
+Browser applications that prohibit dynamic code generation should use the descriptive CSP-safe browser entry:
 
 ```js
-import { validateMcpDescription } from '@mcpdesc/validator/standalone';
+import { validateMcpDescription } from '@mcpdesc/validator/browser';
 ```
 
-It has the same synchronous API, selectors, diagnostics, and offline external-reference behavior as the default entry. Fixed MCP Description schemas and JSON Schema meta-schemas are precompiled during package development; document-provided Tool and Elicitation schemas use the package's interpreted JSON Schema dependency, so the shipped file contains no `eval` or `new Function`. This compatibility entry is larger and slower than the default AJV-based entry and is JavaScript, not WASM.
+The `/browser` entry is a public alias for the existing `/standalone` implementation. `/standalone` remains supported for backward compatibility. Both have the same synchronous API, selectors, diagnostics, and offline external-reference behavior as the default entry. Fixed MCP Description schemas and JSON Schema meta-schemas are precompiled during package development; document-provided Tool and Elicitation schemas use the package's interpreted JSON Schema dependency, so neither entry uses `eval` or `new Function` or requires `unsafe-eval`. These entries are larger and slower than the default AJV-based entry and are JavaScript, not WASM.
+
+The default entry remains unchanged and uses AJV runtime compilation. Applications that need dynamic schema compilation can use it where their runtime policy permits dynamic code generation. Importing it may fail when a browser enforces strict CSP. The package intentionally does not select a different implementation through conditional exports; consumers choose the required behavior explicitly.
 
 ## Snapshot resolution
 
@@ -101,7 +109,7 @@ The package exports frozen `supportedSpecifications`, `supportedProtocolVersions
 
 npm package SemVer tracks implementation releases independently from specification snapshot identity. Adding a later snapshot is additive: it must use a sibling implementation and selector rather than changing an existing snapshot's schema, semantics, metadata, fixtures, or results.
 
-The runtime bundles its schema, performs no network fetches for external schema references, and imports no Node.js built-ins. Unresolved external Tool-schema references produce incomplete-validation warnings and are preserved. Both ESM entry points support Node.js 20 or later and browser bundlers.
+The runtime bundles its schema, performs no network fetches for external schema references, and imports no Node.js built-ins. Unresolved external Tool-schema references produce incomplete-validation warnings and are preserved. All three ESM entry points support Node.js 20 or later and browser bundlers.
 
 ## Snapshot lifecycle
 
@@ -127,4 +135,4 @@ npm run test:browser --workspace @mcpdesc/validator
 npm run test:package --workspace @mcpdesc/validator
 ```
 
-The package test runs each immutable snapshot against its own frozen valid, invalid, and warning fixture corpus. YAML source fixtures are decoded by the test harness before validation; the public API continues to accept parsed JavaScript values only. The other checks compile the declarations, build all runtime snapshots for a browser target, and inspect `npm pack --dry-run --json` against the intended tarball contents, including all runtime snapshots and exclusion of test snapshots.
+The package test runs each immutable snapshot against its own frozen valid, invalid, and warning fixture corpus. YAML source fixtures are decoded by the test harness before validation; the public API continues to accept parsed JavaScript values only. The other checks compile the declarations, bundle the public browser entry with esbuild and Vite, reject runtime AJV compiler inputs and dynamic code generation in those bundles, and inspect `npm pack --dry-run --json` against the intended tarball contents and declared export targets.
