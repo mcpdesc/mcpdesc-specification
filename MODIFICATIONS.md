@@ -4,6 +4,15 @@ This file records material imported from `cisco-open/mcptoolkit-contract` and su
 
 The exact source repository and commit are recorded in [`ORIGIN.md`](ORIGIN.md).
 
+## Validator repository migration — 2026-09-02
+
+The published `@mcpdesc/validator` package, immutable runtime snapshots, frozen
+validator fixtures, package checks, and trusted-publishing workflow moved to
+`mcpdesc/core` from source commit
+`6eb1b54330f8b7dc11468c7e31614214c7521cd0`. This repository retains normative
+specification artifacts, mutable candidate semantics, and deterministic export
+of approved tagged snapshot bundles.
+
 ## Repository bootstrap — 2026-07-28
 
 | File or path | Change | Reason |

@@ -11,7 +11,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import { validateMcpDescription } from '@mcpdesc/validator';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
 import {
