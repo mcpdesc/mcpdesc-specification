@@ -21,6 +21,19 @@ For each declared protocol revision, that revision's normative MCP specification
 | Elicitation | Executed through revision-specific form, URL, or MRTR behavior | Expected operation-level interactions described statically |
 | Authorization | Enforced at runtime | Statically known requirements described |
 
+## References and Identifiers
+
+MCP does not define a general Reference Object that can replace an arbitrary MCP protocol value. It defines several narrower mechanisms whose similar names do not give them the same semantics:
+
+| MCP mechanism | Meaning in MCP | MCP Description representation |
+|---------------|----------------|--------------------------------|
+| JSON Schema `$ref` in Tool `inputSchema` or `outputSchema` | Applies the reference rules of the schema's declared or default dialect. JSON Schema 2020-12 references may identify local or external schema resources. MCP forbids automatic network dereferencing and permits guarded opt-in retrieval. | Preserved inside inline schemas and schemas in `components.schemas`. External references are preserved when unresolved; validators do not fetch them automatically and report incomplete validation. |
+| `Resource.uri`, Resource Link `uri`, Embedded Resource `uri`, and Root `uri` | Identifies a runtime entity. Depending on the MCP type and URI scheme, a client may pass the URI to an MCP operation or retrieve it by another defined means. A URI does not import an MCP Description fragment. | Resource URIs and Resource Template `uriTemplate` values are declared directly. Resource Links and Embedded Resources can appear in applicable Prompt and Tool examples. Roots can be represented in Tool interaction examples and client capability requirements; MCP Description does not define a static root catalogue. |
+| Completion `PromptReference` and `ResourceTemplateReference` | Selects the Prompt name or Resource Template URI whose argument is being completed. It is a request target, not reusable document content. | A `completionExamples` entry is attached to its Prompt or Resource Template, so the containing declaration supplies the target identity without copying the MCP `ref` object. |
+| Icon `src` and other URL-valued metadata | Locates external media or metadata according to the field's own MCP semantics and security rules. | Preserved in the corresponding MCP Description field where that MCP field is supported. |
+
+MCP Description additionally defines `$componentRef` for local, typed, whole-value reuse within one description document. `$componentRef` is not an MCP protocol field and does not imply that MCP itself supports arbitrary object references or cross-document inclusion.
+
 ## MCP Description Does Not Replace Runtime Behavior
 
 A description does not execute Tools, contain Resource content, retrieve Prompts, enforce authorization, manage sessions, or define runtime error handling. Servers and clients continue to follow the applicable MCP revision.

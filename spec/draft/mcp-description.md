@@ -1934,6 +1934,10 @@ No sibling property, including an `x-*` property, is permitted. The pointer MUST
 
 A `$componentRef` is an MCP Description reference only at a use site that permits a Reference Object. JSON Schema `$ref` remains governed exclusively by the applicable embedded JSON Schema dialect. Implementations MUST NOT accept `$ref` as an MCP Description component reference and MUST NOT reinterpret a `$componentRef` nested inside an embedded JSON Schema.
 
+The distinct keyword separates two reference systems embedded in the same document. A JSON Schema `$ref` is an applicator: it applies another schema to the current instance location, participates in the schema dialect's URI-base and dynamic-scope rules, and may have adjacent schema keywords when the dialect permits them. A `$componentRef` instead replaces one complete MCP Description value before that value is checked in its use-site context. It can therefore reference non-schema values, but it does not compose, constrain, or annotate its target.
+
+Local-only resolution is a separate design constraint, not a consequence of using a distinct keyword. OpenAPI Reference Objects use `$ref` URI references for typed OpenAPI values and can address internal or external targets; OpenAPI Schema Objects use the same spelling with JSON Schema semantics. MCP Description 0.8.0 deliberately does not define the base-URI, document loading, trust, bundling, or identity rules needed for external MCP Description values. This does not restrict `$ref`, `$id`, `$anchor`, `$dynamicRef`, composition keywords, or externally identified schema resources inside an embedded JSON Schema; those remain subject to Section 9.2 and the applicable schema dialect.
+
 ### 17.3 Use Sites and Contextual Validation
 
 Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; Resource Template `examples` values MAY reference `resourceTemplateExamples`; and Prompt `examples` values MAY reference `promptExamples`.

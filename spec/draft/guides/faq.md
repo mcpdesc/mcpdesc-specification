@@ -119,9 +119,11 @@ Prompt and Resource Template `completionExamples` are likewise illustrative meta
 
 ### What is the difference between `$componentRef` and JSON Schema `$ref`?
 
-`$componentRef` is an MCP Description Reference Object that points only to a typed value under the same document's root `components` object. It can replace a complete supported schema or named example value and is resolved before the containing use site's rules are applied. It never retrieves another document.
+`$componentRef` is an MCP Description Reference Object that points only to a typed value under the same document's root `components` object. It replaces a complete supported schema or named example value before the containing use site's rules are applied. It does not merge with sibling fields, select a subschema, or compose with its target, and it never retrieves another document.
 
-JSON Schema `$ref` remains a JSON Schema keyword inside an embedded schema and follows that schema's dialect and resolution policy. Neither spelling is accepted as a substitute for the other.
+JSON Schema `$ref` is an applicator inside an embedded schema. It can reference local or external schema resources by URI, works with `$id`, `$anchor`, and `$dynamicRef`, and can participate in `allOf`, `anyOf`, `oneOf`, recursive schemas, and other features of the applicable dialect. Adjacent schema keywords are also allowed when that dialect permits them. Neither spelling is accepted as a substitute for the other.
+
+The separate spelling prevents an object such as `{ "$ref": "..." }` from changing meaning depending on whether MCP Description or JSON Schema is processing it. The local-only rule is an additional 0.8.0 scope decision: external MCP Description references would require document identity, base-URI, loading, trust, bundling, and cycle rules. It does not reduce JSON Schema's expressiveness inside Tool or Elicitation schemas.
 
 ### Can custom metadata be added?
 

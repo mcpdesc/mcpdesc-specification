@@ -30,6 +30,8 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 
 Release Candidate 1 selects Community Working Draft 4 as its baseline for final interoperability and release review. It adds no normative features.
 
+- Documented how MCP's JSON Schema references, runtime URI identifiers, Completion references, and URL-valued metadata map to MCP Description, and clarified that MCP has no general arbitrary-object reference mechanism.
+- Clarified that `$componentRef` syntax and local-only resolution are independent design choices, and compared both with JSON Schema and OpenAPI `$ref` semantics.
 - Removed the bundled Cisco-specific extension documentation and CLI dump metadata from active draft examples; current specification examples use vendor-neutral extension identifiers.
 - Assigned the immutable release-candidate schema identity `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json` while keeping `mcpdesc: 0.8.0` and `schemas/latest.json` on stable 0.7.0.
 - Added release-candidate preparation, metadata validation, and canonical schema publication checks. Exact schema bytes must be published and verified before the candidate is tagged.
