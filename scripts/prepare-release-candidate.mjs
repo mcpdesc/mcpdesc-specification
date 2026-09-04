@@ -6,6 +6,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { formatCanonicalJson } from './canonical-json.mjs';
 
 const root = process.cwd();
 const iteration = Number(process.argv[2]);
@@ -76,7 +77,7 @@ for (const directory of ['examples', 'fixtures', 'guides', 'sections']) {
 
 fs.writeFileSync(statusPath, `${JSON.stringify(status, null, 2)}\n`);
 fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-fs.writeFileSync(schemaPath, `${JSON.stringify(schema, null, 2)}\n`);
+fs.writeFileSync(schemaPath, formatCanonicalJson(schema));
 fs.writeFileSync(sectionPath, section);
 execFileSync(process.execPath, ['scripts/assemble-draft.mjs'], { cwd: root, stdio: 'inherit' });
 console.log('Release-candidate metadata prepared. Complete release prose and proposal decisions, then run npm run release:check -- rc and npm test.');

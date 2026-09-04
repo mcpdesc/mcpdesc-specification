@@ -65,7 +65,7 @@ The recognized core structure is revision-specific:
 | MCP 2024-11-05 and MCP 2025-03-26 | `roots.listChanged`, `sampling`, and `experimental` |
 | MCP 2025-06-18 | The earlier shape plus `elicitation` |
 | MCP 2025-11-25 | `roots.listChanged`; `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; core `tasks.list`, `tasks.cancel`, `tasks.requests.sampling.createMessage`, and `tasks.requests.elicitation.create`; and `experimental` |
-| MCP 2026-07-28 | Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental` |
+| MCP 2026-07-28 | `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental`; Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools` |
 
 Capability marker and settings values MUST be objects. MCP 2026-07-28 `roots` MUST be empty. Validators SHOULD warn when a requirement uses a capability or nested member deprecated in its applicable revision. MCP 2024-11-05 and MCP 2025-03-26 retain the legacy incomplete-validation treatment in Section 3.5: validators apply structural and selected sound checks and MUST NOT report complete MCP semantic conformance.
 

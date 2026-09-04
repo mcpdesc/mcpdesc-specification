@@ -15,6 +15,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { assembleDraft } from './draft-assembly.mjs';
+import { canonicalizeJsonSource } from './canonical-json.mjs';
 import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 function createValidatorForDialect(dialect) {
@@ -189,8 +190,12 @@ const schemas = new Map();
 if (fs.existsSync(schemaDir)) {
   for (const filename of fs.readdirSync(schemaDir).filter((name) => /^\d+\.\d+\.\d+\.json$/.test(name))) {
     const rel = path.posix.join('schemas/mcp-description', filename);
+    const source = readText(rel);
     const schema = readJson(rel);
     if (!schema) continue;
+    if (filename === '0.8.0.json' && source !== canonicalizeJsonSource(source)) {
+      fail(`${rel}: schema must use canonical object-key ordering, 2-space indentation, and one trailing newline`);
+    }
     const ajv = ajvByDialect[dialectFor(schema)];
     try {
       ajv.validateSchema(schema, true);

@@ -31,11 +31,17 @@ editors:
 
 This specification defines the **MCP Description** format — a portable, machine-readable document that describes the durable, externally relevant surface of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
 
-An MCP Description declares supported MCP protocol revisions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static, machine-readable document. It enables offline discovery, documentation generation, description validation, change analysis, testing, governance, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
+An MCP Description declares supported MCP protocol revisions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static, machine-readable document.
+
+It enables offline discovery, documentation generation, description validation, change analysis, testing, governance, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
 
 ## Status of This Document
 
-This document is **Release Candidate 2** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.2` and based on Community Working Draft 4. It retains the RC.1 editorial cleanup and corrects official MCP extension-catalogue diagnostics. The prerelease label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a stable release and may change before final release as review and interoperability testing conclude. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by the Draft 4 baseline are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is **Release Candidate 2** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.2` and based on Community Working Draft 4. The exact review-stage proposal revisions represented by the Draft 4 baseline are recorded in the [proposal revision manifest](../PROPOSALS.md).
+
+This is **not** a stable release and may change before final release as review and interoperability testing conclude.
+
+The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
 
 ## 1. Introduction
 
@@ -189,9 +195,17 @@ The optional `$schema` property selects a JSON Schema resource for structural va
 
 ### 3.3 Optional Sections and Ordinary Collections
 
-Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section. Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
+Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section.
 
-An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
+Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
+
+An optional ordinary declaration collection MUST contain at least one entry when present.
+
+A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection.
+
+This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps.
+
+It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
 
 An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
 
@@ -203,13 +217,12 @@ Absence of a primitive collection MUST NOT be interpreted as proof that no other
 
 ### 3.5 MCP `_meta`
 
-MCP-derived declaration and example objects identified by this specification MAY carry a literal `_meta` object when every revision in their Effective Protocol View defines `_meta` on the corresponding MCP object. A declaration `_meta` is the literal metadata on that Tool, Resource, Resource Template, or Prompt declaration. An example `_meta` is one illustrative literal value on the represented completed result or content object. Neither form declares a reusable metadata schema or requires a live server to emit the shown value.
+The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result or content objects in named examples. It MAY appear only when every revision in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
 
-Each `_meta` key, reserved namespace, permitted context, and reserved value shape MUST satisfy every applicable MCP protocol revision. Recognized violations are document-conformance errors. An otherwise valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning rather than be treated as unauthorized solely because it is unknown to the validator. Valid unprefixed and third-party-prefixed keys MUST be accepted and preserved.
+Metadata in a named example describes only that example. It does not define a reusable metadata schema or require a server to send the same metadata.
 
-MCP `_meta`, `x-*` specification extensions, and `capabilities.extensions` are independent mechanisms. Tooling MUST preserve them independently and MUST NOT automatically project or reinterpret one as another. Projection MUST preserve `_meta` and object-level specification extensions on each selected declaration and named example without merging values from disjoint protocol variants.
+Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol revision. A recognized violation is a document-conformance error. A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A protocol-version projection MUST preserve `_meta` and MUST NOT combine metadata from variants that cover different protocol revisions.
 
-Authors MUST NOT publish credentials, tokens, user identifiers, internal topology, live trace identifiers, or other runtime-sensitive data in static `_meta`; fictitious or redacted values MUST be used where disclosure creates risk. Consumers MUST treat keys and values as untrusted data and apply appropriate size, rendering, logging, and processing limits.
 
 ### 3.6 Property Ordering
 
@@ -761,7 +774,7 @@ The recognized core structure is revision-specific:
 | MCP 2024-11-05 and MCP 2025-03-26 | `roots.listChanged`, `sampling`, and `experimental` |
 | MCP 2025-06-18 | The earlier shape plus `elicitation` |
 | MCP 2025-11-25 | `roots.listChanged`; `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; core `tasks.list`, `tasks.cancel`, `tasks.requests.sampling.createMessage`, and `tasks.requests.elicitation.create`; and `experimental` |
-| MCP 2026-07-28 | Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental` |
+| MCP 2026-07-28 | `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental`; Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools` |
 
 Capability marker and settings values MUST be objects. MCP 2026-07-28 `roots` MUST be empty. Validators SHOULD warn when a requirement uses a capability or nested member deprecated in its applicable revision. MCP 2024-11-05 and MCP 2025-03-26 retain the legacy incomplete-validation treatment in Section 3.5: validators apply structural and selected sound checks and MUST NOT report complete MCP semantic conformance.
 

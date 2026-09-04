@@ -15,6 +15,7 @@ export function assembleDraft(root) {
     .join('\n\n')
     .replaceAll('../../implementations.md', '../implementations.md')
     .replaceAll('../examples/', 'examples/')
+    .replaceAll('../fixtures/', 'fixtures/')
     .replaceAll('../../../schemas/', '../../schemas/');
 
   return { content: `${content}\n`, sections };
