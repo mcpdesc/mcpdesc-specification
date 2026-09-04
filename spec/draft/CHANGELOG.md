@@ -35,6 +35,7 @@ Release Candidate 2 corrects official MCP extension recognition and defines repr
 - Kept extension-specific settings and semantic validation outside core conformance unless an explicitly selected, version-pinned profile performs it.
 - Recognized the official MCP Apps, Tasks, OAuth Client Credentials, and Enterprise-Managed Authorization identifiers in the RC.2 validator catalogue.
 - Added server-capability and primitive-client-requirement coverage for `io.modelcontextprotocol/ui`; unknown MCP-reserved identifiers continue to produce review warnings.
+- Accepted and preserved pre-standard server `capabilities.extensions` advertisements under MCP revisions before 2026-07-28 with a core-schema applicability warning, while retaining strict revision checks for primitive `clientRequirements.extensions`.
 - Condensed the normative `_meta` rules and aligned their terminology with the MCP specification.
 
 #### Release Candidate 1 — 2026-08-31 (`v0.8.0-rc.1`)

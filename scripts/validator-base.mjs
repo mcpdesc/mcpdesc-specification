@@ -799,8 +799,8 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
           diagnostics.push(
             makeDiagnostic(
               'extensions-not-supported-by-version',
-              'error',
-              `capabilities[${index}].extensions is not defined for MCP ${version}; it requires 2026-07-28`,
+              'warning',
+              `capabilities[${index}].extensions is not defined by the MCP ${version} core schema; this description preserves a deployed pre-standard extension negotiation convention. Formal extensions capability negotiation was introduced in MCP 2026-07-28`,
               [...capabilityPath, 'extensions']
             )
           );

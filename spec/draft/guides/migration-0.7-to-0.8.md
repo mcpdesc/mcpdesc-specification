@@ -55,6 +55,8 @@ Wrap a present root Capabilities Object in an array:
 
 Do not translate durable notification semantics into wire-message catalogues. Keep fields such as `resources.subscribe`. Do not copy 2025 core Tasks declarations into a 2026 view; represent a 2026 Tasks extension separately when authoritative metadata supports it.
 
+Preserve a syntactically valid server `capabilities.extensions` map observed under MCP 2025-11-25 or an earlier revision. Version 0.8.0 accepts that deployed pre-standard convention with a warning even though the earlier MCP core schema does not define formal extension negotiation. Do not drop it, rewrite it as `experimental`, `_meta`, or `x-*`, or infer MCP 2026-07-28 support. Consumers that require strict alignment with the applicable MCP core schema may explicitly escalate the warning.
+
 ## Primitive client requirements
 
 No automatic migration is required because `clientRequirements` is optional and 0.7.0 has no equivalent. Add it only when authoritative design information confirms that successful Tool invocation, Resource read, concrete Resource Template read, or Prompt retrieval has an unconditional minimum dependency on client capabilities. Do not infer it from root server `capabilities`, every Elicitation Declaration, optional runtime feature use, security requirements, or one input-dependent failure observation.
