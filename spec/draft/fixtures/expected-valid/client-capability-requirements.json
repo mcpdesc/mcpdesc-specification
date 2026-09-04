@@ -1,5 +1,5 @@
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json",
   "mcpdesc": "0.8.0",
   "info": {
     "name": "client-capability-requirements",
@@ -9,6 +9,16 @@
     "2025-06-18",
     "2025-11-25",
     "2026-07-28"
+  ],
+  "capabilities": [
+    {
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "extensions": {
+        "io.modelcontextprotocol/ui": {}
+      }
+    }
   ],
   "tools": [
     {
@@ -41,7 +51,12 @@
       },
       "clientRequirements": {
         "extensions": {
-          "io.modelcontextprotocol/tasks": {}
+          "io.modelcontextprotocol/tasks": {},
+          "io.modelcontextprotocol/ui": {
+            "mimeTypes": [
+              "text/html;profile=mcp-app"
+            ]
+          }
         }
       }
     }

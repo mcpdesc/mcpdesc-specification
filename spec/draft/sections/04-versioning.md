@@ -29,11 +29,11 @@ The root `$schema` property remains optional. When present, it SHOULD identify t
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json
 mcpdesc: 0.8.0
 ```
 
-The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 1 documents remain `mcpdesc: 0.8.0`.
+The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 2 documents remain `mcpdesc: 0.8.0`.
 
 ### 4.4 Canonical Schema URI Families
 
@@ -43,7 +43,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 

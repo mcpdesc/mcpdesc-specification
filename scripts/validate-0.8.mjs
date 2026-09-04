@@ -7,11 +7,13 @@ import addFormats from 'ajv-formats';
 import { UriTemplateMatcher } from 'uri-template-matcher';
 import schema from '../schemas/mcp-description/0.8.0.json' with { type: 'json' };
 import {
+  mcpExtensionCatalogue,
+  mcpExtensionMaturity,
   semanticValidateDocument as validateBaseSemantics,
   supportedProtocolVersions
 } from './validator-base.mjs';
 
-export { supportedProtocolVersions };
+export { mcpExtensionCatalogue, mcpExtensionMaturity, supportedProtocolVersions };
 
 const TOOL_INTERACTION_SENTINEL = '__interaction_example__';
 const ajv = new Ajv2020({ allErrors: true, strict: false });
@@ -22,7 +24,6 @@ const validateStructure = ajv.compile(schema);
 const primitiveCollections = ['tools', 'resources', 'resourceTemplates', 'prompts'];
 const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples', 'promptExamples'];
 const knownClientCapabilities = new Set(['roots', 'sampling', 'elicitation', 'tasks', 'extensions', 'experimental']);
-const knownReservedCapabilityExtensions = new Set(['io.modelcontextprotocol/tasks']);
 const protocolOrder = new Map(supportedProtocolVersions.map((version, index) => [version, index]));
 
 const clientCapabilitiesByVersion = {
@@ -570,7 +571,17 @@ function validateClientRequirements(document) {
             validateTasks(value, location, path, version);
           } else if (capability === 'extensions') {
             for (const extension of Object.keys(value)) {
-              if (usesMcpReservedPrefix(extension) && !knownReservedCapabilityExtensions.has(extension)) {
+              if (!usesMcpReservedPrefix(extension)) continue;
+              const maturity = mcpExtensionMaturity(extension);
+              if (maturity === 'official') continue;
+              if (maturity === 'experimental') {
+                diagnostics.push(semanticDiagnostic(
+                  'experimental-reserved-extension-identifier',
+                  'warning',
+                  `${location} contains experimental MCP extension ${JSON.stringify(extension)}; preserve it and review its maturity before relying on it`,
+                  [...path, extension]
+                ));
+              } else {
                 diagnostics.push(semanticDiagnostic(
                   'unknown-reserved-extension-identifier',
                   'warning',

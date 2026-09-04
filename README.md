@@ -9,11 +9,11 @@ A portable, machine-readable contract format for describing Model Context Protoc
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
-| 0.8.0 | Release Candidate 1 (`v0.8.0-rc.1`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
+| 0.8.0 | Release Candidate 2 (`v0.8.0-rc.2`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
-Release Candidate 1 is based on the Draft 4 interoperability snapshot plus editorial cleanup. It remains a prerelease and does not update `schemas/latest.json`; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact Draft 4 design-input revisions represented and excluded after review. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
+Release Candidate 2 is based on the Draft 4 interoperability snapshot plus RC.1 editorial cleanup and the extension-catalogue diagnostic correction. It remains a prerelease and does not update `schemas/latest.json`; its [proposal manifest](spec/draft/PROPOSALS.md) records the exact Draft 4 design-input revisions represented and excluded after review. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
 
 ## Repository roles
 

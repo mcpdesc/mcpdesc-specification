@@ -26,6 +26,16 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 
 ### Release candidates
 
+#### Release Candidate 2 — 2026-09-04 (`v0.8.0-rc.2`)
+
+Release Candidate 2 corrects official MCP extension recognition and defines reproducible catalogue diagnostics. It does not change the MCP Description document shape.
+
+- Defined official, experimental, and uncatalogued MCP-reserved extension recognition behavior while preserving every syntactically valid identifier.
+- Required validators using an extension catalogue to disclose and pin its authoritative source, effective date, and maturity assignments.
+- Kept extension-specific settings and semantic validation outside core conformance unless an explicitly selected, version-pinned profile performs it.
+- Recognized the official MCP Apps, Tasks, OAuth Client Credentials, and Enterprise-Managed Authorization identifiers in the RC.2 validator catalogue.
+- Added server-capability and primitive-client-requirement coverage for `io.modelcontextprotocol/ui`; unknown MCP-reserved identifiers continue to produce review warnings.
+
 #### Release Candidate 1 — 2026-08-31 (`v0.8.0-rc.1`)
 
 Release Candidate 1 selects Community Working Draft 4 as its baseline for final interoperability and release review. It adds no normative features.

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json",
+  "$id": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json",
   "title": "MCP Description",
-  "description": "MCP Description 0.8.0 Release Candidate 1 (v0.8.0-rc.1; prerelease).",
+  "description": "MCP Description 0.8.0 Release Candidate 2 (v0.8.0-rc.2; prerelease).",
   "type": "object",
   "required": [
     "mcpdesc",
@@ -1288,563 +1288,563 @@
         ]
       }
     },
-      "elicitationInteractionFormRequest": {
-        "type": "object",
-        "required": [
-          "mode",
-          "message",
-          "requestedSchema"
-        ],
-        "properties": {
-          "mode": {
-            "const": "form"
-          },
-          "message": {
-            "type": "string",
-            "minLength": 1
-          },
-          "requestedSchema": {
-            "$ref": "#/$defs/elicitationFormSchema"
-          }
+    "elicitationInteractionFormRequest": {
+      "type": "object",
+      "required": [
+        "mode",
+        "message",
+        "requestedSchema"
+      ],
+      "properties": {
+        "mode": {
+          "const": "form"
         },
-        "additionalProperties": false
-      },
-      "elicitationInteractionUrlRequest": {
-        "type": "object",
-        "required": [
-          "mode",
-          "message",
-          "url"
-        ],
-        "properties": {
-          "mode": {
-            "const": "url"
-          },
-          "message": {
-            "type": "string",
-            "minLength": 1
-          },
-          "url": {
-            "type": "string",
-            "format": "uri"
-          }
+        "message": {
+          "type": "string",
+          "minLength": 1
         },
-        "additionalProperties": false
-      },
-      "elicitationInteractionRequest": {
-        "oneOf": [
-          {
-            "$ref": "#/$defs/elicitationInteractionFormRequest"
-          },
-          {
-            "$ref": "#/$defs/elicitationInteractionUrlRequest"
-          }
-        ]
-      },
-      "elicitationInteractionAcceptedResponse": {
-        "type": "object",
-        "required": [
-          "action"
-        ],
-        "properties": {
-          "action": {
-            "const": "accept"
-          },
-          "content": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/$defs/jsonValue"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "elicitationInteractionDeclinedResponse": {
-        "type": "object",
-        "required": [
-          "action"
-        ],
-        "properties": {
-          "action": {
-            "enum": [
-              "decline",
-              "cancel"
-            ]
-          }
-        },
-        "additionalProperties": false
-      },
-      "elicitationInteractionResponse": {
-        "oneOf": [
-          {
-            "$ref": "#/$defs/elicitationInteractionAcceptedResponse"
-          },
-          {
-            "$ref": "#/$defs/elicitationInteractionDeclinedResponse"
-          }
-        ]
-      },
-      "samplingModelHint": {
-        "type": "object",
-        "required": [
-          "name"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingModelPreferences": {
-        "type": "object",
-        "properties": {
-          "hints": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "$ref": "#/$defs/samplingModelHint"
-            }
-          },
-          "costPriority": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          },
-          "speedPriority": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          },
-          "intelligencePriority": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingToolChoice": {
-        "type": "object",
-        "required": [
-          "mode"
-        ],
-        "properties": {
-          "mode": {
-            "enum": [
-              "auto",
-              "required",
-              "none"
-            ]
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingRequestTool": {
-        "type": "object",
-        "required": [
-          "name",
-          "inputSchema"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1
-          },
-          "title": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "inputSchema": {
-            "allOf": [
-              {
-                "$ref": "#/$defs/schemaComponentValue"
-              },
-              {
-                "required": [
-                  "type"
-                ],
-                "properties": {
-                  "type": {
-                    "const": "object"
-                  }
-                }
-              }
-            ]
-          },
-          "annotations": {
-            "$ref": "#/$defs/toolAnnotations"
-          }
-        },
-        "patternProperties": {
-          "^x-": {
-            "$ref": "#/$defs/specificationExtensionValue"
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingToolUseContent": {
-        "type": "object",
-        "required": [
-          "type",
-          "id",
-          "name",
-          "input"
-        ],
-        "properties": {
-          "type": {
-            "const": "tool_use"
-          },
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "input": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/$defs/jsonValue"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingToolResultContent": {
-        "type": "object",
-        "required": [
-          "type",
-          "toolUseId",
-          "content"
-        ],
-        "properties": {
-          "type": {
-            "const": "tool_result"
-          },
-          "toolUseId": {
-            "type": "string"
-          },
-          "content": {
-            "oneOf": [
-              {
-                "$ref": "#/$defs/toolResultContent"
-              },
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "$ref": "#/$defs/toolResultContent"
-                }
-              }
-            ]
-          },
-          "isError": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingContentBlock": {
-        "oneOf": [
-          {
-            "$ref": "#/$defs/toolResultContent"
-          },
-          {
-            "$ref": "#/$defs/samplingToolUseContent"
-          },
-          {
-            "$ref": "#/$defs/samplingToolResultContent"
-          }
-        ]
-      },
-      "samplingMessageContent": {
-        "oneOf": [
-          {
-            "$ref": "#/$defs/samplingContentBlock"
-          },
-          {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "$ref": "#/$defs/samplingContentBlock"
-            }
-          }
-        ]
-      },
-      "samplingMessage": {
-        "type": "object",
-        "required": [
-          "role",
-          "content"
-        ],
-        "properties": {
-          "role": {
-            "enum": [
-              "user",
-              "assistant"
-            ]
-          },
-          "content": {
-            "$ref": "#/$defs/samplingMessageContent"
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingCreateMessageRequest": {
-        "type": "object",
-        "required": [
-          "messages",
-          "maxTokens"
-        ],
-        "properties": {
-          "messages": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "$ref": "#/$defs/samplingMessage"
-            }
-          },
-          "modelPreferences": {
-            "$ref": "#/$defs/samplingModelPreferences"
-          },
-          "systemPrompt": {
-            "type": "string"
-          },
-          "includeContext": {
-            "enum": [
-              "none",
-              "thisServer",
-              "allServers"
-            ]
-          },
-          "maxTokens": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "temperature": {
-            "type": "number"
-          },
-          "stopSequences": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/$defs/jsonValue"
-            }
-          },
-          "tools": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "$ref": "#/$defs/samplingRequestTool"
-            }
-          },
-          "toolChoice": {
-            "$ref": "#/$defs/samplingToolChoice"
-          }
-        },
-        "additionalProperties": false
-      },
-      "samplingCreateMessageResult": {
-        "type": "object",
-        "required": [
-          "role",
-          "content",
-          "model"
-        ],
-        "properties": {
-          "role": {
-            "const": "assistant"
-          },
-          "content": {
-            "$ref": "#/$defs/samplingMessageContent"
-          },
-          "model": {
-            "type": "string"
-          },
-          "stopReason": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "rootDeclaration": {
-        "type": "object",
-        "required": [
-          "uri"
-        ],
-        "properties": {
-          "uri": {
-            "type": "string",
-            "format": "uri"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "rootsListRequest": {
-        "type": "object",
-        "maxProperties": 0,
-        "additionalProperties": false
-      },
-      "rootsListResult": {
-        "type": "object",
-        "required": [
-          "roots"
-        ],
-        "properties": {
-          "roots": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/rootDeclaration"
-            }
-          }
-        },
-        "additionalProperties": false
-      },
-      "toolInteractionElicitationStep": {
-        "type": "object",
-        "required": [
-          "type",
-          "request",
-          "response"
-        ],
-        "properties": {
-          "type": {
-            "const": "elicitation"
-          },
-          "declaration": {
-            "type": "string",
-            "pattern": "^[A-Za-z0-9._-]+$"
-          },
-          "request": {
-            "$ref": "#/$defs/elicitationInteractionRequest"
-          },
-          "response": {
-            "$ref": "#/$defs/elicitationInteractionResponse"
-          }
-        },
-        "patternProperties": {
-          "^x-": {
-            "$ref": "#/$defs/specificationExtensionValue"
-          }
-        },
-        "additionalProperties": false
-      },
-      "toolInteractionSamplingStep": {
-        "type": "object",
-        "required": [
-          "type",
-          "request",
-          "response"
-        ],
-        "properties": {
-          "type": {
-            "const": "sampling"
-          },
-          "request": {
-            "$ref": "#/$defs/samplingCreateMessageRequest"
-          },
-          "response": {
-            "$ref": "#/$defs/samplingCreateMessageResult"
-          }
-        },
-        "patternProperties": {
-          "^x-": {
-            "$ref": "#/$defs/specificationExtensionValue"
-          }
-        },
-        "additionalProperties": false
-      },
-      "toolInteractionRootsStep": {
-        "type": "object",
-        "required": [
-          "type",
-          "request",
-          "response"
-        ],
-        "properties": {
-          "type": {
-            "const": "roots"
-          },
-          "request": {
-            "$ref": "#/$defs/rootsListRequest"
-          },
-          "response": {
-            "$ref": "#/$defs/rootsListResult"
-          }
-        },
-        "patternProperties": {
-          "^x-": {
-            "$ref": "#/$defs/specificationExtensionValue"
-          }
-        },
-        "additionalProperties": false
-      },
-      "toolInteractionStep": {
-        "oneOf": [
-          {
-            "$ref": "#/$defs/toolInteractionElicitationStep"
-          },
-          {
-            "$ref": "#/$defs/toolInteractionSamplingStep"
-          },
-          {
-            "$ref": "#/$defs/toolInteractionRootsStep"
-          }
-        ]
-      },
-      "toolInteractionExample": {
-        "type": "object",
-        "required": [
-          "input",
-          "steps",
-          "result"
-        ],
-        "properties": {
-          "input": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/$defs/jsonValue"
-            }
-          },
-          "steps": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "$ref": "#/$defs/toolInteractionStep"
-            }
-          },
-          "result": {
-            "$ref": "#/$defs/completedToolResultExample"
-          }
-        },
-        "patternProperties": {
-          "^x-": {
-            "$ref": "#/$defs/specificationExtensionValue"
-          }
-        },
-        "additionalProperties": false
-      },
-      "toolInteractionExamples": {
-        "type": "object",
-        "minProperties": 1,
-        "propertyNames": {
-          "pattern": "^[A-Za-z0-9._-]+$"
-        },
-        "additionalProperties": {
-          "$ref": "#/$defs/toolInteractionExample"
+        "requestedSchema": {
+          "$ref": "#/$defs/elicitationFormSchema"
         }
       },
+      "additionalProperties": false
+    },
+    "elicitationInteractionUrlRequest": {
+      "type": "object",
+      "required": [
+        "mode",
+        "message",
+        "url"
+      ],
+      "properties": {
+        "mode": {
+          "const": "url"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    },
+    "elicitationInteractionRequest": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/elicitationInteractionFormRequest"
+        },
+        {
+          "$ref": "#/$defs/elicitationInteractionUrlRequest"
+        }
+      ]
+    },
+    "elicitationInteractionAcceptedResponse": {
+      "type": "object",
+      "required": [
+        "action"
+      ],
+      "properties": {
+        "action": {
+          "const": "accept"
+        },
+        "content": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "elicitationInteractionDeclinedResponse": {
+      "type": "object",
+      "required": [
+        "action"
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "decline",
+            "cancel"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "elicitationInteractionResponse": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/elicitationInteractionAcceptedResponse"
+        },
+        {
+          "$ref": "#/$defs/elicitationInteractionDeclinedResponse"
+        }
+      ]
+    },
+    "samplingModelHint": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingModelPreferences": {
+      "type": "object",
+      "properties": {
+        "hints": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/samplingModelHint"
+          }
+        },
+        "costPriority": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "speedPriority": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "intelligencePriority": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingToolChoice": {
+      "type": "object",
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "enum": [
+            "auto",
+            "required",
+            "none"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingRequestTool": {
+      "type": "object",
+      "required": [
+        "name",
+        "inputSchema"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "inputSchema": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/schemaComponentValue"
+            },
+            {
+              "required": [
+                "type"
+              ],
+              "properties": {
+                "type": {
+                  "const": "object"
+                }
+              }
+            }
+          ]
+        },
+        "annotations": {
+          "$ref": "#/$defs/toolAnnotations"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingToolUseContent": {
+      "type": "object",
+      "required": [
+        "type",
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "type": {
+          "const": "tool_use"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingToolResultContent": {
+      "type": "object",
+      "required": [
+        "type",
+        "toolUseId",
+        "content"
+      ],
+      "properties": {
+        "type": {
+          "const": "tool_result"
+        },
+        "toolUseId": {
+          "type": "string"
+        },
+        "content": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/toolResultContent"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/toolResultContent"
+              }
+            }
+          ]
+        },
+        "isError": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingContentBlock": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/toolResultContent"
+        },
+        {
+          "$ref": "#/$defs/samplingToolUseContent"
+        },
+        {
+          "$ref": "#/$defs/samplingToolResultContent"
+        }
+      ]
+    },
+    "samplingMessageContent": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/samplingContentBlock"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/samplingContentBlock"
+          }
+        }
+      ]
+    },
+    "samplingMessage": {
+      "type": "object",
+      "required": [
+        "role",
+        "content"
+      ],
+      "properties": {
+        "role": {
+          "enum": [
+            "user",
+            "assistant"
+          ]
+        },
+        "content": {
+          "$ref": "#/$defs/samplingMessageContent"
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingCreateMessageRequest": {
+      "type": "object",
+      "required": [
+        "messages",
+        "maxTokens"
+      ],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/samplingMessage"
+          }
+        },
+        "modelPreferences": {
+          "$ref": "#/$defs/samplingModelPreferences"
+        },
+        "systemPrompt": {
+          "type": "string"
+        },
+        "includeContext": {
+          "enum": [
+            "none",
+            "thisServer",
+            "allServers"
+          ]
+        },
+        "maxTokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "temperature": {
+          "type": "number"
+        },
+        "stopSequences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/samplingRequestTool"
+          }
+        },
+        "toolChoice": {
+          "$ref": "#/$defs/samplingToolChoice"
+        }
+      },
+      "additionalProperties": false
+    },
+    "samplingCreateMessageResult": {
+      "type": "object",
+      "required": [
+        "role",
+        "content",
+        "model"
+      ],
+      "properties": {
+        "role": {
+          "const": "assistant"
+        },
+        "content": {
+          "$ref": "#/$defs/samplingMessageContent"
+        },
+        "model": {
+          "type": "string"
+        },
+        "stopReason": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rootDeclaration": {
+      "type": "object",
+      "required": [
+        "uri"
+      ],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rootsListRequest": {
+      "type": "object",
+      "maxProperties": 0,
+      "additionalProperties": false
+    },
+    "rootsListResult": {
+      "type": "object",
+      "required": [
+        "roots"
+      ],
+      "properties": {
+        "roots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rootDeclaration"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "toolInteractionElicitationStep": {
+      "type": "object",
+      "required": [
+        "type",
+        "request",
+        "response"
+      ],
+      "properties": {
+        "type": {
+          "const": "elicitation"
+        },
+        "declaration": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+$"
+        },
+        "request": {
+          "$ref": "#/$defs/elicitationInteractionRequest"
+        },
+        "response": {
+          "$ref": "#/$defs/elicitationInteractionResponse"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "toolInteractionSamplingStep": {
+      "type": "object",
+      "required": [
+        "type",
+        "request",
+        "response"
+      ],
+      "properties": {
+        "type": {
+          "const": "sampling"
+        },
+        "request": {
+          "$ref": "#/$defs/samplingCreateMessageRequest"
+        },
+        "response": {
+          "$ref": "#/$defs/samplingCreateMessageResult"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "toolInteractionRootsStep": {
+      "type": "object",
+      "required": [
+        "type",
+        "request",
+        "response"
+      ],
+      "properties": {
+        "type": {
+          "const": "roots"
+        },
+        "request": {
+          "$ref": "#/$defs/rootsListRequest"
+        },
+        "response": {
+          "$ref": "#/$defs/rootsListResult"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "toolInteractionStep": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/toolInteractionElicitationStep"
+        },
+        {
+          "$ref": "#/$defs/toolInteractionSamplingStep"
+        },
+        {
+          "$ref": "#/$defs/toolInteractionRootsStep"
+        }
+      ]
+    },
+    "toolInteractionExample": {
+      "type": "object",
+      "required": [
+        "input",
+        "steps",
+        "result"
+      ],
+      "properties": {
+        "input": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/toolInteractionStep"
+          }
+        },
+        "result": {
+          "$ref": "#/$defs/completedToolResultExample"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/$defs/specificationExtensionValue"
+        }
+      },
+      "additionalProperties": false
+    },
+    "toolInteractionExamples": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "pattern": "^[A-Za-z0-9._-]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/toolInteractionExample"
+      }
+    },
     "completedReadResourceResultExample": {
       "type": "object",
       "required": [

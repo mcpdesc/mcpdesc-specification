@@ -15,12 +15,18 @@ import { decodeDocumentSource, documentFormatForPath } from './decode-document.m
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
 import {
   evaluateClientRequirements,
+  mcpExtensionCatalogue,
+  mcpExtensionMaturity,
   resolveComponentReferences,
   semanticValidateDocument,
   validateMcpdesc08Document
 } from './validate-0.8.mjs';
 
 const root = process.cwd();
+
+assert.equal(mcpExtensionCatalogue.effectiveDate, '2026-09-04');
+assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/ui'), 'official');
+assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/future-capability'), 'uncatalogued');
 
 function fixture(relativePath) {
   return decodeDocumentSource(
@@ -134,7 +140,10 @@ assert.deepEqual(clientRequirementView2025.tools[0].clientRequirements, {
   tasks: { requests: { sampling: { createMessage: {} } } }
 });
 assert.deepEqual(clientRequirementView2026.tools[0].clientRequirements, {
-  extensions: { 'io.modelcontextprotocol/tasks': {} }
+  extensions: {
+    'io.modelcontextprotocol/tasks': {},
+    'io.modelcontextprotocol/ui': { mimeTypes: ['text/html;profile=mcp-app'] }
+  }
 });
 const mergedClientRequirements = mergeProtocolDescriptions([clientRequirementView2025, clientRequirementView2026]);
 assert.equal(mergedClientRequirements.tools.length, 2);
