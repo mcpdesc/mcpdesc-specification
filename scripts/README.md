@@ -19,6 +19,8 @@ When those sources disagree, the workflow controls CI triggering, `package.json`
 | [`validate-repository.mjs`](validate-repository.mjs) | Invoked by both `npm test` and `npm run validate`; therefore also runs in repository CI. | See its module header for validation scope and [`package.json`](../package.json) for command composition. |
 | [`test-schema-publication.mjs`](test-schema-publication.mjs) | Invoked by `npm test` and `npm run test:publication`; therefore also runs in repository CI. | Exercises the schema-publication verifier with in-process HTTP responses and pure checks only; it never depends on the live mcpdesc.org endpoint. |
 | [`test-views.mjs`](test-views.mjs) | Invoked by `npm test`; therefore also runs in repository CI. | See its module header for the behaviors covered. |
+| [`normalize-schema.mjs`](normalize-schema.mjs) | Invoked explicitly with `npm run schema:normalize -- <schema.json> [...]`; release-candidate preparation uses the same formatter internally. | Recursively sorts object keys and writes two-space JSON with one trailing newline. Array order is preserved. |
+| [`schema-diff.mjs`](schema-diff.mjs) | Invoked explicitly with `npm run schema:diff -- <old-schema.json> <new-schema.json>`. | Separates root `$id` and `description` changes from validation-relevant changes and reports changed JSON Pointers. |
 | [`validate-0.8.mjs`](validate-0.8.mjs) | Current 0.8.0 working-tree facade used by repository and Effective Protocol View tooling. It extends the candidate semantic base without modifying published validator snapshots. | Published executable validation is maintained in `mcpdesc/core`. |
 | [`mcpdesc-views.mjs`](mcpdesc-views.mjs) | Library module exercised by `test-views.mjs`; it is not independently triggered by CI. | See its exported API and module header. |
 | [`assemble-draft.mjs`](assemble-draft.mjs) | Invoked by `npm run assemble:draft` and draft release preparation. | Regenerates the assembled draft from ordered section sources and rewrites companion-document links. |
@@ -66,3 +68,21 @@ npm run release:check -- stable 0.8.0
 Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a manifest-verified bundle from an exact tagged commit; package intake and release remain in `mcpdesc/core`. Stable preparation freezes `spec/draft/` and prints the pointer and status updates that remain.
 
 The commands do not create branches or pull requests, merge changes, create or move tags, publish GitHub releases, alter npm dist-tags, or publish packages. `draft-publication` is intentionally opt-in and networked; ordinary `npm test` remains deterministic and offline. Run the release checks on a release branch, review every generated change, run `npm test`, and use annotated tags only after explicit maintainer approval.
+
+## Schema normalization and comparison
+
+Generated mutable schemas use a deterministic textual representation. Root keys follow `$schema`, `$id`, `title`, `description`, `type`, `required`, `additionalProperties`, `properties`, `patternProperties`, and `$defs`; other object keys are sorted alphabetically. Arrays retain their source order, indentation is two spaces, and the file ends with one newline. Release-candidate preparation applies this format automatically, and repository validation rejects a non-canonical `schemas/mcp-description/0.8.0.json`. Published and frozen schemas are not rewritten.
+
+Normalize a generated schema explicitly with:
+
+```bash
+npm run schema:normalize -- schemas/mcp-description/0.8.0.json
+```
+
+Compare two schema snapshots with:
+
+```bash
+npm run schema:diff -- old-schema.json new-schema.json
+```
+
+The comparison reports root `$id` and `description` changes as release metadata. All other added, removed, or changed JSON Pointers are reported under validation changes. The command exits with status 0 when there are no validation changes, status 1 when validation changes exist, and status 2 for usage or input errors.

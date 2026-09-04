@@ -23,7 +23,7 @@ Completion examples on Prompt and Resource Template declarations are descriptive
 | `completions` | object | Present if the server supports argument autocompletion (MCP 2025-03-26+) |
 | `logging` | object | Present if the server supports sending log messages to the client |
 | `tasks` | object | Present if the server supports core task-augmented requests (MCP 2025-11-25 only) |
-| `extensions` | non-empty map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28) |
+| `extensions` | non-empty map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28); pre-standard server advertisements are preserved with a warning for earlier revisions |
 | `experimental` | object | Experimental, non-standard capabilities |
 
 ### 8.3 Tasks Capability
@@ -38,7 +38,17 @@ The `tasks` object, when present, indicates the server supports long-running tas
 
 ### 8.4 Extensibility
 
+Formal `extensions` capability negotiation begins with MCP 2026-07-28. When a server Capabilities Object containing `extensions` applies to an earlier revision, the map MUST satisfy the same structural requirements, MUST be accepted and preserved, and MUST NOT imply that the earlier MCP core revision defines the field or that the server supports MCP 2026-07-28. Validators SHOULD warn for each applicable earlier revision that its core schema does not define the field and that the description is preserving a deployed pre-standard extension negotiation convention. Implementations MAY escalate this warning under an explicit local policy.
+
 `extensions` keys MUST use the MCP mandatory-prefix metadata form `prefix/name`. A prefix whose second label is `modelcontextprotocol` or `mcp` is reserved for MCP use. Unknown syntactically valid extension identifiers are accepted and MUST be preserved. A validator SHOULD warn about an unrecognized identifier under a reserved prefix and MUST NOT treat absence from its local catalogue alone as proof of namespace misuse. Use known to be unauthorized is a semantic error.
+
+Protocol-version, identifier-authority, and identifier-maturity diagnostics are independent. Tooling MUST NOT move, copy, or reinterpret a pre-standard server extension map as `experimental`, `_meta`, an MCP Description `x-*` property, or a declaration for another protocol revision.
+
+For this purpose, an official MCP extension is recognized when the validator's extension catalogue identifies it from an authoritative MCP extension source. A validator SHOULD NOT emit an unknown-reserved-identifier warning for a catalogued official extension. It SHOULD identify a catalogued experimental extension as experimental rather than unknown and SHOULD warn that its maturity must be reviewed. Recognition establishes identifier authority and maturity only; it does not establish that an extension value satisfies extension-specific settings or semantics.
+
+An extension catalogue is validator metadata rather than part of the MCP Description document or its core conformance result. A validator that uses one MUST disclose its authoritative source, effective date, and identifier maturity assignments. A frozen validator snapshot MUST pin that metadata. Catalogue updates MAY change authority or maturity diagnostics without changing whether an otherwise conforming document satisfies this specification.
+
+A validator MAY apply deeper extension-specific validation only through an explicitly selected profile or other configured trusted mechanism. Such validation SHOULD identify an immutable or otherwise pinned extension specification version and MUST distinguish profile diagnostics from core MCP Description conformance. Failure to retrieve mutable extension material MUST NOT invalidate an otherwise conforming document.
 
 Core `tasks` in MCP 2025-11-25 and a Tasks extension in MCP 2026-07-28 are distinct declarations and MUST NOT be automatically reinterpreted as one another. `logging` remains representable for revisions that define it; validators SHOULD warn when it applies to MCP 2026-07-28, where it is deprecated.
 
@@ -48,7 +58,7 @@ The Capabilities Object and the MCP Description-defined `tools`, `resources`, an
 
 Tool, Resource, Resource Template, and Prompt Objects MAY contain a `clientRequirements` Client Capability Requirements Object. It describes an unconditional static precondition on the minimum MCP client capabilities required to use that primitive through `tools/call`, `resources/read`, or `prompts/get`. A Resource Template requirement applies to reading a concrete URI produced from the template. Requirements do not apply to listing or discovery, and this specification neither requires nor prohibits runtime filtering based on them.
 
-The object uses the `ClientCapabilities` structure of every MCP revision in the containing primitive's effective protocol scope. It MUST be non-empty, MUST NOT contain `protocolVersions`, and inherits no value from the root, a Transport Object, server `capabilities`, an Elicitation Declaration, or another primitive. Every declared capability and nested capability member MUST be valid for every effective revision. When requirements differ materially between revisions, the primitive MUST be split into pairwise-disjoint protocol-scoped variants.
+The object uses the `ClientCapabilities` structure of every MCP revision in the containing primitive's effective protocol scope. It MUST be non-empty, MUST NOT contain `protocolVersions`, and inherits no value from the root, a Transport Object, server `capabilities`, an Elicitation Declaration, or another primitive. Every declared capability and nested capability member MUST be valid for every effective revision. The pre-standard server-advertisement preservation rule in Section 8.4 does not relax this requirement. When requirements differ materially between revisions, the primitive MUST be split into pairwise-disjoint protocol-scoped variants.
 
 All requirements are conjunctive. Satisfying them does not guarantee success or authorization. Authors MUST NOT declare a capability that is optional, opportunistic, input-dependent, or used only on some runtime paths as an unconditional requirement.
 
@@ -59,7 +69,7 @@ The recognized core structure is revision-specific:
 | MCP 2024-11-05 and MCP 2025-03-26 | `roots.listChanged`, `sampling`, and `experimental` |
 | MCP 2025-06-18 | The earlier shape plus `elicitation` |
 | MCP 2025-11-25 | `roots.listChanged`; `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; core `tasks.list`, `tasks.cancel`, `tasks.requests.sampling.createMessage`, and `tasks.requests.elicitation.create`; and `experimental` |
-| MCP 2026-07-28 | Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental` |
+| MCP 2026-07-28 | `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental`; Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools` |
 
 Capability marker and settings values MUST be objects. MCP 2026-07-28 `roots` MUST be empty. Validators SHOULD warn when a requirement uses a capability or nested member deprecated in its applicable revision. MCP 2024-11-05 and MCP 2025-03-26 retain the legacy incomplete-validation treatment in Section 3.5: validators apply structural and selected sound checks and MUST NOT report complete MCP semantic conformance.
 

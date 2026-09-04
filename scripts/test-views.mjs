@@ -15,12 +15,18 @@ import { decodeDocumentSource, documentFormatForPath } from './decode-document.m
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
 import {
   evaluateClientRequirements,
+  mcpExtensionCatalogue,
+  mcpExtensionMaturity,
   resolveComponentReferences,
   semanticValidateDocument,
   validateMcpdesc08Document
 } from './validate-0.8.mjs';
 
 const root = process.cwd();
+
+assert.equal(mcpExtensionCatalogue.effectiveDate, '2026-09-04');
+assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/ui'), 'official');
+assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/future-capability'), 'uncatalogued');
 
 function fixture(relativePath) {
   return decodeDocumentSource(
@@ -134,7 +140,10 @@ assert.deepEqual(clientRequirementView2025.tools[0].clientRequirements, {
   tasks: { requests: { sampling: { createMessage: {} } } }
 });
 assert.deepEqual(clientRequirementView2026.tools[0].clientRequirements, {
-  extensions: { 'io.modelcontextprotocol/tasks': {} }
+  extensions: {
+    'io.modelcontextprotocol/tasks': {},
+    'io.modelcontextprotocol/ui': { mimeTypes: ['text/html;profile=mcp-app'] }
+  }
 });
 const mergedClientRequirements = mergeProtocolDescriptions([clientRequirementView2025, clientRequirementView2026]);
 assert.equal(mergedClientRequirements.tools.length, 2);
@@ -264,6 +273,49 @@ assert.deepEqual(
   mergedReservedExtension.capabilities[0].extensions['io.modelcontextprotocol/future-capability'],
   { enabled: true }
 );
+
+const preStandardExtensionSource = fixture('spec/draft/fixtures/expected-warning/pre-standard-extension-capabilities.json');
+assert.deepEqual(
+  semanticValidateDocument(preStandardExtensionSource).map(({ code, severity }) => ({ code, severity })),
+  [{ code: 'extensions-not-supported-by-version', severity: 'warning' }]
+);
+const preStandardExtensionView = projectProtocolView(preStandardExtensionSource, '2025-11-25');
+assert.deepEqual(preStandardExtensionView.capabilities[0].extensions['io.modelcontextprotocol/ui'], {});
+
+const uncataloguedPreStandardExtension = structuredClone(preStandardExtensionSource);
+uncataloguedPreStandardExtension.capabilities[0].extensions = {
+  'io.modelcontextprotocol/future-capability': {}
+};
+assert.deepEqual(
+  semanticValidateDocument(uncataloguedPreStandardExtension).map(({ code, severity }) => ({ code, severity })),
+  [
+    { code: 'extensions-not-supported-by-version', severity: 'warning' },
+    { code: 'unknown-reserved-extension-identifier', severity: 'warning' }
+  ]
+);
+
+const invalidPreStandardClientRequirement = structuredClone(preStandardExtensionSource);
+delete invalidPreStandardClientRequirement.capabilities;
+invalidPreStandardClientRequirement.tools = [{
+  name: 'requires_apps',
+  inputSchema: { type: 'object', additionalProperties: false },
+  clientRequirements: { extensions: { 'io.modelcontextprotocol/ui': {} } }
+}];
+assert.ok(
+  semanticValidateDocument(invalidPreStandardClientRequirement)
+    .some(({ code, severity }) => code === 'client-requirement-version-mismatch' && severity === 'error')
+);
+
+const mixedPreStandardExtensionSource = structuredClone(preStandardExtensionSource);
+mixedPreStandardExtensionSource.protocolVersions.push('2026-07-28');
+const mixedPreStandardExtensionViews = mixedPreStandardExtensionSource.protocolVersions.map((version) =>
+  projectProtocolView(mixedPreStandardExtensionSource, version)
+);
+assert.ok(mixedPreStandardExtensionViews.every((view) => Object.hasOwn(view.capabilities[0], 'extensions')));
+const mergedPreStandardExtensions = mergeProtocolDescriptions(mixedPreStandardExtensionViews);
+assert.ok(mixedPreStandardExtensionSource.protocolVersions.every((version) =>
+  semanticallyEquivalent(projectProtocolView(mergedPreStandardExtensions, version), projectProtocolView(mixedPreStandardExtensionSource, version))
+));
 
 const objectExtensionSource = fixture('spec/draft/fixtures/expected-valid/object-level-specification-extensions.json');
 const objectExtensionView2025 = projectProtocolView(objectExtensionSource, '2025-11-25');

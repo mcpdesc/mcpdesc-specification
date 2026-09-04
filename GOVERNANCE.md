@@ -19,7 +19,7 @@ The MCP Toolkit and `mcpcontract` implementation remain in `cisco-open/mcptoolki
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | `cisco-open/mcptoolkit-contract` |
-| 0.8.0 | Release Candidate 1 (`v0.8.0-rc.1`; prerelease) | `mcpdesc/mcpdesc-specification` |
+| 0.8.0 | Release Candidate 2 (`v0.8.0-rc.2`; prerelease) | `mcpdesc/mcpdesc-specification` |
 
 The v0.8.0 draft is not a stable specification release. Draft snapshot tags publish specific review and interoperability baselines without satisfying the stable-release approval requirements.
 

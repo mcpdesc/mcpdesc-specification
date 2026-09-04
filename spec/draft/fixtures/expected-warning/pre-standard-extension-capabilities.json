@@ -2,24 +2,22 @@
   "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json",
   "mcpdesc": "0.8.0",
   "info": {
-    "name": "unknown-extension-identifier",
-    "version": "1.0.0"
+    "name": "pre-standard-extension-capabilities",
+    "version": "3.4.6"
   },
   "protocolVersions": [
-    "2026-07-28"
+    "2025-11-25"
   ],
   "transports": [
     {
-      "type": "stdio",
-      "command": "unknown-extension-identifier"
+      "type": "streamable-http",
+      "url": "https://mcp.example.com"
     }
   ],
   "capabilities": [
     {
       "extensions": {
-        "com.example/custom-feature": {
-          "enabled": true
-        }
+        "io.modelcontextprotocol/ui": {}
       }
     }
   ]

@@ -5,10 +5,12 @@
   "description": "Development and validation tooling for the MCP Description specification",
   "type": "module",
   "scripts": {
-    "test": "node scripts/test-serializations.mjs && node scripts/test-schema-publication.mjs && node scripts/validate-repository.mjs && node scripts/test-views.mjs",
+    "test": "node scripts/test-canonical-json.mjs && node scripts/test-schema-diff.mjs && node scripts/test-serializations.mjs && node scripts/test-schema-publication.mjs && node scripts/validate-repository.mjs && node scripts/test-views.mjs",
     "test:publication": "node scripts/test-schema-publication.mjs",
     "validate": "node scripts/validate-repository.mjs",
     "assemble:draft": "node scripts/assemble-draft.mjs",
+    "schema:diff": "node scripts/schema-diff.mjs",
+    "schema:normalize": "node scripts/normalize-schema.mjs",
     "release:check": "node scripts/check-release.mjs",
     "release:check:draft-publication": "node scripts/check-release.mjs draft-publication",
     "release:prepare": "node scripts/prepare-release.mjs"

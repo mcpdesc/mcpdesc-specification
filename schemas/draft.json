@@ -3,13 +3,13 @@
   "description": "Identifies the active MCP Description prerelease. This is NOT a stable-version pointer; stable releases are tracked in latest.json.",
   "mcp-description": "0.8.0",
   "status": "release-candidate",
-  "iteration": 1,
-  "snapshotTag": "v0.8.0-rc.1",
-  "snapshotDate": "2026-08-31",
+  "iteration": 2,
+  "snapshotTag": "v0.8.0-rc.2",
+  "snapshotDate": "2026-09-04",
   "baselineTag": "v0.8.0-draft.4",
   "released": false,
-  "branch": "release/0.8.0-rc.1",
+  "branch": "release/0.8.0-rc.2",
   "schema": "schemas/mcp-description/0.8.0.json",
-  "schemaId": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json",
-  "note": "v0.8.0-rc.1 identifies Release Candidate 1 based on Community Working Draft 4, not a stable release or a distinct mcpdesc conformance version. schemas/latest.json remains pinned to the stable 0.7.0 release."
+  "schemaId": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json",
+  "note": "v0.8.0-rc.2 identifies Release Candidate 2 based on v0.8.0-draft.4, not a stable release or a distinct mcpdesc conformance version. schemas/latest.json remains pinned to the stable 0.7.0 release."
 }

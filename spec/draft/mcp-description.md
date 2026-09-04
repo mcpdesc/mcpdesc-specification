@@ -1,13 +1,13 @@
 ---
 title: MCP Description Specification
 version: 0.8.0
-status: Release candidate 1
-release-candidate-iteration: 1
-snapshot-tag: v0.8.0-rc.1
+status: Release candidate 2
+release-candidate-iteration: 2
+snapshot-tag: v0.8.0-rc.2
 released: false
 baseline: 0.7.0
 baseline-snapshot: v0.8.0-draft.4
-date: 2026-08-31
+date: 2026-09-04
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
@@ -19,9 +19,9 @@ editors:
 
 # MCP Description Specification
 
-**Version**: 0.8.0 (release candidate 1; `v0.8.0-rc.1`)
+**Version**: 0.8.0 (release candidate 2; `v0.8.0-rc.2`)
 
-**Status**: Release candidate 1 — prerelease
+**Status**: Release candidate 2 — prerelease
 
 **Baseline**: v0.7.0
 
@@ -31,11 +31,17 @@ editors:
 
 This specification defines the **MCP Description** format — a portable, machine-readable document that describes the durable, externally relevant surface of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
 
-An MCP Description declares supported MCP protocol revisions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static, machine-readable document. It enables offline discovery, documentation generation, description validation, change analysis, testing, governance, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
+An MCP Description declares supported MCP protocol revisions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static, machine-readable document.
+
+It enables offline discovery, documentation generation, description validation, change analysis, testing, governance, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
 
 ## Status of This Document
 
-This document is **Release Candidate 1** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.1` and based on Community Working Draft 4. The prerelease label does not change the `mcpdesc` conformance version from `0.8.0`. This is **not** a stable release and may change before final release as review and interoperability testing conclude. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository. The exact review-stage proposal revisions represented by the Draft 4 baseline are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is **Release Candidate 2** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.2` and based on Community Working Draft 4. The exact review-stage proposal revisions represented by the Draft 4 baseline are recorded in the [proposal revision manifest](../PROPOSALS.md).
+
+This is **not** a stable release and may change before final release as review and interoperability testing conclude.
+
+The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
 
 ## 1. Introduction
 
@@ -189,9 +195,17 @@ The optional `$schema` property selects a JSON Schema resource for structural va
 
 ### 3.3 Optional Sections and Ordinary Collections
 
-Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section. Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
+Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section.
 
-An optional ordinary declaration collection MUST contain at least one entry when present. A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection. This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps. It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
+Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
+
+An optional ordinary declaration collection MUST contain at least one entry when present.
+
+A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection.
+
+This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps.
+
+It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
 
 An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
 
@@ -203,13 +217,12 @@ Absence of a primitive collection MUST NOT be interpreted as proof that no other
 
 ### 3.5 MCP `_meta`
 
-MCP-derived declaration and example objects identified by this specification MAY carry a literal `_meta` object when every revision in their Effective Protocol View defines `_meta` on the corresponding MCP object. A declaration `_meta` is the literal metadata on that Tool, Resource, Resource Template, or Prompt declaration. An example `_meta` is one illustrative literal value on the represented completed result or content object. Neither form declares a reusable metadata schema or requires a live server to emit the shown value.
+The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result or content objects in named examples. It MAY appear only when every revision in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
 
-Each `_meta` key, reserved namespace, permitted context, and reserved value shape MUST satisfy every applicable MCP protocol revision. Recognized violations are document-conformance errors. An otherwise valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning rather than be treated as unauthorized solely because it is unknown to the validator. Valid unprefixed and third-party-prefixed keys MUST be accepted and preserved.
+Metadata in a named example describes only that example. It does not define a reusable metadata schema or require a server to send the same metadata.
 
-MCP `_meta`, `x-*` specification extensions, and `capabilities.extensions` are independent mechanisms. Tooling MUST preserve them independently and MUST NOT automatically project or reinterpret one as another. Projection MUST preserve `_meta` and object-level specification extensions on each selected declaration and named example without merging values from disjoint protocol variants.
+Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol revision. A recognized violation is a document-conformance error. A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A protocol-version projection MUST preserve `_meta` and MUST NOT combine metadata from variants that cover different protocol revisions.
 
-Authors MUST NOT publish credentials, tokens, user identifiers, internal topology, live trace identifiers, or other runtime-sensitive data in static `_meta`; fictitious or redacted values MUST be used where disclosure creates risk. Consumers MUST treat keys and values as untrusted data and apply appropriate size, rendering, logging, and processing limits.
 
 ### 3.6 Property Ordering
 
@@ -229,7 +242,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json",
   "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-rating-server",
@@ -272,11 +285,11 @@ The root `$schema` property remains optional. When present, it SHOULD identify t
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json
 mcpdesc: 0.8.0
 ```
 
-The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 1 documents remain `mcpdesc: 0.8.0`.
+The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 2 documents remain `mcpdesc: 0.8.0`.
 
 ### 4.4 Canonical Schema URI Families
 
@@ -286,7 +299,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -719,7 +732,7 @@ Completion examples on Prompt and Resource Template declarations are descriptive
 | `completions` | object | Present if the server supports argument autocompletion (MCP 2025-03-26+) |
 | `logging` | object | Present if the server supports sending log messages to the client |
 | `tasks` | object | Present if the server supports core task-augmented requests (MCP 2025-11-25 only) |
-| `extensions` | non-empty map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28) |
+| `extensions` | non-empty map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28); pre-standard server advertisements are preserved with a warning for earlier revisions |
 | `experimental` | object | Experimental, non-standard capabilities |
 
 ### 8.3 Tasks Capability
@@ -734,7 +747,17 @@ The `tasks` object, when present, indicates the server supports long-running tas
 
 ### 8.4 Extensibility
 
+Formal `extensions` capability negotiation begins with MCP 2026-07-28. When a server Capabilities Object containing `extensions` applies to an earlier revision, the map MUST satisfy the same structural requirements, MUST be accepted and preserved, and MUST NOT imply that the earlier MCP core revision defines the field or that the server supports MCP 2026-07-28. Validators SHOULD warn for each applicable earlier revision that its core schema does not define the field and that the description is preserving a deployed pre-standard extension negotiation convention. Implementations MAY escalate this warning under an explicit local policy.
+
 `extensions` keys MUST use the MCP mandatory-prefix metadata form `prefix/name`. A prefix whose second label is `modelcontextprotocol` or `mcp` is reserved for MCP use. Unknown syntactically valid extension identifiers are accepted and MUST be preserved. A validator SHOULD warn about an unrecognized identifier under a reserved prefix and MUST NOT treat absence from its local catalogue alone as proof of namespace misuse. Use known to be unauthorized is a semantic error.
+
+Protocol-version, identifier-authority, and identifier-maturity diagnostics are independent. Tooling MUST NOT move, copy, or reinterpret a pre-standard server extension map as `experimental`, `_meta`, an MCP Description `x-*` property, or a declaration for another protocol revision.
+
+For this purpose, an official MCP extension is recognized when the validator's extension catalogue identifies it from an authoritative MCP extension source. A validator SHOULD NOT emit an unknown-reserved-identifier warning for a catalogued official extension. It SHOULD identify a catalogued experimental extension as experimental rather than unknown and SHOULD warn that its maturity must be reviewed. Recognition establishes identifier authority and maturity only; it does not establish that an extension value satisfies extension-specific settings or semantics.
+
+An extension catalogue is validator metadata rather than part of the MCP Description document or its core conformance result. A validator that uses one MUST disclose its authoritative source, effective date, and identifier maturity assignments. A frozen validator snapshot MUST pin that metadata. Catalogue updates MAY change authority or maturity diagnostics without changing whether an otherwise conforming document satisfies this specification.
+
+A validator MAY apply deeper extension-specific validation only through an explicitly selected profile or other configured trusted mechanism. Such validation SHOULD identify an immutable or otherwise pinned extension specification version and MUST distinguish profile diagnostics from core MCP Description conformance. Failure to retrieve mutable extension material MUST NOT invalidate an otherwise conforming document.
 
 Core `tasks` in MCP 2025-11-25 and a Tasks extension in MCP 2026-07-28 are distinct declarations and MUST NOT be automatically reinterpreted as one another. `logging` remains representable for revisions that define it; validators SHOULD warn when it applies to MCP 2026-07-28, where it is deprecated.
 
@@ -744,7 +767,7 @@ The Capabilities Object and the MCP Description-defined `tools`, `resources`, an
 
 Tool, Resource, Resource Template, and Prompt Objects MAY contain a `clientRequirements` Client Capability Requirements Object. It describes an unconditional static precondition on the minimum MCP client capabilities required to use that primitive through `tools/call`, `resources/read`, or `prompts/get`. A Resource Template requirement applies to reading a concrete URI produced from the template. Requirements do not apply to listing or discovery, and this specification neither requires nor prohibits runtime filtering based on them.
 
-The object uses the `ClientCapabilities` structure of every MCP revision in the containing primitive's effective protocol scope. It MUST be non-empty, MUST NOT contain `protocolVersions`, and inherits no value from the root, a Transport Object, server `capabilities`, an Elicitation Declaration, or another primitive. Every declared capability and nested capability member MUST be valid for every effective revision. When requirements differ materially between revisions, the primitive MUST be split into pairwise-disjoint protocol-scoped variants.
+The object uses the `ClientCapabilities` structure of every MCP revision in the containing primitive's effective protocol scope. It MUST be non-empty, MUST NOT contain `protocolVersions`, and inherits no value from the root, a Transport Object, server `capabilities`, an Elicitation Declaration, or another primitive. Every declared capability and nested capability member MUST be valid for every effective revision. The pre-standard server-advertisement preservation rule in Section 8.4 does not relax this requirement. When requirements differ materially between revisions, the primitive MUST be split into pairwise-disjoint protocol-scoped variants.
 
 All requirements are conjunctive. Satisfying them does not guarantee success or authorization. Authors MUST NOT declare a capability that is optional, opportunistic, input-dependent, or used only on some runtime paths as an unconditional requirement.
 
@@ -755,7 +778,7 @@ The recognized core structure is revision-specific:
 | MCP 2024-11-05 and MCP 2025-03-26 | `roots.listChanged`, `sampling`, and `experimental` |
 | MCP 2025-06-18 | The earlier shape plus `elicitation` |
 | MCP 2025-11-25 | `roots.listChanged`; `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; core `tasks.list`, `tasks.cancel`, `tasks.requests.sampling.createMessage`, and `tasks.requests.elicitation.create`; and `experimental` |
-| MCP 2026-07-28 | Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental` |
+| MCP 2026-07-28 | `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental`; Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools` |
 
 Capability marker and settings values MUST be objects. MCP 2026-07-28 `roots` MUST be empty. Validators SHOULD warn when a requirement uses a capability or nested member deprecated in its applicable revision. MCP 2024-11-05 and MCP 2025-03-26 retain the legacy incomplete-validation treatment in Section 3.5: validators apply structural and selected sound checks and MUST NOT report complete MCP semantic conformance.
 
@@ -1840,10 +1863,10 @@ String values MUST be valid JSON strings after decoding. URI values MUST conform
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For 0.8.0 Release Candidate 1, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`. The stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
+For 0.8.0 Release Candidate 2, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json`. The stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json
 mcpdesc: 0.8.0
 ```
 
@@ -1934,6 +1957,10 @@ No sibling property, including an `x-*` property, is permitted. The pointer MUST
 
 A `$componentRef` is an MCP Description reference only at a use site that permits a Reference Object. JSON Schema `$ref` remains governed exclusively by the applicable embedded JSON Schema dialect. Implementations MUST NOT accept `$ref` as an MCP Description component reference and MUST NOT reinterpret a `$componentRef` nested inside an embedded JSON Schema.
 
+The distinct keyword separates two reference systems embedded in the same document. A JSON Schema `$ref` is an applicator: it applies another schema to the current instance location, participates in the schema dialect's URI-base and dynamic-scope rules, and may have adjacent schema keywords when the dialect permits them. A `$componentRef` instead replaces one complete MCP Description value before that value is checked in its use-site context. It can therefore reference non-schema values, but it does not compose, constrain, or annotate its target.
+
+Local-only resolution is a separate design constraint, not a consequence of using a distinct keyword. OpenAPI Reference Objects use `$ref` URI references for typed OpenAPI values and can address internal or external targets; OpenAPI Schema Objects use the same spelling with JSON Schema semantics. MCP Description 0.8.0 deliberately does not define the base-URI, document loading, trust, bundling, or identity rules needed for external MCP Description values. This does not restrict `$ref`, `$id`, `$anchor`, `$dynamicRef`, composition keywords, or externally identified schema resources inside an embedded JSON Schema; those remain subject to Section 9.2 and the applicable schema dialect.
+
 ### 17.3 Use Sites and Contextual Validation
 
 Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; Resource Template `examples` values MAY reference `resourceTemplateExamples`; and Prompt `examples` values MAY reference `promptExamples`.
@@ -2011,7 +2038,7 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.8.0.json](../../schemas/mcp-description/0.8.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json` for the Release Candidate 1 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json` for the Release Candidate 2 canonical schema resource
 - `https://mcpdesc.org/schema/mcp-description/0.8.0.json` for the stable 0.8.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.

@@ -42,7 +42,7 @@ For example, one document conforming to MCP Description 0.8.0 can describe both 
 
 `$schema` identifies one structural JSON Schema resource for editor tooling and instance-shape validation. `mcpdesc` identifies the MCP Description format and conformance version of the instance document itself.
 
-For Release Candidate 1, the recommended `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`, while `mcpdesc` remains `0.8.0`. The stable 0.8.0 release will change the recommended `$schema` URI to the stable canonical schema without changing the role of `mcpdesc`.
+For Release Candidate 2, the recommended `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json`, while `mcpdesc` remains `0.8.0`. The stable 0.8.0 release will change the recommended `$schema` URI to the stable canonical schema without changing the role of `mcpdesc`.
 
 ### How can one document describe multiple MCP revisions?
 
@@ -81,7 +81,7 @@ Generation does not make a description complete or authoritative. Generators mus
 
 Use the schema for the declared `mcpdesc` version and apply that version's semantic validation rules. Schema validation alone cannot enforce cross-object rules such as protocol coverage, scoped uniqueness, revision-specific fields, security references, or example consistency.
 
-For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json"` for editor support and use the repository validation workflow for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional.
+For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json"` for editor support and use the repository validation workflow for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional.
 
 ### Should a consumer automatically retrieve any `$schema` URL it sees?
 
@@ -119,9 +119,11 @@ Prompt and Resource Template `completionExamples` are likewise illustrative meta
 
 ### What is the difference between `$componentRef` and JSON Schema `$ref`?
 
-`$componentRef` is an MCP Description Reference Object that points only to a typed value under the same document's root `components` object. It can replace a complete supported schema or named example value and is resolved before the containing use site's rules are applied. It never retrieves another document.
+`$componentRef` is an MCP Description Reference Object that points only to a typed value under the same document's root `components` object. It replaces a complete supported schema or named example value before the containing use site's rules are applied. It does not merge with sibling fields, select a subschema, or compose with its target, and it never retrieves another document.
 
-JSON Schema `$ref` remains a JSON Schema keyword inside an embedded schema and follows that schema's dialect and resolution policy. Neither spelling is accepted as a substitute for the other.
+JSON Schema `$ref` is an applicator inside an embedded schema. It can reference local or external schema resources by URI, works with `$id`, `$anchor`, and `$dynamicRef`, and can participate in `allOf`, `anyOf`, `oneOf`, recursive schemas, and other features of the applicable dialect. Adjacent schema keywords are also allowed when that dialect permits them. Neither spelling is accepted as a substitute for the other.
+
+The separate spelling prevents an object such as `{ "$ref": "..." }` from changing meaning depending on whether MCP Description or JSON Schema is processing it. The local-only rule is an additional 0.8.0 scope decision: external MCP Description references would require document identity, base-URI, loading, trust, bundling, and cycle rules. It does not reduce JSON Schema's expressiveness inside Tool or Elicitation schemas.
 
 ### Can custom metadata be added?
 

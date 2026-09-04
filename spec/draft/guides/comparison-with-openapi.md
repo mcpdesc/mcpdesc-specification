@@ -20,6 +20,20 @@ This guide maps MCP Description concepts to OpenAPI for developers familiar with
 
 ## Detailed Comparison
 
+### References and Reuse
+
+OpenAPI 3.1 and 3.2 use `$ref` in two context-dependent ways. In a Schema Object, `$ref` has JSON Schema semantics and can use URI references, schema resources, anchors, adjacent keywords, recursion, and composition. At other reference-enabled OpenAPI use sites, a Reference Object uses `$ref` to identify a complete typed OpenAPI value, internally or externally; `summary` and `description` are its only defined siblings.
+
+MCP Description keeps these mechanisms lexically separate:
+
+| Mechanism | Target | Resolution and composition |
+|-----------|--------|----------------------------|
+| JSON Schema `$ref` in MCP Description or OpenAPI | A schema | Applicable JSON Schema dialect; URI-based and potentially external; adjacent schema keywords and composition remain available. |
+| OpenAPI Reference Object `$ref` | A typed OpenAPI value | URI-based, internal or external; replaces a complete value at a reference-enabled use site. |
+| MCP Description `$componentRef` | A typed MCP Description component | Exact local pointer under `#/components`; replaces a complete value; no siblings or external documents in 0.8.0. |
+
+The different MCP Description spelling avoids ambiguity at the boundary between the host format and embedded JSON Schema. Its local-only scope is a separate interoperability choice: version 0.8.0 does not define external MCP Description document identity, base URIs, loading policy, trust, or bundling. Schema authors still retain JSON Schema `$ref`, `$id`, `$anchor`, `$dynamicRef`, and composition inside embedded schemas.
+
 ### Info Object
 
 Both specifications use a nearly identical `info` object:

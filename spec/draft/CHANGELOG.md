@@ -26,10 +26,24 @@ This section tracks changes for the MCP Description v0.8.0 Community Working Dra
 
 ### Release candidates
 
+#### Release Candidate 2 — 2026-09-04 (`v0.8.0-rc.2`)
+
+Release Candidate 2 corrects official MCP extension recognition and defines reproducible catalogue diagnostics. It does not change the MCP Description document shape.
+
+- Defined official, experimental, and uncatalogued MCP-reserved extension recognition behavior while preserving every syntactically valid identifier.
+- Required validators using an extension catalogue to disclose and pin its authoritative source, effective date, and maturity assignments.
+- Kept extension-specific settings and semantic validation outside core conformance unless an explicitly selected, version-pinned profile performs it.
+- Recognized the official MCP Apps, Tasks, OAuth Client Credentials, and Enterprise-Managed Authorization identifiers in the RC.2 validator catalogue.
+- Added server-capability and primitive-client-requirement coverage for `io.modelcontextprotocol/ui`; unknown MCP-reserved identifiers continue to produce review warnings.
+- Accepted and preserved pre-standard server `capabilities.extensions` advertisements under MCP revisions before 2026-07-28 with a core-schema applicability warning, while retaining strict revision checks for primitive `clientRequirements.extensions`.
+- Condensed the normative `_meta` rules and aligned their terminology with the MCP specification.
+
 #### Release Candidate 1 — 2026-08-31 (`v0.8.0-rc.1`)
 
 Release Candidate 1 selects Community Working Draft 4 as its baseline for final interoperability and release review. It adds no normative features.
 
+- Documented how MCP's JSON Schema references, runtime URI identifiers, Completion references, and URL-valued metadata map to MCP Description, and clarified that MCP has no general arbitrary-object reference mechanism.
+- Clarified that `$componentRef` syntax and local-only resolution are independent design choices, and compared both with JSON Schema and OpenAPI `$ref` semantics.
 - Removed the bundled Cisco-specific extension documentation and CLI dump metadata from active draft examples; current specification examples use vendor-neutral extension identifiers.
 - Assigned the immutable release-candidate schema identity `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json` while keeping `mcpdesc: 0.8.0` and `schemas/latest.json` on stable 0.7.0.
 - Added release-candidate preparation, metadata validation, and canonical schema publication checks. Exact schema bytes must be published and verified before the candidate is tagged.

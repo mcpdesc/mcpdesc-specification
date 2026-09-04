@@ -23,10 +23,24 @@ export const supportedProtocolVersions = Object.freeze([
 const protocolOrder = new Map(supportedProtocolVersions.map((version, index) => [version, index]));
 const toolSchemaDialectVersion = '2025-11-25';
 const completeSemanticConformanceVersion = '2025-06-18';
-const knownReservedCapabilityExtensions = new Set([
-  'io.modelcontextprotocol/tasks'
-]);
+export const mcpExtensionCatalogue = Object.freeze({
+  effectiveDate: '2026-09-04',
+  source: 'https://modelcontextprotocol.io/extensions/overview',
+  officialIdentifiers: Object.freeze([
+    'io.modelcontextprotocol/enterprise-managed-authorization',
+    'io.modelcontextprotocol/oauth-client-credentials',
+    'io.modelcontextprotocol/tasks',
+    'io.modelcontextprotocol/ui'
+  ]),
+  experimentalIdentifiers: Object.freeze([])
+});
 const metaKeyPattern = /^(?:(?:[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)(?:\.[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\/)?(?:[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)?$/;
+
+export function mcpExtensionMaturity(identifier) {
+  if (mcpExtensionCatalogue.officialIdentifiers.includes(identifier)) return 'official';
+  if (mcpExtensionCatalogue.experimentalIdentifiers.includes(identifier)) return 'experimental';
+  return 'uncatalogued';
+}
 
 function createValidatorForDialect(dialect) {
   const Factory = dialect === '2020-12' ? Ajv2020 : Ajv;
@@ -785,20 +799,26 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
           diagnostics.push(
             makeDiagnostic(
               'extensions-not-supported-by-version',
-              'error',
-              `capabilities[${index}].extensions is not defined for MCP ${version}; it requires 2026-07-28`,
+              'warning',
+              `capabilities[${index}].extensions is not defined by the MCP ${version} core schema; this description preserves a deployed pre-standard extension negotiation convention. Formal extensions capability negotiation was introduced in MCP 2026-07-28`,
               [...capabilityPath, 'extensions']
             )
           );
         }
       }
       for (const identifier of Object.keys(capability.extensions ?? {})) {
-        if (!usesMcpReservedPrefix(identifier) || knownReservedCapabilityExtensions.has(identifier)) continue;
+        if (!usesMcpReservedPrefix(identifier)) continue;
+        const maturity = mcpExtensionMaturity(identifier);
+        if (maturity === 'official') continue;
         diagnostics.push(
           makeDiagnostic(
-            'unknown-reserved-extension-identifier',
+            maturity === 'experimental'
+              ? 'experimental-reserved-extension-identifier'
+              : 'unknown-reserved-extension-identifier',
             'warning',
-            `capabilities[${index}].extensions contains unrecognized identifier ${JSON.stringify(identifier)} under an MCP-reserved prefix; preserve it and review its authority`,
+            maturity === 'experimental'
+              ? `capabilities[${index}].extensions contains experimental MCP extension ${JSON.stringify(identifier)}; preserve it and review its maturity before relying on it`
+              : `capabilities[${index}].extensions contains unrecognized identifier ${JSON.stringify(identifier)} under an MCP-reserved prefix; preserve it and review its authority`,
             [...capabilityPath, 'extensions', identifier]
           )
         );

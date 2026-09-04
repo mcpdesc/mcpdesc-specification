@@ -12,7 +12,7 @@ Before treating an existing YAML file as conforming, verify YAML 1.2.2 JSON-sche
 
 ## Schema identity and publication
 
-Draft 4 introduces a new canonical MCP Description schema family under `https://mcpdesc.org/schema/mcp-description/`. When a migrated 0.8.0 draft document emits `$schema`, use `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json` and keep `mcpdesc: 0.8.0` unchanged.
+Draft 4 introduces a new canonical MCP Description schema family under `https://mcpdesc.org/schema/mcp-description/`. When a migrated 0.8.0 draft document emits `$schema`, use `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json` and keep `mcpdesc: 0.8.0` unchanged.
 
 Do not rewrite frozen stable 0.7.0 or published Draft 1-3 documents merely to change their embedded schema identifiers. Stable 0.7.0 retains the historical Cisco root `$id`, and Draft 1-3 retain the historical short URI family. Exact historical validation of those snapshots should use the corresponding bundled validator selector rather than guessing from a rewritten URL.
 
@@ -54,6 +54,8 @@ Wrap a present root Capabilities Object in an array:
 ```
 
 Do not translate durable notification semantics into wire-message catalogues. Keep fields such as `resources.subscribe`. Do not copy 2025 core Tasks declarations into a 2026 view; represent a 2026 Tasks extension separately when authoritative metadata supports it.
+
+Preserve a syntactically valid server `capabilities.extensions` map observed under MCP 2025-11-25 or an earlier revision. Version 0.8.0 accepts that deployed pre-standard convention with a warning even though the earlier MCP core schema does not define formal extension negotiation. Do not drop it, rewrite it as `experimental`, `_meta`, or `x-*`, or infer MCP 2026-07-28 support. Consumers that require strict alignment with the applicable MCP core schema may explicitly escalate the warning.
 
 ## Primitive client requirements
 
@@ -193,7 +195,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 
 1. Parse and validate the 0.7.0 source.
 2. Copy unchanged identity, transport, primitive, tag, and extension fields.
-3. Set `mcpdesc` to `0.8.0` and, when emitting it, set `$schema` to `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.1.json`.
+3. Set `mcpdesc` to `0.8.0` and, when emitting it, set `$schema` to `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json`.
 4. Move `info.protocolVersion` to root `protocolVersions`; require input if absent or unsupported.
 5. Wrap a present Capabilities Object in a one-item array.
 6. Resolve every missing Tool `inputSchema` through author review.
@@ -204,4 +206,4 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 
 A migration tool MUST report unresolved ambiguity instead of guessing.
 
-Preserve every syntactically valid `capabilities.extensions` identifier. If an identifier uses an MCP-reserved prefix but is absent from the tool's local official-extension catalogue, emit a review warning rather than rejecting or rewriting it solely on that basis.
+Preserve every syntactically valid `capabilities.extensions` identifier. A validator should accept a catalogued official MCP extension without an authority warning, identify a catalogued experimental extension as experimental, and warn when an MCP-reserved identifier is uncatalogued. The validator must disclose and pin its catalogue source, effective date, and maturity assignments. Catalogue recognition does not validate extension-specific settings.

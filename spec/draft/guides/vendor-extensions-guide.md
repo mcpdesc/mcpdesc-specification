@@ -104,6 +104,8 @@ Implementations that encounter extensions they don't recognize:
 
 The core specification does not register or endorse particular vendor extensions. Extension authors may publish schemas and documentation independently at stable URLs.
 
+This is distinct from formal MCP protocol extensions under `capabilities.extensions` and `clientRequirements.extensions`. Validators may use a pinned catalogue derived from the authoritative MCP extension registry to distinguish official, experimental, and uncatalogued MCP-reserved identifiers. Catalogue recognition confirms identifier authority and maturity only; extension-specific settings require a separately selected, version-pinned validation profile.
+
 ## Best Practices
 
 1. **Version your extension schema** — use `$id` with version in the URL

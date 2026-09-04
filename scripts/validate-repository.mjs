@@ -15,6 +15,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { assembleDraft } from './draft-assembly.mjs';
+import { canonicalizeJsonSource } from './canonical-json.mjs';
 import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
 function createValidatorForDialect(dialect) {
@@ -166,7 +167,8 @@ const proposalSnapshots = [
   ['0015-prompt-examples.md', 'f5cd5a5b62f4b074702f6405d209cee3e7b683d0', 'proposals/0015-prompt-examples.md', 'e2c74d3b4615ad4898a82c6918e919e3e9f337ec0e870dac32d9281900e67eed'],
   ['0016-completion-examples.md', '81393cf4b232c71a25d828f09a6836dc1ff316a6', 'proposals/0016-completion-examples.md', '0196662c57b7bed2a4ef2720e7acf5d74b2cc17bdecd2cbb027349fa3d480fe9'],
   ['0017-tool-interaction-examples.md', '067788c14c1361f4994ed1f819df388a29c9e978', 'proposals/0017-tool-interaction-examples.md', 'b4ad04ce763256e14b0f59cfbcd0fe10414d9d71fe4ec67ddb75e2289f7e90ed'],
-  ['0019-schema-identity-publication.md', '9680328d5aeb2e446a62e2eb4dec03ee028cfa60', 'proposals/0019-schema-identity-publication.md', 'c7a6b08f7851b49b1f324fc4c5d19b9eb180bd3f0302f0c1b122f4490be0f2bd']
+  ['0019-schema-identity-publication.md', '9680328d5aeb2e446a62e2eb4dec03ee028cfa60', 'proposals/0019-schema-identity-publication.md', 'c7a6b08f7851b49b1f324fc4c5d19b9eb180bd3f0302f0c1b122f4490be0f2bd'],
+  ['0021-pre-standard-extension-capabilities.md', 'bd1b6e53b1d44fb5177478ffefa32a466cfb1de4', 'proposals/0021-pre-standard-extension-capabilities.md', '4355bf4aee9e89a1681a337a5dacd9b3f6ed23d4d7bc430f05f9e413f57b64cc']
 ];
 const proposalManifest = fs.existsSync(path.join(root, 'spec/draft/PROPOSALS.md')) ? readText('spec/draft/PROPOSALS.md') : '';
 if (!proposalManifest) fail('missing required file: spec/draft/PROPOSALS.md');
@@ -189,8 +191,12 @@ const schemas = new Map();
 if (fs.existsSync(schemaDir)) {
   for (const filename of fs.readdirSync(schemaDir).filter((name) => /^\d+\.\d+\.\d+\.json$/.test(name))) {
     const rel = path.posix.join('schemas/mcp-description', filename);
+    const source = readText(rel);
     const schema = readJson(rel);
     if (!schema) continue;
+    if (filename === '0.8.0.json' && source !== canonicalizeJsonSource(source)) {
+      fail(`${rel}: schema must use canonical object-key ordering, 2-space indentation, and one trailing newline`);
+    }
     const ajv = ajvByDialect[dialectFor(schema)];
     try {
       ajv.validateSchema(schema, true);
