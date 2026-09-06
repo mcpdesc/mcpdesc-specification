@@ -95,6 +95,14 @@ The recommended media types are `application/mcp-description+json` and `applicat
 
 ## Supplemental MCP Description Metadata
 
+### Why is the Capabilities Object closed when MCP `ServerCapabilities` is open?
+
+MCP keeps `ServerCapabilities` open so runtime clients can tolerate capabilities introduced by later protocol revisions or other implementations. MCP Description is a static documentation and contract format: accepting arbitrary capability properties would leave their schema, meaning, revision applicability, and compatibility behavior undefined.
+
+The MCP Description Capabilities Object therefore defines a closed set of properties with explicit extension mechanisms. Use `experimental` for experimental non-standard MCP capabilities, `extensions` for namespaced MCP protocol extensions, and eligible `x-*` properties for MCP Description metadata. These mechanisms let tooling preserve extension data without treating an unknown property as a documented, interoperable capability.
+
+A capture tool that observes an unknown top-level MCP capability cannot silently relabel it. It should preserve it through the applicable MCP mechanism when that classification is known, or report that the capability cannot be represented faithfully.
+
 ### What do static security requirements mean?
 
 They describe authorization requirements known to the document author. They do not acquire tokens, enforce access, predict authorization-filtered discovery, or override the applicable MCP authorization specification.
