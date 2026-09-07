@@ -1,8 +1,10 @@
 # Proposal revisions represented in MCP Description 0.8.0 Draft 4
 
-This manifest records the exact proposal revisions used as design inputs for MCP Description 0.8.0 Community Working Draft 4 (`v0.8.0-draft.4`) and Release Candidate 2 (`v0.8.0-rc.2`). The captured files under [`proposal-snapshots/`](proposal-snapshots/) reproduce their source revisions byte for byte. They are provenance records, not accepted proposal decision records.
+This manifest records the exact proposal revisions used as design inputs for MCP Description 0.8.0 Community Working Draft 4 (`v0.8.0-draft.4`), Release Candidate 2 (`v0.8.0-rc.2`), and behavior-equivalent Release Candidate 3 (`v0.8.0-rc.3`). The captured files under [`proposal-snapshots/`](proposal-snapshots/) reproduce their source revisions byte for byte. They are provenance records, not accepted proposal decision records.
 
 Release Candidate 2 (`v0.8.0-rc.2`) retains the Draft 4 implementation and proposal-revision set as its baseline and adds the review-stage Proposal 0021 compatibility relaxation. The release-candidate designation, RC.2 extension-catalogue diagnostic correction, and Proposal 0021 implementation do not change the captured proposal statuses or imply proposal acceptance.
+
+Release Candidate 3 (`v0.8.0-rc.3`) retains the same document-conformance behavior and proposal-revision set as RC.2. Its release identity, companion-document corrections, and repository policy changes do not change the captured proposal statuses or imply proposal acceptance.
 
 All listed proposals had status **Review** when captured. Their implementations are experimental and may change incompatibly or be removed through review. Inclusion in Draft 4 does not imply proposal acceptance, a stable specification, or community consensus. Proposal 0008 remains captured as a Draft 2 design input but is explicitly excluded from the Draft 4 implementation after review.
 

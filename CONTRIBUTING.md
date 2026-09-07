@@ -7,7 +7,7 @@ Thank you for helping evolve the MCP Description specification.
 - Read [`GOVERNANCE.md`](GOVERNANCE.md).
 - Search existing issues and proposals.
 - Open an issue before making a non-trivial normative change.
-- Target the active draft branch for draft specification work.
+- Target `main` from a contribution branch and make normative changes under `spec/draft/`.
 
 ## Licensing of contributions
 
