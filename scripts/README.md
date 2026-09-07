@@ -37,16 +37,19 @@ Application consumers should use the independently versioned `@mcpdesc/validator
 
 Public draft snapshots use annotated tags named `v<version>-draft.<iteration>`, such as `v0.8.0-draft.1`. They identify an immutable review and interoperability baseline but do not create a new `mcpdesc` conformance version or a stable release.
 
-Before tagging, maintainers update the draft status metadata, front matter, changelog, public status pages, and `spec/draft/PROPOSALS.md`; capture and verify every proposal revision required by governance; run `npm test`; and confirm that `schemas/latest.json` and frozen specification versions are unchanged. For Draft 4 and later, once the canonical schema URL is live, maintainers also run `npm run release:check -- draft-publication` to verify direct publication, media type, immutable bytes, schema identity, CORS, cache policy, ETag, and HTML-fallback absence before tagging. Draft snapshots are tagged directly from the reviewed integration commit. Do not run `freeze-version.mjs` for a draft snapshot.
+Before tagging, maintainers update the draft status metadata, front matter, changelog, public status pages, and `spec/draft/PROPOSALS.md`; capture and verify every proposal revision required by governance; run `npm test`; and confirm that `schemas/latest.json` and frozen specification versions are unchanged. Once the canonical schema URL is live, maintainers also run `npm run release:check -- draft-publication` to verify direct publication, media type, immutable bytes, schema identity, CORS, cache policy, ETag, and HTML-fallback absence before tagging. Draft snapshots are tagged directly from the reviewed integration commit. Do not run `freeze-version.mjs` for a draft snapshot.
 
 ## Validator snapshot export boundary
 
 The validator package and its SemVer releases are maintained in `mcpdesc/core`.
 After this repository approves and tags an exact specification snapshot,
-`export-validator-snapshot.mjs` emits snapshot-local runtime inputs, frozen
-fixtures, source provenance, and SHA-256 digests. The core repository validates
-and imports that bundle additively. Specification approval does not choose a
-validator package version or authorize npm publication.
+`export-validator-snapshot.mjs` emits a reviewable artifact copy containing
+snapshot-local runtime inputs, frozen fixtures, source provenance, a file
+manifest, and SHA-256 digests. A consuming repository reviews and imports that
+copy additively. Source tag and commit fields are informational provenance; the
+consumer-owned schema, runtime, fixtures, and schema digest are its integrity
+inputs. Specification approval does not choose a consumer package version or
+authorize publication.
 
 ## Release helper commands
 
@@ -55,7 +58,7 @@ The helpers automate only reproducible file generation and consistency checks:
 ```bash
 npm run release:prepare -- draft.4 2026-09-15
 npm run release:prepare -- rc.1 2026-09-30
-npm run release:prepare -- validator 0.8.0-rc.2 /tmp/mcpdesc-0.8.0-rc.2
+npm run release:prepare -- validator 0.8.0-rc.3 /tmp/mcpdesc-0.8.0-rc.3
 npm run release:prepare -- stable 0.8.0
 
 npm run release:check -- draft
@@ -65,7 +68,7 @@ npm run release:check -- draft-publication
 npm run release:check -- stable 0.8.0
 ```
 
-Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a manifest-verified bundle from an exact tagged commit; package intake and release remain in `mcpdesc/core`. Stable preparation freezes `spec/draft/` and prints the pointer and status updates that remain.
+Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a reviewable artifact copy from an exact tagged commit; consumer intake and release remain outside this repository. Stable preparation freezes `spec/draft/` and prints the pointer and status updates that remain.
 
 The commands do not create branches or pull requests, merge changes, create or move tags, publish GitHub releases, alter npm dist-tags, or publish packages. `draft-publication` is intentionally opt-in and networked; ordinary `npm test` remains deterministic and offline. Run the release checks on a release branch, review every generated change, run `npm test`, and use annotated tags only after explicit maintainer approval.
 

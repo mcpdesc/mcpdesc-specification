@@ -29,11 +29,11 @@ The root `$schema` property remains optional. When present, it SHOULD identify t
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json
 mcpdesc: 0.8.0
 ```
 
-The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 2 documents remain `mcpdesc: 0.8.0`.
+The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 3 documents remain `mcpdesc: 0.8.0`.
 
 ### 4.4 Canonical Schema URI Families
 
@@ -43,7 +43,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.2.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -65,17 +65,7 @@ The project MAY also publish mutable convenience aliases such as `https://mcpdes
 
 The repository files `schemas/latest.json` and `schemas/draft.json` remain version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
 
-### 4.7 Legacy Draft 1-3 and Stable 0.7.0 Treatment
-
-Stable 0.7.0 and published Draft 1, Draft 2, and Draft 3 artifacts MUST remain byte-for-byte unchanged.
-
-The project SHOULD publish the exact Draft 3 schema at `https://mcpdesc.org/schema/0.8.0.json` because Draft 3 is the final snapshot whose embedded `$id` used that legacy short URI. The project MAY also publish exact Draft 1 and Draft 2 bytes at `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.1.json` and `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.2.json`, and Draft 3 bytes at `https://mcpdesc.org/schema/mcp-description/0.8.0-draft.3.json`, as archival retrieval mirrors.
-
-Those archival copies retain their frozen embedded `$id` values. They are retrieval mirrors, not corrected self-identifying canonical schema resources, and consumers MUST NOT treat their request URLs as corrected schema identities. Exact historical validation of Draft 1, Draft 2, and Draft 3 remains anchored on the corresponding bundled validator selectors.
-
-Stable 0.7.0 likewise retains the historical Cisco root `$id`, `https://developer.cisco.com/mcp-description/schema/0.7.0`, and Cisco Open as its canonical source. The project MAY publish the exact stable 0.7.0 bytes at `https://mcpdesc.org/schema/mcp-description/0.7.0.json` as an archival mirror only. That mirror MUST preserve attribution, licensing, schema content, and origin records.
-
-### 4.8 Retrieval and Security Boundary
+### 4.7 Retrieval and Security Boundary
 
 MCP Description conformance MUST NOT require network retrieval. A validator MAY bundle known schema resources and resolve their canonical URIs locally.
 
@@ -83,7 +73,7 @@ Consumers MUST NOT automatically retrieve an arbitrary `$schema` URI from an unt
 
 The `$schema` property assists structural schema selection and editor integration. It does not make a structurally valid document semantically conforming and does not supersede protocol-revision or cross-object validation.
 
-### 4.9 Version Compatibility
+### 4.8 Version Compatibility
 
 Implementations SHOULD support the latest specification version. Implementations MAY support multiple versions.
 
@@ -92,7 +82,7 @@ When processing a document, implementations MUST check the `mcpdesc` value and:
 - Accept documents with a recognized `mcpdesc` version
 - Reject documents with an unrecognized `mcpdesc` version or provide a clear warning
 
-### 4.10 MCP Protocol Coverage
+### 4.9 MCP Protocol Coverage
 
 The root `protocolVersions` array identifies the MCP protocol revisions described by the document. It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
@@ -106,7 +96,7 @@ An unknown or later MCP revision is invalid under mcpdesc 0.8.0 because this spe
 
 Root coverage states which revisions the document describes. It does not prove that the server supports no other revisions.
 
-### 4.11 Protocol Scopes and Inheritance
+### 4.10 Protocol Scopes and Inheritance
 
 Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts MAY declare `protocolVersions`.
 
@@ -116,11 +106,11 @@ For a nested scoped declaration, the effective scope is its explicit `protocolVe
 
 Omission therefore means the complete effective parent scope; it does not mean unknown applicability.
 
-### 4.12 Relationship Between Version Fields
+### 4.11 Relationship Between Version Fields
 
 The `mcpdesc` version identifies this description format. Root and declaration-level `protocolVersions` identify MCP protocol applicability. The optional root `$schema` identifies a structural validation schema resource. These version dimensions are independent.
 
-### 4.13 Effective Protocol Views and Projection
+### 4.12 Effective Protocol Views and Projection
 
 For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration.
 
@@ -137,7 +127,7 @@ A conforming single-version projection tool MUST:
 
 Projection produces an ordinary conforming MCP Description document, not a second format. It MUST NOT materialize transport-dependent inherited values onto a primitive unless the operation also selects a transport and defines that resolution.
 
-### 4.14 Merge
+### 4.13 Merge
 
 A merge tool MAY construct an aggregate from single-version or multi-version descriptions. It MUST validate every input and MUST report a conflict rather than guess when inputs cannot be represented faithfully.
 

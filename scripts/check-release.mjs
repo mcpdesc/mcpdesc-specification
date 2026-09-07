@@ -110,7 +110,6 @@ function checkPrerelease(expectedStatus) {
   const releaseLabel = isReleaseCandidate ? 'prerelease' : 'unreleased';
   expectIncludes(readText('README.md'), `${statusLabel} (\`${snapshotTag}\`; ${releaseLabel})`, 'README.md');
   expectIncludes(readText('spec/README.md'), `${statusLabel} (\`${snapshotTag}\`; ${releaseLabel})`, 'spec/README.md');
-  expectIncludes(readText('GOVERNANCE.md'), `${statusLabel} (\`${snapshotTag}\`; ${releaseLabel})`, 'GOVERNANCE.md');
   const baselineIteration = isReleaseCandidate ? Number(/-draft\.(\d+)$/.exec(baselineTag ?? '')?.[1]) : iteration;
   expectIncludes(readText('spec/draft/PROPOSALS.md'), `MCP Description ${version} Draft ${baselineIteration}`, 'spec/draft/PROPOSALS.md');
   expectIncludes(readText('spec/draft/CHANGELOG.md'), `${statusLabel} — ${snapshotDate} (\`${snapshotTag}\`)`, 'spec/draft/CHANGELOG.md');

@@ -1,6 +1,6 @@
 # MCP Description Specification governance
 
-This repository is governed as part of the independent `{mcpdesc}` open source project. The organization-level governance remains applicable; this document defines the specification-specific process.
+This repository is governed as part of the independent `{mcpdesc}` open source project. The [organization-level governance](https://github.com/mcpdesc/.github/blob/main/GOVERNANCE.md) remains applicable; this document defines the specification-specific process.
 
 ## Scope
 
@@ -12,16 +12,13 @@ This repository maintains:
 - proposals and design records;
 - release planning and migration guidance.
 
-The MCP Toolkit and `mcpcontract` implementation remain in `cisco-open/mcptoolkit-contract` and follow that repository's governance.
+## Specification status
 
-## Current status
-
-| Version | Status | Canonical source |
-|---|---|---|
-| 0.7.0 | Current stable release | `cisco-open/mcptoolkit-contract` |
-| 0.8.0 | Release Candidate 2 (`v0.8.0-rc.2`; prerelease) | `mcpdesc/mcpdesc-specification` |
-
-The v0.8.0 draft is not a stable specification release. Draft snapshot tags publish specific review and interoperability baselines without satisfying the stable-release approval requirements.
+Current stable and prerelease status is recorded in
+[`specification-status.json`](specification-status.json) and summarized in the
+repository [`README.md`](README.md). Public draft and release-candidate tags
+identify review and interoperability baselines without satisfying the approval
+requirements for a stable specification release.
 
 ## Roles
 
@@ -58,7 +55,7 @@ A compatible normative change should include:
 
 Breaking changes should be rare. A potentially breaking change must include clear justification, affected examples, migration guidance, and an explicit compatibility decision. It should normally remain open for public review for at least 30 days unless a security issue or release-blocking defect justifies a shorter period; the reason for shortening review must be documented.
 
-MCP Description v0.8.0 is targeted to preserve v0.7.0 documents wherever reasonable. Any proposal that invalidates a conforming v0.7.0 document requires explicit maintainer approval and migration documentation.
+A proposed release should preserve documents conforming to the current stable specification wherever reasonable. Any proposal that invalidates a document conforming to the current stable specification requires explicit maintainer approval and migration documentation.
 
 ## Proposal lifecycle
 
@@ -87,13 +84,13 @@ Proposal numbers are assigned sequentially. Acceptance of a proposal does not it
 4. **Implement** the accepted proposal on a separate `feature/<topic>` branch that changes `spec/draft/` and the affected schema, examples, and `spec/draft/CHANGELOG.md`.
 5. When an accepted proposal's implementation merges, set the proposal status to **Implemented** and link it from the changelog entry.
 
-The root `proposals/` directory therefore contains accepted or implemented proposals. Proposal-revision snapshots used by an unreleased public draft are separate historical inputs governed below; they are not accepted proposal decision records.
+The root `proposals/` directory therefore contains accepted or implemented proposals. Proposal-revision snapshots used by a public prerelease are separate historical inputs governed below; they are not accepted proposal decision records.
 
-### Public draft snapshots and review-stage proposals
+### Public prerelease snapshots and review-stage proposals
 
-A maintainer may decide that an internally coherent draft is ready to share before every proposal it contains has completed review. This exception exists to obtain community implementation and interoperability feedback on concrete draft text and schemas; it does not shorten or replace proposal review. The canonical review-stage proposal remains in its pull request and is not merged into the root `proposals/` directory until accepted.
+A maintainer may decide that an internally coherent draft or release candidate is ready to share before every proposal it contains has completed review. This exception exists to obtain community implementation and interoperability feedback on concrete prerelease text and schemas; it does not shorten or replace proposal review. The canonical review-stage proposal remains in its pull request and is not merged into the root `proposals/` directory until accepted.
 
-When publishing such a draft snapshot:
+When publishing such a prerelease snapshot:
 
 1. the maintainer decision MUST identify every proposal still in **Review** that the snapshot implements;
 2. `spec/draft/PROPOSALS.md` MUST list every proposal covered, its status at capture, its implementation relationship, and the path to its captured revision under `spec/draft/proposal-snapshots/`;
@@ -102,38 +99,43 @@ When publishing such a draft snapshot:
 5. the commit ID MUST identify a publicly retrievable commit in the proposal's repository. It SHOULD be a commit included in the proposal pull request or, for an accepted proposal, the commit containing the proposal under the root `proposals/` directory on `main`. A branch name, tag name, pull-request head, or abbreviated commit ID alone is not sufficient provenance;
 6. the captured file and recorded digest MUST be verified against the source path at that commit before publication;
 7. the corresponding implementation MAY be merged to `spec/draft/`, but the changelog and snapshot notes MUST identify review-stage content as subject to review and possible incompatible change or removal;
-8. the snapshot MUST be labeled as an unreleased community working draft and MUST NOT be represented as an accepted specification, stable release, or claim of community consensus; and
+8. the snapshot MUST be labeled as a prerelease and MUST NOT be represented as an accepted specification, stable release, or claim of community consensus; and
 9. acceptance MUST still follow the normal review period, resolution of substantive feedback, and an explicit maintainer decision. Publishing, capturing, or implementing the proposal MUST NOT be used as evidence that acceptance is predetermined.
 
-Proposal-revision snapshots are provenance records, not independently editable proposal documents. They are updated only by capturing another identified source revision and updating the manifest. A published draft tag preserves the proposal revisions used by that snapshot even when the active draft later captures newer revisions.
+Proposal-revision snapshots are provenance records, not independently editable proposal documents. They are updated only by capturing another identified source revision and updating the manifest. A published prerelease tag preserves the proposal revisions used by that snapshot even when the active draft later captures newer revisions.
 
-If a review-stage proposal included in a snapshot is later rejected or withdrawn, its normative implementation MUST be removed from the active draft. The proposal decision and rationale MUST be recorded in its issue and pull request. Previously published draft tags remain immutable historical records of what was shared; the active draft manifest records the removal or exclusion as appropriate.
+If a review-stage proposal included in a snapshot is later rejected or withdrawn, its normative implementation MUST be removed from the active draft. The proposal decision and rationale MUST be recorded in its issue and pull request. Previously published prerelease tags remain immutable historical records of what was shared; the active draft manifest records the removal or exclusion as appropriate.
 
 ## Branch and release model
 
-- `main` is the integration branch and the default view of the project. Every released specification version lives in its own `spec/<version>/` folder, and the in-progress draft lives in `spec/draft/`, so all versions are readable without switching branches.
-- Feature branches target `main` via pull request and change `spec/draft/`.
-- Released versions are frozen into `spec/<version>/` and tagged; `spec/draft/` is then re-initialized from that snapshot.
+- `main` is the integration branch and the default view of the project. Community-released specification versions live in `spec/<version>/`, historical releases may use pointers to their canonical source, and the in-progress specification lives in `spec/draft/`.
+- All contribution branches target `main` via pull request. Normative feature branches change `spec/draft/` and all corresponding artifacts.
+- Community stable releases are frozen into `spec/<version>/` and tagged; `spec/draft/` is then re-initialized for subsequent work.
 - `schemas/latest.json` identifies the latest stable schema, not the active draft.
 - Draft status may be represented separately in `schemas/draft.json` and `specification-status.json`.
 - Maintainers may publish annotated draft snapshot tags named `v<version>-draft.<iteration>` for community feedback. A draft snapshot does not change the `mcpdesc` conformance version, freeze `spec/draft/`, update `schemas/latest.json`, or satisfy the approval requirements for a stable release.
-- Maintainers may publish annotated release-candidate tags named `v<version>-rc.<iteration>` after selecting a draft baseline for final interoperability and release review. A release candidate remains a prerelease: it does not update `schemas/latest.json`, freeze a stable version folder, or imply acceptance of review-stage proposals. Each candidate uses its own immutable schema identity and must pass the same publication checks as Draft 4 and later snapshots before tagging.
-- For Draft 4 and later, once the canonical schema URL is live, maintainers MUST run `npm run release:check -- draft-publication` before tagging a public draft snapshot so the canonical URI, immutable bytes, direct-serving policy, and required publication metadata are verified.
-- Releases require passing validation, updated normative text and schemas, examples, changelog and migration guidance, an explicit maintainer decision, and an annotated version tag.
+- Maintainers may publish annotated release-candidate tags named `v<version>-rc.<iteration>` after selecting a draft baseline for final interoperability and release review. A release candidate remains a prerelease: it does not update `schemas/latest.json`, freeze a stable version folder, or imply acceptance of review-stage proposals. Each candidate uses its own immutable schema identity and must pass the same publication checks as other snapshots before tagging.
+- Before tagging, maintainers MUST run the preparation and local release checks documented in [`scripts/README.md`](scripts/README.md) for the applicable release type. Drafts and release candidates MUST also pass their corresponding publication check after the canonical schema URL is live. A stable release review MUST verify that its canonical schema satisfies the publication requirements in the specification.
+- Publishing a specification snapshot requires passing validation, synchronized normative text and schemas, examples, changelog and migration guidance, an explicit maintainer decision, and an annotated version tag.
 
-### Validator snapshot export
+### Published snapshot maintenance
 
-The `@mcpdesc/validator` package is maintained and published from
-`mcpdesc/core`. This repository owns normative text, canonical schemas, mutable
-fixtures, and candidate semantic validation. After an approved specification
-tag identifies an exact clean commit, maintainers MAY export a manifest-verified
-snapshot bundle for review and additive intake in the tooling repository.
+The **published specification artifacts** for a snapshot are its normative specification text, canonical schema bytes and `$id`, semantic validation behavior, and conformance fixtures. Changing any of those artifacts requires a new public draft snapshot, release candidate, or stable specification release, as applicable. Existing specification tags remain immutable.
 
-An exported bundle records the exact selector, specification tag and commit,
-embedded schema digest, snapshot-local semantic implementation, and frozen
-fixtures. Export does not choose a validator SemVer, npm dist-tag, or authorize
-package publication. Existing published selectors remain immutable in the
-tooling repository.
+Changelogs, FAQs, guides, governance documents, and release-page prose are maintainable companion documentation. They may be corrected on `main` without publishing a new specification snapshot when the correction does not alter a frozen artifact. Such corrections must not be presented as changing the meaning or behavior of an existing snapshot.
+
+### Specification artifact export
+
+After an approved specification tag identifies an exact clean commit,
+maintainers MAY export a reviewable copy of the [published specification
+artifacts](#published-snapshot-maintenance) for use by downstream consumers.
+An export records the specification snapshot, schema digest, semantic validation
+implementation, and conformance fixtures included in the handoff.
+
+The specification tag and source commit provide informational provenance.
+Consumers are responsible for reviewing the exported artifacts, preserving the
+behavior of versions they publish, and defining their own package versions and
+release process. Export does not authorize publication by a consumer.
 
 ## Intellectual property and contributions
 
