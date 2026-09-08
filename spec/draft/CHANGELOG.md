@@ -52,7 +52,7 @@ It also introduces reusable components, richer examples and interaction scenario
 
 ### Changed
 
-- Defined the root Info Object as document-wide metadata independent of MCP protocol revisions, preserving all Info properties during migration and projection and removing runtime `Implementation` availability gates ([Proposal 0022](proposal-snapshots/0022-protocol-independent-info-metadata.md)).
+- Defined the root Info Object as document-wide metadata independent of MCP protocol revisions, preserving all Info properties during migration and projection and removing runtime `Implementation` availability gates ([Proposal 0022](../../proposals/0022-protocol-independent-info-metadata.md)).
 - Made `transports` optional and defined omission of an optional section as no declaration rather than evidence of runtime non-support.
 - Required ordinary declaration collections to be non-empty when present and projection or merge to omit collections that become empty.
 - Defined MCP 2025-06-18 as the floor for complete revision-specific semantic validation; older recognized revisions produce incomplete-validation diagnostics.
