@@ -58,17 +58,21 @@ The helpers automate only reproducible file generation and consistency checks:
 ```bash
 npm run release:prepare -- draft.4 2026-09-15
 npm run release:prepare -- rc.1 2026-09-30
+npm run release:prepare -- editorial v0.8.0-rc.4 1 2026-10-02
 npm run release:prepare -- validator 0.8.0-rc.3 /tmp/mcpdesc-0.8.0-rc.3
 npm run release:prepare -- stable 0.8.0
 
 npm run release:check -- draft
 npm run release:check -- rc
+npm run release:check -- editorial
 npm run release:check -- rc-publication
 npm run release:check -- draft-publication
 npm run release:check -- stable 0.8.0
 ```
 
 Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a reviewable artifact copy from an exact tagged commit; consumer intake and release remain outside this repository. Stable preparation freezes `spec/draft/` and prints the pointer and status updates that remain.
+
+Editorial-edition preparation records a positive edition iteration and immutable tag over an existing release-candidate or stable base tag. It does not change the conformance version, schema identity, schema pointers, validator selector, examples, or fixtures. The editorial check compares protected conformance artifacts with the base tag and fails on any difference. Specification prose still requires human review to establish that an edit is strictly editorial; automation cannot prove semantic equivalence.
 
 The commands do not create branches or pull requests, merge changes, create or move tags, publish GitHub releases, alter npm dist-tags, or publish packages. `draft-publication` is intentionally opt-in and networked; ordinary `npm test` remains deterministic and offline. Run the release checks on a release branch, review every generated change, run `npm test`, and use annotated tags only after explicit maintainer approval.
 

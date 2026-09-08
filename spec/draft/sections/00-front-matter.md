@@ -37,7 +37,7 @@ It enables offline discovery, documentation generation, description validation, 
 
 ## Status of This Document
 
-This document is **Release Candidate 3** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.3` and based on Community Working Draft 4. RC.3 is behavior-equivalent to RC.2 for MCP Description documents: its document-conformance requirements, schema validation behavior, semantic validation behavior, examples, and conformance fixtures are unchanged apart from the new release identity and schema references. Repository publication and artifact-maintenance policy is maintained separately in the repository governance. The exact review-stage proposal revisions represented by the Draft 4 baseline are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is **Release Candidate 3** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.3`.
 
 This is **not** a stable release and may change before final release as review and interoperability testing conclude.
 

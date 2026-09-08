@@ -42,6 +42,7 @@ const snapshotTag = `v${version}-rc.${iteration}`;
 const schemaId = `https://mcpdesc.org/schema/mcp-description/${snapshotTag.slice(1)}.json`;
 const previousSchemaId = manifest.schemaId;
 
+delete status.editorialEdition;
 status.draft = { ...previous, status: 'release-candidate', iteration, snapshotTag, snapshotDate: date, baselineTag, branch: `release/${version}-rc.${iteration}`, released: false };
 Object.assign(manifest, {
   status: 'release-candidate', iteration, snapshotTag, snapshotDate: date, baselineTag,

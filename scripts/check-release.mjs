@@ -6,6 +6,7 @@
 //   node scripts/check-release.mjs draft-publication
 //   node scripts/check-release.mjs rc
 //   node scripts/check-release.mjs rc-publication
+//   node scripts/check-release.mjs editorial
 //   node scripts/check-release.mjs stable 0.8.0
 //   node scripts/check-release.mjs all
 
@@ -16,6 +17,7 @@ import {
   loadDraftSchemaPublicationExpectation,
   verifySchemaPublication
 } from './schema-publication.mjs';
+import { checkEditorialEdition } from './editorial-edition.mjs';
 
 const root = process.cwd();
 const mode = process.argv[2] ?? 'all';
@@ -166,13 +168,18 @@ function checkStable() {
 }
 
 async function main() {
-  if (!['all', 'draft', 'draft-publication', 'rc', 'rc-publication', 'stable'].includes(mode)) {
-    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, rc, rc-publication, or stable`);
+  if (!['all', 'draft', 'draft-publication', 'rc', 'rc-publication', 'editorial', 'stable'].includes(mode)) {
+    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, rc, rc-publication, editorial, or stable`);
   } else {
     if (mode === 'draft') checkPrerelease('community-working-draft');
     if (mode === 'rc') checkPrerelease('release-candidate');
     if (mode === 'all') checkPrerelease(readJson('specification-status.json')?.draft?.status);
     if (mode === 'draft-publication' || mode === 'rc-publication') await checkDraftPublication();
+    if (mode === 'editorial') {
+      const result = checkEditorialEdition(root);
+      for (const message of result.errors) fail(`editorial edition: ${message}`);
+      if (result.errors.length === 0) console.log(`Checked editorial edition ${result.editionTag}.`);
+    }
     if (mode === 'stable') checkStable();
   }
 

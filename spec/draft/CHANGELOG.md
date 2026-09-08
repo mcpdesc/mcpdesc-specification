@@ -24,7 +24,9 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 > MCP Description v0.8.0 is a community working draft under active review and interoperability testing, so its features may still change before release.
 
-Release Candidate 3 is behavior-equivalent to Release Candidate 2 for MCP Description documents. Document-conformance requirements, schema validation behavior, semantic validation behavior, examples, and conformance fixtures are unchanged apart from the RC.3 identity and `$schema` references. Repository publication and artifact-maintenance policy now lives in [`GOVERNANCE.md`](../../GOVERNANCE.md), allowing companion-document corrections without a new specification snapshot. The existing `v0.8.0-rc.2` tag and artifacts remain unchanged.
+> Release Candidate 3 is behavior-equivalent to Release Candidate 2 for MCP Description documents. Document-conformance requirements, schema validation behavior, semantic validation behavior, examples, and conformance fixtures are unchanged apart from the RC.3 identity and `$schema` references.
+
+Repository publication and artifact-maintenance policy now lives in [`GOVERNANCE.md`](../../GOVERNANCE.md), allowing companion-document corrections without a new specification snapshot. The existing `v0.8.0-rc.2` tag and artifacts remain unchanged.
 
 Version 0.8 adds first-class multi-revision descriptions, including protocol-scoped declarations and deterministic views for each MCP revision.
 
