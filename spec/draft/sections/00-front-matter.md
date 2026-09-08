@@ -25,7 +25,7 @@ editors:
 
 **Baseline**: v0.7.0
 
-**Date**: 2026-09-07
+**Date**: 2026-09-08
 
 ## Abstract
 
@@ -37,13 +37,8 @@ It enables offline discovery, documentation generation, description validation, 
 
 ## Status of This Document
 
-This document is **Release Candidate 4** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.4` and based on Community Working Draft 4. RC.4 includes the compatible Proposal 0022 relaxation that defines Info as document-wide metadata independent of MCP protocol revisions. The exact review-stage proposal revisions represented by this candidate are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is a **Release Candidate** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.4`.
 
-This is **not** a stable release and may change before final release as review and interoperability testing conclude.
+The exact proposals implemented by this release candidate are recorded in the [proposal revision manifest](../PROPOSALS.md).
 
-The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
-
-
-
-
-
+This is **not** a stable release and may change before final release as review and interoperability testing conclude. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.

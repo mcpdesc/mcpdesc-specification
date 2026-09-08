@@ -1,7 +1,5 @@
 # MCP Description Specification — Overview
 
-> **Current prerelease**: 0.8.0 Release Candidate 4 (`v0.8.0-rc.4`)
-
 ## Introduction
 
 The **MCP Description Specification** defines a standard, machine-readable document that describes the capabilities of a **Model Context Protocol (MCP) server**.
@@ -279,6 +277,6 @@ A standard description format makes it easier for new tools and platforms to int
 
 # Summary
 
-MCP Description 0.8.0 Release Candidate 4 provides a portable, machine-readable description format for MCP servers, enabling consistent discovery, documentation, validation, and integration across the MCP ecosystem.
+MCP Description 0.8.0 provides a portable, machine-readable description format for MCP servers, enabling consistent discovery, documentation, validation, and integration across the MCP ecosystem.
 
 By standardizing how MCP servers declare their capabilities — using MCP-native structures and OpenAPI-inspired design patterns — the specification helps establish a foundation for a **mature and interoperable MCP tooling ecosystem**, similar to the role that OpenAPI plays in the HTTP API ecosystem.

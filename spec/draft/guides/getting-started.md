@@ -44,9 +44,9 @@ tools:
     - player_id
 ```
 
-That's a valid MCP Description. It declares a server with one tool accessible via stdio.
+That's a valid MCP Description document. It declares a server with one tool accessible via stdio.
 
-The sample `$schema` value points to the exact Release Candidate 4 schema resource for structural validation and editor tooling. The `mcpdesc` field still carries the MCP Description conformance version, so release-candidate documents remain `mcpdesc: 0.8.0`.
+The sample `$schema` value points to the exact schema resource for structural validation and editor tooling. The `mcpdesc` field still carries the MCP Description conformance version, so release-candidate documents remain `mcpdesc: 0.8.0`.
 
 ## Step 2: Add Richer Info
 

@@ -25,7 +25,7 @@ editors:
 
 **Baseline**: v0.7.0
 
-**Date**: 2026-09-07
+**Date**: 2026-09-08
 
 ## Abstract
 
@@ -37,11 +37,11 @@ It enables offline discovery, documentation generation, description validation, 
 
 ## Status of This Document
 
-This document is **Release Candidate 4** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.4` and based on Community Working Draft 4. RC.4 includes the compatible Proposal 0022 relaxation that defines Info as document-wide metadata independent of MCP protocol revisions. The exact review-stage proposal revisions represented by this candidate are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is a **Release Candidate** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.4`.
 
-This is **not** a stable release and may change before final release as review and interoperability testing conclude.
+The exact proposals implemented by this release candidate are recorded in the [proposal revision manifest](../PROPOSALS.md).
 
-The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
+This is **not** a stable release and may change before final release as review and interoperability testing conclude. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
 
 ## 1. Introduction
 
@@ -280,16 +280,23 @@ The specification uses [Semantic Versioning](https://semver.org/) for its own ve
 
 The root `$schema` property, when present, identifies the JSON Schema resource against which the document's normalized JSON-compatible data model can be structurally validated. It does not replace the instance format discriminator.
 
+```yaml
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0.json
+mcpdesc: 0.8.0
+```
+
 The root `$schema` property remains optional. When present, it SHOULD identify the exact stable version or public draft snapshot used to produce or validate the document. Omitting `$schema` does not make an otherwise conforming document invalid; a validator MAY select an applicable bundled schema through its API, surrounding metadata, or explicit user configuration.
 
-The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
+The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution.
+
+A prerelease label in `$schema` does not change the MCP Description conformance version: Release Candidate 4 documents remain `mcpdesc: 0.8.0`.
 
 ```yaml
 $schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json
 mcpdesc: 0.8.0
 ```
 
-The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 4 documents remain `mcpdesc: 0.8.0`.
+The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
 
 ### 4.4 Canonical Schema URI Families
 
