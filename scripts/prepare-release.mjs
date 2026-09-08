@@ -4,13 +4,14 @@
 // Usage:
 //   node scripts/prepare-release.mjs draft.<iteration> <YYYY-MM-DD>
 //   node scripts/prepare-release.mjs rc.<iteration> <YYYY-MM-DD>
+//   node scripts/prepare-release.mjs editorial <base-tag> <iteration> <YYYY-MM-DD>
 //   node scripts/prepare-release.mjs validator <selector> <output-directory>
 //   node scripts/prepare-release.mjs stable <version>
 
 import { execFileSync } from 'node:child_process';
 import process from 'node:process';
 
-const [target, value, output] = process.argv.slice(2);
+const [target, value, output, date] = process.argv.slice(2);
 let script;
 let args;
 
@@ -20,6 +21,9 @@ if (/^draft\.\d+$/.test(target ?? '')) {
 } else if (/^rc\.\d+$/.test(target ?? '')) {
   script = 'scripts/prepare-release-candidate.mjs';
   args = [target.split('.')[1], value];
+} else if (target === 'editorial') {
+  script = 'scripts/editorial-edition.mjs';
+  args = ['prepare', value, output, date];
 } else if (target === 'validator') {
   script = 'scripts/export-validator-snapshot.mjs';
   args = [value, output];
@@ -30,6 +34,7 @@ if (/^draft\.\d+$/.test(target ?? '')) {
   console.error('Usage:');
   console.error('  npm run release:prepare -- draft.<iteration> <YYYY-MM-DD>');
   console.error('  npm run release:prepare -- rc.<iteration> <YYYY-MM-DD>');
+  console.error('  npm run release:prepare -- editorial <base-tag> <iteration> <YYYY-MM-DD>');
   console.error('  npm run release:prepare -- validator <selector> <output-directory>');
   console.error('  npm run release:prepare -- stable <version>');
   process.exit(1);

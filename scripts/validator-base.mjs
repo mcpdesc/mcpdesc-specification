@@ -691,11 +691,6 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
     }
   }
 
-  checkMinimumVersion('info', ['info'], document.info ?? {}, 'title', '2025-06-18', rootScope);
-  checkMinimumVersion('info', ['info'], document.info ?? {}, 'description', '2025-11-25', rootScope);
-  checkMinimumVersion('info', ['info'], document.info ?? {}, 'icons', '2025-11-25', rootScope);
-  checkMinimumVersion('info', ['info'], document.info ?? {}, 'websiteUrl', '2025-11-25', rootScope);
-
   (document.transports ?? []).forEach((transport, index) => {
     const scope = effectiveScope(document, transport, rootScope);
     if (transport.type === 'streamable-http') {

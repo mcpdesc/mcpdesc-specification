@@ -12,7 +12,9 @@ Before treating an existing YAML file as conforming, verify YAML 1.2.2 JSON-sche
 
 ## Schema identity and publication
 
-Draft 4 introduces a new canonical MCP Description schema family under `https://mcpdesc.org/schema/mcp-description/`. When a migrated 0.8.0 draft document emits `$schema`, use `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json` and keep `mcpdesc: 0.8.0` unchanged.
+v0.8.0 introduces a new canonical MCP Description schema family under `https://mcpdesc.org/schema/mcp-description/`.
+
+When a migrated 0.8.0 draft document emits `$schema`, use `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json` and keep `mcpdesc: 0.8.0` unchanged.
 
 Do not rewrite frozen stable 0.7.0 or published Draft 1-3 documents merely to change their embedded schema identifiers. Stable 0.7.0 retains the historical Cisco root `$id`, and Draft 1-3 retain the historical short URI family. Exact historical validation of those snapshots should use the corresponding bundled validator selector rather than guessing from a rewritten URL.
 
@@ -97,7 +99,7 @@ Tool schema details are revision-sensitive. Explicit `$schema` declarations requ
 
 Preserve external `$ref` values without automatically retrieving network targets. Prefer converting author-controlled schemas to self-contained local `$defs` where practical. If a target is unavailable to offline validation, retain the reference and emit a warning that complete Tool schema validation was not possible. Consumers that require executable schema certainty should resolve it through an explicitly trusted catalogue or treat the warning as an error.
 
-Likewise, `info.description` requires MCP 2025-11-25 or later, and Streamable HTTP requires MCP 2025-03-26 or later. Associate legacy SSE with modern revisions only when that compatibility surface is intentional; validators warn about that association.
+Info metadata is document-wide and independent of MCP protocol revisions. Preserve every conforming Info property from 0.7.0 regardless of the selected root `protocolVersions`; do not drop a property or silently select a newer protocol revision merely because the corresponding runtime `Implementation` field is unavailable. Streamable HTTP requires MCP 2025-03-26 or later. Associate legacy SSE with modern revisions only when that compatibility surface is intentional; validators warn about that association.
 
 ## Tool examples
 
@@ -195,7 +197,7 @@ Add root `instructions` when durable server guidance is authoritatively availabl
 
 1. Parse and validate the 0.7.0 source.
 2. Copy unchanged identity, transport, primitive, tag, and extension fields.
-3. Set `mcpdesc` to `0.8.0` and, when emitting it, set `$schema` to `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json`.
+3. Set `mcpdesc` to `0.8.0` and, when emitting it, set `$schema` to `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json`.
 4. Move `info.protocolVersion` to root `protocolVersions`; require input if absent or unsupported.
 5. Wrap a present Capabilities Object in a one-item array.
 6. Resolve every missing Tool `inputSchema` through author review.

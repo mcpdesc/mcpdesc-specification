@@ -710,13 +710,20 @@ assert.throws(
   /transport-coverage-gap/
 );
 
-const invalidRevisionApplicabilitySource = structuredClone(scoped);
-invalidRevisionApplicabilitySource.info.description = 'This field is not defined for the 2024-11-05 root revision';
-invalidRevisionApplicabilitySource.protocolVersions = ['2024-11-05', '2025-11-25'];
-assert.throws(
-  () => projectProtocolView(invalidRevisionApplicabilitySource, '2024-11-05'),
-  /field-not-supported-by-version/
-);
+const protocolIndependentInfoSource = {
+  mcpdesc: '0.8.0',
+  info: {
+    name: 'metadata-server',
+    title: 'Metadata Server',
+    version: '1.0.0',
+    description: 'Document-wide metadata',
+    icons: [{ src: 'https://example.com/icon.png' }],
+    websiteUrl: 'https://example.com/server'
+  },
+  protocolVersions: ['2025-06-18']
+};
+const legacyInfoView = projectProtocolView(protocolIndependentInfoSource, '2025-06-18');
+assert.deepEqual(legacyInfoView.info, protocolIndependentInfoSource.info);
 
 const invalidMergeInput = structuredClone(view2025);
 delete invalidMergeInput.tools[0].inputSchema;

@@ -56,6 +56,7 @@ for (const [search, replacement, label] of [
   section = replaceRequired(section, search, replacement, label);
 }
 
+delete status.editorialEdition;
 status.draft = { ...status.draft, iteration, snapshotTag, snapshotDate: date, released: false };
 draft.iteration = iteration;
 draft.snapshotTag = snapshotTag;

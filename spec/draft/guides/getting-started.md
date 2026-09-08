@@ -18,7 +18,7 @@ Create a file called `chess-coach.mcpdesc.yaml`:
 MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files use YAML 1.2.2 JSON-schema scalar resolution and exclude aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numbers.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json
 mcpdesc: 0.8.0
 info:
   name: chess-rating-server
@@ -44,9 +44,9 @@ tools:
     - player_id
 ```
 
-That's a valid MCP Description. It declares a server with one tool accessible via stdio.
+That's a valid MCP Description document. It declares a server with one tool accessible via stdio.
 
-The sample `$schema` value points to the exact Release Candidate 3 schema resource for structural validation and editor tooling. The `mcpdesc` field still carries the MCP Description conformance version, so release-candidate documents remain `mcpdesc: 0.8.0`.
+The sample `$schema` value points to the exact schema resource for structural validation and editor tooling. The `mcpdesc` field still carries the MCP Description conformance version, so release-candidate documents remain `mcpdesc: 0.8.0`.
 
 ## Step 2: Add Richer Info
 

@@ -9,11 +9,11 @@ A portable, machine-readable contract format for describing Model Context Protoc
 | Version | Status | Canonical source |
 |---|---|---|
 | 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
-| 0.8.0 | Release Candidate 3 (`v0.8.0-rc.3`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
+| 0.8.0 | Release Candidate 4 (`v0.8.0-rc.4`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
-Release Candidate 3 is behavior-equivalent to RC.2 for MCP Description documents: its document-conformance requirements, schema validation behavior, semantic validation behavior, examples, and conformance fixtures are unchanged apart from the new release identity and schema references. RC.3 includes companion-document corrections and moves repository publication and artifact-maintenance policy into [governance](GOVERNANCE.md). It remains a prerelease and does not update `schemas/latest.json`; RC.2 and its tag remain unchanged. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
+Release Candidate 4 defines the root Info Object as document-wide metadata independent of MCP protocol revisions. It is a compatible relaxation that preserves Info metadata during migration and projection without changing the JSON Schema shape. RC.4 remains a prerelease and does not update `schemas/latest.json`; earlier release-candidate tags remain unchanged. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
 
 ## Repository roles
 

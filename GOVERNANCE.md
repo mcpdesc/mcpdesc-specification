@@ -120,9 +120,20 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 
 ### Published snapshot maintenance
 
-The **published specification artifacts** for a snapshot are its normative specification text, canonical schema bytes and `$id`, semantic validation behavior, and conformance fixtures. Changing any of those artifacts requires a new public draft snapshot, release candidate, or stable specification release, as applicable. Existing specification tags remain immutable.
+The **published conformance artifacts** for a snapshot are its normative requirements, canonical schema bytes and `$id`, semantic validation behavior, examples, conformance fixtures, serialization fixtures, and proposal-revision provenance. Changing any of those artifacts requires a new public draft snapshot, release candidate, or stable specification release, as applicable. Existing specification tags remain immutable.
 
 Changelogs, FAQs, guides, governance documents, and release-page prose are maintainable companion documentation. They may be corrected on `main` without publishing a new specification snapshot when the correction does not alter a frozen artifact. Such corrections must not be presented as changing the meaning or behavior of an existing snapshot.
+
+Strictly editorial corrections to specification prose MAY be published as an immutable **editorial edition** of an existing release candidate or stable release. An editorial edition:
+
+- MUST NOT change document-conformance requirements, canonical schema bytes or identity, semantic validation behavior, examples, conformance fixtures, serialization fixtures, or proposal-revision provenance;
+- MUST retain the base snapshot's `mcpdesc` value, `$schema` URI, and validator selector;
+- MUST identify its immutable base snapshot and use an annotated tag formed by appending SemVer build metadata `+editorial.<iteration>` to the base tag, for example `v0.8.0-rc.4+editorial.1` or `v0.8.0+editorial.1`;
+- MUST use a positive, monotonically increasing editorial iteration for a given base snapshot;
+- MUST pass the repository editorial-edition check against the base tag before tagging; and
+- MUST be reviewed as editorial and must link to a public issue or pull request explaining why meaning is unchanged.
+
+SemVer build metadata distinguishes immutable editorial editions but does not establish version precedence. Repository status metadata records the current editorial iteration for consumers that need ordering. A change to an RFC 2119/8174 requirement keyword, a conformance condition, or text whose effect is reasonably ambiguous is normative unless review establishes otherwise, and normally requires a new conformance snapshot instead of an editorial edition. Editorial-edition tags never move or replace their base tags.
 
 ### Specification artifact export
 

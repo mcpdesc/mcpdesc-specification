@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import { compareSchemas, formatSchemaDiff } from './schema-diff.mjs';
 
 const metadataOnly = compareSchemas(
-  { $id: 'rc.1', description: 'RC 1', type: 'object' },
-  { type: 'object', description: 'RC 2', $id: 'rc.2' }
+  { $id: 'rc.1', title: 'Candidate 1', description: 'RC 1', type: 'object' },
+  { type: 'object', description: 'RC 2', title: 'Candidate 2', $id: 'rc.2' }
 );
 assert.deepEqual(metadataOnly.validation, []);
-assert.deepEqual(metadataOnly.metadata.map((change) => change.path), ['/$id', '/description']);
+assert.deepEqual(metadataOnly.metadata.map((change) => change.path), ['/$id', '/description', '/title']);
 
 const changed = compareSchemas(
   { required: ['name'], properties: { name: { type: 'string' } } },

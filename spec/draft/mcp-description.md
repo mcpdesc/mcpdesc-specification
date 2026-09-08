@@ -1,13 +1,13 @@
 ---
 title: MCP Description Specification
 version: 0.8.0
-status: Release candidate 3
-release-candidate-iteration: 3
-snapshot-tag: v0.8.0-rc.3
+status: Release candidate 4
+release-candidate-iteration: 4
+snapshot-tag: v0.8.0-rc.4
 released: false
 baseline: 0.7.0
 baseline-snapshot: v0.8.0-draft.4
-date: 2026-09-07
+date: 2026-09-08
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
@@ -19,13 +19,13 @@ editors:
 
 # MCP Description Specification
 
-**Version**: 0.8.0 (release candidate 3; `v0.8.0-rc.3`)
+**Version**: 0.8.0 (release candidate 4; `v0.8.0-rc.4`)
 
-**Status**: Release candidate 3 — prerelease
+**Status**: Release candidate 4 — prerelease
 
 **Baseline**: v0.7.0
 
-**Date**: 2026-09-07
+**Date**: 2026-09-08
 
 ## Abstract
 
@@ -37,11 +37,11 @@ It enables offline discovery, documentation generation, description validation, 
 
 ## Status of This Document
 
-This document is **Release Candidate 3** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.3` and based on Community Working Draft 4. RC.3 is behavior-equivalent to RC.2 for MCP Description documents: its document-conformance requirements, schema validation behavior, semantic validation behavior, examples, and conformance fixtures are unchanged apart from the new release identity and schema references. Repository publication and artifact-maintenance policy is maintained separately in the repository governance. The exact review-stage proposal revisions represented by the Draft 4 baseline are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This document is a **Release Candidate** for MCP Description v0.8.0, identified by prerelease tag `v0.8.0-rc.4`.
 
-This is **not** a stable release and may change before final release as review and interoperability testing conclude.
+The exact proposals implemented by this release candidate are recorded in the [proposal revision manifest](../PROPOSALS.md).
 
-The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
+This is **not** a stable release and may change before final release as review and interoperability testing conclude. The current stable release is v0.7.0, whose canonical source remains the Cisco Open `mcptoolkit-contract` repository.
 
 ## 1. Introduction
 
@@ -242,7 +242,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json",
   "mcpdesc": "0.8.0",
   "info": {
     "name": "chess-rating-server",
@@ -280,16 +280,23 @@ The specification uses [Semantic Versioning](https://semver.org/) for its own ve
 
 The root `$schema` property, when present, identifies the JSON Schema resource against which the document's normalized JSON-compatible data model can be structurally validated. It does not replace the instance format discriminator.
 
-The root `$schema` property remains optional. When present, it SHOULD identify the exact stable version or public draft snapshot used to produce or validate the document. Omitting `$schema` does not make an otherwise conforming document invalid; a validator MAY select an applicable bundled schema through its API, surrounding metadata, or explicit user configuration.
-
-The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution. The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
-
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0.json
 mcpdesc: 0.8.0
 ```
 
-The prerelease label in `$schema` does not change the MCP Description conformance version. Release Candidate 3 documents remain `mcpdesc: 0.8.0`.
+The root `$schema` property remains optional. When present, it SHOULD identify the exact stable version or public draft snapshot used to produce or validate the document. Omitting `$schema` does not make an otherwise conforming document invalid; a validator MAY select an applicable bundled schema through its API, surrounding metadata, or explicit user configuration.
+
+The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution.
+
+A prerelease label in `$schema` does not change the MCP Description conformance version: Release Candidate 4 documents remain `mcpdesc: 0.8.0`.
+
+```yaml
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json
+mcpdesc: 0.8.0
+```
+
+The schema document's own `$schema` property identifies the JSON Schema dialect used to interpret the schema. MCP Description 0.8.0 schemas use `https://json-schema.org/draft/2020-12/schema`.
 
 ### 4.4 Canonical Schema URI Families
 
@@ -299,7 +306,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -356,6 +363,8 @@ Root coverage states which revisions the document describes. It does not prove t
 
 Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts MAY declare `protocolVersions`.
 
+The root Info Object is unscoped, document-wide MCP Description metadata. Its properties are valid independently of root `protocolVersions` and MUST NOT be treated as protocol-scoped declarations.
+
 For root version set `R`, a top-level declaration's effective scope is its explicit `protocolVersions` when present and `R` otherwise. An explicit scope MUST be a non-empty subset of `R`.
 
 For a nested scoped declaration, the effective scope is its explicit `protocolVersions` when present and its parent's effective scope otherwise. An explicit child scope MUST be a non-empty subset of its parent's effective scope.
@@ -368,7 +377,7 @@ The `mcpdesc` version identifies this description format. Root and declaration-l
 
 ### 4.12 Effective Protocol Views and Projection
 
-For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration.
+For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration. It preserves the complete Info Object unchanged.
 
 A conforming single-version projection tool MUST:
 
@@ -407,17 +416,21 @@ The `info` object provides metadata about the MCP server. It is REQUIRED.
 
 The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fields from the MCP `Implementation` type used for server identity. The MCP-sourced fields — `name`, `title`, `description`, `version`, `icons`, and `websiteUrl` — allow an MCP Description document to represent server identity metadata that may also be advertised at runtime.
 
+Info is unscoped, document-wide MCP Description metadata. Every property defined by this specification MAY appear regardless of the revisions listed in root `protocolVersions`. A mapping to MCP `Implementation` indicates that a producer MAY obtain or compare the value through runtime initialization when the negotiated revision defines that field. It MUST NOT be interpreted as requiring a runtime origin or restricting the property's presence to those revisions. Validators MUST NOT emit a revision-applicability diagnostic solely because an Info property is unavailable on `Implementation` in an applicable MCP revision.
+
+A producer MAY obtain Info metadata from author input, configuration, package metadata, a registry, runtime discovery, or another source. This specification does not assign trust or precedence among those sources, and consumers MUST NOT infer that an Info value was asserted by a live server.
+
 ### 5.1 Properties
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Programmatic server name (identifier). MUST be non-empty. Maps to `Implementation.name` (MCP `BaseMetadata`). |
 | `version` | string | **Yes** | Server version. Semver RECOMMENDED. MUST be non-empty. Maps to `Implementation.version`. |
-| `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Maps to `Implementation.title` (MCP `BaseMetadata`, since 2025-06-18). |
-| `description` | string | No | Brief description of what the server does. Maps to `Implementation.description` (MCP, since 2025-11-25). |
+| `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Runtime mapping: `Implementation.title` (MCP `BaseMetadata`, available since 2025-06-18). |
+| `description` | string | No | Brief description of what the server does. Runtime mapping: `Implementation.description` (available since MCP 2025-11-25). |
 | `id` | string | No | Unique server identifier (URI, DID, or URN). |
-| `icons` | non-empty array\<[Icon](#appendix-a-icon-object)\> | No | Icons for UI display. Maps to `Implementation.icons` (MCP, since 2025-11-25). |
-| `websiteUrl` | string (URI) | No | URL of the server's website. Maps to `Implementation.websiteUrl` (MCP, since 2025-11-25). |
+| `icons` | non-empty array\<[Icon](#appendix-a-icon-object)\> | No | Icons for UI display. Runtime mapping: `Implementation.icons` (available since MCP 2025-11-25). |
+| `websiteUrl` | string (URI) | No | URL of the server's website. Runtime mapping: `Implementation.websiteUrl` (available since MCP 2025-11-25). |
 | `contact` | [Contact Object](#52-contact-object) | No | Contact information (OpenAPI-style, not part of MCP `Implementation`). |
 | `license` | [License Object](#53-license-object) | No | License information (OpenAPI-style, not part of MCP `Implementation`). |
 
@@ -1853,10 +1866,10 @@ String values MUST be valid JSON strings after decoding. URI values MUST conform
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For 0.8.0 Release Candidate 3, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json`. The stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
+For 0.8.0 Release Candidate 4, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json`. The stable 0.8.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. In both cases, the `$schema` value does not change the required `mcpdesc: 0.8.0` discriminator.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json
 mcpdesc: 0.8.0
 ```
 
@@ -2028,7 +2041,7 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.8.0.json](../../schemas/mcp-description/0.8.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.3.json` for the Release Candidate 3 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json` for the Release Candidate 4 canonical schema resource
 - `https://mcpdesc.org/schema/mcp-description/0.8.0.json` for the stable 0.8.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.
