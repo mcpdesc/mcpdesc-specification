@@ -4,6 +4,10 @@ version: 0.8.0
 status: Release candidate 4
 release-candidate-iteration: 4
 snapshot-tag: v0.8.0-rc.4
+edition-date: 2026-09-08
+edition-tag: v0.8.0-rc.4+editorial.1
+editorial-base-tag: v0.8.0-rc.4
+editorial-edition: 1
 released: false
 baseline: 0.7.0
 baseline-snapshot: v0.8.0-draft.4

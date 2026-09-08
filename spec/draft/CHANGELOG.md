@@ -20,7 +20,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 <!-- tocstop -->
 
-## [0.8.0] — Release Candidate 4 — 2026-09-08 (`v0.8.0-rc.4`)
+## [0.8.0-RC.4] — 2026-09-08
 
 > MCP Description v0.8.0 is a community working draft under active review and interoperability testing, so its features may still change before release.
 
@@ -28,7 +28,7 @@ Version 0.8 adds multi-revision descriptions, including protocol-scoped declarat
 
 It also introduces reusable components, richer examples and interaction scenarios, client capability requirements, elicitation declarations, extension support, and stronger validation across JSON and YAML documents.
 
-Release Candidate 4 includes the compatible Proposal 0022 relaxation: Info metadata is document-wide and no longer restricted by the runtime availability of corresponding MCP `Implementation` fields. Existing conforming documents remain conforming, and documents rejected only by those Info revision gates become conforming. The JSON Schema validation shape is unchanged apart from the RC.4 identity and `$schema` references.
+RC.4 includes the compatible Proposal 0022 relaxation: Info metadata is document-wide and no longer restricted by the runtime availability of corresponding MCP `Implementation` fields. Existing conforming documents remain conforming, and documents rejected only by those Info revision gates become conforming. The JSON Schema validation shape is unchanged apart from the RC.4 identity and `$schema` references.
 
 ### Breaking
 
