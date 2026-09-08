@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mcpdesc.org/schema/mcp-description/0.8.0-rc.4.json",
-  "title": "MCP Description",
-  "description": "MCP Description 0.8.0 Release Candidate 4 (v0.8.0-rc.4; prerelease).",
+  "title": "MCP Server Description (mcpdesc format)",
+  "description": "A static, curated description of what an MCP server offers. Uses MCP-native terminology, an OpenAPI-aligned info and security structure, and support for multiple transports, protocol revisions, and specification extensions. Supports MCP protocol revisions 2024-11-05, 2025-03-26, 2025-06-18, 2025-11-25, and 2026-07-28.",
   "type": "object",
   "required": [
     "mcpdesc",

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import process from 'node:process';
 
-const METADATA_PATHS = new Set(['/$id', '/description']);
+const METADATA_PATHS = new Set(['/$id', '/title', '/description']);
 const MISSING = Symbol('missing');
 
 function isObject(value) {
