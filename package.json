@@ -13,6 +13,7 @@
     "schema:normalize": "node scripts/normalize-schema.mjs",
     "release:check": "node scripts/check-release.mjs",
     "release:check:draft-publication": "node scripts/check-release.mjs draft-publication",
+    "release:check:stable-publication": "node scripts/check-release.mjs stable-publication",
     "release:prepare": "node scripts/prepare-release.mjs"
   },
   "engines": {

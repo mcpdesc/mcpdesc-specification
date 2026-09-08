@@ -8,10 +8,10 @@ Maintain a precise, portable, machine-readable description format for MCP server
 
 ## Locked constraints
 
-- v0.7.0 is the current stable release; its canonical source remains Cisco Open.
-- v0.8.0 is a community working draft in this repository.
-- Do not promote v0.8.0 to stable without an explicit release decision.
-- Do not change `schemas/latest.json` from 0.7.0 during draft work.
+- v0.8.0 is the current stable release in this repository.
+- v0.7.0 remains frozen; its canonical source remains Cisco Open.
+- No active draft exists until work on the next version is explicitly initialized.
+- `schemas/latest.json` identifies the current stable release and MUST NOT point to draft or prerelease content.
 - No CLA, copyright assignment, or DCO is required.
 - Preserve copyright, licensing, attribution, origin, and modification records.
 

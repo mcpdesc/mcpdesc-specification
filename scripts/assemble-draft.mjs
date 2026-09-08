@@ -4,11 +4,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import { assembleDraft } from './draft-assembly.mjs';
+import { assembleDraft, assembleSpecification } from './draft-assembly.mjs';
 
 const root = process.cwd();
-const output = path.join(root, 'spec', 'draft', 'mcp-description.md');
-const { content, sections } = assembleDraft(root);
+const versionDirectory = process.argv[2] ?? 'draft';
+const output = path.join(root, 'spec', versionDirectory, 'mcp-description.md');
+const { content, sections } = versionDirectory === 'draft'
+	? assembleDraft(root)
+	: assembleSpecification(root, versionDirectory);
 
 fs.writeFileSync(output, content);
-console.log(`Assembled ${sections.length} sections into spec/draft/mcp-description.md.`);
+console.log(`Assembled ${sections.length} sections into spec/${versionDirectory}/mcp-description.md.`);

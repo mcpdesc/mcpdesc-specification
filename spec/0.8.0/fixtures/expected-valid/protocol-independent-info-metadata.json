@@ -1,0 +1,23 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "chess-coach",
+    "title": "Chess Coach Cloud",
+    "version": "2.1.0",
+    "description": "Cloud-hosted chess analysis, ratings, and game history service",
+    "icons": [
+      {
+        "src": "https://chess-coach.example.com/icon.png",
+        "mimeType": "image/png",
+        "sizes": [
+          "48x48"
+        ]
+      }
+    ],
+    "websiteUrl": "https://chess-coach.example.com"
+  },
+  "protocolVersions": [
+    "2025-06-18"
+  ]
+}

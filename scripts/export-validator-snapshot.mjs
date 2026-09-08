@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Export an approved specification snapshot for manifest-verified validator intake.
-// Usage: node scripts/export-validator-snapshot.mjs <x.y.z-draft.n|x.y.z-rc.n> <output-directory>
+// Usage: node scripts/export-validator-snapshot.mjs <x.y.z|x.y.z-draft.n|x.y.z-rc.n> <output-directory>
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -17,8 +17,8 @@ function die(message) {
   process.exit(1);
 }
 
-if (!/^\d+\.\d+\.\d+-(?:draft|rc)\.\d+$/.test(selector ?? '')) {
-  die('selector must use x.y.z-draft.n or x.y.z-rc.n');
+if (!/^\d+\.\d+\.\d+(?:-(?:draft|rc)\.\d+)?$/.test(selector ?? '')) {
+  die('selector must use x.y.z, x.y.z-draft.n, or x.y.z-rc.n');
 }
 if (!outputArgument) die('output directory is required');
 
@@ -58,11 +58,11 @@ const schemaSource = path.join(
   'mcp-description',
   `${version}.json`,
 );
-const fixtureSource = path.join(root, 'spec', 'draft', 'fixtures');
+const fixtureSource = path.join(root, 'spec', selector === version ? version : 'draft', 'fixtures');
 const baseSource = path.join(root, 'scripts', 'validator-base.mjs');
 for (const [source, label] of [
   [schemaSource, `schema for ${version}`],
-  [fixtureSource, 'draft fixtures'],
+  [fixtureSource, `${selector} fixtures`],
   [baseSource, 'candidate semantic base'],
 ]) {
   if (!fs.existsSync(source)) die(`missing ${label}: ${path.relative(root, source)}`);

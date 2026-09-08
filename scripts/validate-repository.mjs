@@ -14,7 +14,7 @@ import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
-import { assembleDraft } from './draft-assembly.mjs';
+import { assembleSpecification } from './draft-assembly.mjs';
 import { canonicalizeJsonSource } from './canonical-json.mjs';
 import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
@@ -39,6 +39,8 @@ const ajvByDialect = {
 const root = process.cwd();
 const errors = [];
 const warnings = [];
+const specificationDirectory = fs.existsSync(path.join(root, 'spec', 'draft')) ? 'draft' : '0.8.0';
+const specificationRoot = `spec/${specificationDirectory}`;
 const requiredFiles = [
   'README.md',
   'LICENSE',
@@ -50,7 +52,7 @@ const requiredFiles = [
   'schemas/latest.json',
   'schemas/mcp-description/0.7.0.json',
   'schemas/mcp-description/0.8.0.json',
-  'spec/draft/mcp-description.md'
+  `${specificationRoot}/mcp-description.md`
 ];
 
 function fail(message) {
@@ -111,29 +113,32 @@ for (const rel of ['ORIGIN.md', 'README.md', 'NOTICE']) {
   }
 }
 
-const sectionDir = path.join(root, 'spec', 'draft', 'sections');
-if (fs.existsSync(sectionDir) && fs.existsSync(path.join(root, 'spec/draft/mcp-description.md'))) {
-  const { content: assembledFromSections } = assembleDraft(root);
-  if (readText('spec/draft/mcp-description.md') !== assembledFromSections) {
-    fail('spec/draft/mcp-description.md: assembled specification is out of sync with spec/draft/sections');
+const sectionDir = path.join(root, specificationRoot, 'sections');
+if (fs.existsSync(sectionDir) && fs.existsSync(path.join(root, specificationRoot, 'mcp-description.md'))) {
+  const { content: assembledFromSections } = assembleSpecification(root, specificationDirectory);
+  if (readText(`${specificationRoot}/mcp-description.md`) !== assembledFromSections) {
+    fail(`${specificationRoot}/mcp-description.md: assembled specification is out of sync with ${specificationRoot}/sections`);
   }
 }
 
 const status = readJson('specification-status.json');
 const latest = readJson('schemas/latest.json');
-if (status && status.stable?.version !== '0.7.0') fail('stable status must remain 0.7.0 during bootstrap');
-if (status && status.draft?.version !== '0.8.0') fail('draft status must identify 0.8.0');
-if (status && !Number.isInteger(status.draft?.iteration)) fail('draft status iteration must be an integer');
-if (status && !['community-working-draft', 'release-candidate'].includes(status.draft?.status)) fail('draft status must identify a community working draft or release candidate');
-if (status) {
+const hasActiveDraft = specificationDirectory === 'draft';
+if (status && latest && status.stable?.version !== latest['mcp-description']) fail('stable status must match schemas/latest.json');
+if (hasActiveDraft && status && status.draft?.version !== '0.8.0') fail('draft status must identify 0.8.0');
+if (hasActiveDraft && status && !Number.isInteger(status.draft?.iteration)) fail('draft status iteration must be an integer');
+if (hasActiveDraft && status && !['community-working-draft', 'release-candidate'].includes(status.draft?.status)) fail('draft status must identify a community working draft or release candidate');
+if (hasActiveDraft && status) {
   const prereleaseLabel = status.draft?.status === 'release-candidate' ? 'rc' : 'draft';
   if (status.draft?.snapshotTag !== `v${status.draft?.version}-${prereleaseLabel}.${status.draft?.iteration}`) {
     fail('draft status snapshot tag must match its status, version, and iteration');
   }
 }
-if (status && !/^\d{4}-\d{2}-\d{2}$/.test(status.draft?.snapshotDate ?? '')) fail('draft status snapshot date must use YYYY-MM-DD');
-if (status && status.draft?.released !== false) fail('v0.8.0 must remain unreleased during bootstrap');
-if (latest && latest['mcp-description'] !== '0.7.0') fail('schemas/latest.json must remain on 0.7.0 until release');
+if (hasActiveDraft && status && !/^\d{4}-\d{2}-\d{2}$/.test(status.draft?.snapshotDate ?? '')) fail('draft status snapshot date must use YYYY-MM-DD');
+if (hasActiveDraft && status && status.draft?.released !== false) fail('active draft must remain unreleased');
+if (!hasActiveDraft && status?.draft) fail('specification-status.json must not identify an active draft when spec/draft is absent');
+if (!hasActiveDraft && status?.stable?.version !== '0.8.0') fail('retired draft state requires stable 0.8.0');
+if (!hasActiveDraft && latest?.['mcp-description'] !== '0.8.0') fail('retired draft state requires schemas/latest.json to identify 0.8.0');
 
 if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
   const draft = readJson('schemas/draft.json');
@@ -171,10 +176,11 @@ const proposalSnapshots = [
   ['0021-pre-standard-extension-capabilities.md', 'bd1b6e53b1d44fb5177478ffefa32a466cfb1de4', 'proposals/0021-pre-standard-extension-capabilities.md', '4355bf4aee9e89a1681a337a5dacd9b3f6ed23d4d7bc430f05f9e413f57b64cc'],
   ['0022-protocol-independent-info-metadata.md', '87b2d493cfa87a9cbea8148ae1f6638bd1aae786', 'proposals/0022-protocol-independent-info-metadata.md', '45c66ad65bbdae67c0afea416e025ddb1ce3dd4125306b40742fb6f887824785']
 ];
-const proposalManifest = fs.existsSync(path.join(root, 'spec/draft/PROPOSALS.md')) ? readText('spec/draft/PROPOSALS.md') : '';
-if (!proposalManifest) fail('missing required file: spec/draft/PROPOSALS.md');
+const proposalManifestPath = `${specificationRoot}/PROPOSALS.md`;
+const proposalManifest = fs.existsSync(path.join(root, proposalManifestPath)) ? readText(proposalManifestPath) : '';
+if (!proposalManifest) fail(`missing required file: ${proposalManifestPath}`);
 for (const [filename, commit, sourcePath, expectedDigest] of proposalSnapshots) {
-  const rel = `spec/draft/proposal-snapshots/${filename}`;
+  const rel = `${specificationRoot}/proposal-snapshots/${filename}`;
   const full = path.join(root, rel);
   if (!fs.existsSync(full)) {
     fail(`missing proposal snapshot: ${rel}`);
@@ -183,7 +189,19 @@ for (const [filename, commit, sourcePath, expectedDigest] of proposalSnapshots) 
   const digest = createHash('sha256').update(fs.readFileSync(full)).digest('hex');
   if (digest !== expectedDigest) fail(`${rel}: SHA-256 differs from recorded proposal revision`);
   for (const provenanceValue of [filename, commit, sourcePath, expectedDigest]) {
-    if (!proposalManifest.includes(provenanceValue)) fail(`spec/draft/PROPOSALS.md: missing provenance value ${provenanceValue}`);
+    if (!proposalManifest.includes(provenanceValue)) fail(`${proposalManifestPath}: missing provenance value ${provenanceValue}`);
+  }
+}
+
+if (!hasActiveDraft) {
+  for (const [filename] of proposalSnapshots) {
+    if (filename === '0008-primitive-provenance.md') continue;
+    const rel = `proposals/${filename}`;
+    if (!fs.existsSync(path.join(root, rel))) {
+      fail(`missing implemented proposal record: ${rel}`);
+    } else if (!readText(rel).includes('- Status: Implemented')) {
+      fail(`${rel}: stable proposal record must have Implemented status`);
+    }
   }
 }
 
@@ -252,7 +270,7 @@ for (const full of exampleFiles) {
   }
 }
 
-const fixtureRoot = path.join(root, 'spec', 'draft', 'fixtures');
+const fixtureRoot = path.join(root, specificationRoot, 'fixtures');
 const fixtureGroups = [
   ['expected-valid', false, false],
   ['expected-invalid', true, false],

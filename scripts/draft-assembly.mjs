@@ -1,8 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export function assembleDraft(root) {
-  const sectionDir = path.join(root, 'spec', 'draft', 'sections');
+export function assembleSpecification(root, versionDirectory = 'draft') {
+  const sectionDir = path.join(root, 'spec', versionDirectory, 'sections');
   if (!fs.existsSync(sectionDir)) throw new Error('spec/draft/sections does not exist');
 
   const sections = fs.readdirSync(sectionDir)
@@ -14,9 +14,14 @@ export function assembleDraft(root) {
     .map((filename) => fs.readFileSync(path.join(sectionDir, filename), 'utf8').trimEnd())
     .join('\n\n')
     .replaceAll('../../implementations.md', '../implementations.md')
+    .replaceAll('../PROPOSALS.md', 'PROPOSALS.md')
     .replaceAll('../examples/', 'examples/')
     .replaceAll('../fixtures/', 'fixtures/')
     .replaceAll('../../../schemas/', '../../schemas/');
 
   return { content: `${content}\n`, sections };
+}
+
+export function assembleDraft(root) {
+  return assembleSpecification(root);
 }

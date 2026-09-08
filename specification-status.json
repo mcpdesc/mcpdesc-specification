@@ -1,27 +1,10 @@
 {
   "stable": {
-    "version": "0.7.0",
-    "status": "current-stable-release",
-    "canonicalSource": "https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec",
-    "path": "spec/0.7.0"
-  },
-  "draft": {
     "version": "0.8.0",
-    "status": "release-candidate",
-    "iteration": 4,
-    "snapshotTag": "v0.8.0-rc.4",
-    "snapshotDate": "2026-09-08",
-    "baselineTag": "v0.8.0-draft.4",
+    "status": "current-stable-release",
     "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
-    "branch": "release/0.8.0-rc.4",
-    "path": "spec/draft",
-    "released": false
-  },
-  "editorialEdition": {
-    "baseTag": "v0.8.0-rc.4",
-    "iteration": 1,
-    "editionTag": "v0.8.0-rc.4+editorial.1",
-    "editionDate": "2026-09-08",
-    "target": "prerelease"
+    "path": "spec/0.8.0",
+    "releaseTag": "v0.8.0",
+    "releaseDate": "2026-09-08"
   }
 }
