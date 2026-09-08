@@ -20,11 +20,11 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 <!-- tocstop -->
 
-## [0.8.0] — Release Candidate 3 — 2026-09-07 (`v0.8.0-rc.3`)
+## [0.8.0] — Release Candidate 4 — 2026-09-08 (`v0.8.0-rc.4`)
 
 > MCP Description v0.8.0 is a community working draft under active review and interoperability testing, so its features may still change before release.
 
-> Release Candidate 3 is behavior-equivalent to Release Candidate 2 for MCP Description documents. Document-conformance requirements, schema validation behavior, semantic validation behavior, examples, and conformance fixtures are unchanged apart from the RC.3 identity and `$schema` references.
+Release Candidate 4 includes the compatible Proposal 0022 relaxation: Info metadata is document-wide and no longer restricted by the runtime availability of corresponding MCP `Implementation` fields. Existing conforming documents remain conforming, and documents rejected only by those Info revision gates become conforming. The JSON Schema validation shape is unchanged apart from the RC.4 identity and `$schema` references.
 
 Repository publication and artifact-maintenance policy now lives in [`GOVERNANCE.md`](../../GOVERNANCE.md), allowing companion-document corrections without a new specification snapshot. The existing `v0.8.0-rc.2` tag and artifacts remain unchanged.
 
@@ -52,6 +52,7 @@ It also introduces reusable components, richer examples and interaction scenario
 
 ### Changed
 
+- Defined the root Info Object as document-wide metadata independent of MCP protocol revisions, preserving all Info properties during migration and projection and removing runtime `Implementation` availability gates ([Proposal 0022](proposal-snapshots/0022-protocol-independent-info-metadata.md)).
 - Made `transports` optional and defined omission of an optional section as no declaration rather than evidence of runtime non-support.
 - Required ordinary declaration collections to be non-empty when present and projection or merge to omit collections that become empty.
 - Defined MCP 2025-06-18 as the floor for complete revision-specific semantic validation; older recognized revisions produce incomplete-validation diagnostics.

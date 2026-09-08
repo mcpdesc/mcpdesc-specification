@@ -59,7 +59,7 @@ The helpers automate only reproducible file generation and consistency checks:
 npm run release:prepare -- draft.4 2026-09-15
 npm run release:prepare -- rc.1 2026-09-30
 npm run release:prepare -- editorial v0.8.0-rc.4 1 2026-10-02
-npm run release:prepare -- validator 0.8.0-rc.3 /tmp/mcpdesc-0.8.0-rc.3
+npm run release:prepare -- validator 0.8.0-rc.4 /tmp/mcpdesc-0.8.0-rc.4
 npm run release:prepare -- stable 0.8.0
 
 npm run release:check -- draft
