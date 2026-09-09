@@ -486,7 +486,13 @@ assert.deepEqual(
 const componentSource = fixture('spec/draft/fixtures/expected-valid/reusable-components.json');
 assertStructurallyConforming(componentSource);
 assert.deepEqual(validateMcpdesc08Document(componentSource).filter((diagnostic) => diagnostic.severity === 'error'), []);
-const resolvedComponents = resolveComponentReferences(componentSource).document;
+const componentResolution = resolveComponentReferences(componentSource);
+const resolvedComponents = componentResolution.document;
+assert.equal(componentResolution.provenance.length, 8);
+assert.deepEqual(componentResolution.provenance[0], {
+  referencePath: ['components', 'schemas', 'InputAlias'],
+  targetPath: ['components', 'schemas', 'Input']
+});
 assert.deepEqual(resolvedComponents.tools[0].inputSchema, componentSource.components.schemas.Input);
 assert.deepEqual(resolvedComponents.tools[0].examples.basic, componentSource.components.toolExamples.basic);
 assert.deepEqual(resolvedComponents.prompts[0].examples.default, componentSource.components.promptExamples.default);

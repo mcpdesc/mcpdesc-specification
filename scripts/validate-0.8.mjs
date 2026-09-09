@@ -63,6 +63,7 @@ function componentDiagnostic(code, rel, message, path) {
 export function resolveComponentReferences(document, rel = 'document') {
   const resolved = structuredClone(document);
   const diagnostics = [];
+  const provenance = [];
   let substitutions = 0;
 
   function resolve(reference, expectedNamespace, path, stack = []) {
@@ -76,7 +77,7 @@ export function resolveComponentReferences(document, rel = 'document') {
         `must target #/components/${expectedNamespace}, not #/components/${namespace}`,
         path
       ));
-      return reference;
+      return { value: reference };
     }
 
     const key = `${namespace}/${name}`;
@@ -87,7 +88,7 @@ export function resolveComponentReferences(document, rel = 'document') {
         `forms a cycle through ${[...stack, key].join(' -> ')}`,
         path
       ));
-      return reference;
+      return { value: reference };
     }
 
     const target = document?.components?.[namespace]?.[name];
@@ -98,18 +99,29 @@ export function resolveComponentReferences(document, rel = 'document') {
         `targets missing component ${JSON.stringify(reference.$componentRef)}`,
         path
       ));
-      return reference;
+      return { value: reference };
     }
     substitutions += 1;
     return isReferenceObject(target)
       ? resolve(target, expectedNamespace, path, [...stack, key])
-      : structuredClone(target);
+      : {
+          value: structuredClone(target),
+          targetPath: ['components', namespace, name]
+        };
+  }
+
+  function substitute(reference, expectedNamespace, path, stack = []) {
+    const result = resolve(reference, expectedNamespace, path, stack);
+    if (result.targetPath) {
+      provenance.push({ referencePath: path, targetPath: result.targetPath });
+    }
+    return result.value;
   }
 
   for (const namespace of componentNamespaces) {
     for (const [name, value] of Object.entries(document?.components?.[namespace] ?? {})) {
       if (isReferenceObject(value)) {
-        resolved.components[namespace][name] = resolve(value, namespace, ['components', namespace, name], [`${namespace}/${name}`]);
+        resolved.components[namespace][name] = substitute(value, namespace, ['components', namespace, name], [`${namespace}/${name}`]);
       }
     }
   }
@@ -125,7 +137,7 @@ export function resolveComponentReferences(document, rel = 'document') {
       if (collection === 'tools') {
         for (const field of ['inputSchema', 'outputSchema']) {
           if (isReferenceObject(declaration[field])) {
-            resolvedDeclaration[field] = resolve(declaration[field], 'schemas', [collection, declarationIndex, field]);
+            resolvedDeclaration[field] = substitute(declaration[field], 'schemas', [collection, declarationIndex, field]);
           }
         }
       }
@@ -139,7 +151,7 @@ export function resolveComponentReferences(document, rel = 'document') {
             : 'promptExamples';
       for (const [name, example] of Object.entries(declaration.examples ?? {})) {
         if (isReferenceObject(example)) {
-          resolvedDeclaration.examples[name] = resolve(
+          resolvedDeclaration.examples[name] = substitute(
             example,
             exampleNamespace,
             [collection, declarationIndex, 'examples', name]
@@ -153,7 +165,7 @@ export function resolveComponentReferences(document, rel = 'document') {
     for (const [declarationIndex, declaration] of (document?.[collection] ?? []).entries()) {
       for (const [elicitationIndex, elicitation] of (declaration.elicitations ?? []).entries()) {
         if (isReferenceObject(elicitation.requestedSchema)) {
-          resolved[collection][declarationIndex].elicitations[elicitationIndex].requestedSchema = resolve(
+          resolved[collection][declarationIndex].elicitations[elicitationIndex].requestedSchema = substitute(
             elicitation.requestedSchema,
             'schemas',
             [collection, declarationIndex, 'elicitations', elicitationIndex, 'requestedSchema']
@@ -163,7 +175,7 @@ export function resolveComponentReferences(document, rel = 'document') {
     }
   }
 
-  return { document: resolved, diagnostics, substitutions };
+  return { document: resolved, diagnostics, substitutions, provenance };
 }
 
 function structuralPath(document, error) {
