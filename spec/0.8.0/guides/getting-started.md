@@ -11,7 +11,7 @@ An MCP Description document for a chess server that:
 
 ## Step 1: Start with the Minimum
 
-Every MCP Description needs `mcpdesc`, `info`, `protocolVersions`, and `transports`. Primitive collections are optional in 0.8.0, although this example adds a Tool.
+Every MCP Description requires `mcpdesc`, `info`, and a non-empty `protocolVersions` array. `transports` and primitive collections are optional. This tutorial adds both a transport and a Tool.
 
 Create a file called `chess-coach.mcpdesc.yaml`:
 

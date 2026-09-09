@@ -44,8 +44,6 @@ For example, one document conforming to MCP Description 0.8.0 can describe both 
 
 For a stable release such as v0.8.0, the `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0.json`.
 
-For a release candidate such as RC4, the `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0.json`, while `mcpdesc` remains `0.8.0`.
-
 ### How can one document describe multiple MCP revisions?
 
 The root `protocolVersions` declares total coverage. Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts can narrow their applicability with their own `protocolVersions`.

@@ -64,7 +64,12 @@ Versioned JSON Schemas live at the repository root under
 
 - **MCP-native** — tools, resources, and prompts use MCP protocol structures directly
 - **OpenAPI-aligned** — familiar `info`, `security`, and metadata patterns
+- **Multi-revision** — one document can describe deterministic views for multiple MCP revisions
+- **Client-aware** — primitives can declare required client capabilities and elicitation behavior
+- **Reusable** — typed local components reduce duplication across schemas and examples
+- **Example-rich** — named results, completions, and Tool interaction scenarios document behavior
 - **Multi-transport** — declare stdio, streamable-http, and SSE endpoints
+- **JSON + YAML** — conforming serializations share one JSON-compatible data model
 - **Extensible** — vendor-specific metadata via the `x-` extension mechanism
 - **Versioned** — schema evolution with backward compatibility tracking
 - **Offline-first** — no server connection needed to understand capabilities

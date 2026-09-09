@@ -68,11 +68,12 @@ frontMatter = frontMatter
   .replace(/^editorial-base-tag: .+\n/m, '')
   .replace(/^editorial-edition: .+\n/m, '')
   .replace(/^released: false$/m, 'released: true')
+  .replace('Stève Sfartz (v0.8.0 draft)', 'Stève Sfartz (v0.8.0 editor)')
   .replace(`**Version**: ${version} (release candidate 4; \`v${version}-rc.4\`)`, `**Version**: ${version}`)
   .replace('**Status**: Release candidate 4 — prerelease', '**Status**: Stable release')
   .replace(
     `This document is a **Release Candidate** for MCP Description v${version}, identified by prerelease tag \`v${version}-rc.4\`.\n\nThe exact proposals implemented by this release candidate are recorded in the [proposal revision manifest](../PROPOSALS.md).\n\nThis is **not** a stable release and may change before final release as review and interoperability testing conclude. The current stable release is v0.7.0, whose canonical source remains the Cisco Open \`mcptoolkit-contract\` repository.`,
-    `This document is the stable MCP Description v${version} specification, identified by tag \`${releaseTag}\`.\n\nThe proposal revisions that informed this release are recorded in the [proposal revision manifest](../PROPOSALS.md).`
+    `This document is the stable MCP Description v${version} specification, identified by tag \`${releaseTag}\`.\n\nThe proposal revisions that informed this release are recorded in the [proposal revision manifest](../PROPOSALS.md).\n\nThe release-candidate series was based on the \`v0.8.0-draft.4\` snapshot recorded by \`baseline-snapshot\` in the front matter.`
   );
 fs.writeFileSync(path.join(root, sectionPath), frontMatter);
 
@@ -107,6 +108,30 @@ for (const fullPath of filesUnder(targetDir)) {
     fs.writeFileSync(fullPath, source.replaceAll(prereleaseSchemaId, stableSchemaId));
   }
 }
+
+replaceInFile(`spec/${version}/sections/04-versioning.md`, `A public prerelease uses the target version followed by its prerelease identifier, for example \`${stableSchemaId}\`.`, 'A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`.', 'generic prerelease schema example');
+replaceInFile(`spec/${version}/sections/04-versioning.md`, 'The repository files `schemas/latest.json` and `schemas/draft.json` remain version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.', 'The repository file `schemas/latest.json` and, when an active draft exists, `schemas/draft.json` are version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.', 'optional draft status manifest');
+replaceInFile(`spec/${version}/sections/04-versioning.md`, 'Implementations SHOULD support the latest specification version. Implementations MAY support multiple versions.', "Implementations MAY support multiple MCP Description versions. An implementation claiming support for a version MUST process its `mcpdesc` discriminator according to that version's requirements.", 'immutable version support guidance');
+replaceInFile(`spec/${version}/sections/09-tools.md`, 'The first 0.8.0 draft defines three step kinds:', 'MCP Description 0.8.0 defines three step kinds:', 'stable Tool interaction wording');
+replaceInFile(`spec/${version}/sections/99-appendices.md`, 'demonstrating all features of this specification.', 'demonstrating a broad set of features from this specification.', 'example coverage claim');
+replaceInFile(`spec/${version}/guides/getting-started.md`, 'Every MCP Description needs `mcpdesc`, `info`, `protocolVersions`, and `transports`. Primitive collections are optional in 0.8.0, although this example adds a Tool.', 'Every MCP Description requires `mcpdesc`, `info`, and a non-empty `protocolVersions` array. `transports` and primitive collections are optional. This tutorial adds both a transport and a Tool.', 'minimum document fields');
+replaceInFile(`spec/${version}/guides/faq.md`, `\nFor a release candidate such as RC4, the \`$schema\` value is \`${stableSchemaId}\`, while \`mcpdesc\` remains \`${version}\`.\n`, '', 'obsolete RC FAQ');
+replaceInFile(`spec/${version}/guides/migration-0.7-to-0.8.md`, 'a migrated 0.8.0 draft document', 'a migrated 0.8.0 document', 'stable migration wording');
+replaceInFile(`spec/${version}/guides/intro.md`, 'Today, MCP servers typically expose their capabilities only at runtime. This means:', 'MCP defines runtime discovery rather than a portable, offline server-surface document. Without a separate description artifact:', 'runtime discovery framing');
+replaceInFile(`spec/${version}/guides/intro.md`, '* documentation must be generated dynamically', '* documentation generation requires a live connection or implementation-specific metadata', 'documentation discovery dependency');
+replaceInFile(`spec/${version}/guides/intro.md`, '### 3. No standard portable description for MCP servers', '### 3. No protocol-defined portable description for MCP servers', 'portable description heading');
+replaceInFile(`spec/${version}/guides/intro.md`, 'the MCP ecosystem lacks a standard **description document**', 'the MCP protocol does not define a portable static **description document**', 'portable description scope');
+replaceInFile(`spec/${version}/guides/intro.md`, '* hierarchical tag taxonomy', '* flat document-wide tag catalogue', 'flat tag catalogue');
+replaceInFile(`spec/${version}/guides/relationship-to-mcp.md`, 'does not execute Tools, contain Resource content, retrieve Prompts', 'does not execute Tools, provide authoritative live Resource content, retrieve Prompts', 'runtime Resource boundary');
+replaceInFile(`spec/${version}/guides/design-principles.md`, '| **Metadata** | Who built it and how | Authors, generation metadata |', '| **Supplemental metadata** | Project-specific context and provenance | Generation or observation provenance in `x-*` extensions |', 'metadata guidance');
+replaceInFile(`spec/${version}/guides/comparison-with-openapi.md`, '| `info` | `info` | Nearly identical structure |', '| `info` | `info` | Similar metadata role; MCP Description additionally requires programmatic `name` |', 'Info comparison');
+replaceInFile(`spec/${version}/guides/comparison-with-openapi.md`, '| `security` / `securitySchemes` | `security` | Same structure |', '| `security` / `securitySchemes` | `security` / `securitySchemes` | Named schemes and requirement arrays with MCP Description semantics |', 'security comparison');
+replaceInFile(`spec/${version}/guides/comparison-with-openapi.md`, '| `tags` | `tags` on tools/resources/prompts | Per-entity tagging |', '| `tags` | Root `tags` catalogue and declaration references | Flat document-wide categorization |', 'tag comparison');
+replaceInFile(`spec/${version}/guides/comparison-with-openapi.md`, 'Both specifications use a nearly identical `info` object:', 'Both specifications use an `info` object for document-wide metadata:', 'Info object wording');
+replaceInFile(`spec/${version}/guides/comparison-with-openapi.md`, 'MCP tools are simpler — no HTTP verbs, path parameters, or content negotiation. Just a name, description, and input schema.', 'MCP Tools avoid HTTP verbs, path parameters, and content negotiation. Beyond their required name and input schema, 0.8.0 Tools can declare output schemas, examples, interactions, elicitation, security, client requirements, tags, annotations, metadata, and protocol-revision scope.', 'Tool comparison');
+replaceInFile(`spec/${version}/guides/comparison-with-openapi.md`, '| **Tool Annotations** | Behavioral hints (readOnly, destructive, idempotent) |', '| **Tool Annotations** | Behavioral hints (readOnly, destructive, idempotent) |\n| **Protocol Revision Scopes** | One description can declare and project deterministic Effective Protocol Views for multiple MCP revisions |\n| **MCP Extensions** | Formal extension capabilities and extension-aware client requirements |\n| **Client Requirements** | Primitive-level minimum client capabilities |\n| **Elicitation and Interaction Examples** | Declared user interaction plus Tool, completion, and multi-step examples |', '0.8.0 comparison features');
+replaceInFile('spec/implementations.md', '[`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json). Draft conformance', '[`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json). MCP Description conformance', 'stable validator guidance');
+replaceInFile('spec/implementations.md', 'with an exact snapshot selector', 'with an exact version or snapshot selector', 'stable validator selector');
 
 const changelogPath = `spec/${version}/CHANGELOG.md`;
 let changelog = fs.readFileSync(path.join(root, changelogPath), 'utf8');
@@ -162,8 +187,9 @@ for (const filename of fs.readdirSync(proposalSource).filter((name) => name.ends
 
 replaceInFile('README.md', '> This repository is the development home for the next version of the MCP Description Specification. Draft material here is not a released specification until it is explicitly tagged and published — see the status table below.', '> This repository is the canonical home of the MCP Description Specification.', 'repository status');
 replaceInFile('README.md', '| 0.7.0 | Current stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |\n| 0.8.0 | Release Candidate 4 (`v0.8.0-rc.4`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) |', '| 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) |\n| 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |', 'status table');
-replaceInFile('README.md', 'Release Candidate 4 defines the root Info Object as document-wide metadata independent of MCP protocol revisions. It is a compatible relaxation that preserves Info metadata during migration and projection without changing the JSON Schema shape. RC.4 remains a prerelease and does not update `schemas/latest.json`; earlier release-candidate tags remain unchanged.', 'Version 0.8.0 defines the root Info Object as document-wide metadata independent of MCP protocol revisions. It is a compatible relaxation that preserves Info metadata during migration and projection without changing the JSON Schema shape.', 'release summary');
-replaceInFile('README.md', '- Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`); `spec/draft/` is then re-initialized from that snapshot.\n- `schemas/latest.json` continues to identify v0.7.0 until stable v0.8.0 is explicitly released.', '- Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`).\n- `schemas/latest.json` identifies the current stable schema. No active draft is present until development of the next version begins.', 'repository roles');
+replaceInFile('README.md', 'Release Candidate 4 defines the root Info Object as document-wide metadata independent of MCP protocol revisions. It is a compatible relaxation that preserves Info metadata during migration and projection without changing the JSON Schema shape. RC.4 remains a prerelease and does not update `schemas/latest.json`; earlier release-candidate tags remain unchanged.', 'MCP Description 0.8.0 adds MCP `2026-07-28` support, multi-revision server descriptions, and deterministic Effective Protocol Views. It also introduces reusable components, richer examples and interactions, primitive client capability requirements, elicitation declarations, formal MCP extension support, reusable security schemes, and conforming JSON and YAML serializations. See the [changelog](CHANGELOG.md) for details.', 'release summary');
+replaceInFile('README.md', '- `main` is the integration branch and the default view of the project. It carries every released specification version as a folder under `spec/`, plus the in-progress `spec/draft/`, so work in progress is visible without switching branches.\n- Feature branches (for example `feature/support-meta` or `feature/support-mcp-2026-07-28`) target `main` via pull request and change `spec/draft/`.\n- Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`); `spec/draft/` is then re-initialized from that snapshot.\n- `schemas/latest.json` continues to identify v0.7.0 until stable v0.8.0 is explicitly released.', '- `main` is the integration branch and the default view of the project. It carries every released specification version and, when development is active, the in-progress `spec/draft/`.\n- Feature branches target `main` via pull request. When an active development version has been initialized, normative feature branches change `spec/draft/`.\n- Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`).\n- `schemas/latest.json` identifies the current stable schema. No active draft is present until development of the next version begins.', 'repository roles');
+replaceInFile('README.md', 'spec/                         Per-version specification folders (draft/ + frozen releases)', 'spec/                         Per-version specification folders and optional active draft', 'repository structure');
 
 const specReadmePath = path.join(root, 'spec', 'README.md');
 let specReadme = fs.readFileSync(specReadmePath, 'utf8');
@@ -172,6 +198,38 @@ specReadme = specReadme
   .replace('| 0.7.0 | Current stable release |', '| 0.7.0 | Previous stable release |')
   .replace('| 0.8.0 | Release Candidate 4 (`v0.8.0-rc.4`; prerelease) | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) (prerelease) |', '| 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) |')
   .replace('The exact proposal revisions represented by Draft 4 are recorded in its [`draft/PROPOSALS.md`](draft/PROPOSALS.md) manifest.', 'The exact proposal revisions represented by 0.8.0 are recorded in its [`0.8.0/PROPOSALS.md`](0.8.0/PROPOSALS.md) manifest.')
+  .replace(`\`\`\`yaml
+mcpdesc: 0.7.0
+info:
+  name: chess-rating-server
+  title: Chess Rating MCP Server
+  version: 1.0.0
+transports:
+\- type: stdio
+  command: chess-rating
+  args:
+  \- serve
+tools:
+\- name: get_player_rating
+  description: Get the current Elo rating for a chess player
+  inputSchema:
+    type: object
+    properties:
+      player_id:
+        type: string
+        description: Player identifier
+    required:
+    \- player_id
+\`\`\``, `\`\`\`yaml
+$schema: ${stableSchemaId}
+mcpdesc: ${version}
+info:
+  name: chess-rating-server
+  title: Chess Rating MCP Server
+  version: 1.0.0
+protocolVersions:
+\- '2026-07-28'
+\`\`\``)
   .replace('  draft/               Active prerelease (currently 0.8.0-rc.4)\n', '')
   .replace('    mcp-description.md  Assembled normative specification text\n    sections/          Normative specification, section by section\n    guides/            Rationale, tutorials, and comparisons (non-normative)\n    examples/          Example MCP Description documents\n    extensions/        Vendor extension specifications\n    CHANGELOG.md       Format version history\n', '')
   .replace('  0.7.0/               Frozen release pointer (canonical source: Cisco Open)', '  0.8.0/               Frozen current stable release\n  0.7.0/               Frozen release pointer (canonical source: Cisco Open)')
@@ -180,7 +238,14 @@ specReadme = specReadme
   .replace('[draft/examples/](draft/examples/)', '[0.8.0/examples/](0.8.0/examples/)')
   .replace('[../schemas/mcp-description/0.7.0.json](../schemas/mcp-description/0.7.0.json) (latest', '[../schemas/mcp-description/0.8.0.json](../schemas/mcp-description/0.8.0.json) (latest')
   .replace('[draft/guides/getting-started.md](draft/guides/getting-started.md)', '[0.8.0/guides/getting-started.md](0.8.0/guides/getting-started.md)');
+specReadme = specReadme.replace('- **OpenAPI-aligned** — familiar `info`, `security`, and metadata patterns\n- **Multi-transport**', '- **OpenAPI-aligned** — familiar `info`, `security`, and metadata patterns\n- **Multi-revision** — one document can describe deterministic views for multiple MCP revisions\n- **Client-aware** — primitives can declare required client capabilities and elicitation behavior\n- **Reusable** — typed local components reduce duplication across schemas and examples\n- **Example-rich** — named results, completions, and Tool interaction scenarios document behavior\n- **Multi-transport**').replace('- **Multi-transport** — declare stdio, streamable-http, and SSE endpoints\n- **Extensible**', '- **Multi-transport** — declare stdio, streamable-http, and SSE endpoints\n- **JSON + YAML** — conforming serializations share one JSON-compatible data model\n- **Extensible**');
 fs.writeFileSync(specReadmePath, specReadme);
+
+replaceInFile('CONTRIBUTING.md', '- Target `main` from a contribution branch and make normative changes under `spec/draft/`.', '- Target `main` from a contribution branch. When an active development version has been initialized, make normative changes under `spec/draft/`.', 'optional draft contribution target');
+replaceInFile('CONTRIBUTING.md', '7. a `spec/draft/CHANGELOG.md` entry.', '7. a changelog entry in the active development version.', 'active changelog');
+replaceInFile('CONTRIBUTING.md', 'then implemented as a separate `spec/draft/` change', 'then implemented separately in the active development version', 'proposal implementation target');
+replaceInFile('AGENTS.md', 'For every normative change, update all affected artifacts:', 'When an active development version has been initialized, update all affected artifacts for every normative change:', 'optional draft discipline');
+replaceInFile('AGENTS.md', '- v0.7.0 is the current stable release; its canonical source remains Cisco Open.\n- v0.8.0 is a community working draft in this repository.\n- Do not promote v0.8.0 to stable without an explicit release decision.\n- Do not change `schemas/latest.json` from 0.7.0 during draft work.', '- v0.8.0 is the current stable release in this repository.\n- v0.7.0 remains frozen; its canonical source remains Cisco Open.\n- No active draft exists until work on the next version is explicitly initialized.\n- `schemas/latest.json` identifies the current stable release and MUST NOT point to draft or prerelease content.', 'stable locked constraints');
 
 fs.rmSync(draftDir, { recursive: true });
 fs.rmSync(path.join(root, 'schemas', 'draft.json'));

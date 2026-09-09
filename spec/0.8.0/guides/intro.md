@@ -20,11 +20,11 @@ While this mechanism works for dynamic interactions, it presents several limitat
 
 ### 1. Lack of a portable server description
 
-Today, MCP servers typically expose their capabilities only at runtime. This means:
+MCP defines runtime discovery rather than a portable, offline server-surface document. Without a separate description artifact:
 
 * tools cannot inspect capabilities without connecting to the server
 * offline tooling is difficult
-* documentation must be generated dynamically
+* documentation generation requires a live connection or implementation-specific metadata
 
 ### 2. Limited interoperability between platforms
 
@@ -34,9 +34,9 @@ Different MCP tools and platforms often implement their own ways of representing
 * limited compatibility between MCP tooling ecosystems
 * difficulty sharing MCP server metadata
 
-### 3. No standard portable description for MCP servers
+### 3. No protocol-defined portable description for MCP servers
 
-Unlike REST APIs (OpenAPI) or event systems (AsyncAPI), the MCP ecosystem lacks a standard **description document** that can represent an MCP server independently of a running instance.
+Unlike REST APIs (OpenAPI) or event systems (AsyncAPI), the MCP protocol does not define a portable static **description document** that can represent an MCP server independently of a running instance.
 
 This makes it difficult to support:
 
@@ -64,7 +64,7 @@ An MCP Description document provides a consistent structure for declaring:
 * resources and resource templates
 * prompts
 * server capabilities
-* hierarchical tag taxonomy
+* flat document-wide tag catalogue
 
 ### Offline discoverability
 

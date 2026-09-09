@@ -7,13 +7,13 @@ This guide maps MCP Description concepts to OpenAPI for developers familiar with
 | OpenAPI Concept | MCP Description Equivalent | Notes |
 |----------------|---------------------------|-------|
 | `openapi: "3.1.0"` | `mcpdesc: "0.8.0"` | Specification version |
-| `info` | `info` | Nearly identical structure |
+| `info` | `info` | Similar metadata role; MCP Description additionally requires programmatic `name` |
 | `servers` | `transports` | Connection endpoints |
 | `paths` + operations | `tools` | Server capabilities |
 | `webhooks` | — | No equivalent (MCP uses notifications) |
 | `components/schemas` and Reference Objects | `components/schemas` and `$componentRef` | Typed local reuse; different reference syntax and semantics |
-| `security` / `securitySchemes` | `security` | Same structure |
-| `tags` | `tags` on tools/resources/prompts | Per-entity tagging |
+| `security` / `securitySchemes` | `security` / `securitySchemes` | Named schemes and requirement arrays with MCP Description semantics |
+| `tags` | Root `tags` catalogue and declaration references | Flat document-wide categorization |
 | — | `resources` | No direct OpenAPI equivalent |
 | — | `prompts` | No direct OpenAPI equivalent |
 | `x-` extensions | `x-` extensions | Same convention |
@@ -36,7 +36,7 @@ The different MCP Description spelling avoids ambiguity at the boundary between 
 
 ### Info Object
 
-Both specifications use a nearly identical `info` object:
+Both specifications use an `info` object for document-wide metadata:
 
 **OpenAPI:**
 ```json
@@ -142,7 +142,7 @@ OpenAPI models HTTP operations (GET, POST, etc.). MCP Description models tools:
 }
 ```
 
-MCP tools are simpler — no HTTP verbs, path parameters, or content negotiation. Just a name, description, and input schema.
+MCP Tools avoid HTTP verbs, path parameters, and content negotiation. Beyond their required name and input schema, 0.8.0 Tools can declare output schemas, examples, interactions, elicitation, security, client requirements, tags, annotations, metadata, and protocol-revision scope.
 
 ### Security
 
@@ -172,6 +172,10 @@ MCP Description uses named scheme definitions and requirement arrays aligned wit
 | **Prompts** | Server-side prompt templates with arguments |
 | **Capabilities** | Feature flags (subscriptions, notifications, completions) |
 | **Tool Annotations** | Behavioral hints (readOnly, destructive, idempotent) |
+| **Protocol Revision Scopes** | One description can declare and project deterministic Effective Protocol Views for multiple MCP revisions |
+| **MCP Extensions** | Formal extension capabilities and extension-aware client requirements |
+| **Client Requirements** | Primitive-level minimum client capabilities |
+| **Elicitation and Interaction Examples** | Declared user interaction plus Tool, completion, and multi-step examples |
 
 ### What OpenAPI Has That MCP Description Doesn't
 

@@ -36,7 +36,7 @@ MCP Description additionally defines `$componentRef` for local, typed, whole-val
 
 ## MCP Description Does Not Replace Runtime Behavior
 
-A description does not execute Tools, contain Resource content, retrieve Prompts, enforce authorization, manage sessions, or define runtime error handling. Servers and clients continue to follow the applicable MCP revision.
+A description does not execute Tools, provide authoritative live Resource content, retrieve Prompts, enforce authorization, manage sessions, or define runtime error handling. Servers and clients continue to follow the applicable MCP revision.
 
 Elicitation Declarations document that fulfilling a primitive may require additional user interaction. Tool `interactionExamples` can additionally record ordered semantic elicitation, sampling, and roots steps for one Tool invocation. Neither model reproduces JSON-RPC envelopes, Multi Round-Trip Request state, retries, correlation, capability negotiation, or lifecycle messages. The applicable MCP revision determines how the described interaction is executed on the wire.
 

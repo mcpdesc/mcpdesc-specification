@@ -17,7 +17,7 @@ Maintain a precise, portable, machine-readable description format for MCP server
 
 ## Specification discipline
 
-For every normative change, update all affected artifacts:
+When an active development version has been initialized, update all affected artifacts for every normative change:
 
 1. section source under `spec/draft/sections/`;
 2. assembled `spec/draft/mcp-description.md`;

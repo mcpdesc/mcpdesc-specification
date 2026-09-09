@@ -95,7 +95,7 @@ A Tool Interaction Example Object contains these core properties and MAY carry `
 
 `input` follows the same schema-compatibility rules as Tool Example `input`. `result` follows the same completed success and execution-error rules as Tool Example `result`. The scenario is illustrative and non-exhaustive: it asserts only that the shown steps occur in the displayed order in this example. It does not define branching, retries, correlation IDs, task state, transport framing, timing, or behavior for responses not shown.
 
-Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. The first 0.8.0 draft defines three step kinds:
+Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. MCP Description 0.8.0 defines three step kinds:
 
 | `type` | Request payload | Response payload |
 |--------|-----------------|------------------|

@@ -10,7 +10,7 @@ date: 2026-09-08
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
-  - name: Stève Sfartz (v0.8.0 draft)
+  - name: Stève Sfartz (v0.8.0 editor)
     url: https://github.com/stsfartz
   - name: "{mcpdesc} community"
     url: https://github.com/mcpdesc/mcpdesc-specification
@@ -39,6 +39,8 @@ It enables offline discovery, documentation generation, description validation, 
 This document is the stable MCP Description v0.8.0 specification, identified by tag `v0.8.0`.
 
 The proposal revisions that informed this release are recorded in the [proposal revision manifest](PROPOSALS.md).
+
+The release-candidate series was based on the `v0.8.0-draft.4` snapshot recorded by `baseline-snapshot` in the front matter.
 
 ## 1. Introduction
 
@@ -303,7 +305,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -323,7 +325,7 @@ Canonical responses MUST return a JSON-compatible media type and SHOULD use `app
 
 The project MAY also publish mutable convenience aliases such as `https://mcpdesc.org/schema/mcp-description/latest.json` for the latest stable release and `https://mcpdesc.org/schema/mcp-description/draft.json` for the active community draft. An alias SHOULD redirect to its selected immutable canonical resource. An alias MUST NOT be declared as a schema `$id`, and normative examples SHOULD use immutable canonical URIs instead.
 
-The repository files `schemas/latest.json` and `schemas/draft.json` remain version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
+The repository file `schemas/latest.json` and, when an active draft exists, `schemas/draft.json` are version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
 
 ### 4.7 Retrieval and Security Boundary
 
@@ -335,7 +337,7 @@ The `$schema` property assists structural schema selection and editor integratio
 
 ### 4.8 Version Compatibility
 
-Implementations SHOULD support the latest specification version. Implementations MAY support multiple versions.
+Implementations MAY support multiple MCP Description versions. An implementation claiming support for a version MUST process its `mcpdesc` discriminator according to that version's requirements.
 
 When processing a document, implementations MUST check the `mcpdesc` value and:
 
@@ -916,7 +918,7 @@ A Tool Interaction Example Object contains these core properties and MAY carry `
 
 `input` follows the same schema-compatibility rules as Tool Example `input`. `result` follows the same completed success and execution-error rules as Tool Example `result`. The scenario is illustrative and non-exhaustive: it asserts only that the shown steps occur in the displayed order in this example. It does not define branching, retries, correlation IDs, task state, transport framing, timing, or behavior for responses not shown.
 
-Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. The first 0.8.0 draft defines three step kinds:
+Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. MCP Description 0.8.0 defines three step kinds:
 
 | `type` | Request payload | Response payload |
 |--------|-----------------|------------------|
@@ -2029,7 +2031,7 @@ Clients MUST support `image/png` and `image/jpeg`. Clients SHOULD also support `
 
 ## Appendix B: Complete Example
 
-See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MCP Description document demonstrating all features of this specification.
+See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MCP Description document demonstrating a broad set of features from this specification.
 
 ---
 

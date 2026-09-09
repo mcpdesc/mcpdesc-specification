@@ -10,7 +10,7 @@ date: 2026-09-08
 editors:
   - name: Cisco DevNet (v0.7.0 baseline)
     url: https://developer.cisco.com
-  - name: Stève Sfartz (v0.8.0 draft)
+  - name: Stève Sfartz (v0.8.0 editor)
     url: https://github.com/stsfartz
   - name: "{mcpdesc} community"
     url: https://github.com/mcpdesc/mcpdesc-specification
@@ -39,3 +39,5 @@ It enables offline discovery, documentation generation, description validation, 
 This document is the stable MCP Description v0.8.0 specification, identified by tag `v0.8.0`.
 
 The proposal revisions that informed this release are recorded in the [proposal revision manifest](../PROPOSALS.md).
+
+The release-candidate series was based on the `v0.8.0-draft.4` snapshot recorded by `baseline-snapshot` in the front matter.

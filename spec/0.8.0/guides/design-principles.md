@@ -66,7 +66,7 @@ The specification distinguishes between:
 | Layer | Purpose | Example |
 |-------|---------|---------|
 | **Described surface** | Durable, externally relevant server semantics | Tools, resources, prompts |
-| **Metadata** | Who built it and how | Authors, generation metadata |
+| **Supplemental metadata** | Project-specific context and provenance | Generation or observation provenance in `x-*` extensions |
 | **Observation** | What was discovered at runtime | Latency, CORS support, session behavior |
 
 Server-surface declarations live in the core specification. Source-specific generation metadata and runtime diagnostics belong in extensions such as `x-example-runtime-observations`. An observed view need not claim a server's exhaustive surface.

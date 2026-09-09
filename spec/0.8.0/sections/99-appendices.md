@@ -17,7 +17,7 @@ Clients MUST support `image/png` and `image/jpeg`. Clients SHOULD also support `
 
 ## Appendix B: Complete Example
 
-See [examples/full-featured.yaml](../examples/full-featured.yaml) for a complete MCP Description document demonstrating all features of this specification.
+See [examples/full-featured.yaml](../examples/full-featured.yaml) for a complete MCP Description document demonstrating a broad set of features from this specification.
 
 ---
 

@@ -14,7 +14,7 @@ Before treating an existing YAML file as conforming, verify YAML 1.2.2 JSON-sche
 
 v0.8.0 introduces a new canonical MCP Description schema family under `https://mcpdesc.org/schema/mcp-description/`.
 
-When a migrated 0.8.0 draft document emits `$schema`, use `https://mcpdesc.org/schema/mcp-description/0.8.0.json` and keep `mcpdesc: 0.8.0` unchanged.
+When a migrated 0.8.0 document emits `$schema`, use `https://mcpdesc.org/schema/mcp-description/0.8.0.json` and keep `mcpdesc: 0.8.0` unchanged.
 
 Do not rewrite frozen stable 0.7.0 or published Draft 1-3 documents merely to change their embedded schema identifiers. Stable 0.7.0 retains the historical Cisco root `$id`, and Draft 1-3 retain the historical short URI family. Exact historical validation of those snapshots should use the corresponding bundled validator selector rather than guessing from a rewritten URL.
 

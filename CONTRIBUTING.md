@@ -7,7 +7,7 @@ Thank you for helping evolve the MCP Description specification.
 - Read [`GOVERNANCE.md`](GOVERNANCE.md).
 - Search existing issues and proposals.
 - Open an issue before making a non-trivial normative change.
-- Target `main` from a contribution branch and make normative changes under `spec/draft/`.
+- Target `main` from a contribution branch. When an active development version has been initialized, make normative changes under `spec/draft/`.
 
 ## Licensing of contributions
 
@@ -35,11 +35,11 @@ A non-trivial specification change should include:
 4. corresponding JSON Schema changes;
 5. positive and negative examples or fixtures;
 6. compatibility, migration, and security considerations;
-7. a `spec/draft/CHANGELOG.md` entry.
+7. a changelog entry in the active development version.
 
 A schema change without corresponding specification text and examples is incomplete.
 
-Proposals are merged to `main` only once accepted, then implemented as a separate `spec/draft/` change; see the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
+Proposals are merged to `main` only once accepted, then implemented separately in the active development version; see the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ## Compatibility classification
 

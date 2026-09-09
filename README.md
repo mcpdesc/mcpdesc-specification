@@ -13,12 +13,12 @@ A portable, machine-readable contract format for describing Model Context Protoc
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
-Version 0.8.0 defines the root Info Object as document-wide metadata independent of MCP protocol revisions. It is a compatible relaxation that preserves Info metadata during migration and projection without changing the JSON Schema shape. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
+MCP Description 0.8.0 adds MCP `2026-07-28` support, multi-revision server descriptions, and deterministic Effective Protocol Views. It also introduces reusable components, richer examples and interactions, primitive client capability requirements, elicitation declarations, formal MCP extension support, reusable security schemes, and conforming JSON and YAML serializations. See the [changelog](CHANGELOG.md) for details. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
 
 ## Repository roles
 
-- `main` is the integration branch and the default view of the project. It carries every released specification version as a folder under `spec/`, plus the in-progress `spec/draft/`, so work in progress is visible without switching branches.
-- Feature branches (for example `feature/support-meta` or `feature/support-mcp-2026-07-28`) target `main` via pull request and change `spec/draft/`.
+- `main` is the integration branch and the default view of the project. It carries every released specification version and, when development is active, the in-progress `spec/draft/`.
+- Feature branches target `main` via pull request. When an active development version has been initialized, normative feature branches change `spec/draft/`.
 - Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`).
 - `schemas/latest.json` identifies the current stable schema. No active draft is present until development of the next version begins.
 
@@ -31,7 +31,7 @@ Cisco employees may participate in the project, subject to Cisco's applicable co
 ## Repository structure
 
 ```text
-spec/                         Per-version specification folders (draft/ + frozen releases)
+spec/                         Per-version specification folders and optional active draft
 schemas/mcp-description/      Versioned MCP Description JSON Schemas
 proposals/                    Specification change proposals
 scripts/                      Repository validation and maintenance scripts

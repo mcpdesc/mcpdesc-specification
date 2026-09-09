@@ -50,7 +50,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -70,7 +70,7 @@ Canonical responses MUST return a JSON-compatible media type and SHOULD use `app
 
 The project MAY also publish mutable convenience aliases such as `https://mcpdesc.org/schema/mcp-description/latest.json` for the latest stable release and `https://mcpdesc.org/schema/mcp-description/draft.json` for the active community draft. An alias SHOULD redirect to its selected immutable canonical resource. An alias MUST NOT be declared as a schema `$id`, and normative examples SHOULD use immutable canonical URIs instead.
 
-The repository files `schemas/latest.json` and `schemas/draft.json` remain version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
+The repository file `schemas/latest.json` and, when an active draft exists, `schemas/draft.json` are version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
 
 ### 4.7 Retrieval and Security Boundary
 
@@ -82,7 +82,7 @@ The `$schema` property assists structural schema selection and editor integratio
 
 ### 4.8 Version Compatibility
 
-Implementations SHOULD support the latest specification version. Implementations MAY support multiple versions.
+Implementations MAY support multiple MCP Description versions. An implementation claiming support for a version MUST process its `mcpdesc` discriminator according to that version's requirements.
 
 When processing a document, implementations MUST check the `mcpdesc` value and:
 
