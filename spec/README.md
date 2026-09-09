@@ -17,8 +17,8 @@ Think of it as **OpenAPI for MCP servers**: a static contract that enables disco
 
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
-| 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
 | 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) |
+| 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
 The exact proposal revisions represented by 0.8.0 are recorded in its [`0.8.0/PROPOSALS.md`](0.8.0/PROPOSALS.md) manifest.

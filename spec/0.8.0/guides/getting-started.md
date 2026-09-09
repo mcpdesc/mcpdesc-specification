@@ -46,7 +46,7 @@ tools:
 
 That's a valid MCP Description document. It declares a server with one tool accessible via stdio.
 
-The sample `$schema` value points to the exact schema resource for structural validation and editor tooling. The `mcpdesc` field still carries the MCP Description conformance version, so release-candidate documents remain `mcpdesc: 0.8.0`.
+The sample `$schema` value points to the exact schema resource for structural validation and editor tooling. The `mcpdesc` field carries the MCP Description conformance version independently of the schema resource.
 
 ## Step 2: Add Richer Info
 
@@ -256,14 +256,15 @@ Tool `interactionExamples` are for the case where one Tool invocation needs more
 
 ## Step 6: Validate
 
-To validate structure, use a JSON Schema 2020-12 validator against the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json). Complete conformance also requires semantic checks for protocol scopes, transport coverage, security, tag, and component references, revision-specific fields, and Tool-example compatibility with resolved embedded schemas.
+Structural validation checks the document shape. Use any JSON Schema Draft 2020-12 implementation with the [0.8.0 schema](../../../schemas/mcp-description/0.8.0.json).
+
+Complete conformance also requires semantic validation of protocol scopes, transport coverage, security, tag and component references, revision-specific fields, and Tool-example compatibility with resolved embedded schemas. The `@mcpdesc/validator` library provides structural and semantic validation for applications. For command-line use, `mcpcontract validate` validates a document and selects its declared MCP Description version:
 
 ```bash
-# From a checkout of this specification repository
-npm test
+mcpcontract validate chess-coach.mcpdesc.yaml --schema mcpdesc --strict
 ```
 
-
+These tools are implementations, not normative parts of the specification. See [Known Implementations](../../implementations.md) for the validator library, CLI, MCP Description Editor, and other companion tools.
 
 ## Next Steps
 

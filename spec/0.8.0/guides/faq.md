@@ -81,7 +81,7 @@ Generation does not make a description complete or authoritative. Generators mus
 
 Use the schema for the declared `mcpdesc` version and apply that version's semantic validation rules. Schema validation alone cannot enforce cross-object rules such as protocol coverage, scoped uniqueness, revision-specific fields, security references, or example consistency.
 
-For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0.json"` for editor support and use the repository validation workflow for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional.
+For MCP Description 0.8.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0.json"` for editor support and use a conforming semantic validator for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional. See [Known Implementations](../../implementations.md) for available libraries and tools.
 
 ### Should a consumer automatically retrieve any `$schema` URL it sees?
 
