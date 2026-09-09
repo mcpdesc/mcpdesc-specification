@@ -22,42 +22,42 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.8.0] — 2026-09-08
 
-Version 0.8 adds multi-revision descriptions, including protocol-scoped declarations and deterministic views for each MCP revision.
+Version 0.8 adds protocol-version-scoped declarations and deterministic views for each supported MCP protocol version.
 
 It also introduces reusable components, richer examples and interaction scenarios, client capability requirements, elicitation declarations, extension support, and stronger validation across JSON and YAML documents.
 
-The stable release includes the compatible Proposal 0022 relaxation: Info metadata is document-wide and no longer restricted by the runtime availability of corresponding MCP `Implementation` fields. Existing conforming documents remain conforming, and documents rejected only by those Info revision gates become conforming. The JSON Schema validation shape is unchanged apart from the RC.4 identity and `$schema` references.
+The accepted proposals represented by this release are listed in the [0.8.0 proposal revision manifest](PROPOSALS.md).
 
 ### Breaking
 
-- Removed `info.protocolVersion` and added required root `protocolVersions` using the closed set of MCP revisions whose semantics 0.8.0 validates.
-- Changed root `capabilities` from one object to an array of protocol-scoped Capabilities Objects.
-- Replaced inline security definitions with named root `securitySchemes` and Security Requirement Arrays.
-- Required every Tool to contain an object-rooted `inputSchema`.
-- Updated pre-1.0 versioning policy to permit breaking changes in `0.x` minor releases.
+- Removed `info.protocolVersion` and added required root `protocolVersions` using the closed set of MCP revisions whose semantics 0.8.0 validates (Proposal 0001).
+- Changed root `capabilities` from one object to an array of protocol-scoped Capabilities Objects (Proposal 0001).
+- Replaced inline security definitions with named root `securitySchemes` and Security Requirement Arrays (Proposal 0003).
+- Required every Tool to contain an object-rooted `inputSchema` (Proposal 0001).
+- Updated pre-1.0 versioning policy to permit breaking changes in `0.x` minor releases (release policy).
 
 ### Added
 
-- MCP `2026-07-28` support and protocol applicability across transports, capabilities, and primitive declarations.
-- Deterministic Effective Protocol Views with projection and conflict-detecting merge behavior.
-- Root `instructions`, formal MCP extension declarations, and primitive `clientRequirements`.
-- Named Tool, Resource, Resource Template, and Prompt examples, plus Tool interaction and completion examples.
-- Reusable typed `components` referenced through local `$componentRef` objects.
-- Operation-level elicitation declarations and object-level `x-*` specification extensions.
-- JSON and restricted YAML serializations, canonical versioned schema URIs, and expanded semantic validation.
+- MCP `2026-07-28` support and protocol applicability across transports, capabilities, and primitive declarations (Proposal 0001).
+- Deterministic Effective Protocol Views with projection and conflict-detecting merge behavior (Proposal 0001).
+- Root `instructions`, formal MCP extension declarations, and primitive `clientRequirements` (Proposals 0001, 0012).
+- Named Tool, Resource, Resource Template, and Prompt examples, plus Tool interaction and completion examples (Proposals 0004, 0005, 0015, 0016, 0017).
+- Reusable typed `components` referenced through local `$componentRef` objects (Proposal 0009).
+- Operation-level elicitation declarations and object-level `x-*` specification extensions (Proposals 0007, 0011).
+- JSON and restricted YAML serializations, canonical versioned schema URIs, and expanded semantic validation (Proposals 0010, 0019).
 
 ### Changed
 
-- Defined the root Info Object as document-wide metadata independent of MCP protocol revisions, preserving all Info properties during migration and projection and removing runtime `Implementation` availability gates ([Proposal 0022](../../proposals/0022-protocol-independent-info-metadata.md)).
-- Made `transports` optional and defined omission of an optional section as no declaration rather than evidence of runtime non-support.
-- Required ordinary declaration collections to be non-empty when present and projection or merge to omit collections that become empty.
-- Defined MCP 2025-06-18 as the floor for complete revision-specific semantic validation; older recognized revisions produce incomplete-validation diagnostics.
-- Aligned Tool, Resource, Resource Template, Prompt, annotation, `_meta`, and extension validation with their applicable MCP revisions.
-- Treated unrecognized MCP-reserved extension identifiers and unresolved external Tool schema references as warning-and-preserve conditions.
-- Distinguished MCP 2025-11-25 core Tasks from MCP 2026-07-28 Tasks extensions.
-- Made active specification examples vendor-neutral and removed bundled vendor-specific extension metadata.
+- Defined the root Info Object as document-wide metadata independent of MCP protocol revisions, preserving all Info properties during migration and projection and removing runtime `Implementation` availability gates (Proposal 0022).
+- Made `transports` optional and defined omission of an optional section as no declaration rather than evidence of runtime non-support (Proposal 0013).
+- Required ordinary declaration collections to be non-empty when present and projection or merge to omit collections that become empty (Proposal 0013).
+- Defined MCP 2025-06-18 as the floor for complete revision-specific semantic validation; older recognized revisions produce incomplete-validation diagnostics (Proposals 0001, 0002).
+- Aligned Tool, Resource, Resource Template, Prompt, annotation, `_meta`, and extension validation with their applicable MCP revisions (Proposals 0001, 0002).
+- Treated pre-standard or unrecognized MCP extension declarations and unresolved external Tool schema references as warning-and-preserve conditions (Proposals 0001, 0021).
+- Distinguished MCP 2025-11-25 core Tasks from MCP 2026-07-28 Tasks extensions (Proposal 0001).
+- Made active specification examples vendor-neutral and removed bundled vendor-specific extension metadata (editorial).
 
-Detailed Draft 1–4 and release-candidate history is available in the [GitHub prereleases](https://github.com/mcpdesc/mcpdesc-specification/releases) and [tags](https://github.com/mcpdesc/mcpdesc-specification/tags).
+Detailed history is available in the [GitHub prereleases](https://github.com/mcpdesc/mcpdesc-specification/releases) and [tags](https://github.com/mcpdesc/mcpdesc-specification/tags).
 
 ## [0.7.0] — 2026-03-23
 
