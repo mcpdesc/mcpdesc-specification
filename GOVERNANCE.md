@@ -60,7 +60,7 @@ A proposed release should preserve documents conforming to the current stable sp
 ## Proposal lifecycle
 
 Proposals are working documents used to refine a major or otherwise non-trivial
-change and agree on its scope before it is written into the specification.
+change while its normative implementation is developed in the active draft.
 Deliberation happens in a GitHub issue; the proposal document captures the design
 and the decision.
 
@@ -68,7 +68,7 @@ Proposal statuses are:
 
 - **Draft** — under active authoring;
 - **Review** — complete enough for community review;
-- **Accepted** — approved for normative implementation;
+- **Accepted** — approved for inclusion in the specification;
 - **Rejected** — not adopted, with rationale;
 - **Withdrawn** — withdrawn by its author;
 - **Implemented** — incorporated into a draft or release;
@@ -80,26 +80,26 @@ Proposal numbers are assigned sequentially. Acceptance of a proposal does not it
 
 1. **Open an issue** describing the problem and use cases. Discussion and deliberation happen there.
 2. **Author the proposal** on a `feature/<slug>-proposal` branch using [`proposals/0000-template.md`](proposals/0000-template.md), with status `Draft` then `Review`, and open a pull request.
-3. **Review** happens on that pull request. Only an **Accepted** proposal is merged into the root `proposals/` directory on `main`, where it becomes the durable decision record. A **Rejected** or **Withdrawn** proposal stays as its closed pull request and issue on GitHub, with the rationale recorded there — it is not stored in the root `proposals/` directory.
-4. **Implement** the accepted proposal on a separate `feature/<topic>` branch that changes `spec/draft/` and the affected schema, examples, and `spec/draft/CHANGELOG.md`.
-5. When an accepted proposal's implementation merges, set the proposal status to **Implemented** and link it from the changelog entry.
+3. **Implement and review** the proposal on a `feature/<topic>` branch that changes `spec/draft/` and the affected schema, examples, fixtures, and `spec/draft/CHANGELOG.md`. Review and deliberation continue in the corresponding issue and proposal pull request.
+4. **Capture the reviewed revision** exactly under `spec/draft/proposal-snapshots/` and record its source commit, digest, review links, status, and implementation relationship in `spec/draft/PROPOSALS.md`.
+5. **Decide** the proposal after its implementation and review are complete. An **Accepted** proposal is merged into the root `proposals/` directory on `main`, where it becomes the durable decision record, and is marked **Implemented** when its normative changes are present in the active draft. A **Rejected** or **Withdrawn** proposal stays as its closed pull request and issue on GitHub, with the rationale recorded there; its normative implementation is removed from the active draft and it is not stored in the root `proposals/` directory.
 
-The root `proposals/` directory therefore contains accepted or implemented proposals. Proposal-revision snapshots used by a public prerelease are separate historical inputs governed below; they are not accepted proposal decision records.
+The root `proposals/` directory therefore contains accepted or implemented proposals. Proposal-revision snapshots in the active draft are separate implementation inputs governed below; they are not accepted proposal decision records.
 
-### Public prerelease snapshots and review-stage proposals
+### Draft snapshots and review-stage proposals
 
-A maintainer may decide that an internally coherent draft or release candidate is ready to share before every proposal it contains has completed review. This exception exists to obtain community implementation and interoperability feedback on concrete prerelease text and schemas; it does not shorten or replace proposal review. The canonical review-stage proposal remains in its pull request and is not merged into the root `proposals/` directory until accepted.
+Implementing a review-stage proposal in the active draft enables community implementation and interoperability feedback on concrete text and schemas; it does not shorten or replace proposal review. The canonical review-stage proposal remains in its pull request and is not merged into the root `proposals/` directory until accepted.
 
-When publishing such a prerelease snapshot:
+For each proposal implemented in the active draft:
 
-1. the maintainer decision MUST identify every proposal still in **Review** that the snapshot implements;
+1. the corresponding public issue and proposal pull request MUST be identified;
 2. `spec/draft/PROPOSALS.md` MUST list every proposal covered, its status at capture, its implementation relationship, and the path to its captured revision under `spec/draft/proposal-snapshots/`;
 3. each captured revision MUST reproduce the proposal file exactly as it exists at a specified full commit ID, without an inserted status banner or other modification;
 4. the manifest MUST record the full commit ID, source repository, source path, review issue and pull request when applicable, and a SHA-256 digest of the captured file;
 5. the commit ID MUST identify a publicly retrievable commit in the proposal's repository. It SHOULD be a commit included in the proposal pull request or, for an accepted proposal, the commit containing the proposal under the root `proposals/` directory on `main`. A branch name, tag name, pull-request head, or abbreviated commit ID alone is not sufficient provenance;
 6. the captured file and recorded digest MUST be verified against the source path at that commit before publication;
 7. the corresponding implementation MAY be merged to `spec/draft/`, but the changelog and snapshot notes MUST identify review-stage content as subject to review and possible incompatible change or removal;
-8. the snapshot MUST be labeled as a prerelease and MUST NOT be represented as an accepted specification, stable release, or claim of community consensus; and
+8. when the active draft is published as a specification snapshot, that snapshot MUST be labeled as a prerelease and MUST NOT be represented as an accepted specification, stable release, or claim of community consensus; and
 9. acceptance MUST still follow the normal review period, resolution of substantive feedback, and an explicit maintainer decision. Publishing, capturing, or implementing the proposal MUST NOT be used as evidence that acceptance is predetermined.
 
 Proposal-revision snapshots are provenance records, not independently editable proposal documents. They are updated only by capturing another identified source revision and updating the manifest. A published prerelease tag preserves the proposal revisions used by that snapshot even when the active draft later captures newer revisions.

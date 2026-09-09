@@ -2,16 +2,19 @@
 
 Proposals are working documents that refine a non-trivial change — one involving
 design choices, compatibility, or broad ecosystem impact — and record the decision
-before it is written into the specification.
+while its normative implementation is developed in the active draft.
 
-Deliberation starts in a GitHub issue. The proposal is authored on a branch,
-opened as a pull request, and **merged to `main` only once its status is
-`Accepted`**; rejected or withdrawn proposals remain as their closed pull request
-and issue on GitHub, with the rationale recorded there. As a result this
-directory contains only accepted proposals.
+Every proposal corresponds to a public GitHub issue. The proposal is authored on
+a branch and opened as a pull request. Its implementation is developed first
+under `spec/draft/`, with the reviewed proposal revision captured exactly under
+`spec/draft/proposal-snapshots/` and recorded in `spec/draft/PROPOSALS.md`.
+Once accepted, the proposal is merged here as the durable decision record;
+rejected or withdrawn proposals remain as their closed pull request and issue on
+GitHub, with the rationale recorded there. As a result this directory contains
+only accepted or implemented proposals.
 
-An unreleased public draft may contain an exact snapshot of a review-stage
-proposal revision under `spec/draft/proposal-snapshots/`. Those copies are
+An active draft contains an exact snapshot of each implemented proposal revision
+under `spec/draft/proposal-snapshots/`. Those copies are
 versioned design inputs with commit and digest provenance, not accepted proposal
 decision records. See [`../GOVERNANCE.md`](../GOVERNANCE.md) for the snapshot
 requirements.

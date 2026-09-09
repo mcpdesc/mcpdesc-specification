@@ -29,8 +29,8 @@ Do not remove existing copyright, license, origin, or attribution notices.
 
 A non-trivial specification change should include:
 
-1. an issue explaining the problem and use cases;
-2. a proposal under `proposals/` when design choices or compatibility are involved;
+1. a corresponding public issue explaining the problem and use cases;
+2. a proposal authored for review and captured exactly under `spec/draft/proposal-snapshots/` when design choices or compatibility are involved;
 3. normative text updates;
 4. corresponding JSON Schema changes;
 5. positive and negative examples or fixtures;
@@ -39,7 +39,7 @@ A non-trivial specification change should include:
 
 A schema change without corresponding specification text and examples is incomplete.
 
-Proposals are merged to `main` only once accepted, then implemented separately in the active development version; see the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
+Every proposal corresponds to a public issue. Its normative changes are implemented first in the active development version under `spec/draft/`, with the reviewed proposal revision captured under `spec/draft/proposal-snapshots/` and recorded in `spec/draft/PROPOSALS.md`. Once accepted, the proposal becomes a durable decision record under the root `proposals/` directory. See the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ## Compatibility classification
 
