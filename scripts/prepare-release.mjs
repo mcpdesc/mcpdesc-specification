@@ -6,7 +6,7 @@
 //   node scripts/prepare-release.mjs rc.<iteration> <YYYY-MM-DD>
 //   node scripts/prepare-release.mjs editorial <base-tag> <iteration> <YYYY-MM-DD>
 //   node scripts/prepare-release.mjs validator <x.y.z|x.y.z-draft.n|x.y.z-rc.n> <output-directory>
-//   node scripts/prepare-release.mjs stable <version>
+//   node scripts/prepare-release.mjs stable <version> <YYYY-MM-DD>
 
 import { execFileSync } from 'node:child_process';
 import process from 'node:process';
@@ -29,14 +29,14 @@ if (/^draft\.\d+$/.test(target ?? '')) {
   args = [value, output];
 } else if (target === 'stable') {
   script = 'scripts/freeze-version.mjs';
-  args = [value];
+  args = [value, output];
 } else {
   console.error('Usage:');
   console.error('  npm run release:prepare -- draft.<iteration> <YYYY-MM-DD>');
   console.error('  npm run release:prepare -- rc.<iteration> <YYYY-MM-DD>');
   console.error('  npm run release:prepare -- editorial <base-tag> <iteration> <YYYY-MM-DD>');
   console.error('  npm run release:prepare -- validator <selector> <output-directory>');
-  console.error('  npm run release:prepare -- stable <version>');
+  console.error('  npm run release:prepare -- stable <version> <YYYY-MM-DD>');
   process.exit(1);
 }
 

@@ -1,7 +1,7 @@
 ---
 name: mcpdesc-release
 description: 'Prepare, validate, and coordinate MCP Description draft snapshots, validator snapshot exports, and stable specification releases. Use when asked to release, tag, export, freeze, or perform release readiness checks.'
-argument-hint: 'draft.<iteration> <date> | rc.<iteration> <date> | validator <selector> <output> | stable <version> | check'
+argument-hint: 'draft.<iteration> <date> | rc.<iteration> <date> | validator <selector> <output> | stable <version> <date> | check'
 ---
 
 # MCP Description Release
@@ -16,7 +16,8 @@ Use repository scripts as the source of deterministic release behavior. Do not r
    - Draft: `npm run release:prepare -- draft.<iteration> <YYYY-MM-DD>`
    - Release candidate: `npm run release:prepare -- rc.<iteration> <YYYY-MM-DD>`
    - Validator snapshot export: `npm run release:prepare -- validator <x.y.z|x.y.z-draft.n|x.y.z-rc.n> <output-directory>`
-   - Stable: `npm run release:prepare -- stable <x.y.z>`
+    - Stable: `npm run release:prepare -- stable <x.y.z> <YYYY-MM-DD>`
+       The generic stable helper has not been exercised end to end and was not used for v0.8.0. Do not use it until the next active draft and release-candidate cycle adds fixtures and validates its complete diff.
 4. Complete the review-required prose, proposal provenance, schema pointers, tests, or status changes printed by the script. Snapshot exports require an exact approved tag at a clean `HEAD`.
 5. Run the matching check:
    - `npm run release:check -- draft`

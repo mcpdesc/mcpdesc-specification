@@ -9,7 +9,7 @@ This guide maps MCP Description concepts to OpenAPI for developers familiar with
 | `openapi: "3.1.0"` | `mcpdesc: "0.8.0"` | Specification version |
 | `info` | `info` | Similar metadata role; MCP Description additionally requires programmatic `name` |
 | `servers` | `transports` | Connection endpoints |
-| `paths` + operations | `tools` | Server capabilities |
+| `paths` + operations | `tools`, `resources`, `prompts` | Server capabilities |
 | `webhooks` | — | No equivalent (MCP uses notifications) |
 | `components/schemas` and Reference Objects | `components/schemas` and `$componentRef` | Typed local reuse; different reference syntax and semantics |
 | `security` / `securitySchemes` | `security` / `securitySchemes` | Named schemes and requirement arrays with MCP Description semantics |

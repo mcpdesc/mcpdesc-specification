@@ -1,6 +1,6 @@
 # MCP Description Specification
 
-A portable, machine-readable contract format for [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers.
+A portable, machine-readable description format for [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers.
 
 > This directory contains the MCP Description (`mcpdesc`) specification. Version
 > **0.8.0** is the current stable release, maintained in this repository.
@@ -9,9 +9,9 @@ A portable, machine-readable contract format for [Model Context Protocol (MCP)](
 
 ## Overview
 
-The **MCP Description Specification** defines a standard document format that describes the capabilities of an MCP server — its tools, resources, prompts, transports, and security requirements — without requiring a runtime connection.
+The **MCP Description Specification** defines a standard description format that describes the capabilities of an MCP server — its tools, resources, prompts, transports, and security requirements — without requiring a runtime connection.
 
-Think of it as **OpenAPI for MCP servers**: a static contract that enables discovery, documentation, validation, and governance across the MCP ecosystem.
+Think of it as **OpenAPI for MCP servers**: a static description that enables discovery, documentation, validation, and governance across the MCP ecosystem.
 
 ## Status
 

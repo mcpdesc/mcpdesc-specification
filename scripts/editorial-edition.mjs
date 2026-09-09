@@ -12,13 +12,17 @@ const protectedPaths = [
   'schemas',
   'scripts/mcpdesc-views.mjs',
   'scripts/validate-0.8.mjs',
-  'scripts/validator-base.mjs',
-  'spec/draft/PROPOSALS.md',
-  'spec/draft/examples',
-  'spec/draft/fixtures',
-  'spec/draft/proposal-snapshots',
-  'spec/draft/serialization-fixtures'
+  'scripts/validator-base.mjs'
 ];
+
+function protectedPathsFor(target) {
+  if (!target) return protectedPaths;
+  return [
+    ...protectedPaths,
+    `${target.specificationPath}/PROPOSALS.md`,
+    `${target.specificationPath}/proposal-snapshots`
+  ];
+}
 
 function git(root, args, options = {}) {
   return execFileSync('git', args, { cwd: root, encoding: 'utf8', ...options }).trim();
@@ -42,6 +46,7 @@ function activeTarget(status, baseTag) {
   if (status.draft?.snapshotTag === baseTag) {
     return {
       kind: 'prerelease',
+      specificationPath: 'spec/draft',
       sectionPath: 'spec/draft/sections/00-front-matter.md',
       assembledPath: 'spec/draft/mcp-description.md'
     };
@@ -49,6 +54,7 @@ function activeTarget(status, baseTag) {
   if (`v${status.stable?.version}` === baseTag) {
     return {
       kind: 'stable',
+      specificationPath: `spec/${status.stable.version}`,
       assembledPath: `spec/${status.stable.version}/mcp-description.md`
     };
   }
@@ -127,9 +133,10 @@ export function checkEditorialEdition(root) {
   try {
     git(root, ['rev-parse', '--verify', `${metadata.baseTag}^{commit}`]);
     git(root, ['merge-base', '--is-ancestor', metadata.baseTag, 'HEAD']);
-    const changed = git(root, ['diff', '--name-only', metadata.baseTag, '--', ...protectedPaths]);
+    const editionProtectedPaths = protectedPathsFor(target);
+    const changed = git(root, ['diff', '--name-only', metadata.baseTag, '--', ...editionProtectedPaths]);
     if (changed) errors.push(`protected conformance artifacts differ from ${metadata.baseTag}: ${changed.split('\n').join(', ')}`);
-    const untracked = git(root, ['ls-files', '--others', '--exclude-standard', '--', ...protectedPaths]);
+    const untracked = git(root, ['ls-files', '--others', '--exclude-standard', '--', ...editionProtectedPaths]);
     if (untracked) errors.push(`untracked protected conformance artifacts exist: ${untracked.split('\n').join(', ')}`);
   } catch (error) {
     errors.push(`cannot compare with ${metadata.baseTag}: ${error.message}`);

@@ -1,59 +1,98 @@
 $schema: https://mcpdesc.org/schema/mcp-description/0.8.0.json
 mcpdesc: 0.8.0
+
 info:
-  name: reusable-search
+  name: unified-knowledge-search
+  title: Reusable Components Across Search Tools
   version: 1.0.0
+  description: >
+    Demonstrates how multiple MCP tools can reuse shared schemas and examples
+    defined once in the components section.
+
 protocolVersions:
   - '2026-07-28'
+
+# Components are reusable building blocks. Each component below is referenced
+# by both tools, avoiding duplicated schemas and example payloads.
 components:
   schemas:
-    SearchInput:
+    SearchRequest:
       type: object
       properties:
         query:
           type: string
-      required: [query]
+          description: Text to search for.
+        limit:
+          type: integer
+          description: Maximum number of results to return.
+          minimum: 1
+          maximum: 50
+          default: 10
+      required:
+        - query
       additionalProperties: false
-    SearchOutput:
+
+    SearchResults:
       type: object
       properties:
-        count:
+        matches:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              location:
+                type: string
+              excerpt:
+                type: string
+            required:
+              - title
+              - location
+            additionalProperties: false
+        total:
           type: integer
-      required: [count]
+          minimum: 0
+      required:
+        - matches
+        - total
       additionalProperties: false
+
   toolExamples:
-    basic-search:
+    no-results:
       input:
-        query: components
+        query: undocumented component
+        limit: 10
       result:
         resultType: complete
         content:
           - type: text
-            text: Found one result.
+            text: No matching items were found.
         structuredContent:
-          count: 1
-      x-example-source: documentation
-  promptExamples:
-    default-greeting:
-      arguments: {}
-      result:
-        resultType: complete
-        messages:
-          - role: assistant
-            content:
-              type: text
-              text: Hello.
+          matches: []
+          total: 0
+
 tools:
-  - name: search
+  # These tools serve different data sources but share the same request and
+  # response structures.
+  - name: search-documentation
+    title: Search Documentation
+    description: Search product guides, tutorials, and API documentation.
     inputSchema:
-      $componentRef: '#/components/schemas/SearchInput'
+      $componentRef: '#/components/schemas/SearchRequest'
     outputSchema:
-      $componentRef: '#/components/schemas/SearchOutput'
+      $componentRef: '#/components/schemas/SearchResults'
     examples:
-      basic:
-        $componentRef: '#/components/toolExamples/basic-search'
-prompts:
-  - name: greeting
+      no-results:
+        $componentRef: '#/components/toolExamples/no-results'
+
+  - name: search-source-code
+    title: Search Source Code
+    description: Search source files, symbols, and code comments.
+    inputSchema:
+      $componentRef: '#/components/schemas/SearchRequest'
+    outputSchema:
+      $componentRef: '#/components/schemas/SearchResults'
     examples:
-      default:
-        $componentRef: '#/components/promptExamples/default-greeting'
+      no-results:
+        $componentRef: '#/components/toolExamples/no-results'

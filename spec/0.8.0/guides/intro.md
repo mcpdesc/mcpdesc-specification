@@ -154,7 +154,7 @@ The document explicitly describes server capabilities such as:
 * prompts
 * transports
 
-This ensures clients can understand server functionality without executing protocol calls.
+This ensures clients can understand an MCP server surface without executing protocol calls.
 
 ---
 
@@ -253,9 +253,9 @@ Adopting a standardized MCP Description format provides several ecosystem-wide b
 
 Tools and platforms can exchange MCP server descriptions using a common format.
 
-### Better developer experience
+### Better developer and AI experience
 
-Developers can understand server capabilities without connecting to the server.
+Developers and agents can inspect an MCP server capabilities without connecting to the server.
 
 ### Stronger tooling ecosystem
 

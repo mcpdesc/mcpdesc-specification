@@ -5,4 +5,20 @@ info:
   title: Chess Rating MCP Server
   version: 1.0.0
 protocolVersions:
-- '2026-07-28'
+  - "2025-11-25"
+transports:
+  - args:
+      - serve
+    command: chess-rating
+    type: stdio
+tools:
+  - description: Get the current Elo rating for a chess player
+    inputSchema:
+      properties:
+        player_id:
+          description: Player identifier
+          type: string
+      required:
+        - player_id
+      type: object
+    name: get_player_rating

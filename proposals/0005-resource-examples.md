@@ -474,7 +474,7 @@ Acceptance criteria:
 
 ## Decision record
 
-Accepted and implemented in MCP Description 0.8.0 by maintainer release decision on 2026-09-08. The decision approves the documented bootstrap review-period exceptions based on public Draft 1-4 and RC.1-RC.4 review and interoperability testing.
+Accepted and implemented in MCP Description 0.8.0 by maintainer release decision on 2026-09-09. The decision approves the documented bootstrap review-period exceptions based on public Draft 1-4 and RC.1-RC.4 review and interoperability testing.
 
 This proposal is intentionally independent from Proposal 0004. If both are accepted, their implementations may share a feature branch and infrastructure but should remain separated into reviewable commits so either change can progress independently.
 

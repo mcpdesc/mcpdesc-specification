@@ -8,7 +8,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 <!-- update with `markdown-toc -i CHANGELOG.md --maxdepth 2 -->
 <!-- toc -->
 
-- [[0.8.0] — 2026-09-08](#080--2026-09-08)
+- [[0.8.0] — 2026-09-09](#080--2026-09-09)
 - [[0.7.0] — 2026-03-23](#070--2026-03-23)
 - [[0.6.0] — 2026-03-20](#060--2026-03-20)
 - [[0.5.2] — 2026-03-18](#052--2026-03-18)
@@ -20,7 +20,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 <!-- tocstop -->
 
-## [0.8.0] — 2026-09-08
+## [0.8.0] — 2026-09-09
 
 Version 0.8 adds protocol-version-scoped declarations and deterministic views for each supported MCP protocol version.
 
@@ -34,7 +34,6 @@ The accepted proposals represented by this release are listed in the [0.8.0 prop
 - Changed root `capabilities` from one object to an array of protocol-scoped Capabilities Objects (Proposal 0001).
 - Replaced inline security definitions with named root `securitySchemes` and Security Requirement Arrays (Proposal 0003).
 - Required every Tool to contain an object-rooted `inputSchema` (Proposal 0001).
-- Updated pre-1.0 versioning policy to permit breaking changes in `0.x` minor releases (release policy).
 
 ### Added
 
@@ -56,8 +55,6 @@ The accepted proposals represented by this release are listed in the [0.8.0 prop
 - Treated pre-standard or unrecognized MCP extension declarations and unresolved external Tool schema references as warning-and-preserve conditions (Proposals 0001, 0021).
 - Distinguished MCP 2025-11-25 core Tasks from MCP 2026-07-28 Tasks extensions (Proposal 0001).
 - Made active specification examples vendor-neutral and removed bundled vendor-specific extension metadata (editorial).
-
-Detailed history is available in the [GitHub prereleases](https://github.com/mcpdesc/mcpdesc-specification/releases) and [tags](https://github.com/mcpdesc/mcpdesc-specification/tags).
 
 ## [0.7.0] — 2026-03-23
 

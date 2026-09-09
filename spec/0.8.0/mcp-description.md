@@ -5,8 +5,7 @@ status: Stable release
 release-tag: v0.8.0
 released: true
 baseline: 0.7.0
-baseline-snapshot: v0.8.0-rc.4
-date: 2026-09-08
+date: 2026-09-09
 ---
 
 # MCP Description Specification
@@ -17,7 +16,7 @@ date: 2026-09-08
 
 **Baseline**: v0.7.0
 
-**Date**: 2026-09-08
+**Date**: 2026-09-09
 
 ## Abstract
 

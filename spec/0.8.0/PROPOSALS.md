@@ -2,7 +2,7 @@
 
 This manifest records the exact proposal revisions used as design inputs for MCP Description 0.8.0.
 
-All listed proposal snapshots had status **Review** when captured. The included proposals were subsequently accepted and implemented by the 2026-09-08 maintainer release decision; the snapshots remain byte-exact provenance records. Proposal 0008 remains excluded.
+All listed proposal snapshots had status **Review** when captured. The included proposals were subsequently accepted and implemented by the 2026-09-09 maintainer release decision; the snapshots remain byte-exact provenance records. Proposal 0008 remains excluded.
 
 | Proposal | Implementation relationship | Source revision | Review record | Captured file | SHA-256 |
 |---|---|---|---|---|---|

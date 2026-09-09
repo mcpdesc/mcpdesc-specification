@@ -120,13 +120,14 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 
 ### Published snapshot maintenance
 
-The **published conformance artifacts** for a snapshot are its normative requirements, canonical schema bytes and `$id`, semantic validation behavior, examples, conformance fixtures, serialization fixtures, and proposal-revision provenance. Changing any of those artifacts requires a new public draft snapshot, release candidate, or stable specification release, as applicable. Existing specification tags remain immutable.
+The **published conformance artifacts** for a snapshot are its normative requirements, canonical schema bytes and `$id`, semantic validation behavior, and proposal-revision provenance. Changing any of those artifacts requires a new public draft snapshot, release candidate, or stable specification release, as applicable. Existing specification tags remain immutable.
 
-Changelogs, FAQs, guides, governance documents, and release-page prose are maintainable companion documentation. They may be corrected on `main` without publishing a new specification snapshot when the correction does not alter a frozen artifact. Such corrections must not be presented as changing the meaning or behavior of an existing snapshot.
+Examples, conformance fixtures, serialization fixtures, changelogs, FAQs, guides, governance documents, and release-page prose are non-normative, maintainable supporting material. They may be corrected on `main` without publishing a new conformance snapshot when the correction does not alter normative requirements, schema acceptance, or semantic validation behavior. Corrected examples and fixtures MUST remain valid for their declared purpose and pass the repository test suite. Such corrections must not be presented as changing the meaning or behavior of an existing snapshot.
 
 Strictly editorial corrections to specification prose MAY be published as an immutable **editorial edition** of an existing release candidate or stable release. An editorial edition:
 
-- MUST NOT change document-conformance requirements, canonical schema bytes or identity, semantic validation behavior, examples, conformance fixtures, serialization fixtures, or proposal-revision provenance;
+- MUST NOT change document-conformance requirements, canonical schema bytes or identity, semantic validation behavior, or proposal-revision provenance;
+- MAY correct non-normative examples, conformance fixtures, and serialization fixtures when the correction preserves their declared purpose and does not change conformance semantics;
 - MUST retain the base snapshot's `mcpdesc` value, `$schema` URI, and validator selector;
 - MUST identify its immutable base snapshot and use an annotated tag formed by appending SemVer build metadata `+editorial.<iteration>` to the base tag, for example `v0.8.0-rc.4+editorial.1` or `v0.8.0+editorial.1`;
 - MUST use a positive, monotonically increasing editorial iteration for a given base snapshot;

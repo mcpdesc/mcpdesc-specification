@@ -87,9 +87,8 @@ No running server is needed to read, validate, or process the document.
 
 The specification minimizes required fields:
 
-- `mcpdesc` — which specification version
-- `info.name` + `info.version` — identity
+- `mcpdesc` — which MCP Description specification version
+- `info.name` + `info.version` — server identity
 - `protocolVersions` — which MCP revisions are described
-- `transports` — how to connect (at least one)
 
-Everything else is optional. Zero-primitive descriptions are valid, including descriptions of servers under development or authorization-scoped observations.
+Everything else is optional, including transports and primitive collections. Zero-primitive descriptions are valid, including descriptions of servers under development or authorization-scoped observations.
