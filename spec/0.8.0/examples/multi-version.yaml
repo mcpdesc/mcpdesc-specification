@@ -1,0 +1,169 @@
+# Example 1 — Tasks migration between MCP 2025-11-25 and 2026-07-28
+#
+# Educational point:
+# The business operation is the same in both Effective Protocol Views.
+# What changes is the MCP representation of long-running execution:
+# - 2025-11-25 uses the experimental core Tasks capability plus Tool.execution.
+# - 2026-07-28 moves Tasks to the io.modelcontextprotocol/tasks extension.
+#
+# This is a strong use of protocolVersions: the variants exist because the
+# protocol contract changed, not because the server happens to ship two
+# unrelated product editions.
+
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0.json
+mcpdesc: 0.8.0
+
+info:
+  name: chess-analysis-server
+  title: Chess Analysis MCP Server
+  version: 2.0.0
+  description: >
+    Provides chess-engine analysis while exposing long-running work using the
+    task model appropriate to each supported MCP protocol revision.
+
+protocolVersions:
+- '2025-11-25'
+- '2026-07-28'
+
+# The same stdio transport is valid for both protocol revisions, so it is
+# deliberately left unscoped.
+transports:
+- type: stdio
+  command: chess-analysis
+  args:
+  - serve
+
+# Capabilities are split because Tasks changed representation in 2026-07-28.
+# Capability scopes are pairwise disjoint.
+capabilities:
+- protocolVersions:
+  - '2025-11-25'
+  tools:
+    listChanged: true
+  tasks:
+    cancel: {}
+    requests:
+      tools:
+        call: {}
+
+- protocolVersions:
+  - '2026-07-28'
+  tools:
+    listChanged: true
+  extensions:
+    io.modelcontextprotocol/tasks: {}
+
+tools:
+# This synchronous tool has identical MCP semantics in both revisions, so it
+# inherits the root protocolVersions and needs only one declaration.
+- name: get_position_evaluation
+  title: Get Position Evaluation
+  description: Return a quick static evaluation of a chess position.
+  inputSchema:
+    type: object
+    properties:
+      fen:
+        type: string
+        description: Position in Forsyth-Edwards Notation.
+    required:
+    - fen
+    additionalProperties: false
+  outputSchema:
+    type: object
+    properties:
+      evaluation_cp:
+        type: integer
+        description: Evaluation in centipawns from White's perspective.
+    required:
+    - evaluation_cp
+    additionalProperties: false
+
+# 2025-11-25 variant:
+# Tool.execution is defined by MCP Description only for this MCP revision.
+# taskSupport: required means this operation is described as task-only here.
+- name: analyze_game
+  title: Analyze Game
+  protocolVersions:
+  - '2025-11-25'
+  description: >
+    Run a deep engine analysis of a PGN game. In the 2025-11-25 protocol view,
+    the tool uses the experimental core task-augmented tools/call model.
+  inputSchema:
+    type: object
+    properties:
+      pgn:
+        type: string
+        description: Game in Portable Game Notation.
+      depth:
+        type: integer
+        minimum: 10
+        maximum: 60
+        default: 30
+        description: Requested engine search depth.
+    required:
+    - pgn
+    additionalProperties: false
+  outputSchema:
+    type: object
+    properties:
+      evaluation_cp:
+        type: integer
+      best_move:
+        type: string
+      critical_positions:
+        type: array
+        items:
+          type: string
+    required:
+    - evaluation_cp
+    - best_move
+    additionalProperties: false
+  execution:
+    taskSupport: required
+
+# 2026-07-28 variant:
+# There is no Tool.execution declaration here. Long-running execution is
+# negotiated through the formal Tasks extension instead.
+#
+# Because this particular tool is intentionally task-only, clientRequirements
+# records an unconditional need for the Tasks extension when invoking it.
+- name: analyze_game
+  title: Analyze Game
+  protocolVersions:
+  - '2026-07-28'
+  description: >
+    Run a deep engine analysis of a PGN game. In the 2026-07-28 protocol view,
+    long-running execution uses the io.modelcontextprotocol/tasks extension.
+  clientRequirements:
+    extensions:
+      io.modelcontextprotocol/tasks: {}
+  inputSchema:
+    type: object
+    properties:
+      pgn:
+        type: string
+        description: Game in Portable Game Notation.
+      depth:
+        type: integer
+        minimum: 10
+        maximum: 60
+        default: 30
+        description: Requested engine search depth.
+    required:
+    - pgn
+    additionalProperties: false
+  outputSchema:
+    type: object
+    properties:
+      evaluation_cp:
+        type: integer
+      best_move:
+        type: string
+      critical_positions:
+        type: array
+        items:
+          type: string
+    required:
+    - evaluation_cp
+    - best_move
+    additionalProperties: false

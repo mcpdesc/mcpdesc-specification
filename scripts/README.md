@@ -27,7 +27,7 @@ When those sources disagree, the workflow controls CI triggering, `package.json`
 | [`check-release.mjs`](check-release.mjs) | Invoked by `npm run release:check -- <mode>` and `npm run release:check:draft-publication`. | Checks draft, publication, or stable-release metadata without tagging or publishing. |
 | [`prepare-release.mjs`](prepare-release.mjs) | Invoked by `npm run release:prepare -- <target>`. | Dispatches mechanical draft metadata preparation, validator snapshot export, or stable-version freezing. |
 | [`export-validator-snapshot.mjs`](export-validator-snapshot.mjs) | Invoked by validator release preparation after an approved specification tag identifies a clean `HEAD`. | Emits a manifest-verified runtime and fixture bundle for intake in `mcpdesc/core`; it does not publish a package. |
-| [`freeze-version.mjs`](freeze-version.mjs) | Maintainer-invoked during an explicitly approved release; it is not part of `npm test` or CI. | See the script header for usage and its printed post-freeze checklist; release authority and prerequisites remain in [`GOVERNANCE.md`](../GOVERNANCE.md#branch-and-release-model). |
+| [`freeze-version.mjs`](freeze-version.mjs) | Reserved for a future explicitly approved stable release; it is not part of `npm test` or CI. The generic implementation has not been exercised end to end and was not used to finalize v0.8.0. | It MUST be tested during the next active draft and release-candidate cycle before release use. See the script header for its safety boundary; release authority and prerequisites remain in [`GOVERNANCE.md`](../GOVERNANCE.md#branch-and-release-model). |
 
 The validation scripts report failures but do not modify specification artifacts. The freeze script performs only the mechanical snapshot step and deliberately leaves release-status and schema-pointer decisions to maintainers.
 
@@ -60,7 +60,8 @@ npm run release:prepare -- draft.4 2026-09-15
 npm run release:prepare -- rc.1 2026-09-30
 npm run release:prepare -- editorial v0.8.0-rc.4 1 2026-10-02
 npm run release:prepare -- validator 0.8.0-rc.4 /tmp/mcpdesc-0.8.0-rc.4
-npm run release:prepare -- stable 0.8.0
+npm run release:prepare -- validator 0.8.0 /tmp/mcpdesc-0.8.0
+npm run release:prepare -- stable 0.9.0 2027-01-15
 
 npm run release:check -- draft
 npm run release:check -- rc
@@ -68,13 +69,14 @@ npm run release:check -- editorial
 npm run release:check -- rc-publication
 npm run release:check -- draft-publication
 npm run release:check -- stable 0.8.0
+npm run release:check -- stable-publication 0.8.0
 ```
 
-Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a reviewable artifact copy from an exact tagged commit; consumer intake and release remain outside this repository. Stable preparation freezes `spec/draft/` and prints the pointer and status updates that remain.
+Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a reviewable artifact copy from an exact tagged commit; consumer intake and release remain outside this repository. The currently untested stable preparation helper freezes `spec/draft/`, converts mechanical stable identities, updates status pointers, and retires the active draft. It deliberately does not write release prose, changelog content, proposal decisions, or public status pages. The stable publication check verifies the deployed canonical schema before tagging.
 
-Editorial-edition preparation records a positive edition iteration and immutable tag over an existing release-candidate or stable base tag. It does not change the conformance version, schema identity, schema pointers, validator selector, examples, or fixtures. The editorial check compares protected conformance artifacts with the base tag and fails on any difference. Specification prose still requires human review to establish that an edit is strictly editorial; automation cannot prove semantic equivalence.
+Editorial-edition preparation records a positive edition iteration and immutable tag over an existing release-candidate or stable base tag. It does not change the conformance version, schema identity, schema pointers, validator selector, semantic validation behavior, or proposal provenance. Non-normative examples and fixtures may be corrected when they retain their declared purpose and remain consistent with the unchanged conformance rules. The editorial check compares protected conformance artifacts with the base tag and fails on any difference; `npm test` validates the corrected supporting material. Specification prose and supporting-artifact changes still require human review to establish that an edit is strictly editorial; automation cannot prove semantic equivalence.
 
-The commands do not create branches or pull requests, merge changes, create or move tags, publish GitHub releases, alter npm dist-tags, or publish packages. `draft-publication` is intentionally opt-in and networked; ordinary `npm test` remains deterministic and offline. Run the release checks on a release branch, review every generated change, run `npm test`, and use annotated tags only after explicit maintainer approval.
+The commands do not create branches or pull requests, merge changes, create or move tags, publish GitHub releases, alter npm dist-tags, or publish packages. Publication checks are intentionally opt-in and networked; ordinary `npm test` remains deterministic and offline. Run the release checks on a release branch, review every generated change, run `npm test`, and use annotated tags only after explicit maintainer approval.
 
 ## Schema normalization and comparison
 

@@ -1,0 +1,24 @@
+$schema: https://mcpdesc.org/schema/mcp-description/0.8.0.json
+mcpdesc: 0.8.0
+info:
+  name: chess-rating-server
+  title: Chess Rating MCP Server
+  version: 1.0.0
+protocolVersions:
+  - "2025-11-25"
+transports:
+  - args:
+      - serve
+    command: chess-rating
+    type: stdio
+tools:
+  - description: Get the current Elo rating for a chess player
+    inputSchema:
+      properties:
+        player_id:
+          description: Player identifier
+          type: string
+      required:
+        - player_id
+      type: object
+    name: get_player_rating

@@ -15,6 +15,7 @@ import path from 'node:path';
 import process from 'node:process';
 import {
   loadDraftSchemaPublicationExpectation,
+  loadStableSchemaPublicationExpectation,
   verifySchemaPublication
 } from './schema-publication.mjs';
 import { checkEditorialEdition } from './editorial-edition.mjs';
@@ -151,12 +152,24 @@ function checkStable() {
   }
   const status = readJson('specification-status.json');
   const latest = readJson('schemas/latest.json');
+  const schema = readJson(`schemas/mcp-description/${requestedVersion}.json`);
+  const stableTag = `v${requestedVersion}`;
+  const stableSchemaId = `https://mcpdesc.org/schema/mcp-description/${requestedVersion}.json`;
+  const section = frontMatter(`spec/${requestedVersion}/sections/00-front-matter.md`);
   expectEqual(status?.stable?.version, requestedVersion, 'specification-status.json stable version');
+  expectEqual(status?.stable?.status, 'current-stable-release', 'specification-status.json stable status');
+  expectEqual(status?.stable?.path, `spec/${requestedVersion}`, 'specification-status.json stable path');
+  expectEqual(status?.stable?.releaseTag, stableTag, 'specification-status.json stable releaseTag');
   expectEqual(latest?.['mcp-description'], requestedVersion, 'schemas/latest.json mcp-description');
-  readText(`schemas/mcp-description/${requestedVersion}.json`);
+  expectEqual(schema?.$id, stableSchemaId, `schemas/mcp-description/${requestedVersion}.json $id`);
   readText(`spec/${requestedVersion}/mcp-description.md`);
+  expectEqual(section.version, requestedVersion, `spec/${requestedVersion}/sections/00-front-matter.md version`);
+  expectEqual(section.status, 'Stable release', `spec/${requestedVersion}/sections/00-front-matter.md status`);
+  expectEqual(section['release-tag'], stableTag, `spec/${requestedVersion}/sections/00-front-matter.md release-tag`);
+  expectEqual(section.released, 'true', `spec/${requestedVersion}/sections/00-front-matter.md released`);
   expectIncludes(readText('README.md'), `| ${requestedVersion} | Current stable release |`, 'README.md');
   expectIncludes(readText('spec/README.md'), `| ${requestedVersion} | Current stable release |`, 'spec/README.md');
+  if (fs.existsSync(path.join(root, 'spec', 'draft'))) fail('spec/draft must be retired until the next draft is initialized');
   if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
     const draft = readJson('schemas/draft.json');
     if (draft?.['mcp-description'] === requestedVersion) {
@@ -166,9 +179,36 @@ function checkStable() {
   console.log(`Checked stable release ${requestedVersion}.`);
 }
 
+async function checkStablePublication() {
+  if (!requestedVersion || !/^\d+\.\d+\.\d+$/.test(requestedVersion)) {
+    fail('stable-publication mode requires an x.y.z version argument');
+    return;
+  }
+  let expectation;
+  try {
+    expectation = loadStableSchemaPublicationExpectation(root, requestedVersion);
+  } catch (error) {
+    fail(`stable publication setup failed: ${error.message}`);
+    return;
+  }
+  for (const message of expectation.localErrors) fail(`stable publication: ${message}`);
+  if (expectation.localErrors.length > 0) return;
+
+  try {
+    const result = await verifySchemaPublication(expectation);
+    for (const message of result.errors) fail(`stable publication: ${message}`);
+    for (const message of result.warnings) warn(`stable publication: ${message}`);
+    if (result.errors.length === 0) {
+      console.log(`Checked stable publication ${expectation.requestedUrl} (${result.observed.actualDigest}).`);
+    }
+  } catch (error) {
+    fail(`stable publication fetch failed: ${error.message}`);
+  }
+}
+
 async function main() {
-  if (!['all', 'draft', 'draft-publication', 'rc', 'rc-publication', 'editorial', 'stable'].includes(mode)) {
-    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, rc, rc-publication, editorial, or stable`);
+  if (!['all', 'draft', 'draft-publication', 'rc', 'rc-publication', 'editorial', 'stable', 'stable-publication'].includes(mode)) {
+    fail(`unknown mode ${JSON.stringify(mode)}; expected all, draft, draft-publication, rc, rc-publication, editorial, stable, or stable-publication`);
   } else {
     if (mode === 'draft') checkPrerelease('community-working-draft');
     if (mode === 'rc') checkPrerelease('release-candidate');
@@ -180,6 +220,7 @@ async function main() {
       if (result.errors.length === 0) console.log(`Checked editorial edition ${result.editionTag}.`);
     }
     if (mode === 'stable') checkStable();
+    if (mode === 'stable-publication') await checkStablePublication();
   }
 
   if (warnings.length > 0) {

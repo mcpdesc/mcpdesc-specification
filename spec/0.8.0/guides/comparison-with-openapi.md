@@ -1,0 +1,197 @@
+# MCP Description vs OpenAPI — Conceptual Comparison
+
+This guide maps MCP Description concepts to OpenAPI for developers familiar with the API ecosystem.
+
+## Quick Mapping
+
+| OpenAPI Concept | MCP Description Equivalent | Notes |
+|----------------|---------------------------|-------|
+| `openapi: "3.1.0"` | `mcpdesc: "0.8.0"` | Specification version |
+| `info` | `info` | Similar metadata role; MCP Description additionally requires programmatic `name` |
+| `servers` | `transports` | Connection endpoints |
+| `paths` + operations | `tools`, `resources`, `prompts` | Server capabilities |
+| `webhooks` | — | No equivalent (MCP uses notifications) |
+| `components/schemas` and Reference Objects | `components/schemas` and `$componentRef` | Typed local reuse; different reference syntax and semantics |
+| `security` / `securitySchemes` | `security` / `securitySchemes` | Named schemes and requirement arrays with MCP Description semantics |
+| `tags` | Root `tags` catalogue and declaration references | Flat document-wide categorization |
+| — | `resources` | No direct OpenAPI equivalent |
+| — | `prompts` | No direct OpenAPI equivalent |
+| `x-` extensions | `x-` extensions | Same convention |
+
+## Detailed Comparison
+
+### References and Reuse
+
+OpenAPI 3.1 and 3.2 use `$ref` in two context-dependent ways. In a Schema Object, `$ref` has JSON Schema semantics and can use URI references, schema resources, anchors, adjacent keywords, recursion, and composition. At other reference-enabled OpenAPI use sites, a Reference Object uses `$ref` to identify a complete typed OpenAPI value, internally or externally; `summary` and `description` are its only defined siblings.
+
+MCP Description keeps these mechanisms lexically separate:
+
+| Mechanism | Target | Resolution and composition |
+|-----------|--------|----------------------------|
+| JSON Schema `$ref` in MCP Description or OpenAPI | A schema | Applicable JSON Schema dialect; URI-based and potentially external; adjacent schema keywords and composition remain available. |
+| OpenAPI Reference Object `$ref` | A typed OpenAPI value | URI-based, internal or external; replaces a complete value at a reference-enabled use site. |
+| MCP Description `$componentRef` | A typed MCP Description component | Exact local pointer under `#/components`; replaces a complete value; no siblings or external documents in 0.8.0. |
+
+The different MCP Description spelling avoids ambiguity at the boundary between the host format and embedded JSON Schema. Its local-only scope is a separate interoperability choice: version 0.8.0 does not define external MCP Description document identity, base URIs, loading policy, trust, or bundling. Schema authors still retain JSON Schema `$ref`, `$id`, `$anchor`, `$dynamicRef`, and composition inside embedded schemas.
+
+### Info Object
+
+Both specifications use an `info` object for document-wide metadata:
+
+**OpenAPI:**
+```json
+{
+  "info": {
+    "title": "Chess Coach API",
+    "version": "2.1.0",
+    "description": "Chess analysis and rating API",
+    "contact": { "name": "Team", "email": "team@example.com" },
+    "license": { "name": "MIT" }
+  }
+}
+```
+
+**MCP Description:**
+```json
+{
+  "info": {
+    "name": "chess-coach",
+    "title": "Chess Coach MCP Server",
+    "version": "2.1.0",
+    "description": "Chess analysis and rating server",
+    "contact": { "name": "Team", "email": "team@example.com" },
+    "license": { "name": "MIT" }
+  }
+}
+```
+
+Key difference: MCP Description has both `name` (programmatic identifier, required) and `title` (human-readable, optional).
+
+### Endpoints vs Transports
+
+OpenAPI describes HTTP endpoints. MCP Description describes transport mechanisms:
+
+**OpenAPI:**
+```json
+{
+  "servers": [
+    { "url": "https://api.example.com/v2" }
+  ]
+}
+```
+
+**MCP Description:**
+```json
+{
+  "transports": [
+    { "type": "streamable-http", "url": "https://example.com/mcp" },
+    { "type": "stdio", "command": "chess-coach", "args": ["mcp"] }
+  ]
+}
+```
+
+MCP servers can be local processes (stdio), not just HTTP endpoints.
+
+### Operations vs Tools
+
+OpenAPI models HTTP operations (GET, POST, etc.). MCP Description models tools:
+
+**OpenAPI:**
+```json
+{
+  "paths": {
+    "/games/{id}/analyze": {
+      "post": {
+        "operationId": "analyzeGame",
+        "summary": "Analyze a chess game",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "depth": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+**MCP Description:**
+```json
+{
+  "tools": [
+    {
+      "name": "analyze_game",
+      "description": "Analyze a chess game",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "pgn": { "type": "string" },
+          "depth": { "type": "integer" }
+        },
+        "required": ["pgn"]
+      }
+    }
+  ]
+}
+```
+
+MCP Tools avoid HTTP verbs, path parameters, and content negotiation. Beyond their required name and input schema, 0.8.0 Tools can declare output schemas, examples, interactions, elicitation, security, client requirements, tags, annotations, metadata, and protocol-revision scope.
+
+### Security
+
+MCP Description uses named scheme definitions and requirement arrays aligned with the familiar OpenAPI 3.1 model, without making OpenAPI a normative dependency:
+
+```json
+{
+  "securitySchemes": {
+    "bearer": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT"
+    }
+  },
+  "security": [
+    { "bearer": [] }
+  ]
+}
+```
+
+### What MCP Description Has That OpenAPI Doesn't
+
+| Feature | Description |
+|---------|-------------|
+| **Resources** | Named data sources with URIs — no equivalent in REST (closest: well-known URLs) |
+| **Resource Templates** | Parameterized URI templates for dynamic resources |
+| **Prompts** | Server-side prompt templates with arguments |
+| **Capabilities** | Feature flags (subscriptions, notifications, completions) |
+| **Tool Annotations** | Behavioral hints (readOnly, destructive, idempotent) |
+| **Protocol Revision Scopes** | One description can declare and project deterministic Effective Protocol Views for multiple MCP revisions |
+| **MCP Extensions** | Formal extension capabilities and extension-aware client requirements |
+| **Client Requirements** | Primitive-level minimum client capabilities |
+| **Elicitation and Interaction Examples** | Declared user interaction plus Tool, completion, and multi-step examples |
+
+### What OpenAPI Has That MCP Description Doesn't
+
+| Feature | Notes |
+|---------|-------|
+| **Path-based routing** | MCP tools are flat, not organized by path |
+| **HTTP methods** | MCP uses tool names, not GET/POST/PUT/DELETE |
+| **Content negotiation** | MCP uses structured JSON, not multiple media types |
+| **Response codes** | MCP uses protocol-level success/error, not HTTP status codes |
+| **External component references** | MCP Description `$componentRef` is local to one document and does not define imports or network retrieval |
+| **Webhooks** | MCP uses notifications within the protocol |
+
+## When to Use Which
+
+| Use Case | Format |
+|----------|--------|
+| HTTP REST API | OpenAPI |
+| MCP server | MCP Description |
+| Server exposing both REST and MCP | Both — OpenAPI for HTTP endpoints, MCP Description for MCP capabilities |

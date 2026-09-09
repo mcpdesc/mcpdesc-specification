@@ -23,16 +23,18 @@ import {
 } from './validate-0.8.mjs';
 
 const root = process.cwd();
+const specificationRoot = fs.existsSync(path.join(root, 'spec', 'draft')) ? 'spec/draft' : 'spec/0.8.0';
 
 assert.equal(mcpExtensionCatalogue.effectiveDate, '2026-09-04');
 assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/ui'), 'official');
 assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/future-capability'), 'uncatalogued');
 
 function fixture(relativePath) {
+  const resolvedPath = relativePath.replace(/^spec\/draft/, specificationRoot);
   return decodeDocumentSource(
-    fs.readFileSync(path.join(root, relativePath), 'utf8'),
-    documentFormatForPath(relativePath),
-    relativePath
+    fs.readFileSync(path.join(root, resolvedPath), 'utf8'),
+    documentFormatForPath(resolvedPath),
+    resolvedPath
   );
 }
 

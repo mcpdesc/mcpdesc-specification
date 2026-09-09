@@ -1,7 +1,7 @@
 ---
 name: mcpdesc-release
 description: 'Prepare, validate, and coordinate MCP Description draft snapshots, validator snapshot exports, and stable specification releases. Use when asked to release, tag, export, freeze, or perform release readiness checks.'
-argument-hint: 'draft.<iteration> <date> | rc.<iteration> <date> | validator <selector> <output> | stable <version> | check'
+argument-hint: 'draft.<iteration> <date> | rc.<iteration> <date> | validator <selector> <output> | stable <version> <date> | check'
 ---
 
 # MCP Description Release
@@ -15,14 +15,16 @@ Use repository scripts as the source of deterministic release behavior. Do not r
 3. Choose exactly one preparation target:
    - Draft: `npm run release:prepare -- draft.<iteration> <YYYY-MM-DD>`
    - Release candidate: `npm run release:prepare -- rc.<iteration> <YYYY-MM-DD>`
-   - Validator snapshot export: `npm run release:prepare -- validator <x.y.z-draft.n|x.y.z-rc.n> <output-directory>`
-   - Stable: `npm run release:prepare -- stable <x.y.z>`
+   - Validator snapshot export: `npm run release:prepare -- validator <x.y.z|x.y.z-draft.n|x.y.z-rc.n> <output-directory>`
+    - Stable: `npm run release:prepare -- stable <x.y.z> <YYYY-MM-DD>`
+       The generic stable helper has not been exercised end to end and was not used for v0.8.0. Do not use it until the next active draft and release-candidate cycle adds fixtures and validates its complete diff.
 4. Complete the review-required prose, proposal provenance, schema pointers, tests, or status changes printed by the script. Snapshot exports require an exact approved tag at a clean `HEAD`.
 5. Run the matching check:
    - `npm run release:check -- draft`
    - `npm run release:check -- rc`
    - `npm run release:check -- stable <x.y.z>`
-6. Run `npm test` and `git diff --check`. For a validator snapshot export, review its manifest, schema digest, semantic source, and fixture corpus before intake in `mcpdesc/core`.
+   - `npm run release:check -- stable-publication <x.y.z>` after stable schema deployment
+6. Run `npm test` and `git diff --check`. Stable releases must pass `stable-publication` before tagging. For a validator snapshot export, review its manifest, schema digest, semantic source, and fixture corpus before intake in `mcpdesc/core`.
 7. Open a pull request with compatibility classification, validation results, and AI-assistance disclosure. Wait for CI and maintainer approval.
 8. Treat annotated specification tags as exact snapshot identities, not authorization to publish tooling packages. Validator package release authority belongs to `mcpdesc/core`.
 9. After specification publication, verify GitHub release state and schema provenance. Verify validator intake and publication in `mcpdesc/core` separately.

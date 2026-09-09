@@ -63,6 +63,24 @@ export function loadDraftSchemaPublicationExpectation(root) {
   };
 }
 
+export function loadStableSchemaPublicationExpectation(root, version) {
+  const schemaPath = `schemas/mcp-description/${version}.json`;
+  const schemaBytes = fs.readFileSync(path.join(root, schemaPath));
+  const schema = JSON.parse(schemaBytes.toString('utf8'));
+  const requestedUrl = `https://mcpdesc.org/schema/mcp-description/${version}.json`;
+
+  return {
+    requestedUrl,
+    schemaPath,
+    expectedBytes: schemaBytes,
+    expectedRootId: String(schema.$id || ''),
+    expectedDialect: String(schema.$schema || ''),
+    localErrors: requestedUrl === schema.$id
+      ? []
+      : [`${schemaPath} root $id ${JSON.stringify(schema.$id)} does not match stable URI ${JSON.stringify(requestedUrl)}`]
+  };
+}
+
 export async function fetchSchemaPublication(requestedUrl, { fetchImpl = fetch, requestOrigin = 'https://editor.example' } = {}) {
   const response = await fetchImpl(requestedUrl, {
     redirect: 'manual',

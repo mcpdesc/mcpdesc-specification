@@ -7,7 +7,7 @@ Thank you for helping evolve the MCP Description specification.
 - Read [`GOVERNANCE.md`](GOVERNANCE.md).
 - Search existing issues and proposals.
 - Open an issue before making a non-trivial normative change.
-- Target `main` from a contribution branch and make normative changes under `spec/draft/`.
+- Target `main` from a contribution branch. When an active development version has been initialized, make normative changes under `spec/draft/`.
 
 ## Licensing of contributions
 
@@ -29,17 +29,17 @@ Do not remove existing copyright, license, origin, or attribution notices.
 
 A non-trivial specification change should include:
 
-1. an issue explaining the problem and use cases;
-2. a proposal under `proposals/` when design choices or compatibility are involved;
+1. a corresponding public issue explaining the problem and use cases;
+2. a proposal authored for review and captured exactly under `spec/draft/proposal-snapshots/` when design choices or compatibility are involved;
 3. normative text updates;
 4. corresponding JSON Schema changes;
 5. positive and negative examples or fixtures;
 6. compatibility, migration, and security considerations;
-7. a `spec/draft/CHANGELOG.md` entry.
+7. a changelog entry in the active development version.
 
 A schema change without corresponding specification text and examples is incomplete.
 
-Proposals are merged to `main` only once accepted, then implemented as a separate `spec/draft/` change; see the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
+Every proposal corresponds to a public issue. Its normative changes are implemented first in the active development version under `spec/draft/`, with the reviewed proposal revision captured under `spec/draft/proposal-snapshots/` and recorded in `spec/draft/PROPOSALS.md`. Once accepted, the proposal becomes a durable decision record under the root `proposals/` directory. See the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ## Compatibility classification
 

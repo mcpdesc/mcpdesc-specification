@@ -5,7 +5,8 @@ import process from 'node:process';
 import { decodeDocumentSource } from './decode-document.mjs';
 import { validateMcpdesc08Document } from './validate-0.8.mjs';
 
-const fixtureRoot = path.join(process.cwd(), 'spec', 'draft', 'serialization-fixtures');
+const specificationRoot = fs.existsSync(path.join(process.cwd(), 'spec', 'draft')) ? 'spec/draft' : 'spec/0.8.0';
+const fixtureRoot = path.join(process.cwd(), specificationRoot, 'serialization-fixtures');
 const readFixture = (relative) => fs.readFileSync(path.join(fixtureRoot, relative), 'utf8');
 
 const yamlDocument = decodeDocumentSource(
@@ -22,7 +23,7 @@ assert.deepEqual(yamlDocument, jsonDocument);
 assert.deepEqual(validateMcpdesc08Document(yamlDocument), validateMcpdesc08Document(jsonDocument));
 
 const integratedSource = fs.readFileSync(
-  path.join(process.cwd(), 'spec', 'draft', 'fixtures', 'expected-valid', 'integrated-draft2-features.yaml'),
+  path.join(process.cwd(), specificationRoot, 'fixtures', 'expected-valid', 'integrated-draft2-features.yaml'),
   'utf8'
 );
 const integratedYamlDocument = decodeDocumentSource(
@@ -75,10 +76,10 @@ assert.deepEqual(
   }
 );
 
-const exampleDir = path.join(process.cwd(), 'spec', 'draft', 'examples');
+const exampleDir = path.join(process.cwd(), specificationRoot, 'examples');
 for (const filename of fs.readdirSync(exampleDir).filter((name) => /\.ya?ml$/i.test(name))) {
   const source = fs.readFileSync(path.join(exampleDir, filename), 'utf8');
-  decodeDocumentSource(source, 'yaml', `spec/draft/examples/${filename}`);
+  decodeDocumentSource(source, 'yaml', `${specificationRoot}/examples/${filename}`);
 }
 
 console.log('Serialization tests passed.');

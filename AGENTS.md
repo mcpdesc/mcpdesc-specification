@@ -8,16 +8,16 @@ Maintain a precise, portable, machine-readable description format for MCP server
 
 ## Locked constraints
 
-- v0.7.0 is the current stable release; its canonical source remains Cisco Open.
-- v0.8.0 is a community working draft in this repository.
-- Do not promote v0.8.0 to stable without an explicit release decision.
-- Do not change `schemas/latest.json` from 0.7.0 during draft work.
+- v0.8.0 is the current stable release in this repository.
+- v0.7.0 remains frozen; its canonical source remains Cisco Open.
+- No active draft exists until work on the next version is explicitly initialized.
+- `schemas/latest.json` identifies the current stable release and MUST NOT point to draft or prerelease content.
 - No CLA, copyright assignment, or DCO is required.
 - Preserve copyright, licensing, attribution, origin, and modification records.
 
 ## Specification discipline
 
-For every normative change, update all affected artifacts:
+When an active development version has been initialized, update all affected artifacts for every normative change:
 
 1. section source under `spec/draft/sections/`;
 2. assembled `spec/draft/mcp-description.md`;
@@ -39,9 +39,9 @@ Use RFC 2119/8174 key words only for genuine normative requirements and keep cap
 
 ## Draft workflow
 
-- Each specification version lives in its own folder under `spec/`. In-progress work happens in `spec/draft/`; released versions are frozen into `spec/<version>/` and are immutable except for errata.
-- Develop each change on a `feature/<topic>` branch that targets `main` (for example `feature/support-meta`). Edit `spec/draft/` only; never modify a frozen `spec/<version>/` folder.
-- Release by freezing `spec/draft/` into `spec/<version>/`, tagging the version, bumping the schema pointers, and re-initializing `spec/draft/`.
+- Each specification version lives in its own folder under `spec/`. In-progress work happens in `spec/draft/`; released versions are frozen into `spec/<version>/` except for reviewed errata to non-normative supporting material.
+- Develop each normative change on a `feature/<topic>` branch that targets `main` (for example `feature/support-meta`) and edit `spec/draft/` only. Corrections to released examples, fixtures, and documentation must not change conformance semantics and must follow the editorial-edition policy in `GOVERNANCE.md`.
+- Release by freezing `spec/draft/` into `spec/<version>/`, tagging the version, and updating the stable schema pointers. Initialize the next `spec/draft/` only when development of the next version explicitly begins.
 - Link each normative pull request to an issue and, when applicable, a proposal.
 - Keep changes focused; separate research/proposals from normative implementation when practical.
 - Prefer primary MCP specification sources for protocol claims.
