@@ -2,7 +2,7 @@
 
 This FAQ explains MCP Description. It does not restate or modify MCP runtime requirements. For runtime behavior, use the normative MCP specification for the applicable protocol revision. MCP Description complements those specifications with a static, portable description format.
 
-## Purpose and Authority
+## Purpose
 
 ### What is an MCP Description?
 
@@ -17,6 +17,22 @@ No. The normative MCP specification for each declared protocol revision defines 
 When MCP Description reuses an MCP field or type, that field retains the semantics and revision applicability defined by MCP. If a description conflicts with the applicable MCP specification or with observed runtime behavior, the description does not change the protocol or the server; it is inaccurate and should be corrected.
 
 See [Relationship to MCP](relationship-to-mcp.md).
+
+### Why not inherit and extend Tool, Resource, and Prompt definitions from the MCP schema?
+
+MCP Description aligns with the MCP primitive types, but the two schemas serve different purposes:
+- An MCP schema defines runtime values for one protocol revision;
+- an MCP Description can describe several revisions, adds static metadata such as security, tags, examples, and client requirements, and permits local reusable components.
+
+Some differences are alternatives rather than additions: for example, mcpdesc Tool schemas may use a `$componentRef`, which cannot satisfy MCP's required inline `inputSchema` merely by composing the schemas with `allOf`.
+
+Keeping the schemas independent also gives each stable mcpdesc release an immutable, offline-usable validation contract.
+
+New MCP fields are reviewed for static meaning, revision applicability, projection, and compatibility instead of being accepted automatically.
+
+Stronger machine-verifiable alignment remains valuable, especially through upstream schema-diff checks and validation of projected native MCP values against pinned MCP schemas.
+
+See [Relationship to the MCP Primitive Schemas](relationship-to-mcp-schemas.md) for the field-by-field comparison, tradeoffs, and potential improvements.
 
 ### Why not just use OpenAPI?
 

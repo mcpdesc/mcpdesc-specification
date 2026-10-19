@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
-import { assembleDraft } from './draft-assembly.mjs';
+import { assembleSpecification } from './draft-assembly.mjs';
 
 const protectedPaths = [
   'schemas',
@@ -48,14 +48,17 @@ function activeTarget(status, baseTag) {
       kind: 'prerelease',
       specificationPath: 'spec/draft',
       sectionPath: 'spec/draft/sections/00-front-matter.md',
-      assembledPath: 'spec/draft/mcp-description.md'
+      assembledPath: 'spec/draft/mcp-description.md',
+      versionDirectory: 'draft'
     };
   }
   if (`v${status.stable?.version}` === baseTag) {
     return {
       kind: 'stable',
       specificationPath: `spec/${status.stable.version}`,
-      assembledPath: `spec/${status.stable.version}/mcp-description.md`
+      sectionPath: `spec/${status.stable.version}/sections/00-front-matter.md`,
+      assembledPath: `spec/${status.stable.version}/mcp-description.md`,
+      versionDirectory: status.stable.version
     };
   }
   return null;
@@ -72,7 +75,7 @@ function updateFrontMatter(source, metadata) {
   for (const [name, value] of fields) {
     const pattern = new RegExp(`^${name}: .+$`, 'm');
     if (pattern.test(updated)) updated = updated.replace(pattern, `${name}: ${value}`);
-    else updated = updated.replace(/^snapshot-tag: .+$/m, (line) => `${line}\n${name}: ${value}`);
+    else updated = updated.replace(/^(?:release-tag|snapshot-tag): .+$/m, (line) => `${line}\n${name}: ${value}`);
   }
   return updated;
 }
@@ -110,7 +113,7 @@ export function prepareEditorialEdition(root, baseTag, iterationValue, date) {
   if (target.sectionPath) {
     const sectionPath = path.join(root, target.sectionPath);
     fs.writeFileSync(sectionPath, updateFrontMatter(fs.readFileSync(sectionPath, 'utf8'), metadata));
-    fs.writeFileSync(assembledPath, assembleDraft(root).content);
+    fs.writeFileSync(assembledPath, assembleSpecification(root, target.versionDirectory).content);
   } else {
     fs.writeFileSync(assembledPath, updateFrontMatter(fs.readFileSync(assembledPath, 'utf8'), metadata));
   }

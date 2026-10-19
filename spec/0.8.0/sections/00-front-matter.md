@@ -3,6 +3,10 @@ title: MCP Description Specification
 version: 0.8.0
 status: Stable release
 release-tag: v0.8.0
+edition-date: 2026-10-19
+edition-tag: v0.8.0+editorial.1
+editorial-base-tag: v0.8.0
+editorial-edition: 1
 released: true
 baseline: 0.7.0
 date: 2026-09-09
