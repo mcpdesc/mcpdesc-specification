@@ -8,7 +8,6 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 <!-- update with `markdown-toc -i CHANGELOG.md --maxdepth 2 -->
 <!-- toc -->
 
-- [[0.8.0+editorial.2] — 2026-10-19](#080editorial2--2026-10-19)
 - [[0.8.0+editorial.1] — 2026-10-19](#080editorial1--2026-10-19)
 - [[0.8.0] — 2026-09-09](#080--2026-09-09)
 - [[0.7.0] — 2026-03-23](#070--2026-03-23)
@@ -22,18 +21,16 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 <!-- tocstop -->
 
-## [0.8.0+editorial.2] — 2026-10-19
-
-### Security
-
-- Updated the transitive development dependency `fast-uri` from 3.1.6 to 3.1.8, resolving the authority-bracket host-confusion vulnerability and all other advisories reported by `npm audit` for the dependency tree.
-
 ## [0.8.0+editorial.1] — 2026-10-19
 
 ### Documentation
 
 - Addressed feedback about why MCP Description does not directly inherit the MCP `Tool`, `Resource`, and `Prompt` schemas with a concise [FAQ answer](guides/faq.md#why-not-inherit-and-extend-tool-resource-and-prompt-definitions-from-the-mcp-schema).
 - Added a detailed [comparison with the MCP primitive schemas](guides/relationship-to-mcp-schemas.md), including shared fields, intentional differences, tradeoffs, and potential improvements for stronger machine-verifiable alignment.
+
+### Security
+
+- Updated the transitive development dependency `fast-uri` from 3.1.6 to 3.1.8, resolving the authority-bracket host-confusion vulnerability and all other advisories reported by `npm audit` for the dependency tree.
 
 ## [0.8.0] — 2026-09-09
 

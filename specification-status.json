@@ -9,8 +9,8 @@
   },
   "editorialEdition": {
     "baseTag": "v0.8.0",
-    "iteration": 2,
-    "editionTag": "v0.8.0+editorial.2",
+    "iteration": 1,
+    "editionTag": "v0.8.0+editorial.1",
     "editionDate": "2026-10-19",
     "target": "stable"
   }
