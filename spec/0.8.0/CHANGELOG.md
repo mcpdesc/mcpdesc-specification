@@ -8,6 +8,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 <!-- update with `markdown-toc -i CHANGELOG.md --maxdepth 2 -->
 <!-- toc -->
 
+- [[0.8.0+editorial.1] — 2026-10-19](#080editorial1--2026-10-19)
 - [[0.8.0] — 2026-09-09](#080--2026-09-09)
 - [[0.7.0] — 2026-03-23](#070--2026-03-23)
 - [[0.6.0] — 2026-03-20](#060--2026-03-20)
@@ -19,6 +20,13 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 - [[0.1.0] — 2025-11-01](#010--2025-11-01)
 
 <!-- tocstop -->
+
+## [0.8.0+editorial.1] — 2026-10-19
+
+### Documentation
+
+- Addressed feedback about why MCP Description does not directly inherit the MCP `Tool`, `Resource`, and `Prompt` schemas with a concise [FAQ answer](guides/faq.md#why-not-inherit-and-extend-tool-resource-and-prompt-definitions-from-the-mcp-schema).
+- Added a detailed [comparison with the MCP primitive schemas](guides/relationship-to-mcp-schemas.md), including shared fields, intentional differences, tradeoffs, and potential improvements for stronger machine-verifiable alignment.
 
 ## [0.8.0] — 2026-09-09
 

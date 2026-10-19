@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { checkEditorialEdition } from './editorial-edition.mjs';
+import { checkEditorialEdition, prepareEditorialEdition } from './editorial-edition.mjs';
 
 function write(root, relativePath, content) {
   const fullPath = path.join(root, relativePath);
@@ -71,6 +71,32 @@ for (const target of ['stable', 'prerelease']) {
 
     write(root, `${specificationPath}/proposal-snapshots/0001.md`, 'changed\n');
     assert.match(checkEditorialEdition(root).errors.join('\n'), /protected conformance artifacts differ/);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+{
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mcpdesc-editorial-prepare-'));
+  try {
+    git(root, 'init', '--quiet');
+    git(root, 'config', 'user.email', 'test@example.com');
+    git(root, 'config', 'user.name', 'Test');
+    write(root, 'specification-status.json', `${JSON.stringify({ stable: { version: '0.8.0' } }, null, 2)}\n`);
+    write(root, 'spec/0.8.0/sections/00-front-matter.md', '---\nrelease-tag: v0.8.0\n---\n');
+    write(root, 'spec/0.8.0/mcp-description.md', '---\nrelease-tag: v0.8.0\n---\n');
+    git(root, 'add', '.');
+    git(root, 'commit', '--quiet', '-m', 'base');
+    git(root, 'tag', 'v0.8.0');
+
+    prepareEditorialEdition(root, 'v0.8.0', 1, '2026-10-19');
+    const specification = fs.readFileSync(path.join(root, 'spec/0.8.0/mcp-description.md'), 'utf8');
+    const source = fs.readFileSync(path.join(root, 'spec/0.8.0/sections/00-front-matter.md'), 'utf8');
+    assert.match(specification, /^editorial-edition: 1$/m);
+    assert.match(specification, /^editorial-base-tag: v0\.8\.0$/m);
+    assert.match(specification, /^edition-tag: v0\.8\.0\+editorial\.1$/m);
+    assert.match(specification, /^edition-date: 2026-10-19$/m);
+    assert.equal(specification, source);
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
