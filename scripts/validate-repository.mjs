@@ -39,6 +39,49 @@ const ajvByDialect = {
 const root = process.cwd();
 const errors = [];
 const warnings = [];
+const expectedFixtureWarnings = [];
+const expectedWarningCodesByFixture = new Map([
+  ['deprecated-client-capability-requirements.json', [
+    'deprecated-client-requirement',
+    'deprecated-client-requirement',
+    'deprecated-client-requirement',
+    'unknown-reserved-extension-identifier'
+  ]],
+  ['legacy-completion-examples.json', ['legacy-protocol-validation-incomplete']],
+  ['legacy-sse-modern-revision.json', [
+    'legacy-protocol-validation-incomplete',
+    'legacy-sse-for-modern-version'
+  ]],
+  ['logging-deprecated-2026.json', ['logging-deprecated-in-2026']],
+  ['pre-dialect-tool-example.json', [
+    'incomplete-tool-example-validation',
+    'legacy-protocol-validation-incomplete'
+  ]],
+  ['pre-dialect-tool-schema-shape.json', ['legacy-protocol-validation-incomplete']],
+  ['pre-standard-extension-capabilities.json', ['extensions-not-supported-by-version']],
+  ['resource-example-consistency.json', [
+    'resource-example-mime-type-mismatch',
+    'resource-example-requested-uri-not-returned',
+    'resource-example-size-mismatch'
+  ]],
+  ['tool-interaction-client-requirements-contradictions.json', [
+    'deprecated-client-requirement',
+    'interaction-example-client-requirements-contradiction',
+    'interaction-example-client-requirements-contradiction',
+    'interaction-example-client-requirements-contradiction',
+    'interaction-example-client-requirements-contradiction'
+  ]],
+  ['uncatalogued-oauth-scope.json', ['uncatalogued-oauth-scope']],
+  ['uncatalogued-openid-scope.json', ['uncatalogued-oauth-scope']],
+  ['unknown-reserved-extension-identifier.json', ['unknown-reserved-extension-identifier']],
+  ['unknown-reserved-meta-key.json', ['meta-unknown-reserved-key']],
+  ['unresolved-external-tool-example-ref.json', [
+    'incomplete-tool-example-validation',
+    'unresolved-external-tool-schema-reference'
+  ]],
+  ['unresolved-external-tool-ref.json', ['unresolved-external-tool-schema-reference']]
+]);
+const seenExpectedWarningFixtures = new Set();
 const specificationDirectory = fs.existsSync(path.join(root, 'spec', 'draft')) ? 'draft' : '0.8.0';
 const specificationRoot = `spec/${specificationDirectory}`;
 const requiredFiles = [
@@ -316,7 +359,33 @@ for (const [group, expectsErrors, expectsWarnings] of fixtureGroups) {
       fail(`${rel}: expected fixture to validate without warnings, but got: ${semanticWarnings.join(' | ')}`);
       continue;
     }
+    if (expectsWarnings) {
+      const fixtureName = path.relative(dir, full).split(path.sep).join('/');
+      const expectedCodes = expectedWarningCodesByFixture.get(fixtureName);
+      const actualCodes = semanticDiagnostics
+        .filter((diagnostic) => diagnostic.severity === 'warning')
+        .map((diagnostic) => diagnostic.code)
+        .sort();
+      if (!expectedCodes) {
+        fail(`${rel}: expected-warning fixture has no declared diagnostic-code expectations`);
+        continue;
+      }
+      seenExpectedWarningFixtures.add(fixtureName);
+      const sortedExpectedCodes = [...expectedCodes].sort();
+      if (JSON.stringify(actualCodes) !== JSON.stringify(sortedExpectedCodes)) {
+        fail(`${rel}: expected warning codes ${JSON.stringify(sortedExpectedCodes)}, but got ${JSON.stringify(actualCodes)}`);
+        continue;
+      }
+      expectedFixtureWarnings.push(...semanticWarnings);
+      continue;
+    }
     for (const fixtureWarning of semanticWarnings) warn(fixtureWarning);
+  }
+}
+
+for (const fixtureName of expectedWarningCodesByFixture.keys()) {
+  if (!seenExpectedWarningFixtures.has(fixtureName)) {
+    fail(`${specificationRoot}/fixtures/expected-warning/${fixtureName}: declared warning expectations have no fixture`);
   }
 }
 
@@ -328,8 +397,15 @@ if (errors.length) {
 }
 
 warnings.sort();
+expectedFixtureWarnings.sort();
 console.log(`Repository validation passed. Checked ${schemas.size} versioned schema(s).`);
+console.log(`Expected warning fixture diagnostics: ${expectedFixtureWarnings.length} across ${seenExpectedWarningFixtures.size} fixture(s).`);
+if (process.env.MCPDESC_VERBOSE_EXPECTED_WARNINGS === '1') {
+  for (const warning of expectedFixtureWarnings) console.log(`- ${warning}`);
+}
 if (warnings.length) {
-  console.log(`Warnings (${warnings.length}):`);
+  console.log(`Non-fixture repository warnings (${warnings.length}):`);
   for (const warning of warnings) console.log(`- ${warning}`);
+} else {
+  console.log('Non-fixture repository warnings: 0.');
 }

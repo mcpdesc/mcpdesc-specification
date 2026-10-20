@@ -2,6 +2,10 @@
 
 This changelog records repository governance, release-process, and project-tooling changes. Changes to the MCP Description format are recorded in the [versioned specification changelog](spec/0.8.0/CHANGELOG.md).
 
+## 2026-10-20
+
+- Distinguished deliberate `expected-warning` fixture diagnostics from other repository warnings in test output, and required exact diagnostic-code multiplicities for every warning fixture.
+
 ## 2026-09-09
 
 - Allowed reviewed editorial corrections to non-normative examples, conformance fixtures, and serialization fixtures when their purpose and conformance semantics remain unchanged and the repository test suite passes.
