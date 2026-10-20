@@ -467,13 +467,10 @@ resources:
     name: weather_dashboard
     mimeType: text/html;profile=mcp-app
     protocolVersions:
-      - '2026-07-28'
+      - '2025-11-25'
     examples:
       default:
         result:
-          resultType: complete
-          ttlMs: 60000
-          cacheScope: private
           contents:
             - uri: ui://weather-server/dashboard
               mimeType: text/html;profile=mcp-app
@@ -686,8 +683,7 @@ Draft experimentation must not silently redefine the stable profile.
 5. Add positive fixtures for default visibility, explicit model/App visibility,
    app-only Tools, UI Resources, CSP, permissions, Resource examples, mixed
    ordinary/App-backed Tools, and graceful degradation without a hard client
-  requirement. Resource examples MUST be scoped or split so their completed
-  result fields conform to every applicable MCP core revision.
+  requirement.
 6. Add negative fixtures for invalid URI schemes, empty or duplicate
    visibility, unknown visibility values, incompatible media types, malformed
    CSP and permissions, and incompatible declared Resource targets.
