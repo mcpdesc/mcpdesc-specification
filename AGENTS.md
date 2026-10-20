@@ -55,6 +55,12 @@ Run:
 npm test
 ```
 
+When adding, changing, renaming, or removing an `expected-warning` fixture,
+update `expectedWarningCodesByFixture` in
+`scripts/validate-repository.mjs` with its exact diagnostic codes and
+multiplicities. Do not suppress warnings emitted by ordinary examples or
+repository content.
+
 Do not bypass failing checks. Explain any test limitation honestly.
 See [`scripts/README.md`](scripts/README.md) for how repository scripts enter local validation, CI, and release workflows.
 
