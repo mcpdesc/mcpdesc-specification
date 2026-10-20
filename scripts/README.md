@@ -29,6 +29,11 @@ When those sources disagree, the workflow controls CI triggering, `package.json`
 | [`export-validator-snapshot.mjs`](export-validator-snapshot.mjs) | Invoked by validator release preparation after an approved specification tag identifies a clean `HEAD`. | Emits a manifest-verified runtime and fixture bundle for intake in `mcpdesc/core`; it does not publish a package. |
 | [`freeze-version.mjs`](freeze-version.mjs) | Reserved for a future explicitly approved stable release; it is not part of `npm test` or CI. The generic implementation has not been exercised end to end and was not used to finalize v0.8.0. | It MUST be tested during the next active draft and release-candidate cycle before release use. See the script header for its safety boundary; release authority and prerequisites remain in [`GOVERNANCE.md`](../GOVERNANCE.md#branch-and-release-model). |
 
+Repository validation asserts the exact diagnostic-code multiplicities emitted
+by every `expected-warning` fixture. Passing output reports those expected
+diagnostics separately from warnings found in ordinary repository content. Set
+`MCPDESC_VERBOSE_EXPECTED_WARNINGS=1` to print each expected fixture diagnostic.
+
 The validation scripts report failures but do not modify specification artifacts. The freeze script performs only the mechanical snapshot step and deliberately leaves release-status and schema-pointer decisions to maintainers.
 
 Application consumers should use the independently versioned `@mcpdesc/validator` package rather than importing repository scripts. Repository-integrity checks, filesystem traversal, YAML parsing, projection, and merge behavior remain under `scripts/`.
