@@ -903,21 +903,10 @@ function collectMcpHeaderAnnotations(schema) {
 }
 
 function validateMcpHeaderAnnotations(tool, toolIndex, scope, rel, diagnostics) {
+  if (!scope.includes('2026-07-28')) return;
+
   const annotations = collectMcpHeaderAnnotations(tool.inputSchema);
   if (!annotations.length) return;
-
-  for (const version of scope) {
-    if (version !== '2026-07-28') {
-      diagnostics.push(
-        makeDiagnostic(
-          'field-not-supported-by-version',
-          'error',
-          `tools[${toolIndex}].inputSchema uses x-mcp-header, which is not defined for MCP ${version}`,
-          ['tools', toolIndex, 'inputSchema']
-        )
-      );
-    }
-  }
 
   const byCaseInsensitiveName = new Map();
   for (const annotation of annotations) {

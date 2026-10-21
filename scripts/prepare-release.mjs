@@ -5,7 +5,7 @@
 //   node scripts/prepare-release.mjs draft.<iteration> <YYYY-MM-DD>
 //   node scripts/prepare-release.mjs rc.<iteration> <YYYY-MM-DD>
 //   node scripts/prepare-release.mjs editorial <base-tag> <iteration> <YYYY-MM-DD>
-//   node scripts/prepare-release.mjs validator <x.y.z|x.y.z-draft.n|x.y.z-rc.n> <output-directory>
+//   node scripts/prepare-release.mjs validator <x.y.z|x.y.z-draft.n|x.y.z-rc.n|x.y.z-rev.YYYYMMDD> <output-directory>
 //   node scripts/prepare-release.mjs stable <version> <YYYY-MM-DD>
 
 import { execFileSync } from 'node:child_process';

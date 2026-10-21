@@ -21,10 +21,28 @@
         "type": "object",
         "properties": {
           "region": {
+            "type": "object",
+            "x-mcp-header": 7
+          },
+          "primary": {
             "type": "string",
-            "x-mcp-header": "Region"
+            "x-mcp-header": "X-Region"
+          },
+          "fallback": {
+            "type": "string",
+            "x-mcp-header": "x-region"
           }
-        }
+        },
+        "allOf": [
+          {
+            "properties": {
+              "composed": {
+                "type": "array",
+                "x-mcp-header": "Invalid Header"
+              }
+            }
+          }
+        ]
       }
     }
   ]

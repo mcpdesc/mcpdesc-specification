@@ -92,6 +92,120 @@ assert.equal('transports' in partialView, false);
 const mergedPartial = mergeProtocolDescriptions([partialView]);
 assert.equal('transports' in mergedPartial, false);
 
+function toolSchemaDocument(protocolVersions, inputSchema) {
+  return {
+    ...structuredClone(partial),
+    info: { name: 'tool-schema-regression', version: '1.0.0' },
+    protocolVersions,
+    tools: [{ name: 'schema_test', inputSchema }]
+  };
+}
+
+function errorCodes(document) {
+  return validateMcpdesc08Document(document)
+    .filter((diagnostic) => diagnostic.severity === 'error')
+    .map((diagnostic) => diagnostic.code);
+}
+
+const legacyMcpHeader = fixture('spec/draft/fixtures/expected-valid/revision-inapplicable-mcp-header.json');
+assert.deepEqual(errorCodes(legacyMcpHeader), []);
+
+const customKeywordSource = fixture('spec/draft/fixtures/expected-valid/custom-tool-schema-keywords.json');
+assert.deepEqual(errorCodes(customKeywordSource), []);
+const yamlCustomKeywords = decodeDocumentSource(
+  'type: object\nproperties:\n  account:\n    type: string\n    x-acme-account-id: true\n    database-field-id: 123\n',
+  'yaml',
+  'custom-schema.yaml'
+);
+assert.equal(yamlCustomKeywords.properties.account['x-acme-account-id'], true);
+assert.equal(yamlCustomKeywords.properties.account['database-field-id'], 123);
+for (const version of customKeywordSource.protocolVersions) {
+  const customKeywordView = projectProtocolView(customKeywordSource, version);
+  const accountSchema = customKeywordView.tools[0].inputSchema.properties.account;
+  assert.equal(accountSchema['x-acme-account-id'], true);
+  assert.equal(accountSchema['database-field-id'], 123);
+  const resultSchema = customKeywordView.tools[0].outputSchema.properties.result;
+  assert.equal(resultSchema['x-acme-result-id'], true);
+  assert.equal(resultSchema['database-field-id'], 456);
+}
+const mergedCustomKeywords = mergeProtocolDescriptions(
+  customKeywordSource.protocolVersions.map((version) => projectProtocolView(customKeywordSource, version))
+);
+assert.equal(mergedCustomKeywords.tools[0].inputSchema.properties.account['x-acme-account-id'], true);
+assert.equal(mergedCustomKeywords.tools[0].inputSchema.properties.account['database-field-id'], 123);
+assert.equal(mergedCustomKeywords.tools[0].outputSchema.properties.result['x-acme-result-id'], true);
+assert.equal(mergedCustomKeywords.tools[0].outputSchema.properties.result['database-field-id'], 456);
+
+const componentCustomKeywords = toolSchemaDocument(['2026-07-28'], { $componentRef: '#/components/schemas/CustomInput' });
+componentCustomKeywords.components = {
+  schemas: {
+    CustomInput: {
+      type: 'object',
+      properties: {
+        account: { type: 'string', 'x-acme-account-id': true, 'database-field-id': 123 }
+      }
+    }
+  }
+};
+const resolvedCustomKeywords = resolveComponentReferences(componentCustomKeywords).document;
+assert.equal(resolvedCustomKeywords.tools[0].inputSchema.properties.account['x-acme-account-id'], true);
+assert.equal(resolvedCustomKeywords.tools[0].inputSchema.properties.account['database-field-id'], 123);
+
+const validMcpHeaderSchema = {
+  type: 'object',
+  properties: { region: { type: 'string', 'x-mcp-header': 'Region' } }
+};
+assert.deepEqual(errorCodes(toolSchemaDocument(['2026-07-28'], validMcpHeaderSchema)), []);
+
+const invalidMcpHeaderCases = [
+  [
+    'invalid token',
+    { type: 'object', properties: { region: { type: 'string', 'x-mcp-header': 'Invalid Header' } } },
+    'invalid-x-mcp-header'
+  ],
+  [
+    'invalid property type',
+    { type: 'object', properties: { region: { type: 'object', 'x-mcp-header': 'Region' } } },
+    'invalid-x-mcp-header'
+  ],
+  [
+    'not statically reachable',
+    { type: 'object', allOf: [{ properties: { region: { type: 'string', 'x-mcp-header': 'Region' } } }] },
+    'invalid-x-mcp-header'
+  ],
+  [
+    'case-insensitive duplicate',
+    {
+      type: 'object',
+      properties: {
+        region: { type: 'string', 'x-mcp-header': 'X-Region' },
+        fallback: { type: 'string', 'x-mcp-header': 'x-region' }
+      }
+    },
+    'duplicate-x-mcp-header'
+  ]
+];
+for (const [label, inputSchema, expectedCode] of invalidMcpHeaderCases) {
+  assert.ok(
+    errorCodes(toolSchemaDocument(['2026-07-28'], inputSchema)).includes(expectedCode),
+    `${label} must be rejected for MCP 2026-07-28`
+  );
+  assert.deepEqual(
+    errorCodes(toolSchemaDocument(['2025-11-25'], inputSchema)),
+    [],
+    `${label} must have no MCP-specific semantics for MCP 2025-11-25`
+  );
+  const multiProtocolCodes = errorCodes(toolSchemaDocument(['2025-11-25', '2026-07-28'], inputSchema));
+  assert.ok(multiProtocolCodes.includes(expectedCode), `${label} must still be rejected in the MCP 2026-07-28 view`);
+  assert.equal(multiProtocolCodes.includes('field-not-supported-by-version'), false);
+}
+
+const invalidDialect = toolSchemaDocument(['2025-11-25'], {
+  $schema: 'https://example.com/unsupported-dialect',
+  type: 'object'
+});
+assert.ok(errorCodes(invalidDialect).includes('unsupported-tool-schema-dialect'));
+
 const scoped = fixture('spec/draft/fixtures/expected-valid/protocol-scoped-primitives.json');
 const view2025 = projectProtocolView(scoped, '2025-11-25');
 const view2026 = projectProtocolView(scoped, '2026-07-28');

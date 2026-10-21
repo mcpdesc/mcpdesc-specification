@@ -18,6 +18,7 @@ When those sources disagree, the workflow controls CI triggering, `package.json`
 |---|---|---|
 | [`validate-repository.mjs`](validate-repository.mjs) | Invoked by both `npm test` and `npm run validate`; therefore also runs in repository CI. | See its module header for validation scope and [`package.json`](../package.json) for command composition. |
 | [`test-schema-publication.mjs`](test-schema-publication.mjs) | Invoked by `npm test` and `npm run test:publication`; therefore also runs in repository CI. | Exercises the schema-publication verifier with in-process HTTP responses and pure checks only; it never depends on the live mcpdesc.org endpoint. |
+| [`test-export-validator-snapshot.mjs`](test-export-validator-snapshot.mjs) | Invoked by `npm test`; therefore also runs in repository CI. | Exports a dated revision snapshot from a temporary tagged repository and verifies manifest digests, schema identity, runtime behavior, and fixtures. |
 | [`test-views.mjs`](test-views.mjs) | Invoked by `npm test`; therefore also runs in repository CI. | See its module header for the behaviors covered. |
 | [`normalize-schema.mjs`](normalize-schema.mjs) | Invoked explicitly with `npm run schema:normalize -- <schema.json> [...]`; release-candidate preparation uses the same formatter internally. | Recursively sorts object keys and writes two-space JSON with one trailing newline. Array order is preserved. |
 | [`schema-diff.mjs`](schema-diff.mjs) | Invoked explicitly with `npm run schema:diff -- <old-schema.json> <new-schema.json>`. | Separates root `$id`, `title`, and `description` annotation changes from validation-relevant changes and reports changed JSON Pointers. |
@@ -66,6 +67,7 @@ npm run release:prepare -- rc.1 2026-09-30
 npm run release:prepare -- editorial v0.8.0-rc.4 1 2026-10-02
 npm run release:prepare -- validator 0.8.0-rc.4 /tmp/mcpdesc-0.8.0-rc.4
 npm run release:prepare -- validator 0.8.0 /tmp/mcpdesc-0.8.0
+npm run release:prepare -- validator 0.8.0-rev.20261021 /tmp/mcpdesc-0.8.0-rev.20261021
 npm run release:prepare -- stable 0.9.0 2027-01-15
 
 npm run release:check -- draft
@@ -77,7 +79,7 @@ npm run release:check -- stable 0.8.0
 npm run release:check -- stable-publication 0.8.0
 ```
 
-Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a reviewable artifact copy from an exact tagged commit; consumer intake and release remain outside this repository. The currently untested stable preparation helper freezes `spec/draft/`, converts mechanical stable identities, updates status pointers, and retires the active draft. It deliberately does not write release prose, changelog content, proposal decisions, or public status pages. The stable publication check verifies the deployed canonical schema before tagging.
+Draft and release-candidate preparation update structured status, front matter, schema identity, active example and fixture schema references, and assembled output. Validator preparation exports a reviewable artifact copy from an exact tagged commit; a dated `x.y.z-rev.YYYYMMDD` selector reuses the stable version's schema identity and fixture location while recording distinct immutable runtime semantics. Consumer intake and release remain outside this repository. The currently untested stable preparation helper freezes `spec/draft/`, converts mechanical stable identities, updates status pointers, and retires the active draft. It deliberately does not write release prose, changelog content, proposal decisions, or public status pages. The stable publication check verifies the deployed canonical schema before tagging.
 
 Editorial-edition preparation records a positive edition iteration and immutable tag over an existing release-candidate or stable base tag. It does not change the conformance version, schema identity, schema pointers, validator selector, semantic validation behavior, or proposal provenance. Non-normative examples and fixtures may be corrected when they retain their declared purpose and remain consistent with the unchanged conformance rules. The editorial check compares protected conformance artifacts with the base tag and fails on any difference; `npm test` validates the corrected supporting material. Specification prose and supporting-artifact changes still require human review to establish that an edit is strictly editorial; automation cannot prove semantic equivalence.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Export an approved specification snapshot for manifest-verified validator intake.
-// Usage: node scripts/export-validator-snapshot.mjs <x.y.z|x.y.z-draft.n|x.y.z-rc.n> <output-directory>
+// Usage: node scripts/export-validator-snapshot.mjs <x.y.z|x.y.z-draft.n|x.y.z-rc.n|x.y.z-rev.YYYYMMDD> <output-directory>
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -17,8 +17,9 @@ function die(message) {
   process.exit(1);
 }
 
-if (!/^\d+\.\d+\.\d+(?:-(?:draft|rc)\.\d+)?$/.test(selector ?? '')) {
-  die('selector must use x.y.z, x.y.z-draft.n, or x.y.z-rc.n');
+const selectorMatch = /^(\d+\.\d+\.\d+)(?:(?:-(?:draft|rc)\.\d+)|(?:-rev\.\d{8}))?$/.exec(selector ?? '');
+if (!selectorMatch) {
+  die('selector must use x.y.z, x.y.z-draft.n, x.y.z-rc.n, or x.y.z-rev.YYYYMMDD');
 }
 if (!outputArgument) die('output directory is required');
 
@@ -51,14 +52,15 @@ const output = path.resolve(outputArgument);
 if (fs.existsSync(output)) die(`output already exists: ${output}`);
 const runtimeTarget = path.join(output, 'runtime');
 const fixtureTarget = path.join(output, 'fixtures');
-const version = selector.split(/-(?:draft|rc)\./)[0];
+const version = selectorMatch[1];
+const usesStableArtifacts = selector === version || selector.startsWith(`${version}-rev.`);
 const schemaSource = path.join(
   root,
   'schemas',
   'mcp-description',
   `${version}.json`,
 );
-const fixtureSource = path.join(root, 'spec', selector === version ? version : 'draft', 'fixtures');
+const fixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'fixtures');
 const baseSource = path.join(root, 'scripts', 'validator-base.mjs');
 for (const [source, label] of [
   [schemaSource, `schema for ${version}`],

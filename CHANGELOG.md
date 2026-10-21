@@ -2,6 +2,11 @@
 
 This changelog records repository governance, release-process, and project-tooling changes. Changes to the MCP Description format are recorded in the [versioned specification changelog](spec/0.8.0/CHANGELOG.md).
 
+## 2026-10-21
+
+- Corrected candidate validator semantics so MCP-specific JSON Schema annotations apply only to protocol revisions that define them, while unknown Tool-schema keywords remain preserved and governed by their JSON Schema dialect.
+- Added dated stable-revision validator snapshot selectors and manifest-verified export regression coverage.
+
 ## 2026-10-20
 
 - Distinguished deliberate `expected-warning` fixture diagnostics from other repository warnings in test output, and required exact diagnostic-code multiplicities for every warning fixture.
