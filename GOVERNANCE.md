@@ -120,7 +120,7 @@ If a review-stage proposal included in a snapshot is later rejected or withdrawn
 
 ### Published snapshot maintenance
 
-The **published conformance artifacts** for a snapshot are its normative requirements, canonical schema bytes and `$id`, semantic validation behavior, and proposal-revision provenance. Changing any of those artifacts requires a new public draft snapshot, release candidate, or stable specification release, as applicable. Existing specification tags remain immutable.
+The **published conformance artifacts** for a snapshot are its normative requirements, canonical schema bytes and `$id`, semantic validation behavior, and proposal-revision provenance. Changing any of those artifacts requires a new public draft snapshot, release candidate, or stable specification release, as applicable, except that a [validator revision](#validator-revision-selectors) may correct defective semantic validation behavior of a stable release. Existing specification tags remain immutable.
 
 Examples, conformance fixtures, serialization fixtures, changelogs, FAQs, guides, governance documents, and release-page prose are non-normative, maintainable supporting material. They may be corrected on `main` without publishing a new conformance snapshot when the correction does not alter normative requirements, schema acceptance, or semantic validation behavior. Corrected examples and fixtures MUST remain valid for their declared purpose and pass the repository test suite. Such corrections must not be presented as changing the meaning or behavior of an existing snapshot.
 
@@ -135,6 +135,20 @@ Strictly editorial corrections to specification prose MAY be published as an imm
 - MUST be reviewed as editorial and must link to a public issue or pull request explaining why meaning is unchanged.
 
 SemVer build metadata distinguishes immutable editorial editions but does not establish version precedence. Repository status metadata records the current editorial iteration for consumers that need ordering. A change to an RFC 2119/8174 requirement keyword, a conformance condition, or text whose effect is reasonably ambiguous is normative unless review establishes otherwise, and normally requires a new conformance snapshot instead of an editorial edition. Editorial-edition tags never move or replace their base tags.
+
+### Validator revision selectors
+
+A correctness defect in the semantic validation of a stable release MAY be corrected by a dated **validator revision** instead of a new specification version. A defect qualifies only when the validator contradicts the stable release's normative text, or a normative MCP source for a protocol revision that the release supports. Changes to MCP Description policy, normative text, or schema acceptance do not qualify and require a new specification version.
+
+A validator revision:
+
+- MUST use an annotated tag `v<version>-rev.<YYYYMMDD>` on an exact clean commit, and the corresponding validator selector `<version>-rev.<YYYYMMDD>`;
+- MUST retain the stable release's canonical schema bytes, `$id`, `mcpdesc` value, and normative text;
+- MAY change semantic validation behavior and conformance fixtures only as needed to correct the identified defects;
+- MUST record each correction, its normative source, and its regression fixtures in the repository changelog; and
+- MUST NOT replace the stable release or earlier revisions, which remain immutable selectors that consumers may continue to use.
+
+While a later specification version is in development on `main`, validator revisions and editorial editions of the stable release are prepared on a `release/<major>.<minor>.x` maintenance branch created from the latest tag of that release line. Corrections that also apply to the active draft are applied there separately.
 
 ### Specification artifact export
 
