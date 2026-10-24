@@ -1,0 +1,26 @@
+rules:
+  - id: mcpdesc.document.schema
+    owner: mcpdesc
+    summary: >-
+      A document validates against the JSON Schema for its declared mcpdesc
+      version. Used for structural failures not attributed to a more specific
+      rule.
+    surface: Document
+    kind: structural
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 16.1, item 7
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/missing-tool-input-schema.json
+      - expected-invalid/object-level-unknown-property.json
+    gaps:
+      - behavior: >-
+          Array indices in structural diagnostic paths are reported as strings
+          instead of numbers, unlike semantic diagnostic paths.
+        resolution: planned
+        reference: Candidate validator correction

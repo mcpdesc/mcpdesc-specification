@@ -32,6 +32,11 @@ Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-dra
 - Draft documents use `mcpdesc: 0.9.0`, and the draft schema [`schemas/mcp-description/0.9.0.json`](../../schemas/mcp-description/0.9.0.json) uses the prerelease identity `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`. Its validation rules are otherwise identical to 0.8.0.
 - Updated version-identity statements to 0.9.0; historical references to earlier versions are unchanged.
 
+### Validation rules (draft Proposal 0024; subject to review and possible incompatible change or removal)
+
+- Added a pilot validation rule registry: [`validation/rule.schema.json`](validation/rule.schema.json) and five rule records under [`validation/rules/`](validation/rules/), covering Tool `outputSchema` availability and object root, `x-mcp-header`, open Result properties, and document schema validation. The registry is non-normative until the proposal is accepted and does not change document conformance.
+- Added fixtures `expected-invalid/output-schema-before-2025-06-18.json` and `expected-valid/open-result-unknown-properties.json` for revision boundaries not covered before.
+
 ## [0.8.0+editorial.1] — 2026-10-19
 
 ### Documentation

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "output-schema-before-2025-06-18",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-03-26"
+  ],
+  "tools": [
+    {
+      "name": "early_output",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  ]
+}

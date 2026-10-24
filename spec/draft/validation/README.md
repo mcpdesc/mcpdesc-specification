@@ -6,9 +6,10 @@ Description 0.9.0 makes protocol alignment explicit: every MCP-related
 validation behavior should state who owns it, which MCP revisions it applies to,
 where it comes from, and how it is tested.
 
-Status: skeleton for the 0.9.0 working draft. The content is non-normative until
-a 0.9.0 proposal decides its normative role. Repository tooling does not consume
-it yet. Design background is tracked in
+Status: pilot for the 0.9.0 working draft, implementing draft
+[Proposal 0024](../../../proposals/0024-validation-rule-identity-and-provenance.md).
+The content is non-normative until that proposal is accepted. The candidate
+validator does not consume the registry yet. Design background is tracked in
 [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72).
 
 ## Layout
@@ -16,7 +17,8 @@ it yet. Design background is tracked in
 | Path | Content | Status |
 | --- | --- | --- |
 | [`mcp-revisions.md`](mcp-revisions.md) | Introductory guide to how MCP structures used by MCP Description differ across supported protocol revisions | Initial version |
-| `rules/` | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Planned |
+| [`rule.schema.json`](rule.schema.json) | JSON Schema for rule registry files | Pilot |
+| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: five rules; checked by `scripts/test-validation-rules.mjs` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas for supported revisions, with a provenance manifest (repository, path, commit, SHA-256, license) | Planned |
 
 The folder is part of the versioned specification: it is frozen with each
@@ -54,6 +56,7 @@ Each validation rule has a permanent identifier and a record:
 | `enforcement` | Internal check, official schema, or external validator |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
 | `fixtures` | Tests covering each revision boundary |
+| `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
 
 Rules are anchored to the MCP type, not to where MCP Description carries it.
 For example, one rule covers `Annotations.lastModified` wherever annotations

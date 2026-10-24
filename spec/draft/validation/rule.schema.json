@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MCP Description validation rule registry file",
+  "description": "Structure of each YAML file under validation/rules/. See Proposal 0024 and validation/README.md.",
+  "type": "object",
+  "required": [
+    "rules"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/rule"
+      }
+    }
+  },
+  "$defs": {
+    "revision": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "rule": {
+      "type": "object",
+      "required": [
+        "id",
+        "owner",
+        "summary",
+        "surface",
+        "kind",
+        "sources",
+        "diagnostics",
+        "enforcement",
+        "status",
+        "fixtures"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(mcp|mcpdesc|json-schema)(\\.[a-z0-9]+(-[a-z0-9]+)*)+$"
+        },
+        "owner": {
+          "enum": [
+            "mcp",
+            "mcpdesc",
+            "json-schema"
+          ]
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "surface": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "enum": [
+            "structural",
+            "semantic",
+            "preservation",
+            "embedded-standard",
+            "mcpdesc-semantic",
+            "completeness",
+            "interoperability"
+          ]
+        },
+        "applicability": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/revision"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "tier",
+              "reference"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "tier": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 8
+              },
+              "reference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "code",
+              "severity"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "code": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+              },
+              "severity": {
+                "enum": [
+                  "error",
+                  "warning"
+                ]
+              }
+            }
+          }
+        },
+        "enforcement": {
+          "enum": [
+            "internal",
+            "official-schema",
+            "external"
+          ]
+        },
+        "status": {
+          "enum": [
+            "internal",
+            "externally-verified",
+            "delegated",
+            "arbitrated",
+            "retired"
+          ]
+        },
+        "fixtures": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)$"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        },
+        "gaps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "behavior",
+              "resolution"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "revisions": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/$defs/revision"
+                }
+              },
+              "behavior": {
+                "type": "string",
+                "minLength": 1
+              },
+              "resolution": {
+                "enum": [
+                  "not-fixed",
+                  "planned"
+                ]
+              },
+              "reference": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "arbitrations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "revisions",
+              "conflict",
+              "authority",
+              "behavior",
+              "rationale",
+              "reviewTrigger",
+              "status"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "revisions": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "$ref": "#/$defs/revision"
+                }
+              },
+              "conflict": {
+                "type": "string",
+                "minLength": 1
+              },
+              "authority": {
+                "type": "string",
+                "minLength": 1
+              },
+              "behavior": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1
+              },
+              "upstream": {
+                "type": "string",
+                "minLength": 1
+              },
+              "reviewTrigger": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "active",
+                  "retired"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

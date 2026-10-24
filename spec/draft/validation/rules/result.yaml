@@ -1,0 +1,36 @@
+rules:
+  - id: mcp.result.additional-properties.preserve
+    owner: mcp
+    summary: >-
+      A carried MCP result may contain properties its revision does not define;
+      they are preserved without assigned semantics.
+    surface: Result
+    kind: preservation
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 3
+        reference: MCP 2024-11-05 through 2026-07-28 schemas, Result (additionalProperties allows any value)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.3 (completed Tool Result shape)
+    diagnostics: []
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-valid/open-result-unknown-properties.json
+    gaps:
+      - revisions: ["2025-06-18", "2025-11-25"]
+        behavior: >-
+          Tool, Prompt, and completion examples reject resultType before MCP
+          2026-07-28, and Resource examples also reject ttlMs and cacheScope.
+          Sections 9.3, 10.4, 11.3, and 11.4 require this today, although the
+          open MCP Result accepts these properties.
+        resolution: planned
+        reference: Native openness proposal under issue #72
+      - revisions: ["2024-11-05", "2025-03-26"]
+        behavior: Same restriction as above.
+        resolution: not-fixed

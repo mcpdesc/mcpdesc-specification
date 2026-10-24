@@ -1,0 +1,105 @@
+rules:
+  - id: mcpdesc.tool.output-schema.revision-availability
+    owner: mcpdesc
+    summary: A Tool declares outputSchema only for MCP revisions that define Tool.outputSchema.
+    surface: Tool
+    path: outputSchema
+    kind: mcpdesc-semantic
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": not-applicable
+      "2025-11-25": not-applicable
+      "2026-07-28": not-applicable
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table, outputSchema since MCP 2025-06-18)
+      - tier: 3
+        reference: MCP 2025-03-26 schema, #/definitions/Tool (no outputSchema property)
+      - tier: 3
+        reference: MCP 2025-06-18 schema, #/definitions/Tool/properties/outputSchema
+    diagnostics:
+      - code: field-not-supported-by-version
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/output-schema-before-2025-06-18.json
+    notes: >-
+      Owned by MCP Description, not MCP: the official Tool schemas do not
+      restrict additional properties, so MCP itself does not reject the field in
+      earlier revisions. Whether MCP Description keeps this restriction is a
+      question for the native openness proposal under issue #72.
+
+  - id: mcp.tool.output-schema.object-root
+    owner: mcp
+    summary: A Tool outputSchema has an object-typed root.
+    surface: Tool
+    path: outputSchema
+    kind: structural
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": not-applicable
+    sources:
+      - tier: 3
+        reference: MCP 2025-06-18 schema, #/definitions/Tool/properties/outputSchema (type const object, required)
+      - tier: 3
+        reference: MCP 2025-11-25 schema, #/$defs/Tool/properties/outputSchema (type const object, required)
+      - tier: 3
+        reference: MCP 2026-07-28 schema, #/$defs/Tool/properties/outputSchema (no root type constraint)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.2
+    diagnostics:
+      - code: field-not-supported-by-version
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/non-object-output-schema-before-2026.json
+      - expected-valid/protocol-coverage-and-tool-schemas.json
+    gaps:
+      - revisions: ["2024-11-05", "2025-03-26"]
+        behavior: >-
+          The object-root check also runs where outputSchema is not defined, so a
+          non-object outputSchema reports this error in addition to the
+          revision-availability error.
+        resolution: not-fixed
+
+  - id: mcp.tool.input-schema.x-mcp-header
+    owner: mcp
+    summary: >-
+      An x-mcp-header annotation is a non-empty HTTP field-name token on a
+      boolean, integer, or string property reachable from the input schema root
+      through properties only, and is unique case-insensitively within the Tool.
+    surface: Tool
+    path: inputSchema properties x-mcp-header
+    kind: semantic
+    applicability:
+      "2024-11-05": opaque
+      "2025-03-26": opaque
+      "2025-06-18": opaque
+      "2025-11-25": opaque
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2026-07-28 specification, Streamable HTTP transport, x-mcp-header validity and extraction rules
+      - tier: 3
+        reference: MCP 2026-07-28 schema, #/$defs/Tool/properties/inputSchema (description)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.2
+    diagnostics:
+      - code: invalid-x-mcp-header
+        severity: error
+      - code: duplicate-x-mcp-header
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-valid/revision-inapplicable-mcp-header.json
+      - expected-valid/custom-tool-schema-keywords.json
+      - expected-invalid/invalid-mcp-header-value.json
+      - expected-invalid/invalid-mcp-header-placement.json
+      - expected-invalid/duplicate-mcp-header.json
