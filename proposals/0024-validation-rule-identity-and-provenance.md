@@ -74,7 +74,6 @@ Tool schemas. Today that knowledge is implicit in validator code.
   treated; see the planned openness proposal under issue #72.
 - Delegating rules to external validators.
 - A declarative rule language, rule engine, or code generation.
-- Adopting an external ruleset format, such as OpenLint, as the canonical model.
 
 ## Background and primary references
 
@@ -87,8 +86,6 @@ Tool schemas. Today that knowledge is implicit in validator code.
   `path`, as published by `@mcpdesc/validator`.
 - `spec/draft/validation/README.md`, which introduces the ownership model and
   folder layout this proposal makes normative.
-- OpenLint draft specification, as related work on ruleset vocabulary:
-  https://openlint.org/blog/2026/10/22/draft-specification-ready-for-feedback/
 
 ## Proposed normative behavior
 
@@ -146,6 +143,7 @@ Each rule record contains:
 | `status` | yes | `internal`, `externally-verified`, `delegated`, `arbitrated`, or `retired` |
 | `fixtures` | yes | Repository fixtures that demonstrate the rule, including each revision boundary |
 | `arbitrations` | no | Arbitration records (Section 6) |
+| `gaps` | no | Known differences between the rule and current validator behavior that are deliberately not corrected, each with the affected revisions (Section 4.1) |
 
 `id`, `owner`, `kind`, `applicability`, and diagnostic severities are
 normative. The remaining fields are informative. If a rule record and the
@@ -172,6 +170,23 @@ The rules applicable to one Effective Protocol View form the ruleset
 `mcpdesc.mcp.<revision>`, for example `mcpdesc.mcp.2026-07-28`. Rules owned by
 MCP Description form `mcpdesc.core`. Rulesets are derived from applicability and
 are not separately maintained.
+
+### 4.1 Revision support tiers
+
+Rules are inventoried for every supported MCP revision, but the depth of
+correction and the validation approach depend on the revision's tier:
+
+| Tier | MCP revisions | Inventory | Corrections | Validation approach |
+| --- | --- | --- | --- | --- |
+| Active | `2025-11-25`, `2026-07-28` | Complete | Applied | Rule-driven validation, extended by later 0.9.0 proposals |
+| Maintained | `2025-06-18` | Complete | Applied | Existing validator logic |
+| Historical | `2024-11-05`, `2025-03-26` | Complete | Not applied; recorded as `gaps` | Existing validator logic |
+
+A gap records a known difference between a rule and current validator behavior
+for historical revisions. Recording a gap does not change validator behavior.
+If keeping the existing logic for historical revisions becomes too costly,
+those revisions move to the rule-driven approach after the active tier is
+complete.
 
 ### 5. Diagnostics
 
@@ -284,8 +299,14 @@ code is why diagnostics need the `rule` property.
 The record states the intended applicability. The current candidate validator
 also applies the object-root check to MCP 2024-11-05 and 2025-03-26, so a
 non-object `outputSchema` in those revisions produces both the availability
-error and a redundant object-root error. Recording applicability per rule is
-what makes such gaps visible; the inventory classifies and corrects them.
+error and a redundant object-root error. Both are historical revisions, so this
+is recorded as a gap rather than corrected:
+
+```yaml
+gaps:
+  - revisions: [2024-11-05, 2025-03-26]
+    behavior: The object-root error is also reported, in addition to the availability error.
+```
 
 ### Revision-sensitive semantics
 
@@ -380,13 +401,6 @@ Deferred. The immediate need is traceability. A rule language is worth
 considering only if repeated implementation experience shows that it reduces
 complexity.
 
-### Adopt OpenLint as the canonical rule vocabulary
-
-Rejected for now. The OpenLint draft models names, severities, JSONPath
-targets, and functions, but not owner, revision applicability, provenance, or
-arbitration. Rule records should stay exportable to OpenLint where they map
-cleanly.
-
 ### Keep the registry in the validator package
 
 Rejected. Rules derive from normative text, which this repository owns. The
@@ -399,15 +413,25 @@ the diagnostic's path and context.
 
 ## Open questions
 
-1. Should the informative record fields (`sources`, `enforcement`, `status`,
-   `fixtures`) also be normative, or remain maintained metadata?
-2. Is a single fallback rule for unattributed JSON Schema failures sufficient,
-   or should structural failures be attributed per object?
-3. Should validators expose the outcome directly, or should consumers derive it
-   from diagnostics and the registry?
-4. How deeply should rules for the historical revisions 2024-11-05, 2025-03-26,
-   and 2025-06-18 be inventoried beyond existing behavior?
-5. When should an OpenLint export be prototyped?
+The following questions are deferred to implementation, where the pilot and
+inventory will provide the evidence to answer them:
+
+1. **Which record fields are part of the specification.** This proposal makes
+   `id`, `owner`, `kind`, `applicability`, and severities binding; `sources`,
+   `enforcement`, `status`, and `fixtures` are maintained notes that can be
+   corrected at any time. Should some of the notes also become binding?
+2. **How JSON Schema failures are labeled.** When a document fails the JSON
+   Schema, the validator knows only which schema keyword failed and where.
+   This proposal labels all such failures with one catch-all rule,
+   `mcpdesc.document.schema`. Should they instead be labeled with finer rules,
+   for example one per object type?
+3. **Who computes the outcome.** Either the validator returns the outcome
+   (`valid`, `valid-with-warnings`, `incomplete`, or `invalid`) with its
+   diagnostics, or each consumer computes it from the diagnostics and the
+   registry. To be decided with the validator package.
+
+Resolved: rules are inventoried for all supported revisions, and corrections
+are limited to MCP 2025-06-18 and later (Section 4.1).
 
 ## Implementation and validation plan
 
@@ -418,7 +442,9 @@ the diagnostic's path and context.
    one availability rule behind `field-not-supported-by-version`, and
    `mcpdesc.document.schema`. Confirm the record format before continuing.
 3. Inventory the remaining Tool rules and the rules for Results carried in Tool,
-   Prompt, and Resource examples, then the other surfaces.
+   Prompt, and Resource examples, then the other surfaces, for all supported
+   revisions. Correct defects for MCP 2025-06-18 and later; record defects for
+   earlier revisions as gaps.
 4. Add a registry consistency test: every code the candidate validator can emit
    belongs to at least one rule, every listed fixture exists, every `mcp` rule
    cites a tier 1 to 3 source, and identifiers are unique and well formed.
