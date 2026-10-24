@@ -279,7 +279,7 @@ The root `$schema` property remains optional. When present, it SHOULD identify t
 
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution.
 
-The `$schema` value does not change the MCP Description conformance version: Community Working Draft 1 documents remain `mcpdesc: 0.9.0`.
+The `$schema` value does not change the MCP Description conformance version: community working draft documents remain `mcpdesc: 0.9.0`.
 
 ```yaml
 $schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json
@@ -1856,7 +1856,7 @@ String values MUST be valid JSON strings after decoding. URI values MUST conform
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For 0.9.0 Community Working Draft 1, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
+For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
 
 ```yaml
 $schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json
@@ -2031,7 +2031,7 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.9.0.json](../../schemas/mcp-description/0.9.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json` for the Community Working Draft 1 canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json` for the current community working draft canonical schema resource
 - `https://mcpdesc.org/schema/mcp-description/0.9.0.json` for the stable 0.9.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.

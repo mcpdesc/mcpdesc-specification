@@ -33,7 +33,7 @@ The root `$schema` property remains optional. When present, it SHOULD identify t
 
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution.
 
-The `$schema` value does not change the MCP Description conformance version: Community Working Draft 1 documents remain `mcpdesc: 0.9.0`.
+The `$schema` value does not change the MCP Description conformance version: community working draft documents remain `mcpdesc: 0.9.0`.
 
 ```yaml
 $schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json
