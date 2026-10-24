@@ -652,6 +652,11 @@ assert.ok(invalidResolutionCodes.includes('component-reference-cycle'));
 
 const invalidComponentSchemas = fixture('spec/draft/fixtures/expected-invalid/component-contextual-schemas.json');
 assert.ok(validateDocument(invalidComponentSchemas).some((diagnostic) => diagnostic.code === 'schema-validation'));
+assert.deepEqual(
+  validateDocument(fixture('spec/draft/fixtures/expected-invalid/object-level-unknown-property.json'))
+    .find((diagnostic) => diagnostic.code === 'schema-validation')?.path,
+  ['tools', 0, 'acmeRisk']
+);
 const invalidComponentExamples = fixture('spec/draft/fixtures/expected-invalid/component-contextual-examples.json');
 const referencedExampleDiagnostics = semanticValidateDocument(invalidComponentExamples);
 assert.ok(referencedExampleDiagnostics.some(

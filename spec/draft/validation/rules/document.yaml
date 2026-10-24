@@ -18,9 +18,3 @@ rules:
     fixtures:
       - expected-invalid/missing-tool-input-schema.json
       - expected-invalid/object-level-unknown-property.json
-    gaps:
-      - behavior: >-
-          Array indices in structural diagnostic paths are reported as strings
-          instead of numbers, unlike semantic diagnostic paths.
-        resolution: planned
-        reference: Candidate validator correction

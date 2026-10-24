@@ -37,6 +37,10 @@ Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-dra
 - Added a pilot validation rule registry: [`validation/rule.schema.json`](validation/rule.schema.json) and five rule records under [`validation/rules/`](validation/rules/), covering Tool `outputSchema` availability and object root, `x-mcp-header`, open Result properties, and document schema validation. The registry is non-normative until the proposal is accepted and does not change document conformance.
 - Added fixtures `expected-invalid/output-schema-before-2025-06-18.json` and `expected-valid/open-result-unknown-properties.json` for revision boundaries not covered before.
 
+### Validator corrections
+
+- Structural (`schema-validation`) diagnostic paths report array indices as numbers, consistent with semantic diagnostic paths. Previously, indices below the document root were reported as strings, for example `["tools", "0", "inputSchema"]`.
+
 ## [0.8.0+editorial.1] — 2026-10-19
 
 ### Documentation

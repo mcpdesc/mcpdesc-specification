@@ -180,15 +180,20 @@ export function resolveComponentReferences(document, rel = 'document') {
 }
 
 function structuralPath(document, error) {
-  const path = error.instancePath
+  const segments = error.instancePath
     ? error.instancePath.slice(1).split('/').map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'))
     : [];
   if (error.keyword === 'required' && typeof error.params.missingProperty === 'string') {
-    path.push(error.params.missingProperty);
+    segments.push(error.params.missingProperty);
   } else if (error.keyword === 'additionalProperties' && typeof error.params.additionalProperty === 'string') {
-    path.push(error.params.additionalProperty);
+    segments.push(error.params.additionalProperty);
   }
-  return path.map((segment) => Array.isArray(document) && /^(?:0|[1-9][0-9]*)$/.test(segment) ? Number(segment) : segment);
+  let node = document;
+  return segments.map((segment) => {
+    const index = Array.isArray(node) && /^(?:0|[1-9][0-9]*)$/.test(segment) ? Number(segment) : segment;
+    node = node !== null && typeof node === 'object' ? node[index] : undefined;
+    return index;
+  });
 }
 
 function structuralDiagnostics(document) {
