@@ -10,7 +10,7 @@ Maintain a precise, portable, machine-readable description format for MCP server
 
 - v0.8.0 is the current stable release in this repository.
 - v0.7.0 remains frozen; its canonical source remains Cisco Open.
-- No active draft exists until work on the next version is explicitly initialized.
+- v0.9.0 is the active community working draft in `spec/draft/`; its schema is `schemas/mcp-description/0.9.0.json`.
 - `schemas/latest.json` identifies the current stable release and MUST NOT point to draft or prerelease content.
 - No CLA, copyright assignment, or DCO is required.
 - Preserve copyright, licensing, attribution, origin, and modification records.

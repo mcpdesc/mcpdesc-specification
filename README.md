@@ -8,6 +8,7 @@ A portable, machine-readable contract format for describing Model Context Protoc
 
 | Version | Status | Canonical source |
 |---|---|---|
+| 0.9.0 | Community Working Draft 1 (`v0.9.0-draft.1`; unreleased) | [`spec/draft/`](spec/draft/) |
 | 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) |
 | 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
 
@@ -20,7 +21,7 @@ MCP Description 0.8.0 adds MCP `2026-07-28` support, multi-revision server descr
 - `main` is the integration branch and the default view of the project. It carries every released specification version and, when development is active, the in-progress `spec/draft/`.
 - Feature branches target `main` via pull request. When an active development version has been initialized, normative feature branches change `spec/draft/`.
 - Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`).
-- `schemas/latest.json` identifies the current stable schema. No active draft is present until development of the next version begins.
+- `schemas/latest.json` identifies the current stable schema. The active 0.9.0 working draft is described by `schemas/draft.json` and `specification-status.json`.
 
 ## Project identity
 

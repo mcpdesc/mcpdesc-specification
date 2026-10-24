@@ -5,7 +5,7 @@ import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { UriTemplateMatcher } from 'uri-template-matcher';
-import schema from '../schemas/mcp-description/0.8.0.json' with { type: 'json' };
+import schema from '../schemas/mcp-description/0.9.0.json' with { type: 'json' };
 import {
   mcpExtensionCatalogue,
   mcpExtensionMaturity,
