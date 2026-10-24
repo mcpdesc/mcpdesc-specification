@@ -1,8 +1,8 @@
 // Validate the repository as a synchronized specification distribution.
 //
 // This executable checks required files and lifecycle invariants, compiles each
-// versioned JSON Schema with its declared dialect, validates draft examples and
-// fixtures, runs the v0.8.0 semantic rules, and detects assembled-spec drift.
+// versioned JSON Schema with its declared dialect, validates candidate examples
+// and fixtures, runs the candidate semantic rules, and detects assembled-spec drift.
 // It is the repository-validation half of `npm test`; projection and merge
 // behavior is exercised separately by `scripts/test-views.mjs`.
 
@@ -16,7 +16,8 @@ import addFormats from 'ajv-formats';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { assembleSpecification } from './draft-assembly.mjs';
 import { canonicalizeJsonSource } from './canonical-json.mjs';
-import { validateMcpdesc08Document } from './validate-0.8.mjs';
+import { candidateSpecification } from './candidate-specification.mjs';
+import { validateDocument } from './validate-document.mjs';
 
 function createValidatorForDialect(dialect) {
   const Factory = dialect === '2020-12' ? Ajv2020 : Ajv;
@@ -82,8 +83,9 @@ const expectedWarningCodesByFixture = new Map([
   ['unresolved-external-tool-ref.json', ['unresolved-external-tool-schema-reference']]
 ]);
 const seenExpectedWarningFixtures = new Set();
-const specificationDirectory = fs.existsSync(path.join(root, 'spec', 'draft')) ? 'draft' : '0.8.0';
-const specificationRoot = `spec/${specificationDirectory}`;
+const candidate = candidateSpecification(root);
+const specificationDirectory = candidate.directory;
+const specificationRoot = candidate.specificationRoot;
 const requiredFiles = [
   'README.md',
   'LICENSE',
@@ -94,9 +96,19 @@ const requiredFiles = [
   'specification-status.json',
   'schemas/latest.json',
   'schemas/mcp-description/0.7.0.json',
-  'schemas/mcp-description/0.8.0.json',
+  `schemas/mcp-description/${candidate.stableVersion}.json`,
+  candidate.schemaPath,
   `${specificationRoot}/mcp-description.md`
 ];
+
+function compareVersions(left, right) {
+  const parse = (value) => String(value ?? '').split('.').map(Number);
+  const [a, b] = [parse(left), parse(right)];
+  for (let index = 0; index < 3; index += 1) {
+    if ((a[index] ?? 0) !== (b[index] ?? 0)) return (a[index] ?? 0) - (b[index] ?? 0);
+  }
+  return 0;
+}
 
 function fail(message) {
   errors.push(message);
@@ -106,8 +118,8 @@ function warn(message) {
   warnings.push(message);
 }
 
-function validateDraftDocument(document) {
-  return validateMcpdesc08Document(document);
+function validateCandidateDocument(document) {
+  return validateDocument(document);
 }
 
 function reportDiagnostic(rel, diagnostic) {
@@ -166,9 +178,10 @@ if (fs.existsSync(sectionDir) && fs.existsSync(path.join(root, specificationRoot
 
 const status = readJson('specification-status.json');
 const latest = readJson('schemas/latest.json');
-const hasActiveDraft = specificationDirectory === 'draft';
+const hasActiveDraft = candidate.isDraft;
+if (hasActiveDraft !== fs.existsSync(path.join(root, 'spec', 'draft'))) fail('spec/draft must exist exactly when specification-status.json identifies an active draft');
 if (status && latest && status.stable?.version !== latest['mcp-description']) fail('stable status must match schemas/latest.json');
-if (hasActiveDraft && status && status.draft?.version !== '0.8.0') fail('draft status must identify 0.8.0');
+if (hasActiveDraft && status && compareVersions(status.draft?.version, status.stable?.version) <= 0) fail('draft status must identify a version later than the stable release');
 if (hasActiveDraft && status && !Number.isInteger(status.draft?.iteration)) fail('draft status iteration must be an integer');
 if (hasActiveDraft && status && !['community-working-draft', 'release-candidate'].includes(status.draft?.status)) fail('draft status must identify a community working draft or release candidate');
 if (hasActiveDraft && status) {
@@ -180,17 +193,17 @@ if (hasActiveDraft && status) {
 if (hasActiveDraft && status && !/^\d{4}-\d{2}-\d{2}$/.test(status.draft?.snapshotDate ?? '')) fail('draft status snapshot date must use YYYY-MM-DD');
 if (hasActiveDraft && status && status.draft?.released !== false) fail('active draft must remain unreleased');
 if (!hasActiveDraft && status?.draft) fail('specification-status.json must not identify an active draft when spec/draft is absent');
-if (!hasActiveDraft && status?.stable?.version !== '0.8.0') fail('retired draft state requires stable 0.8.0');
-if (!hasActiveDraft && latest?.['mcp-description'] !== '0.8.0') fail('retired draft state requires schemas/latest.json to identify 0.8.0');
+if (!hasActiveDraft && fs.existsSync(path.join(root, 'schemas/draft.json'))) fail('schemas/draft.json must be retired when no draft is active');
 
 if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
   const draft = readJson('schemas/draft.json');
   const activeDraftSchema = draft?.schema ? readJson(draft.schema) : null;
-  if (draft && draft['mcp-description'] !== '0.8.0') fail('schemas/draft.json must identify draft 0.8.0');
+  if (draft && draft['mcp-description'] !== status?.draft?.version) fail('schemas/draft.json must identify the active draft version');
+  if (draft && draft.schema !== candidate.schemaPath) fail(`schemas/draft.json schema must be ${candidate.schemaPath}`);
   if (draft && draft.iteration !== status?.draft?.iteration) fail('schemas/draft.json iteration must match specification-status.json');
   if (draft && draft.snapshotTag !== status?.draft?.snapshotTag) fail('schemas/draft.json snapshotTag must match specification-status.json');
   if (draft && draft.snapshotDate !== status?.draft?.snapshotDate) fail('schemas/draft.json snapshotDate must match specification-status.json');
-  if (draft && draft.released !== false) fail('schemas/draft.json must remain unreleased while v0.8.0 is a draft');
+  if (draft && draft.released !== false) fail('schemas/draft.json must remain unreleased while its version is a draft');
   if (draft && draft.branch !== status?.draft?.branch) fail('schemas/draft.json branch must match specification-status.json');
   if (draft && draft.status !== status?.draft?.status) fail('schemas/draft.json status must match specification-status.json');
   if (draft && draft.schemaId !== `https://mcpdesc.org/schema/mcp-description/${draft.snapshotTag?.slice(1)}.json`) fail('schemas/draft.json must record the canonical prerelease schema ID');
@@ -199,7 +212,7 @@ if (fs.existsSync(path.join(root, 'schemas/draft.json'))) {
   if (draft && latest && draft['mcp-description'] === latest['mcp-description']) fail('schemas/draft.json must not equal the released schemas/latest.json version');
 }
 
-const proposalSnapshots = [
+const releasedProposalSnapshots = [
   ['0001-mcp-2026-07-28-alignment.md', 'c7328e6c9ee858f712248d2003d8587da4933cd9', 'proposals/0001-mcp-2026-07-28-alignment.md', '9713db4d1c8583c9480a5597c8f4500b804f00ddb4c957c2a710821b4d83a02a'],
   ['0002-meta-support.md', 'c1301cb60f7edc740a937b551e9c0c4e6467d943', 'proposals/0002-meta-support.md', '42b39d056019d26a304929fc5bca68d8c72f01d2340ee3aebbc4d1a041a35adc'],
   ['0003-security-requirements.md', '199555ade2b13eb179c0a473712027582441158b', 'proposals/0003-security-requirements.md', 'fcba623df2b345d8a060ab9a265949dbcf795f0b17651e8fccd4cb7c0d17150d'],
@@ -219,32 +232,38 @@ const proposalSnapshots = [
   ['0021-pre-standard-extension-capabilities.md', 'bd1b6e53b1d44fb5177478ffefa32a466cfb1de4', 'proposals/0021-pre-standard-extension-capabilities.md', '4355bf4aee9e89a1681a337a5dacd9b3f6ed23d4d7bc430f05f9e413f57b64cc'],
   ['0022-protocol-independent-info-metadata.md', '87b2d493cfa87a9cbea8148ae1f6638bd1aae786', 'proposals/0022-protocol-independent-info-metadata.md', '45c66ad65bbdae67c0afea416e025ddb1ce3dd4125306b40742fb6f887824785']
 ];
-const proposalManifestPath = `${specificationRoot}/PROPOSALS.md`;
-const proposalManifest = fs.existsSync(path.join(root, proposalManifestPath)) ? readText(proposalManifestPath) : '';
-if (!proposalManifest) fail(`missing required file: ${proposalManifestPath}`);
-for (const [filename, commit, sourcePath, expectedDigest] of proposalSnapshots) {
-  const rel = `${specificationRoot}/proposal-snapshots/${filename}`;
-  const full = path.join(root, rel);
-  if (!fs.existsSync(full)) {
-    fail(`missing proposal snapshot: ${rel}`);
-    continue;
-  }
-  const digest = createHash('sha256').update(fs.readFileSync(full)).digest('hex');
-  if (digest !== expectedDigest) fail(`${rel}: SHA-256 differs from recorded proposal revision`);
-  for (const provenanceValue of [filename, commit, sourcePath, expectedDigest]) {
-    if (!proposalManifest.includes(provenanceValue)) fail(`${proposalManifestPath}: missing provenance value ${provenanceValue}`);
+// Proposal revisions captured for the active draft: [file, commit, source path, SHA-256].
+const draftProposalSnapshots = [];
+
+function checkProposalSnapshots(specificationPath, snapshots) {
+  const manifestPath = `${specificationPath}/PROPOSALS.md`;
+  const manifest = fs.existsSync(path.join(root, manifestPath)) ? readText(manifestPath) : '';
+  if (!manifest) fail(`missing required file: ${manifestPath}`);
+  for (const [filename, commit, sourcePath, expectedDigest] of snapshots) {
+    const rel = `${specificationPath}/proposal-snapshots/${filename}`;
+    const full = path.join(root, rel);
+    if (!fs.existsSync(full)) {
+      fail(`missing proposal snapshot: ${rel}`);
+      continue;
+    }
+    const digest = createHash('sha256').update(fs.readFileSync(full)).digest('hex');
+    if (digest !== expectedDigest) fail(`${rel}: SHA-256 differs from recorded proposal revision`);
+    for (const provenanceValue of [filename, commit, sourcePath, expectedDigest]) {
+      if (!manifest.includes(provenanceValue)) fail(`${manifestPath}: missing provenance value ${provenanceValue}`);
+    }
   }
 }
 
-if (!hasActiveDraft) {
-  for (const [filename] of proposalSnapshots) {
-    if (filename === '0008-primitive-provenance.md') continue;
-    const rel = `proposals/${filename}`;
-    if (!fs.existsSync(path.join(root, rel))) {
-      fail(`missing implemented proposal record: ${rel}`);
-    } else if (!readText(rel).includes('- Status: Implemented')) {
-      fail(`${rel}: stable proposal record must have Implemented status`);
-    }
+checkProposalSnapshots('spec/0.8.0', releasedProposalSnapshots);
+if (hasActiveDraft) checkProposalSnapshots(specificationRoot, draftProposalSnapshots);
+
+for (const [filename] of releasedProposalSnapshots) {
+  if (filename === '0008-primitive-provenance.md') continue;
+  const rel = `proposals/${filename}`;
+  if (!fs.existsSync(path.join(root, rel))) {
+    fail(`missing implemented proposal record: ${rel}`);
+  } else if (!readText(rel).includes('- Status: Implemented')) {
+    fail(`${rel}: stable proposal record must have Implemented status`);
   }
 }
 
@@ -256,7 +275,7 @@ if (fs.existsSync(schemaDir)) {
     const source = readText(rel);
     const schema = readJson(rel);
     if (!schema) continue;
-    if (filename === '0.8.0.json' && source !== canonicalizeJsonSource(source)) {
+    if (filename === `${candidate.version}.json` && source !== canonicalizeJsonSource(source)) {
       fail(`${rel}: schema must use canonical object-key ordering, 2-space indentation, and one trailing newline`);
     }
     const ajv = ajvByDialect[dialectFor(schema)];
@@ -274,8 +293,7 @@ const specRoot = path.join(root, 'spec');
 const exampleFiles = walk(specRoot).filter(
   (file) => {
     const relative = path.relative(specRoot, file);
-    return !relative.startsWith(`draft${path.sep}materials${path.sep}`)
-      && /(^|[\\/])examples[\\/]/.test(relative)
+    return /(^|[\\/])examples[\\/]/.test(relative)
       && /\.(json|ya?ml)$/i.test(file);
   }
 );
@@ -304,8 +322,8 @@ for (const full of exampleFiles) {
     continue;
   }
   for (const error of validateAgainstVersionedSchema(document, rel)) fail(error);
-  if (document?.mcpdesc === '0.8.0') {
-    const diagnostics = validateDraftDocument(document);
+  if (document?.mcpdesc === candidate.version) {
+    const diagnostics = validateCandidateDocument(document);
     for (const diagnostic of diagnostics) {
       if (diagnostic.severity === 'error') fail(reportDiagnostic(rel, diagnostic));
       if (diagnostic.severity === 'warning') warn(reportDiagnostic(rel, diagnostic));
@@ -330,7 +348,7 @@ for (const [group, expectsErrors, expectsWarnings] of fixtureGroups) {
     }
 
     const schemaErrors = validateAgainstVersionedSchema(document, rel);
-    const semanticDiagnostics = document?.mcpdesc === '0.8.0' ? validateDraftDocument(document) : [];
+    const semanticDiagnostics = document?.mcpdesc === candidate.version ? validateCandidateDocument(document) : [];
     const semanticErrors = semanticDiagnostics
       .filter((diagnostic) => diagnostic.severity === 'error')
       .map((diagnostic) => reportDiagnostic(rel, diagnostic));

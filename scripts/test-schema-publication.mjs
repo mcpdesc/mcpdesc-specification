@@ -7,9 +7,10 @@ import {
   analyzeSchemaPublication,
   verifySchemaPublication
 } from './schema-publication.mjs';
+import { candidateSpecification } from './candidate-specification.mjs';
 
 const root = process.cwd();
-const schemaPath = path.join(root, 'schemas', 'mcp-description', '0.8.0.json');
+const schemaPath = path.join(root, candidateSpecification(root).schemaPath);
 const expectedBytes = fs.readFileSync(schemaPath);
 const expectedSchema = JSON.parse(expectedBytes.toString('utf8'));
 const requestedUrl = String(expectedSchema.$id);

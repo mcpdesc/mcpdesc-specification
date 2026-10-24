@@ -1,5 +1,5 @@
-// Validate the current 0.8.0 working tree by layering draft additions over
-// immutable snapshot base semantics.
+// Validate documents for the candidate specification version in this working
+// tree by layering current semantics over the shared validator base.
 
 import Ajv from 'ajv';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -16,6 +16,7 @@ import {
 export { mcpExtensionCatalogue, mcpExtensionMaturity, supportedProtocolVersions };
 
 const TOOL_INTERACTION_SENTINEL = '__interaction_example__';
+const specificationVersion = schema.properties.mcpdesc.const;
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
 const ajvDraft7 = new Ajv({ allErrors: true, strict: false });
@@ -195,7 +196,7 @@ function structuralDiagnostics(document) {
   return (validateStructure.errors ?? []).map((error) => ({
     code: 'schema-validation',
     severity: 'error',
-    message: `does not validate against 0.8.0: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
+    message: `does not validate against ${specificationVersion}: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
     path: structuralPath(document, error)
   }));
 }
@@ -233,7 +234,7 @@ function remapSyntheticToolExampleDiagnostic(diagnostic, toolIndex, exampleName)
 
 function validateToolInteractionInputAndResult(tool, toolIndex, exampleName, example, scope) {
   const synthetic = {
-    mcpdesc: '0.8.0',
+    mcpdesc: specificationVersion,
     info: { name: 'tool-interaction-validation', version: '1.0.0' },
     protocolVersions: [...scope],
     tools: [
@@ -978,7 +979,9 @@ export function semanticValidateDocument(document, rel = 'document') {
   );
 }
 
-export function validateMcpdesc08Document(document) {
+export { specificationVersion };
+
+export function validateDocument(document) {
   const diagnostics = structuralDiagnostics(document);
   return diagnostics.length ? diagnostics : semanticValidateDocument(document);
 }

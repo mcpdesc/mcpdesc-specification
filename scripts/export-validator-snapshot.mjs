@@ -72,28 +72,28 @@ for (const [source, label] of [
 
 function replaceRequired(source, search, replacement, label) {
   const first = source.indexOf(search);
-  if (first === -1) die(`could not find ${label} in scripts/validate-0.8.mjs`);
+  if (first === -1) die(`could not find ${label} in scripts/validate-document.mjs`);
   if (source.indexOf(search, first + search.length) !== -1) {
-    die(`found multiple ${label} values in scripts/validate-0.8.mjs`);
+    die(`found multiple ${label} values in scripts/validate-document.mjs`);
   }
   return source.replace(search, replacement);
 }
 
 const semanticSource = fs.readFileSync(
-  path.join(root, 'scripts', 'validate-0.8.mjs'),
+  path.join(root, 'scripts', 'validate-document.mjs'),
   'utf8',
 );
 let semantic = replaceRequired(
   semanticSource,
-  '// Validate the current 0.8.0 working tree by layering draft additions over\n// immutable snapshot base semantics.',
+  '// Validate documents for the candidate specification version in this working\n// tree by layering current semantics over the shared validator base.',
   `// Validate the immutable ${selector} snapshot using only snapshot-local artifacts.`,
   'working-tree module comment',
 );
 semantic = replaceRequired(
   semantic,
-  "import schema from '../schemas/mcp-description/0.8.0.json' with { type: 'json' };",
+  `import schema from '../schemas/mcp-description/${version}.json' with { type: 'json' };`,
   "import schema from './schema.json' with { type: 'json' };",
-  'canonical schema import',
+  `canonical ${version} schema import`,
 );
 semantic = replaceRequired(
   semantic,
@@ -115,7 +115,7 @@ const schema = fs.readFileSync(path.join(runtimeTarget, 'schema.json'));
 const schemaDigest = createHash('sha256').update(schema).digest('hex');
 fs.writeFileSync(
   path.join(runtimeTarget, 'index.js'),
-  `import {\n  supportedProtocolVersions,\n  validateMcpdesc08Document\n} from './semantic.js';\n\nexport const specification = '${selector}';\nexport const snapshotTag = '${snapshotTag}';\nexport const schemaSha256 = '${schemaDigest}';\nexport { supportedProtocolVersions };\n\nexport function validate(document) {\n  const diagnostics = validateMcpdesc08Document(document);\n  return {\n    valid: !diagnostics.some((diagnostic) => diagnostic.severity === 'error'),\n    diagnostics\n  };\n}\n`,
+  `import {\n  supportedProtocolVersions,\n  validateDocument\n} from './semantic.js';\n\nexport const specification = '${selector}';\nexport const snapshotTag = '${snapshotTag}';\nexport const schemaSha256 = '${schemaDigest}';\nexport { supportedProtocolVersions };\n\nexport function validate(document) {\n  const diagnostics = validateDocument(document);\n  return {\n    valid: !diagnostics.some((diagnostic) => diagnostic.severity === 'error'),\n    diagnostics\n  };\n}\n`,
 );
 
 function filesUnder(directory, prefix) {

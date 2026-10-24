@@ -11,7 +11,7 @@ import { assembleSpecification } from './draft-assembly.mjs';
 const protectedPaths = [
   'schemas',
   'scripts/mcpdesc-views.mjs',
-  'scripts/validate-0.8.mjs',
+  'scripts/validate-document.mjs',
   'scripts/validator-base.mjs'
 ];
 

@@ -2,6 +2,11 @@
 
 This changelog records repository governance, release-process, and project-tooling changes. Changes to the MCP Description format are recorded in the [versioned specification changelog](spec/0.8.0/CHANGELOG.md).
 
+## Unreleased
+
+- Codified dated validator revisions as the correction path for stable-release semantic validation defects, and `release/<major>.<minor>.x` maintenance branches for stable-release corrections while a later version is in development.
+- Made repository tooling version-neutral: the candidate validator is `scripts/validate-document.mjs` (exporting `validateDocument`), and tests and repository validation derive the candidate version and paths from `specification-status.json`. Diagnostics for 0.8.0 documents are unchanged.
+
 ## 2026-10-21
 
 - Corrected candidate validator semantics so MCP-specific JSON Schema annotations apply only to protocol revisions that define them, while unknown Tool-schema keywords remain preserved and governed by their JSON Schema dialect.
