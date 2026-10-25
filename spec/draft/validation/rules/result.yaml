@@ -1,4 +1,39 @@
 rules:
+  - id: mcp.completion.revision-availability
+    owner: mcp
+    summary: >-
+      Completion examples are available in every revision that defines
+      completion/complete and CompleteResult.
+    surface: CompleteResult
+    kind: structural
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: "MCP 2024-11-05 schema.ts, interfaces CompleteRequest (method completion/complete) and CompleteResult; the ServerCapabilities.completions capability is added in MCP 2025-03-26"
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+    diagnostics:
+      - code: completion-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-completion-example-semantics.json
+      - expected-warning/legacy-completion-examples.json
+    gaps:
+      - revisions: ["2024-11-05"]
+        behavior: >-
+          Completion examples are rejected with
+          completion-example-version-mismatch, although MCP 2024-11-05 defines
+          completion/complete. MCP Description does not support completion
+          examples for this revision: it is old and the use case is narrow.
+        resolution: not-fixed
+        reference: Maintainer decision on issue #72, 2026-10-25
   - id: mcp.result.additional-properties.preserve
     owner: mcp
     summary: >-

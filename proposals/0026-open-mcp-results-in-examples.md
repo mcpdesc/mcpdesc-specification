@@ -376,8 +376,7 @@ are valid. It can be proposed separately if demand appears.
 
 ## Open questions
 
-1. One shared warning code, as proposed, or one code per example kind, matching
-   existing codes such as `tool-example-result-version-mismatch`?
+None.
 
 ## Implementation and validation plan
 
@@ -421,3 +420,8 @@ are valid. It can be proposed separately if demand appears.
   constraints of Section 2 revision-independent.
 - 2026-10-25: Tool Interaction step responses are in scope, classified with
   each revision's TypeScript type, including their closure in MCP 2026-07-28.
+- 2026-10-25: One shared warning code for all example kinds; `path` identifies
+  the kind. Per-kind codes would add five codes for one rule and one condition,
+  and reusing existing per-kind codes would give one code two severities.
+- 2026-10-25: Completion examples for MCP 2024-11-05 remain unsupported, a known
+  defect outside this proposal, recorded as a `not-fixed` gap.

@@ -95,6 +95,12 @@ which is more permissive than MCP.
 type is open. `2026-07-28` also adds caching fields such as `ttlMs` and
 `cacheScope` to specific results, for example resource reads.
 
+Client responses to server requests (`CreateMessageResult`, `ElicitResult`,
+`ListRootsResult`) extend `Result`, and are therefore open, up to `2025-11-25`.
+In `2026-07-28` they become input responses (`InputResponse`) carried in the
+next request; they no longer extend `Result` and are closed. Only
+`CreateMessageResult` keeps `_meta`, through `SamplingMessage`.
+
 ## Resources, resource templates, and prompts
 
 | Field | 2024-11-05 | 2025-03-26 | 2025-06-18 | 2025-11-25 | 2026-07-28 |
@@ -148,3 +154,12 @@ warns about it.
 
 `Icon` (from `2025-11-25`) requires `src` and may include `mimeType`, `sizes`,
 and `theme`.
+
+## Known defects not fixed
+
+MCP Description deliberately leaves these differences from MCP uncorrected.
+Each is recorded as a `not-fixed` gap in [`rules/`](rules/).
+
+| MCP revision | Difference | Rule |
+| --- | --- | --- |
+| `2024-11-05` | Completion examples are rejected, although MCP defines `completion/complete` and `CompleteResult`; only the `completions` capability is new in `2025-03-26`. Not supported because the revision is old and the use case is narrow. | `mcp.completion.revision-availability` |
