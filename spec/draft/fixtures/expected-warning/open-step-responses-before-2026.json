@@ -27,7 +27,7 @@
               "request": {},
               "response": {
                 "roots": [
-                  { "uri": "file:///workspace/example" }
+                  { "uri": "file:///workspace/example", "_meta": { "trace": "root1" } }
                 ],
                 "_meta": { "trace": "r1" },
                 "acmeTrace": { "id": "a1" }

@@ -95,6 +95,67 @@ rules:
     status: internal
     fixtures:
       - expected-invalid/closed-step-responses-2026.json
+  - id: mcp.root.meta.revision-availability
+    owner: mcp
+    summary: >-
+      A root in a roots response may carry _meta from MCP 2025-06-18.
+    surface: Root
+    path: _meta
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 and 2025-03-26 schema.ts, interface Root (uri, name); MCP 2025-06-18 to 2026-07-28 schema.ts, interface Root (adds _meta)
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 3.5, 3.6, and 9.4
+    diagnostics:
+      - code: interaction-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/root-meta-before-2025-06-18.json
+      - expected-warning/open-step-responses-before-2026.json
+  - id: mcp.meta.reserved-key-context
+    owner: mcp
+    summary: >-
+      A reserved _meta key appears only in the message context, and with the
+      value, that the revision defines for it.
+    surface: _meta
+    kind: semantic
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta (reserved keys and where they apply)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 3.5
+    diagnostics:
+      - code: meta-reserved-key-context
+        severity: error
+      - code: meta-reserved-key-value
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/meta-reserved-key-misuse.json
+      - expected-invalid/meta-reserved-keys-in-carried-values.json
+    notes: >-
+      Checked on declarations and on every carried value: example results,
+      their content, interaction step responses, and roots. MCP 2024-11-05 and
+      2025-03-26 do not define reserved keys; Section 16.2 limits validation
+      for those revisions.
   - id: mcp.completion.result-closed
     owner: mcp
     summary: >-

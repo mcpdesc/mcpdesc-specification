@@ -207,7 +207,7 @@ Absence of a primitive collection MUST NOT be interpreted as proof that no other
 
 ### 3.5 MCP `_meta`
 
-The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result or content objects in named examples. It MAY appear only when every revision in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
+The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result, content, Tool Interaction step response, and root objects in named examples. It MAY appear only when every revision in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
 
 Metadata in a named example describes only that example. It does not define a reusable metadata schema or require a server to send the same metadata.
 

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "root-meta-before-2025-06-18",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2025-03-26"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "root-meta-before-2025-06-18"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list_workspace",
+      "inputSchema": {
+        "type": "object"
+      },
+      "interactionExamples": {
+        "with-root-meta": {
+          "input": {},
+          "steps": [
+            {
+              "type": "roots",
+              "request": {},
+              "response": {
+                "roots": [
+                  { "uri": "file:///workspace/example", "_meta": { "trace": "root1" } }
+                ]
+              }
+            }
+          ],
+          "result": {
+            "content": [
+              { "type": "text", "text": "Listed." }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

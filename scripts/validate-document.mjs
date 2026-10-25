@@ -489,6 +489,16 @@ function validateToolInteractionExamples(document) {
 
         if (step.type === 'roots') {
           for (const [rootIndex, root] of (step.response.roots ?? []).entries()) {
+            for (const version of scope) {
+              if (Object.hasOwn(root, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+                diagnostics.push(semanticDiagnostic(
+                  'interaction-example-version-mismatch',
+                  'error',
+                  `${stepLocation}.response.roots[${rootIndex}]._meta is not defined for MCP ${version}`,
+                  [...stepPath, 'response', 'roots', rootIndex, '_meta']
+                ));
+              }
+            }
             if (typeof root.uri === 'string' && !root.uri.startsWith('file://')) {
               diagnostics.push(semanticDiagnostic(
                 'interaction-example-roots-uri',

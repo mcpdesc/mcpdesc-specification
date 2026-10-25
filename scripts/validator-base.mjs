@@ -258,7 +258,8 @@ function validateMeta(document, rel, diagnostics) {
         continue;
       }
       for (const version of scope.filter((candidate) => protocolOrder.get(candidate) >= protocolOrder.get(completeSemanticConformanceVersion))) {
-        if (validateKnownReservedKey(key, value, context, version, location, locationPath)) continue;
+        const versionContext = typeof context === 'function' ? context(version) : context;
+        if (validateKnownReservedKey(key, value, versionContext, version, location, locationPath)) continue;
         if (usesMcpReservedMetaPrefix(key, version)) {
           diagnostics.push(
             makeDiagnostic(
@@ -314,6 +315,47 @@ function validateMeta(document, rel, diagnostics) {
               `${resultLocation}.contents[${contentIndex}]._meta`,
               [...resultPath, 'contents', contentIndex, '_meta']
             );
+          });
+        }
+      }
+      if (kind === 'prompts') {
+        for (const [exampleName, example] of Object.entries(item.examples ?? {})) {
+          const result = example?.result;
+          if (!result || typeof result !== 'object' || Array.isArray(result)) continue;
+          const resultLocation = `${kind}[${itemIndex}].examples[${JSON.stringify(exampleName)}].result`;
+          const resultPath = [...itemPath, 'examples', exampleName, 'result'];
+          check(result._meta, 'result', scope, `${resultLocation}._meta`, [...resultPath, '_meta']);
+          (Array.isArray(result.messages) ? result.messages : []).forEach((message, messageIndex) => {
+            const content = message?.content;
+            const contentLocation = `${resultLocation}.messages[${messageIndex}].content`;
+            const contentPath = [...resultPath, 'messages', messageIndex, 'content'];
+            check(content?._meta, 'content', scope, `${contentLocation}._meta`, [...contentPath, '_meta']);
+            if (content?.type === 'resource') {
+              check(content.resource?._meta, 'content', scope, `${contentLocation}.resource._meta`, [...contentPath, 'resource', '_meta']);
+            }
+          });
+        }
+      }
+      if (kind === 'prompts' || kind === 'resourceTemplates') {
+        for (const [exampleName, example] of Object.entries(item.completionExamples ?? {})) {
+          const result = example?.result;
+          if (!result || typeof result !== 'object' || Array.isArray(result)) continue;
+          const resultLocation = `${kind}[${itemIndex}].completionExamples[${JSON.stringify(exampleName)}].result`;
+          check(result._meta, 'result', scope, `${resultLocation}._meta`, [...itemPath, 'completionExamples', exampleName, 'result', '_meta']);
+        }
+      }
+      if (kind === 'tools') {
+        for (const [exampleName, example] of Object.entries(item.interactionExamples ?? {})) {
+          (Array.isArray(example?.steps) ? example.steps : []).forEach((step, stepIndex) => {
+            const response = step?.response;
+            if (!response || typeof response !== 'object' || Array.isArray(response)) return;
+            const responseLocation = `${kind}[${itemIndex}].interactionExamples[${JSON.stringify(exampleName)}].steps[${stepIndex}].response`;
+            const responsePath = [...itemPath, 'interactionExamples', exampleName, 'steps', stepIndex, 'response'];
+            // Client responses are results through MCP 2025-11-25 and input responses in 2026-07-28.
+            check(response._meta, (version) => version === '2026-07-28' ? 'client-response' : 'result', scope, `${responseLocation}._meta`, [...responsePath, '_meta']);
+            (Array.isArray(response.roots) ? response.roots : []).forEach((root, rootIndex) => {
+              check(root?._meta, 'root', scope, `${responseLocation}.roots[${rootIndex}]._meta`, [...responsePath, 'roots', rootIndex, '_meta']);
+            });
           });
         }
       }

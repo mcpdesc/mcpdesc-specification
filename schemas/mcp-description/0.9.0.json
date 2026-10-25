@@ -1790,6 +1790,9 @@
     "rootDeclaration": {
       "additionalProperties": false,
       "properties": {
+        "_meta": {
+          "$ref": "#/$defs/metaObject"
+        },
         "name": {
           "type": "string"
         },
