@@ -105,6 +105,56 @@ rules:
         reviewTrigger: An upstream clarification or erratum for the earlier revisions.
         status: active
 
+  - id: mcp.tool.input-schema.object-root
+    owner: mcp
+    summary: >-
+      Tool inputSchema is a JSON Schema object whose root declares
+      type "object", because tool arguments are always JSON objects.
+    surface: Tool
+    path: inputSchema
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, interface Tool, inputSchema type: "object"'
+      - tier: 1
+        reference: MCP 2026-07-28 specification, Server Features, Tools, Data Types, Tool (inputSchema MUST be a valid JSON Schema object, not null)
+      - tier: 4
+        reference: MCP SEP-2106 (Final), which keeps type "object" deliberately
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.2
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - expected-invalid/non-object-input-schema.json
+      - expected-valid/custom-tool-schema-keywords.json
+    arbitrations:
+      - revisions: ["2025-11-25", "2026-07-28"]
+        conflict: >-
+          The specification lets embedded schemas declare another dialect with
+          $schema, while schema.ts requires the JSON Schema keyword and value
+          type "object" at the root. A schema rooted in $ref or allOf, or written
+          in a dialect without that keyword, can describe an object but does not
+          match the TypeScript type.
+        authority: MCP schema.ts, the source of truth for message structures
+        behavior: Require a literal type "object" at the inputSchema root in every revision.
+        rationale: >-
+          The structural source of truth is explicit and SEP-2106 retained the
+          requirement on purpose; clients commonly pass inputSchema to model
+          APIs that expect an object root.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
+        reviewTrigger: Resolution of MCP issue 3238 or a later MCP revision that changes the inputSchema type.
+        status: active
+
   - id: mcp.tool.input-schema.x-mcp-header
     owner: mcp
     summary: >-

@@ -235,7 +235,7 @@ const releasedProposalSnapshots = [
 ];
 // Proposal revisions captured for the active draft: [file, commit, source path, SHA-256].
 const draftProposalSnapshots = [
-  ['0024-validation-rule-identity-and-provenance.md', '470812c1df13504bd7b5938561bbc86b28834e94', 'proposals/0024-validation-rule-identity-and-provenance.md', 'bb71efd0857f978b68bae8ba7e0fef5a3d3134b8fa516819894045ca820f1398'],
+  ['0024-validation-rule-identity-and-provenance.md', '470812c1df13504bd7b5938561bbc86b28834e94', 'proposals/0024-validation-rule-identity-and-provenance.md', '55cac58454794345d3e9a1b6409b8ae9e8a4892b5d9ded16d59bb10fccf287d1'],
   ['0026-open-mcp-results-in-examples.md', 'dea2f100e654e4d0c765f3d2687e3e977bc0f2a0', 'proposals/0026-open-mcp-results-in-examples.md', '2a22ddc3c25749c188ccb08a94a76e1045545483e920ef23fc432b534235736c']
 ];
 

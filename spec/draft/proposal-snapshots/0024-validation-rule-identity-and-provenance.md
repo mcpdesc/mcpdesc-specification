@@ -136,6 +136,7 @@ Each rule record contains:
 | `surface` | yes | Constrained type, such as `Tool` or `Result` |
 | `path` | no | Field or keyword within the surface |
 | `kind` | yes | `structural`, `semantic`, `preservation`, `embedded-standard`, `mcpdesc-semantic`, `completeness`, or `interoperability` |
+| `requirement` | no | Requirement level of the source: `must`, `should`, or `may`. An `mcp` rule whose level is `should` or `may` MUST NOT emit `error` diagnostics |
 | `applicability` | `mcp` and `json-schema` rules | Behavior for every MCP revision supported by the specification version (Section 4) |
 | `sources` | yes | Normative references, each with an authority tier (Section 7) and a section anchor or schema pointer |
 | `diagnostics` | yes | Diagnostic codes the rule emits, with their severity |
@@ -211,20 +212,31 @@ requirement. An arbitration MUST record the affected MCP revisions, the
 conflicting sources, the chosen authority, the resulting validator behavior, the
 rationale, an upstream reference when one exists, and a review trigger.
 
-Normative MCP text is the default authority. A rule with an active arbitration
-has status `arbitrated`. An arbitration is retired, not deleted, when upstream
-sources converge. MCP Description policy choices about objects it owns are not
-arbitrations.
+Normative MCP sources are the default authority, split by concern: the TypeScript
+schema of the revision for message and structure shapes, and the normative
+specification text of the revision for semantics and behavior it cannot
+express. When the two genuinely contradict, the arbitration records an upstream
+ambiguity and references the upstream issue; it is never resolved from SDK
+behavior alone. A rule with an active arbitration has status `arbitrated`. An
+arbitration is retired, not deleted, when upstream sources converge. MCP
+Description policy choices about objects it owns are not arbitrations.
 
 ### 7. Source authority
 
-Sources are ranked as follows, highest first:
+MCP defines each protocol revision with two normative artifacts. Its
+specification states that it "defines the authoritative protocol requirements,
+based on the TypeScript schema", and that the TypeScript schema "is the source
+of truth for all protocol messages and structures". Sources are therefore
+always those of a specific released revision, pinned to an upstream commit, and
+ranked as follows, highest first:
 
-1. normative MCP specification text, the MCP TypeScript schema
-   (`schema.ts`) for the revision, and accepted normative MCP proposals;
-2. normative referenced standards, such as JSON Schema;
-3. the MCP JSON Schema generated for the revision;
-4. official MCP clarifications;
+1. the MCP TypeScript schema (`schema.ts`) of the revision, for message and
+   structure shapes, and the normative MCP specification text of the revision,
+   for semantics and behavior;
+2. normative referenced standards, such as JSON Schema for embedded schemas;
+3. the MCP JSON Schema generated from `schema.ts` for the revision;
+4. official MCP clarifications and final MCP proposals (SEPs), which record
+   design rationale but defer to the current specification;
 5. official SDKs and reference implementations;
 6. MCP Inspector and the official conformance framework;
 7. other ecosystem tooling;
@@ -232,6 +244,8 @@ Sources are ranked as follows, highest first:
 
 An `mcp` rule MUST cite at least one tier 1 to 3 source. Lower tiers can reveal
 ambiguity or defects but do not override a higher tier without an arbitration.
+SDK behavior is interoperability evidence; it does not define MCP conformance.
+Draft MCP revisions are not sources unless a rule explicitly targets them.
 
 Whether an MCP type accepts properties it does not list is determined by its
 TypeScript definition: the type is open only if it declares or inherits an

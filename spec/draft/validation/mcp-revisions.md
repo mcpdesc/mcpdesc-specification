@@ -73,12 +73,29 @@ documentation calls the value a JSON Schema object. MCP Description follows the
 documentation, as `2026-07-28` does explicitly; see the arbitration in
 [`rules/tool.yaml`](rules/tool.yaml).
 
+The `inputSchema` root requirement, `type: "object"`, is written in JSON Schema
+syntax even though `$schema` may select another dialect from `2025-11-25`. MCP
+issue [#3238](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238)
+discusses this tension. MCP Description follows `schema.ts` and requires a
+literal `type: "object"` root; see `mcp.tool.input-schema.object-root`.
+
 ### Tool annotations
 
 `ToolAnnotations` (from `2025-03-26`) contains the hints `title`,
 `readOnlyHint`, `destructiveHint`, `idempotentHint`, and `openWorldHint`. The set
 is unchanged through `2026-07-28` and the type is closed. These are hints, not
-guarantees. MCP Description 0.8.0 allows additional Tool Annotation properties,
+guarantees, and clients must treat them as untrusted unless the server is
+trusted. When a hint is absent, MCP defines its meaning:
+
+| Hint | Meaning when absent |
+| --- | --- |
+| `readOnlyHint` | `false` |
+| `destructiveHint` | `true`; meaningful only when `readOnlyHint` is `false` |
+| `idempotentHint` | `false`; meaningful only when `readOnlyHint` is `false` |
+| `openWorldHint` | `true` |
+
+An absent hint and an explicit value with the same meaning are different
+documents. MCP Description 0.8.0 allows additional Tool Annotation properties,
 which is more permissive than MCP.
 
 ## Results

@@ -89,6 +89,9 @@ for (const filename of files) {
     if (rule.owner === 'mcp' && !rule.sources.some((source) => source.tier <= 3)) {
       fail(`${where}: an mcp rule must cite a tier 1 to 3 source`);
     }
+    if (rule.owner === 'mcp' && ['should', 'may'].includes(rule.requirement) && rule.diagnostics.some((diagnostic) => diagnostic.severity === 'error')) {
+      fail(`${where}: a ${rule.requirement}-level mcp rule must not emit error diagnostics`);
+    }
 
     for (const gap of rule.gaps ?? []) {
       for (const revision of gap.revisions ?? []) {

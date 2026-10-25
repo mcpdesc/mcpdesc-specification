@@ -18,12 +18,48 @@ validator does not consume the registry yet. Design background is tracked in
 | --- | --- | --- |
 | [`mcp-revisions.md`](mcp-revisions.md) | Introductory guide to how MCP structures used by MCP Description differ across supported protocol revisions | Initial version |
 | [`rule.schema.json`](rule.schema.json) | JSON Schema for rule registry files | Pilot |
-| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: seven rules; checked by `scripts/test-validation-rules.mjs` |
+| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: nine rules; checked by `scripts/test-validation-rules.mjs` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas for supported revisions, with a provenance manifest (repository, path, commit, SHA-256, license) | Planned |
 
 The folder is part of the versioned specification: it is frozen with each
 release, so the rules and pinned MCP schemas used by a release never change
 after publication.
+
+## MCP sources of truth
+
+MCP defines each protocol revision with two normative artifacts:
+
+| Concern | Authoritative source | Example |
+| --- | --- | --- |
+| Message and structure shapes: fields, required or optional, unions, inheritance, openness | The revision's TypeScript schema, `schema/<revision>/schema.ts`, which MCP calls "the source of truth for all protocol messages and structures" | `Tool.name` exists, is required, and is a string |
+| Semantics and behavior that types cannot express | The revision's normative specification text | Tool names SHOULD be 1 to 128 characters from `A-Z`, `a-z`, `0-9`, `_`, `-`, and `.` |
+
+Other artifacts are evidence, not authority:
+
+| Artifact | Role for MCP Description |
+| --- | --- |
+| Generated `schema.json` | Machine-readable derivative of `schema.ts`; useful to check projected MCP values, never to override `schema.ts` |
+| Final SEPs | Design rationale; each states that the current specification and changelog are authoritative |
+| SDKs, Inspector, conformance tools | Implementations; interoperability evidence only. SDK models may cover several revisions at once and do not define conformance |
+| Draft revisions | Not used unless a rule explicitly targets a draft |
+
+Rules always name a specific released revision, never "MCP in general": a Tool
+in MCP 2025-11-25 and a Tool in MCP 2026-07-28 are different types. Sources are
+pinned to an upstream commit (see [`mcp-revisions.md`](mcp-revisions.md)).
+
+When sources disagree:
+
+| Conflict | Outcome |
+| --- | --- |
+| Prose example versus `schema.ts` structure | `schema.ts` |
+| `schema.json` versus `schema.ts` | `schema.ts`; probable generator defect, reported upstream |
+| Prose requirement that `schema.ts` cannot express | Prose |
+| Prose and `schema.ts` genuinely contradict | Recorded as an arbitration with the upstream issue; never resolved from SDK behavior alone |
+| SEP versus current specification | Current specification |
+| SDK versus released specification | Released specification |
+
+The requirement level of the source matters: a `SHOULD` in MCP is a
+recommendation, so an MCP rule at that level produces warnings, not errors.
 
 ## Ownership model
 
@@ -34,6 +70,21 @@ Every validated structure has exactly one owner:
 | MCP Description | `info`, transports, security, tags, examples, protocol scoping, components | This specification | As defined by MCP Description |
 | MCP | Tool, Resource, ResourceTemplate, Prompt, capabilities, results, annotations, `_meta` | The applicable MCP revision | As permitted by that revision |
 | Embedded standard | Tool `inputSchema` and `outputSchema` (JSON Schema) | The declared or default dialect, plus semantics the MCP revision adds | As defined by the dialect |
+
+A Tool therefore involves two schema layers, validated separately:
+
+```text
+MCP Tool (MCP type, from schema.ts)
+ ├─ name, title, description, icons, annotations, _meta
+ ├─ inputSchema  ──► a JSON Schema document, in its declared or default dialect
+ └─ outputSchema ──► a JSON Schema document, in its declared or default dialect
+```
+
+The outer object follows the MCP Tool type of the revision. Each embedded
+schema must be valid in its own dialect (JSON Schema 2020-12 when `$schema` is
+absent, in revisions that define a default dialect), plus the root constraints the MCP revision adds,
+such as `type: "object"` for `inputSchema`. Validating the Tool against the
+generated MCP JSON Schema alone does not validate the embedded schemas.
 
 Knowing a field is not the same as the field being defined for a revision. A
 name that a later MCP revision standardizes is not invalid in an earlier
@@ -96,7 +147,8 @@ Each validation rule has a permanent identifier and a record:
 | `id` | Permanent, owner-namespaced identifier, for example `mcp.tool.output-schema.object-root`. Never reused; retired identifiers stay reserved. Protocol revisions are not part of the identifier. |
 | `owner` | `mcp`, `mcpdesc`, or the embedded standard |
 | `surface`, `path` | Native type and field the rule applies to |
-| `kind` | structural, semantic, projection, preservation, embedded-standard, mcpdesc-semantic, or interoperability |
+| `kind` | structural, semantic, preservation, embedded-standard, mcpdesc-semantic, completeness, or interoperability |
+| `requirement` | Requirement level of the source: must, should, or may |
 | `applicability` | Behavior per supported MCP revision |
 | `sources` | Normative MCP text, official schema, or other evidence, by authority tier |
 | `diagnostics` | Diagnostic codes emitted |
