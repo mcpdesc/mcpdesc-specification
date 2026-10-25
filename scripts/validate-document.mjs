@@ -7,6 +7,7 @@ import addFormats from 'ajv-formats';
 import { UriTemplateMatcher } from 'uri-template-matcher';
 import schema from '../schemas/mcp-description/0.9.0.json' with { type: 'json' };
 import {
+  classifyCarriedFields,
   mcpExtensionCatalogue,
   mcpExtensionMaturity,
   semanticValidateDocument as validateBaseSemantics,
@@ -361,6 +362,19 @@ function validateToolInteractionExamples(document) {
         const stepPath = [...examplePath, 'steps', stepIndex];
         warnClientRequirementsContradiction(tool, step, stepLocation, stepPath, diagnostics);
 
+        const responseType = { sampling: 'CreateMessageResult', elicitation: 'ElicitResult', roots: 'ListRootsResult' }[step.type];
+        for (const version of scope) {
+          if (!responseType || (step.type === 'elicitation' && protocolOrder.get(version) < protocolOrder.get('2025-06-18'))) continue;
+          diagnostics.push(...classifyCarriedFields(
+            step.response,
+            responseType,
+            version,
+            `${stepLocation}.response`,
+            [...stepPath, 'response'],
+            'interaction-example-version-mismatch'
+          ));
+        }
+
         if (step.type === 'elicitation') {
           const request = step.request ?? {};
           const response = step.response ?? {};
@@ -704,9 +718,7 @@ function validatePromptExamples(document) {
         if (version === '2026-07-28' && result.resultType !== 'complete') {
           diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType']));
         }
-        if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
-          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType is not defined for MCP ${version}`, [...resultPath, 'resultType']));
-        }
+        diagnostics.push(...classifyCarriedFields(result, 'GetPromptResult', version, resultLocation, resultPath));
         (result.messages ?? []).forEach((message, messageIndex) => {
           const contentLocation = `${resultLocation}.messages[${messageIndex}].content`;
           const contentPath = [...resultPath, 'messages', messageIndex, 'content'];
@@ -761,14 +773,7 @@ function validateCompletionExampleResult(result, exampleLocation, examplePath, v
       [...resultPath, 'resultType']
     ));
   }
-  if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
-    diagnostics.push(semanticDiagnostic(
-      'completion-example-result-version-mismatch',
-      'error',
-      `${resultLocation}.resultType is not defined for MCP ${version}`,
-      [...resultPath, 'resultType']
-    ));
-  }
+  diagnostics.push(...classifyCarriedFields(result, 'CompleteResult', version, resultLocation, resultPath));
 }
 
 function validateCompletionExamples(document) {

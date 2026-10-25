@@ -61,7 +61,7 @@ The Tool Example Object MUST NOT contain other additional properties. In particu
 
 `input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
 
-`result` MUST contain `content` and MUST have the completed Tool Result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`; earlier revisions MUST NOT contain `resultType`. Task, input-required, streaming, progress, JSON-RPC envelope, and JSON-RPC protocol-error forms are not Tool Examples. Content blocks MAY use any text, image, audio, embedded-resource, or resource-link form supported by every applicable revision.
+`result` MUST contain `content` and MUST have the completed Tool Result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable revision does not define follow [Section 3.6](#36-carried-mcp-values). Task, input-required, streaming, progress, JSON-RPC envelope, and JSON-RPC protocol-error forms are not Tool Examples. Content blocks MAY use any text, image, audio, embedded-resource, or resource-link form supported by every applicable revision.
 
 Revision-supported `_meta` on the completed result, content blocks, and embedded Resource Contents is literal illustrative metadata governed by [Section 3.5](#35-mcp-_meta). It is not a schema or a request-metadata declaration. In MCP 2026-07-28, a result example MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid in these represented contexts.
 
@@ -103,7 +103,7 @@ Every Tool Interaction Step Object MUST contain `type`, `request`, and `response
 | `sampling` | Native `sampling/createMessage` parameters | Native completed sampling result |
 | `roots` | Empty object | Native ordered `roots` result object |
 
-Steps MAY carry `x-*` specification extensions and MUST NOT contain other additional fields except those defined for their step kind. A step is semantic MCP Description metadata, not a native MCP wire object. An implementation MUST NOT serialize a Tool Interaction Step directly onto an MCP connection.
+Steps MAY carry `x-*` specification extensions and MUST NOT contain other additional fields except those defined for their step kind. Step `response` values are carried MCP values governed by [Section 3.6](#36-carried-mcp-values). A step is semantic MCP Description metadata, not a native MCP wire object. An implementation MUST NOT serialize a Tool Interaction Step directly onto an MCP connection.
 
 An `elicitation` step MAY contain `declaration`, naming an Elicitation Declaration on the same Tool. When present, the request mode and the request schema or known URL MUST be compatible with that declaration after local reference resolution. For `mode: "form"`, an accepted response MUST contain `content` conforming to the request schema; declined and cancelled responses MUST NOT contain `content`. For `mode: "url"`, the response MUST omit `content`.
 

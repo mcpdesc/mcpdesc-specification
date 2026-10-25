@@ -18,7 +18,7 @@ validator does not consume the registry yet. Design background is tracked in
 | --- | --- | --- |
 | [`mcp-revisions.md`](mcp-revisions.md) | Introductory guide to how MCP structures used by MCP Description differ across supported protocol revisions | Initial version |
 | [`rule.schema.json`](rule.schema.json) | JSON Schema for rule registry files | Pilot |
-| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: nine rules; checked by `scripts/test-validation-rules.mjs` |
+| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: eleven rules; checked by `scripts/test-validation-rules.mjs` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas for supported revisions, with a provenance manifest (repository, path, commit, SHA-256, license) | Planned |
 
 The folder is part of the versioned specification: it is frozen with each
@@ -134,9 +134,8 @@ may add style and quality rules, but they do not relax example validity.
 Decided 2026-10-25 under
 [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72),
 replacing a short-lived direction that would have moved example consistency to
-a linter. The warning outcome is not implemented yet; it is planned for the
-openness proposal, and current differences are recorded as rule gaps. Historical
-revisions keep current behavior.
+a linter. Implemented in the draft by Proposal 0026 for every supported
+revision; see Section 3.6 of the specification.
 
 ## Rule records
 

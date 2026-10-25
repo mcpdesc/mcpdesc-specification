@@ -677,16 +677,32 @@ assert.deepEqual(
   semanticValidateDocument(inlineInvalidExamples).map(({ code, path }) => ({ code, path })),
   referencedExampleDiagnostics.map(({ code, path }) => ({ code, path }))
 );
-const invalidComponentProtocolScope = fixture('spec/draft/fixtures/expected-invalid/component-protocol-scope.json');
-const componentProtocolDiagnostics = semanticValidateDocument(invalidComponentProtocolScope);
-assert.ok(componentProtocolDiagnostics.some(
-  (diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch'
+const componentProtocolScope = fixture('spec/draft/fixtures/expected-warning/component-protocol-scope.json');
+const componentProtocolDiagnostics = semanticValidateDocument(componentProtocolScope);
+assert.ok(componentProtocolDiagnostics.length > 0);
+assert.ok(componentProtocolDiagnostics.every(
+  (diagnostic) => diagnostic.code === 'result-field-not-defined-by-version'
     && diagnostic.path[0] === 'resources'
     && diagnostic.path[1] === 0
 ));
-assert.equal(componentProtocolDiagnostics.some(
-  (diagnostic) => diagnostic.path[0] === 'resources' && diagnostic.path[1] === 1
-), false);
+
+const sharedOpenResults = fixture('spec/draft/fixtures/expected-warning/open-results-shared-across-revisions.json');
+function openResultWarnings(document) {
+  return validateDocument(document)
+    .filter(({ code }) => code === 'result-field-not-defined-by-version')
+    .map(({ message, path }) => JSON.stringify({ message, path }))
+    .sort();
+}
+const sharedOpenResultWarnings = openResultWarnings(sharedOpenResults);
+assert.equal(sharedOpenResultWarnings.length, 5);
+assert.ok(sharedOpenResultWarnings.every((warning) => warning.includes('MCP 2025-11-25')));
+assert.deepEqual(openResultWarnings(projectProtocolView(sharedOpenResults, '2026-07-28')), []);
+assert.deepEqual(
+  [...new Set(sharedOpenResults.protocolVersions.flatMap(
+    (version) => openResultWarnings(projectProtocolView(sharedOpenResults, version))
+  ))].sort(),
+  sharedOpenResultWarnings
+);
 
 const componentProjectionSource = structuredClone(componentSource);
 componentProjectionSource.components.schemas.Unused = { type: 'object' };
@@ -757,8 +773,8 @@ const invalidResourceCacheFields = fixture('spec/draft/fixtures/expected-invalid
 const invalidResourceCacheDiagnostics = semanticValidateDocument(invalidResourceCacheFields);
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.ttlMs is required')));
 assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is required')));
-assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.ttlMs is not defined')));
-assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'resource-example-cache-fields-version-mismatch' && diagnostic.message.includes('.cacheScope is not defined')));
+assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'result-field-not-defined-by-version' && diagnostic.severity === 'warning' && diagnostic.message.includes('.ttlMs is not defined')));
+assert.ok(invalidResourceCacheDiagnostics.some((diagnostic) => diagnostic.code === 'result-field-not-defined-by-version' && diagnostic.severity === 'warning' && diagnostic.message.includes('.cacheScope is not defined')));
 
 const invalidInteractionExamples = fixture('spec/draft/fixtures/expected-invalid/invalid-tool-interaction-example-semantics.json');
 const invalidInteractionDiagnostics = semanticValidateDocument(invalidInteractionExamples);

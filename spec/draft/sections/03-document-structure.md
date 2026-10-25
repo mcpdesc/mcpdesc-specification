@@ -63,19 +63,37 @@ Metadata in a named example describes only that example. It does not define a re
 Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol revision. A recognized violation is a document-conformance error. A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A protocol-version projection MUST preserve `_meta` and MUST NOT combine metadata from variants that cover different protocol revisions.
 
 
-### 3.6 Property Ordering
+### 3.6 Carried MCP Values
+
+Named examples carry MCP values: Tool Example and Tool Interaction Example `result`, Tool Interaction step `response` values for sampling, elicitation, and roots, Resource and Resource Template Example `result`, Prompt Example `result`, and completion example `result`, including values reached through component references. A carried value is validated for every MCP revision in the containing declaration's effective protocol scope, using the type that revision defines for it. A type accepts fields it does not list only if its definition in the revision's TypeScript schema declares or inherits an index signature; such a type is open, and every other type is closed.
+
+For each applicable revision and each field of a carried value:
+
+1. A field that the revision defines MUST satisfy its type, and a field that the revision requires MUST be present.
+2. A field that the revision does not define, on a type that is open in that revision, MUST be accepted and preserved. Implementations MUST NOT apply the meaning that another revision gives the same name. Validators MUST report the warning `result-field-not-defined-by-version`, identifying the field and the revision.
+3. A field that the revision does not define, on a type that is closed in that revision, MUST be rejected.
+
+JSON-RPC envelope fields and non-completed workflow fields are governed by the example rules of Sections 9.3, 9.4, 10.4, and 11 instead.
+
+Every result type carried by examples extends the open MCP `Result` in every supported revision. Sampling, elicitation, and roots responses extend `Result` through MCP 2025-11-25; in MCP 2026-07-28 they are closed input responses, and only the sampling response defines `_meta`. Nested objects such as content blocks, resource contents, roots, and the `completion` object of a completion result are closed.
+
+Example `result` values are completed results. When present, in every revision, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative number, and `cacheScope` MUST be `"public"` or `"private"`.
+
+A declaration covering several revisions MAY use one example map even when a field is defined by only some of them; authors MAY instead split the declaration into protocol-scoped variants to avoid the warnings. Because each warning is attributed to one revision, the warnings defined here for a document equal the union of those for its per-revision Effective Protocol Views.
+
+### 3.7 Property Ordering
 
 Property ordering within objects is not significant. Implementations MUST NOT depend on property or mapping serialization order.
 
-### 3.7 Specification Extensions
+### 3.8 Specification Extensions
 
 Any property whose name matches the pattern `^x-` on the root or another eligible MCP Description-defined semantic object is a specification extension. See [Section 14: Specification Extensions](#14-specification-extensions) for eligibility and exclusion rules.
 
-### 3.8 Additional Properties
+### 3.9 Additional Properties
 
 Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear on the root or another closed eligible semantic object. Implementations MUST reject such unknown properties. An `x-*` property does not make an otherwise ineligible object extensible.
 
-### 3.9 Example
+### 3.10 Example
 
 A minimal valid MCP Description document:
 

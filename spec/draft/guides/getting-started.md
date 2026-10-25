@@ -218,7 +218,7 @@ resourceTemplates:
 
 Resource `examples` use the declaration URI as their implicit read input. Resource Template examples add the exact concrete expanded `uri`. In both cases, copy only a completed `resources/read` result payload, preserve content order, and use exactly one of `text` or base64 `blob` per content entry. Examples are snapshots and do not guarantee live contents or freshness. Never dereference example URIs automatically or publish sensitive captured data.
 
-For MCP 2026-07-28, the copied result also requires `resultType: complete`, non-negative `ttlMs`, and `cacheScope: public` or `private`. Earlier revisions omit those fields. Use disjoint protocol-scoped Resource variants when one logical Resource needs examples for both shapes.
+For MCP 2026-07-28, the copied result also requires `resultType: complete`, non-negative `ttlMs`, and `cacheScope: public` or `private`. Earlier revisions do not define those fields. A Resource that covers both revisions can keep one example with those fields; validators warn that they have no meaning for the earlier revision. To avoid the warnings, use disjoint protocol-scoped Resource variants with separate examples.
 
 ## Step 5: Add Prompts
 
@@ -250,7 +250,7 @@ prompts:
             text: Summarize the game with key turning points.
 ```
 
-Prompt `examples` pair a complete `prompts/get` argument map with one completed Prompt result. When no arguments are supplied, either omit `arguments` or write `arguments: {}`. Keep only the payload from the JSON-RPC response's `result` member. For MCP 2026-07-28, include `resultType: complete`; earlier revisions omit it. Examples are descriptive snapshots, not guarantees of deterministic live output.
+Prompt `examples` pair a complete `prompts/get` argument map with one completed Prompt result. When no arguments are supplied, either omit `arguments` or write `arguments: {}`. Keep only the payload from the JSON-RPC response's `result` member. For MCP 2026-07-28, include `resultType: complete`; earlier revisions do not define it, so validators warn when an example shared with them includes it. Examples are descriptive snapshots, not guarantees of deterministic live output.
 
 Tool `interactionExamples` are for the case where one Tool invocation needs more than a terminal result. Put the initial `tools/call` arguments in `input`, record each elicitation, sampling, or roots exchange as one ordered semantic step, and keep the terminal completed Tool Result in `result`. Do not copy JSON-RPC envelopes, `InputRequiredResult`, `requestState`, task handles, or other runtime correlation data. Split protocol-scoped Tool variants when one interaction shape uses revision-specific fields such as sampling Tool use or MCP 2026-07-28 result fields.
 

@@ -26,10 +26,10 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ### Community Working Draft 1 — 2026-10-24 (`v0.9.0-draft.1`)
 
-Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-draft.1` tag has not been published. No normative change has been made yet.
+Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-draft.1` tag has not been published. Normative changes made since initialization are listed in the sections below.
 
 - Copied the 0.8.0 sections, examples, fixtures, serialization fixtures, and guides into `spec/draft/`.
-- Draft documents use `mcpdesc: 0.9.0`, and the draft schema [`schemas/mcp-description/0.9.0.json`](../../schemas/mcp-description/0.9.0.json) uses the prerelease identity `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`. Its validation rules are otherwise identical to 0.8.0.
+- Draft documents use `mcpdesc: 0.9.0`, and the draft schema [`schemas/mcp-description/0.9.0.json`](../../schemas/mcp-description/0.9.0.json) uses the prerelease identity `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`. At initialization its validation rules were otherwise identical to 0.8.0.
 - Updated version-identity statements to 0.9.0; historical references to earlier versions are unchanged.
 
 ### Validation rules (draft Proposal 0024; subject to review and possible incompatible change or removal)
@@ -38,7 +38,18 @@ Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-dra
 - Documented MCP's sources of truth in [`validation/README.md`](validation/README.md): the revision's `schema.ts` for structures, its specification text for semantics, and generated JSON Schema, SEPs, and SDKs as evidence only. Rule records gain an optional `requirement` level; MCP rules at `should` or `may` level do not emit errors.
 - Recorded the tension between dialect selection and the literal `type: "object"` root of `inputSchema` (MCP issue #3238) as an arbitration on `mcp.tool.input-schema.object-root`; validation is unchanged. Added fixture `expected-invalid/non-object-input-schema.json`.
 - Recorded the "examples fail fast" principle in [`validation/README.md`](validation/README.md): incorrect examples are conformance errors rather than an optional linter concern, measured against MCP's own types. Fields an applicable revision allows but does not define are planned to be accepted with a warning; until then, the differences are recorded as rule gaps.
-- Added fixtures `expected-invalid/output-schema-before-2025-06-18.json` and `expected-valid/open-result-unknown-properties.json` for revision boundaries not covered before.
+- Added fixtures `expected-invalid/output-schema-before-2025-06-18.json` and `expected-warning/open-result-unknown-properties.json` for revision boundaries not covered before.
+
+### Open MCP results in examples (draft Proposal 0026; subject to review and possible incompatible change or removal)
+
+- Added [Section 3.6](sections/03-document-structure.md), Carried MCP Values. Example results and Tool Interaction step responses are validated for each applicable MCP revision against the type that revision's TypeScript schema defines. Former Sections 3.6 to 3.9 are renumbered 3.7 to 3.10.
+- A field that an open MCP type allows but the revision does not define is now accepted, preserved without meaning, and reported with the warning `result-field-not-defined-by-version`. This replaces errors for `resultType` before MCP 2026-07-28 (Tool, Resource, Prompt, and completion examples), `ttlMs` and `cacheScope` before MCP 2026-07-28 (Resource examples), and `structuredContent` before MCP 2025-06-18 (Tool examples). Unknown field names that previously passed silently now produce the same warning.
+- Declarations whose examples span MCP 2026-07-28 and an earlier revision no longer have to be split; splitting remains available to avoid the warnings (Sections 9.3, 10.4.4, 10.4.6, 11.3, and 11.4).
+- Tool Interaction step responses for sampling, elicitation, and roots accept `_meta` and, with warnings, unknown fields through MCP 2025-11-25, where they extend MCP `Result`. For MCP 2026-07-28, where they are closed input responses, unknown fields are rejected with `interaction-example-version-mismatch`; `_meta` is accepted only on sampling responses. The schema now accepts additional properties on these responses and the validator enforces each revision's type.
+- **Breaking:** the `completion` object of a completion example result is closed, as `CompleteResult.completion` is in every MCP revision; extra fields are rejected.
+- Value constraints are unchanged and apply in every revision: when present, `resultType` is `"complete"`, `ttlMs` is non-negative, and `cacheScope` is `"public"` or `"private"`.
+- Fixtures: added `expected-warning/open-results-shared-across-revisions.json`, `expected-warning/open-step-responses-before-2026.json`, `expected-invalid/closed-step-responses-2026.json`, and `expected-invalid/completion-result-extra-field.json`; moved `open-result-unknown-properties.json` and `component-protocol-scope.json` to `expected-warning`.
+- Migration: no change is required for documents that remain valid. Variants split only because of `resultType`, `ttlMs`, or `cacheScope` MAY be merged. Extra fields inside `completion` objects must be removed or moved, for example to result `_meta`.
 
 ### Validator corrections
 

@@ -42,6 +42,11 @@ const errors = [];
 const warnings = [];
 const expectedFixtureWarnings = [];
 const expectedWarningCodesByFixture = new Map([
+  ['component-protocol-scope.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
   ['deprecated-client-capability-requirements.json', [
     'deprecated-client-requirement',
     'deprecated-client-requirement',
@@ -55,6 +60,21 @@ const expectedWarningCodesByFixture = new Map([
     'legacy-sse-for-modern-version'
   ]],
   ['logging-deprecated-2026.json', ['logging-deprecated-in-2026']],
+  ['open-result-unknown-properties.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
+  ['open-results-shared-across-revisions.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
+  ['open-step-responses-before-2026.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
   ['pre-dialect-tool-example.json', [
     'incomplete-tool-example-validation',
     'legacy-protocol-validation-incomplete'

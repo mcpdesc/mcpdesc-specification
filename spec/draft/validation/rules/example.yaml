@@ -33,25 +33,14 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/revision-incompatible-tool-example.json
-      - expected-invalid/resource-example-result-semantics.json
       - expected-invalid/invalid-prompt-example-semantics.json
       - expected-invalid/invalid-completion-example-semantics.json
       - expected-valid/named-tool-examples.json
       - expected-valid/named-resource-examples.json
       - expected-warning/legacy-result-meta.json
+      - expected-warning/open-results-shared-across-revisions.json
     notes: >-
       Fields a revision does not define are governed by
       mcp.result.additional-properties.preserve (accepted with a warning).
-    gaps:
-      - revisions: ["2025-06-18", "2025-11-25"]
-        behavior: >-
-          Also rejects resultType, and in Resource examples ttlMs and
-          cacheScope, although these revisions do not define them. Declarations
-          whose examples span MCP 2026-07-28 and an earlier revision must be
-          split.
-        resolution: planned
-        reference: Openness proposal under issue #72
-      - revisions: ["2024-11-05", "2025-03-26"]
-        behavior: Same as above.
-        resolution: not-fixed
+      When present, resultType must be "complete", ttlMs non-negative, and
+      cacheScope "public" or "private" in every revision (document schema).

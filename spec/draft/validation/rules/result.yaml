@@ -37,10 +37,12 @@ rules:
   - id: mcp.result.additional-properties.preserve
     owner: mcp
     summary: >-
-      A carried MCP result may contain properties its revision does not define;
-      they are preserved without assigned semantics.
+      A field that an open MCP result type allows but the revision does not
+      define is accepted and preserved without meaning, with a warning
+      attributed to that revision.
     surface: Result
     kind: preservation
+    requirement: may
     applicability:
       "2024-11-05": applies
       "2025-03-26": applies
@@ -50,26 +52,74 @@ rules:
     sources:
       - tier: 1
         reference: "MCP 2024-11-05 to 2026-07-28 schema.ts, interface Result (index signature [key: string]: unknown, inherited by every result type)"
+      - tier: 1
+        reference: MCP 2024-11-05 to 2025-11-25 schema.ts, CreateMessageResult, ElicitResult, and ListRootsResult extend Result
       - tier: 8
-        reference: MCP Description 0.9.0, Section 9.3 (completed Tool Result shape)
-    diagnostics: []
+        reference: MCP Description 0.9.0, Section 3.6 (Carried MCP Values)
+    diagnostics:
+      - code: result-field-not-defined-by-version
+        severity: warning
     enforcement: internal
     status: internal
     fixtures:
-      - expected-valid/open-result-unknown-properties.json
+      - expected-warning/open-result-unknown-properties.json
+      - expected-warning/open-results-shared-across-revisions.json
+      - expected-warning/open-step-responses-before-2026.json
+      - expected-warning/component-protocol-scope.json
     notes: >-
-      Planned outcome (Examples fail fast, validation README): undefined fields
-      are accepted with a warning attributed to the revision.
-    gaps:
-      - revisions: ["2025-06-18", "2025-11-25", "2026-07-28"]
-        behavior: >-
-          Fields not defined by the revision are accepted without a warning,
-          except that resultType before 2026-07-28, and ttlMs and cacheScope in
-          Resource examples before 2026-07-28, are rejected as errors.
-        resolution: planned
-        reference: Openness proposal under issue #72
-      - revisions: ["2024-11-05", "2025-03-26"]
-        behavior: >-
-          Same as above; in addition, undefined structuredContent is rejected
-          as an error.
-        resolution: not-fixed
+      The warnings of this rule for a document equal the union of its warnings
+      for each per-revision Effective Protocol View (scripts/test-views.mjs).
+  - id: mcp.input-response.closed
+    owner: mcp
+    summary: >-
+      In MCP 2026-07-28, sampling, elicitation, and roots responses are input
+      responses, not results, and accept only the fields their types define.
+    surface: InputResponse
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": not-applicable
+      "2025-11-25": not-applicable
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: "MCP 2026-07-28 schema.ts, type InputResponse (CreateMessageResult, ListRootsResult, ElicitResult); none extends Result; only CreateMessageResult defines _meta, through SamplingMessage"
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 3.6 and 9.4
+    diagnostics:
+      - code: interaction-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/closed-step-responses-2026.json
+  - id: mcp.completion.result-closed
+    owner: mcp
+    summary: >-
+      The completion object of a completion result contains only values,
+      total, and hasMore.
+    surface: CompleteResult
+    path: completion
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface CompleteResult, completion (no index signature)
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/completion-result-extra-field.json
+      - expected-valid/named-completion-examples.json
