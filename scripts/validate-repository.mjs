@@ -234,7 +234,10 @@ const releasedProposalSnapshots = [
   ['0022-protocol-independent-info-metadata.md', '87b2d493cfa87a9cbea8148ae1f6638bd1aae786', 'proposals/0022-protocol-independent-info-metadata.md', '45c66ad65bbdae67c0afea416e025ddb1ce3dd4125306b40742fb6f887824785']
 ];
 // Proposal revisions captured for the active draft: [file, commit, source path, SHA-256].
-const draftProposalSnapshots = [];
+const draftProposalSnapshots = [
+  ['0024-validation-rule-identity-and-provenance.md', '470812c1df13504bd7b5938561bbc86b28834e94', 'proposals/0024-validation-rule-identity-and-provenance.md', 'bb71efd0857f978b68bae8ba7e0fef5a3d3134b8fa516819894045ca820f1398'],
+  ['0026-open-mcp-results-in-examples.md', 'dea2f100e654e4d0c765f3d2687e3e977bc0f2a0', 'proposals/0026-open-mcp-results-in-examples.md', '2a22ddc3c25749c188ccb08a94a76e1045545483e920ef23fc432b534235736c']
+];
 
 function checkProposalSnapshots(specificationPath, snapshots) {
   const manifestPath = `${specificationPath}/PROPOSALS.md`;

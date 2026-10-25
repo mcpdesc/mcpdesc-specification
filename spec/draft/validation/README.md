@@ -7,7 +7,7 @@ validation behavior should state who owns it, which MCP revisions it applies to,
 where it comes from, and how it is tested.
 
 Status: pilot for the 0.9.0 working draft, implementing draft
-[Proposal 0024](../../../proposals/0024-validation-rule-identity-and-provenance.md).
+[Proposal 0024](../proposal-snapshots/0024-validation-rule-identity-and-provenance.md).
 The content is non-normative until that proposal is accepted. The candidate
 validator does not consume the registry yet. Design background is tracked in
 [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72).
