@@ -34,7 +34,8 @@ Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-dra
 
 ### Validation rules (draft Proposal 0024; subject to review and possible incompatible change or removal)
 
-- Added a pilot validation rule registry: [`validation/rule.schema.json`](validation/rule.schema.json) and five rule records under [`validation/rules/`](validation/rules/), covering Tool `outputSchema` availability and object root, `x-mcp-header`, open Result properties, and document schema validation. The registry is non-normative until the proposal is accepted and does not change document conformance.
+- Added a pilot validation rule registry: [`validation/rule.schema.json`](validation/rule.schema.json) and seven rule records under [`validation/rules/`](validation/rules/), covering Tool `outputSchema` availability and object root, Tool schema keyword preservation, `x-mcp-header`, open Result properties, example result revision fidelity, and document schema validation. The registry is non-normative until the proposal is accepted and does not change document conformance.
+- Recorded the "examples fail fast" principle in [`validation/README.md`](validation/README.md): example correctness, including revision fidelity, remains part of conformance rather than an optional linter concern.
 - Added fixtures `expected-invalid/output-schema-before-2025-06-18.json` and `expected-valid/open-result-unknown-properties.json` for revision boundaries not covered before.
 
 ### Validator corrections

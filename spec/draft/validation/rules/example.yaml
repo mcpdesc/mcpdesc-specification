@@ -1,0 +1,46 @@
+rules:
+  - id: mcpdesc.example.result.revision-fidelity
+    owner: mcpdesc
+    summary: >-
+      An example result reproduces the completed result of every applicable MCP
+      revision: it contains the fields that revision requires and no field that
+      only a later revision defines.
+    surface: Example result
+    kind: mcpdesc-semantic
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: "MCP 2026-07-28 schema.ts, interface Result (resultType required) and interface CacheableResult (ttlMs, cacheScope required)"
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
+      - tier: 8
+        reference: Examples fail fast decision (validation README, 2026-10-25, issue #72)
+    diagnostics:
+      - code: tool-example-result-version-mismatch
+        severity: error
+      - code: resource-example-result-version-mismatch
+        severity: error
+      - code: resource-example-cache-fields-version-mismatch
+        severity: error
+      - code: prompt-example-result-version-mismatch
+        severity: error
+      - code: completion-example-result-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/revision-incompatible-tool-example.json
+      - expected-invalid/resource-example-result-semantics.json
+      - expected-invalid/invalid-prompt-example-semantics.json
+      - expected-invalid/invalid-completion-example-semantics.json
+      - expected-valid/named-tool-examples.json
+      - expected-valid/named-resource-examples.json
+    notes: >-
+      Deliberately stricter than MCP's open Result, which would carry later
+      fields without meaning. Declarations whose examples differ across
+      revisions are split into protocol-scoped variants.

@@ -22,15 +22,7 @@ rules:
     status: internal
     fixtures:
       - expected-valid/open-result-unknown-properties.json
-    gaps:
-      - revisions: ["2025-06-18", "2025-11-25"]
-        behavior: >-
-          Tool, Prompt, and completion examples reject resultType before MCP
-          2026-07-28, and Resource examples also reject ttlMs and cacheScope.
-          Sections 9.3, 10.4, 11.3, and 11.4 require this today, although the
-          open MCP Result accepts these properties.
-        resolution: planned
-        reference: Native openness proposal under issue #72
-      - revisions: ["2024-11-05", "2025-03-26"]
-        behavior: Same restriction as above.
-        resolution: not-fixed
+    notes: >-
+      MCP Description examples are stricter by design: fields that only a later
+      MCP revision defines, such as resultType, ttlMs, and cacheScope before
+      2026-07-28, are rejected by mcpdesc.example.result.revision-fidelity.

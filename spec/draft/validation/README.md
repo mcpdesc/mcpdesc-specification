@@ -18,7 +18,7 @@ validator does not consume the registry yet. Design background is tracked in
 | --- | --- | --- |
 | [`mcp-revisions.md`](mcp-revisions.md) | Introductory guide to how MCP structures used by MCP Description differ across supported protocol revisions | Initial version |
 | [`rule.schema.json`](rule.schema.json) | JSON Schema for rule registry files | Pilot |
-| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: five rules; checked by `scripts/test-validation-rules.mjs` |
+| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: seven rules; checked by `scripts/test-validation-rules.mjs` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas for supported revisions, with a provenance manifest (repository, path, commit, SHA-256, license) | Planned |
 
 The folder is part of the versioned specification: it is frozen with each
@@ -38,7 +38,7 @@ Every validated structure has exactly one owner:
 Knowing a field is not the same as the field being defined for a revision. A
 name that a later MCP revision standardizes is not invalid in an earlier
 revision whose structure permits it; it is preserved without the later
-semantics.
+semantics. Examples are stricter; see [Examples fail fast](#examples-fail-fast).
 
 Whether an MCP structure permits unknown fields is read from MCP's TypeScript
 schema: a type is open only if it declares or inherits an index signature, such
@@ -46,6 +46,30 @@ as `Result`. Fields of an open type that a revision does not define are
 preserved and are not interpreted beyond their presence. The generated MCP JSON
 Schema accepts unlisted properties for every type and is not evidence of
 openness.
+
+## Examples fail fast
+
+Examples are validated as part of conformance. An example that does not match
+the declaration it illustrates, or the completed result of every applicable MCP
+revision, makes the document invalid. Example correctness is not delegated to an
+optional linter or to severities chosen per organization.
+
+Rationale: in the OpenAPI ecosystem, documents commonly validate while their
+examples do not. The resulting misleading documentation rarely gets fixed,
+and consumers build workarounds around it. Failing when an example is
+introduced or its declaration changes forces the fix at the source.
+
+Consequently, an example result reproduces what a server implementing that
+revision returns. Fields that only a later revision defines, such as
+`resultType`, `ttlMs`, and `cacheScope` before MCP 2026-07-28, are rejected even
+though MCP's open `Result` would carry them. A declaration whose examples differ
+across revisions is split into protocol-scoped variants. Linters may add style
+and quality rules, but they do not relax example validity.
+
+Decided 2026-10-25 under
+[issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72),
+replacing a short-lived direction that would have moved example consistency to
+a linter.
 
 ## Rule records
 
