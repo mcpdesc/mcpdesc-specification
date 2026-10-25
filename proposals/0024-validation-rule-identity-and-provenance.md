@@ -217,9 +217,10 @@ arbitrations.
 
 Sources are ranked as follows, highest first:
 
-1. normative MCP specification text and accepted normative MCP proposals;
+1. normative MCP specification text, the MCP TypeScript schema
+   (`schema.ts`) for the revision, and accepted normative MCP proposals;
 2. normative referenced standards, such as JSON Schema;
-3. official MCP schemas for the revision;
+3. the MCP JSON Schema generated for the revision;
 4. official MCP clarifications;
 5. official SDKs and reference implementations;
 6. MCP Inspector and the official conformance framework;
@@ -228,6 +229,12 @@ Sources are ranked as follows, highest first:
 
 An `mcp` rule MUST cite at least one tier 1 to 3 source. Lower tiers can reveal
 ambiguity or defects but do not override a higher tier without an arbitration.
+
+Whether an MCP type accepts properties it does not list is determined by its
+TypeScript definition: the type is open only if it declares or inherits an
+index signature. The generated JSON Schema omits `additionalProperties: false`
+for closed types and is not evidence of openness. Unlisted fields of an open
+type are preserved and not interpreted beyond their presence.
 
 ### 8. Validation outcomes
 
@@ -279,10 +286,10 @@ applicability:
   2025-11-25: applies
   2026-07-28: not-applicable
 sources:
-  - tier: 3
-    reference: MCP 2025-11-25 schema, #/$defs/Tool/properties/outputSchema
-  - tier: 3
-    reference: MCP 2026-07-28 schema, #/$defs/Tool/properties/outputSchema
+  - tier: 1
+    reference: MCP 2025-06-18 and 2025-11-25 schema.ts, interface Tool, outputSchema (type "object")
+  - tier: 1
+    reference: MCP 2026-07-28 schema.ts, interface Tool, outputSchema (no root type)
 diagnostics:
   - code: field-not-supported-by-version
     severity: error

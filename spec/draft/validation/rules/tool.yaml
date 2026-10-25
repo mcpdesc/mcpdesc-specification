@@ -1,10 +1,10 @@
 rules:
-  - id: mcpdesc.tool.output-schema.revision-availability
-    owner: mcpdesc
-    summary: A Tool declares outputSchema only for MCP revisions that define Tool.outputSchema.
+  - id: mcp.tool.output-schema.revision-availability
+    owner: mcp
+    summary: A Tool declares outputSchema only for MCP revisions whose Tool type defines it.
     surface: Tool
     path: outputSchema
-    kind: mcpdesc-semantic
+    kind: structural
     applicability:
       "2024-11-05": applies
       "2025-03-26": applies
@@ -12,12 +12,12 @@ rules:
       "2025-11-25": not-applicable
       "2026-07-28": not-applicable
     sources:
+      - tier: 1
+        reference: MCP 2025-03-26 schema.ts, interface Tool (closed; no outputSchema)
+      - tier: 1
+        reference: MCP 2025-06-18 schema.ts, interface Tool, outputSchema
       - tier: 8
-        reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table, outputSchema since MCP 2025-06-18)
-      - tier: 3
-        reference: MCP 2025-03-26 schema, #/definitions/Tool (no outputSchema property)
-      - tier: 3
-        reference: MCP 2025-06-18 schema, #/definitions/Tool/properties/outputSchema
+        reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table)
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
@@ -25,11 +25,6 @@ rules:
     status: internal
     fixtures:
       - expected-invalid/output-schema-before-2025-06-18.json
-    notes: >-
-      Owned by MCP Description, not MCP: the official Tool schemas do not
-      restrict additional properties, so MCP itself does not reject the field in
-      earlier revisions. Whether MCP Description keeps this restriction is a
-      question for the native openness proposal under issue #72.
 
   - id: mcp.tool.output-schema.object-root
     owner: mcp
@@ -44,12 +39,10 @@ rules:
       "2025-11-25": applies
       "2026-07-28": not-applicable
     sources:
-      - tier: 3
-        reference: MCP 2025-06-18 schema, #/definitions/Tool/properties/outputSchema (type const object, required)
-      - tier: 3
-        reference: MCP 2025-11-25 schema, #/$defs/Tool/properties/outputSchema (type const object, required)
-      - tier: 3
-        reference: MCP 2026-07-28 schema, #/$defs/Tool/properties/outputSchema (no root type constraint)
+      - tier: 1
+        reference: MCP 2025-06-18 and 2025-11-25 schema.ts, interface Tool, outputSchema (type "object")
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, interface Tool, outputSchema (no root type)
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2
     diagnostics:
@@ -67,6 +60,50 @@ rules:
           non-object outputSchema reports this error in addition to the
           revision-availability error.
         resolution: not-fixed
+
+  - id: mcp.tool.schema-keywords.preserve
+    owner: mcp
+    summary: >-
+      Tool inputSchema and outputSchema are JSON Schema objects; keywords beyond
+      those MCP lists are permitted and preserved, and acquire MCP semantics
+      only where a revision defines them.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: preservation
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2025-11-25 schema.ts, interface Tool, inputSchema and outputSchema doc comments ("A JSON Schema object")
+      - tier: 1
+        reference: "MCP 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema (index signature [key: string]: unknown)"
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.2
+    diagnostics: []
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - expected-valid/custom-tool-schema-keywords.json
+      - expected-valid/revision-inapplicable-mcp-header.json
+    arbitrations:
+      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
+        conflict: >-
+          The TypeScript type of inputSchema (and outputSchema from 2025-06-18)
+          lists only type, properties, required, and from 2025-11-25 $schema,
+          with no index signature, while its doc comment defines the value as a
+          JSON Schema object.
+        authority: MCP schema.ts doc comment, consistent with MCP 2026-07-28
+        behavior: Accept and preserve any JSON Schema keyword in these revisions.
+        rationale: >-
+          A JSON Schema object admits any keyword. MCP 2026-07-28 makes this
+          explicit with an index signature, and rejecting keywords such as $defs
+          or $ref would reject Tools that MCP clients accept.
+        reviewTrigger: An upstream clarification or erratum for the earlier revisions.
+        status: active
 
   - id: mcp.tool.input-schema.x-mcp-header
     owner: mcp
@@ -86,8 +123,8 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2026-07-28 specification, Streamable HTTP transport, x-mcp-header validity and extraction rules
-      - tier: 3
-        reference: MCP 2026-07-28 schema, #/$defs/Tool/properties/inputSchema (description)
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, interface Tool, inputSchema doc comment
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2
     diagnostics:

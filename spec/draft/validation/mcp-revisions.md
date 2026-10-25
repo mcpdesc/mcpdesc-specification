@@ -5,10 +5,12 @@ change across the MCP protocol revisions it supports. It is written for
 newcomers and reviewers; it is non-normative and does not replace the MCP
 specification.
 
-Source: the official MCP schemas for each revision. The copies used to prepare
-this guide are not yet pinned to an upstream commit; the pinned copies and
-their provenance will live in `mcp-schemas/`. Where the schema and normative MCP
-text differ, normative text takes precedence.
+Source: the official MCP schemas at upstream commit
+`dae694f61a31f7a3ec2af3aff709e11f70f61e48` of
+`modelcontextprotocol/modelcontextprotocol` (2026-10-23). MCP defines its
+schema in TypeScript (`schema/<revision>/schema.ts`), which is the basis of its
+authoritative requirements, and generates `schema.json` from it. Where the two
+differ, the TypeScript schema and normative MCP text take precedence.
 
 Supported revisions: `2024-11-05`, `2025-03-26`, `2025-06-18`, `2025-11-25`,
 `2026-07-28`.
@@ -16,13 +18,15 @@ Supported revisions: `2024-11-05`, `2025-03-26`, `2025-06-18`, `2025-11-25`,
 ## How to read this guide
 
 - A field marked "required" must be present in that revision.
-- "Open" means the official schema accepts properties it does not list.
-  Openness is either **explicit** (the schema declares additional properties, or
-  MCP text says the set is not closed) or **schema default** (the schema simply
-  does not restrict additional properties). The difference matters for how MCP
-  Description treats unknown fields; see the [README](README.md).
-- A field missing from a revision is not defined by that revision. It is not
-  necessarily invalid there if the containing structure is open.
+- An **open** type accepts properties it does not list. A type is open only if
+  its TypeScript definition declares or inherits an index signature, such as
+  `[key: string]: unknown`. Every other type is **closed**: its listed fields are
+  the complete set for that revision.
+- The generated JSON Schema does not mark closed types with
+  `additionalProperties: false`, so it accepts unlisted properties even for
+  closed types. That is a generation artifact, not openness.
+- A field missing from a revision is not defined by that revision. In a closed
+  type it is not allowed; in an open type it is preserved without MCP meaning.
 
 ## Summary by revision
 
@@ -48,7 +52,8 @@ Supported revisions: `2024-11-05`, `2025-03-26`, `2025-06-18`, `2025-11-25`,
 | `execution` | — | — | — | yes | — |
 | `_meta` | — | — | yes | yes | yes |
 
-Tool is open by schema default in every revision.
+Tool is closed in every revision. Its extension point is `_meta`, from
+`2025-06-18`.
 
 ### Embedded schemas
 
@@ -62,14 +67,19 @@ Tool is open by schema default in every revision.
 
 Unknown keywords inside embedded schemas follow the JSON Schema dialect, not
 MCP Description: a keyword without MCP meaning in a revision is preserved, not
-rejected.
+rejected. Before `2026-07-28`, the TypeScript type of these schemas lists only
+`type`, `properties`, `required`, and from `2025-11-25` `$schema`, while its
+documentation calls the value a JSON Schema object. MCP Description follows the
+documentation, as `2026-07-28` does explicitly; see the arbitration in
+[`rules/tool.yaml`](rules/tool.yaml).
 
 ### Tool annotations
 
 `ToolAnnotations` (from `2025-03-26`) contains the hints `title`,
 `readOnlyHint`, `destructiveHint`, `idempotentHint`, and `openWorldHint`. The set
-is unchanged through `2026-07-28` and is open by schema default. These are
-hints, not guarantees.
+is unchanged through `2026-07-28` and the type is closed. These are hints, not
+guarantees. MCP Description 0.8.0 allows additional Tool Annotation properties,
+which is more permissive than MCP.
 
 ## Results
 
@@ -81,9 +91,9 @@ hints, not guarantees.
 | `CallToolResult.isError` | yes | yes | yes | yes | yes |
 | `CallToolResult.structuredContent` | — | — | yes (object) | yes (object) | yes (any JSON value) |
 
-`Result` is explicitly open in every revision. `2026-07-28` also adds caching
-fields such as `ttlMs` and `cacheScope` to specific results, for example
-resource reads.
+`Result` declares `[key: string]: unknown` in every revision, so every result
+type is open. `2026-07-28` also adds caching fields such as `ttlMs` and
+`cacheScope` to specific results, for example resource reads.
 
 ## Resources, resource templates, and prompts
 
@@ -95,7 +105,7 @@ resource reads.
 | `_meta` | — | — | yes | yes | yes |
 
 Resource requires `uri` and `name`; ResourceTemplate requires `uriTemplate` and
-`name`; Prompt requires `name`. All three are open by schema default.
+`name`; Prompt requires `name`. All three are closed.
 
 ### Common annotations
 
@@ -106,7 +116,9 @@ Resource requires `uri` and `name`; ResourceTemplate requires `uriTemplate` and
 | `lastModified` | — | — | yes |
 
 In `2024-11-05`, resource annotations are defined inline on each structure;
-from `2025-03-26` they use the shared `Annotations` type.
+from `2025-03-26` they use the shared `Annotations` type. Both are closed. MCP
+Description 0.8.0 allows additional annotation properties, which is more
+permissive than MCP.
 
 ## Capabilities
 
@@ -124,10 +136,13 @@ from `2025-03-26` they use the shared `Annotations` type.
 | `tasks` | — | — | — | yes | — |
 | `extensions` | — | — | — | — | yes |
 
-MCP text describes both capability sets as not closed: implementations may
-define additional capabilities. In `2026-07-28`, clients opt in to log messages
-per request instead of through `logging/setLevel`; MCP Description treats the
-`logging` server capability as deprecated for that revision and warns about it.
+The TypeScript capability types declare no index signature, but their
+documentation states that the set "is not a closed set: any server can define
+its own, additional capabilities". `experimental`, and from `2026-07-28`
+`extensions`, are open maps for that purpose. In `2026-07-28`, clients opt in to
+log messages per request instead of through `logging/setLevel`; MCP Description
+treats the `logging` server capability as deprecated for that revision and
+warns about it.
 
 ## Icons
 

@@ -13,8 +13,8 @@ rules:
       "2025-11-25": applies
       "2026-07-28": applies
     sources:
-      - tier: 3
-        reference: MCP 2024-11-05 through 2026-07-28 schemas, Result (additionalProperties allows any value)
+      - tier: 1
+        reference: "MCP 2024-11-05 to 2026-07-28 schema.ts, interface Result (index signature [key: string]: unknown, inherited by every result type)"
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.3 (completed Tool Result shape)
     diagnostics: []

@@ -40,6 +40,13 @@ name that a later MCP revision standardizes is not invalid in an earlier
 revision whose structure permits it; it is preserved without the later
 semantics.
 
+Whether an MCP structure permits unknown fields is read from MCP's TypeScript
+schema: a type is open only if it declares or inherits an index signature, such
+as `Result`. Fields of an open type that a revision does not define are
+preserved and are not interpreted beyond their presence. The generated MCP JSON
+Schema accepts unlisted properties for every type and is not evidence of
+openness.
+
 ## Rule records
 
 Each validation rule has a permanent identifier and a record:
