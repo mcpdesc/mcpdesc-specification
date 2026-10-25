@@ -852,7 +852,7 @@ function validateCompletionExamples(document) {
             diagnostics.push(semanticDiagnostic(
               'completion-example-version-mismatch',
               'error',
-              `${exampleLocation} is not defined for MCP ${version}`,
+              `${exampleLocation} is not supported by MCP Description for MCP ${version}`,
               examplePath
             ));
             continue;

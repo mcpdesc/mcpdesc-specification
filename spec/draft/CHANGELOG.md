@@ -41,6 +41,7 @@ Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-dra
 ### Validator corrections
 
 - Result `_meta` in Resource, Prompt, and completion examples is accepted for MCP 2024-11-05 and 2025-03-26, as it already was in Tool examples. MCP's `Result` defines `_meta` in every supported revision, and Section 3.5 already permitted it; Section 10.4.4 and the validator wrongly limited it to MCP 2025-06-18 and later. Resource Contents `_meta` remains limited to MCP 2025-06-18 and later. Added fixture `expected-warning/legacy-result-meta.json`.
+- Sections 10.4.6 and 11.4 now state that MCP Description does not support completion examples for MCP 2024-11-05, matching existing validator behavior. MCP 2024-11-05 defines `completion/complete`, so the `completion-example-version-mismatch` message now says "not supported by MCP Description" instead of "not defined for MCP". The limitation is recorded as a known defect in [`validation/mcp-revisions.md`](validation/mcp-revisions.md).
 - Structural (`schema-validation`) diagnostic paths report array indices as numbers, consistent with semantic diagnostic paths. Previously, indices below the document root were reported as strings, for example `["tools", "0", "inputSchema"]`.
 
 ## [0.8.0+editorial.1] — 2026-10-19

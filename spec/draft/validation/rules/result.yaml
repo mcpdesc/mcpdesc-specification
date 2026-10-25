@@ -16,7 +16,7 @@ rules:
       - tier: 1
         reference: "MCP 2024-11-05 schema.ts, interfaces CompleteRequest (method completion/complete) and CompleteResult; the ServerCapabilities.completions capability is added in MCP 2025-03-26"
       - tier: 8
-        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4 (no completion examples for MCP 2024-11-05)
     diagnostics:
       - code: completion-example-version-mismatch
         severity: error
