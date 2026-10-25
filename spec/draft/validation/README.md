@@ -38,7 +38,7 @@ Every validated structure has exactly one owner:
 Knowing a field is not the same as the field being defined for a revision. A
 name that a later MCP revision standardizes is not invalid in an earlier
 revision whose structure permits it; it is preserved without the later
-semantics. Examples are stricter; see [Examples fail fast](#examples-fail-fast).
+semantics. See also [Examples fail fast](#examples-fail-fast).
 
 Whether an MCP structure permits unknown fields is read from MCP's TypeScript
 schema: a type is open only if it declares or inherits an index signature, such
@@ -59,17 +59,33 @@ examples do not. The resulting misleading documentation rarely gets fixed,
 and consumers build workarounds around it. Failing when an example is
 introduced or its declaration changes forces the fix at the source.
 
-Consequently, an example result reproduces what a server implementing that
-revision returns. Fields that only a later revision defines, such as
-`resultType`, `ttlMs`, and `cacheScope` before MCP 2026-07-28, are rejected even
-though MCP's open `Result` would carry them. A declaration whose examples differ
-across revisions is split into protocol-scoped variants. Linters may add style
-and quality rules, but they do not relax example validity.
+"Incorrect" is measured against MCP's own types. For each applicable revision,
+the validator classifies every field of an example result:
+
+| Field | Outcome |
+| --- | --- |
+| Defined by the revision, valid | Accepted |
+| Defined by the revision, missing when required or invalid | Error |
+| Not defined by the revision, on an open type such as `Result` | Accepted, preserved without meaning, warning |
+| Not defined by the revision, on a closed type | Error |
+
+For example, `resultType` in a result for MCP 2025-11-25 is allowed by the open
+`Result` but has no meaning there, so it produces a warning. The warning applies
+even when the same example also serves MCP 2026-07-28, where `resultType` is
+required. Authors may accept the warning or split the declaration into
+protocol-scoped variants with separate examples. Unknown names such as a vendor
+field are treated the same way; MCP's extension point for such data is `_meta`.
+
+Warnings are attributed to a revision, so the warnings for a document equal the
+union of the warnings for its per-revision Effective Protocol Views. Linters
+may add style and quality rules, but they do not relax example validity.
 
 Decided 2026-10-25 under
 [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72),
 replacing a short-lived direction that would have moved example consistency to
-a linter.
+a linter. The warning outcome is not implemented yet; it is planned for the
+openness proposal, and current differences are recorded as rule gaps. Historical
+revisions keep current behavior.
 
 ## Rule records
 

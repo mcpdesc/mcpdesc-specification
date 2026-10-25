@@ -23,6 +23,19 @@ rules:
     fixtures:
       - expected-valid/open-result-unknown-properties.json
     notes: >-
-      MCP Description examples are stricter by design: fields that only a later
-      MCP revision defines, such as resultType, ttlMs, and cacheScope before
-      2026-07-28, are rejected by mcpdesc.example.result.revision-fidelity.
+      Planned outcome (Examples fail fast, validation README): undefined fields
+      are accepted with a warning attributed to the revision.
+    gaps:
+      - revisions: ["2025-06-18", "2025-11-25", "2026-07-28"]
+        behavior: >-
+          Fields not defined by the revision are accepted without a warning,
+          except that resultType before 2026-07-28, and ttlMs and cacheScope in
+          Resource examples before 2026-07-28, are rejected as errors.
+        resolution: planned
+        reference: Openness proposal under issue #72
+      - revisions: ["2024-11-05", "2025-03-26"]
+        behavior: >-
+          Same as above; in addition, undefined structuredContent is rejected
+          as an error, and result _meta is rejected although Result defines it
+          in these revisions.
+        resolution: not-fixed

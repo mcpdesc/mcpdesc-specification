@@ -2,9 +2,8 @@ rules:
   - id: mcpdesc.example.result.revision-fidelity
     owner: mcpdesc
     summary: >-
-      An example result reproduces the completed result of every applicable MCP
-      revision: it contains the fields that revision requires and no field that
-      only a later revision defines.
+      An example result contains every field that each applicable MCP revision
+      requires, and every field a revision defines has a valid value.
     surface: Example result
     kind: mcpdesc-semantic
     applicability:
@@ -41,6 +40,17 @@ rules:
       - expected-valid/named-tool-examples.json
       - expected-valid/named-resource-examples.json
     notes: >-
-      Deliberately stricter than MCP's open Result, which would carry later
-      fields without meaning. Declarations whose examples differ across
-      revisions are split into protocol-scoped variants.
+      Fields a revision does not define are governed by
+      mcp.result.additional-properties.preserve (accepted with a warning).
+    gaps:
+      - revisions: ["2025-06-18", "2025-11-25"]
+        behavior: >-
+          Also rejects resultType, and in Resource examples ttlMs and
+          cacheScope, although these revisions do not define them. Declarations
+          whose examples span MCP 2026-07-28 and an earlier revision must be
+          split.
+        resolution: planned
+        reference: Openness proposal under issue #72
+      - revisions: ["2024-11-05", "2025-03-26"]
+        behavior: Same as above.
+        resolution: not-fixed

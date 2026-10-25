@@ -35,7 +35,7 @@ Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-dra
 ### Validation rules (draft Proposal 0024; subject to review and possible incompatible change or removal)
 
 - Added a pilot validation rule registry: [`validation/rule.schema.json`](validation/rule.schema.json) and seven rule records under [`validation/rules/`](validation/rules/), covering Tool `outputSchema` availability and object root, Tool schema keyword preservation, `x-mcp-header`, open Result properties, example result revision fidelity, and document schema validation. The registry is non-normative until the proposal is accepted and does not change document conformance.
-- Recorded the "examples fail fast" principle in [`validation/README.md`](validation/README.md): example correctness, including revision fidelity, remains part of conformance rather than an optional linter concern.
+- Recorded the "examples fail fast" principle in [`validation/README.md`](validation/README.md): incorrect examples are conformance errors rather than an optional linter concern, measured against MCP's own types. Fields an applicable revision allows but does not define are planned to be accepted with a warning; until then, the differences are recorded as rule gaps.
 - Added fixtures `expected-invalid/output-schema-before-2025-06-18.json` and `expected-valid/open-result-unknown-properties.json` for revision boundaries not covered before.
 
 ### Validator corrections
