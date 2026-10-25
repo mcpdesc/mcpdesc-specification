@@ -36,6 +36,5 @@ rules:
       - revisions: ["2024-11-05", "2025-03-26"]
         behavior: >-
           Same as above; in addition, undefined structuredContent is rejected
-          as an error, and result _meta is rejected although Result defines it
-          in these revisions.
+          as an error.
         resolution: not-fixed

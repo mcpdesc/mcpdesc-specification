@@ -707,9 +707,6 @@ function validatePromptExamples(document) {
         if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
           diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType is not defined for MCP ${version}`, [...resultPath, 'resultType']));
         }
-        if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}._meta is not defined for MCP ${version}`, [...resultPath, '_meta']));
-        }
         (result.messages ?? []).forEach((message, messageIndex) => {
           const contentLocation = `${resultLocation}.messages[${messageIndex}].content`;
           const contentPath = [...resultPath, 'messages', messageIndex, 'content'];
@@ -770,14 +767,6 @@ function validateCompletionExampleResult(result, exampleLocation, examplePath, v
       'error',
       `${resultLocation}.resultType is not defined for MCP ${version}`,
       [...resultPath, 'resultType']
-    ));
-  }
-  if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic(
-      'completion-example-result-version-mismatch',
-      'error',
-      `${resultLocation}._meta is not defined for MCP ${version}`,
-      [...resultPath, '_meta']
     ));
   }
 }

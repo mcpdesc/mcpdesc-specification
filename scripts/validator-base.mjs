@@ -1292,9 +1292,6 @@ function validateCompletedResourceResult(result, scope, location, locationPath, 
         diagnostics.push(makeDiagnostic('resource-example-cache-fields-version-mismatch', 'error', `${location}.${cacheField} is not defined for MCP ${version}`, [...locationPath, cacheField]));
       }
     }
-    if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-      diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${location}._meta is not defined for MCP ${version}`, [...locationPath, '_meta']));
-    }
     (result.contents ?? []).forEach((content, contentIndex) => {
       if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
         diagnostics.push(makeDiagnostic('resource-example-content-version-mismatch', 'error', `${location}.contents[${contentIndex}]._meta is not defined for MCP ${version}`, [...locationPath, 'contents', contentIndex, '_meta']));

@@ -39,6 +39,7 @@ rules:
       - expected-invalid/invalid-completion-example-semantics.json
       - expected-valid/named-tool-examples.json
       - expected-valid/named-resource-examples.json
+      - expected-warning/legacy-result-meta.json
     notes: >-
       Fields a revision does not define are governed by
       mcp.result.additional-properties.preserve (accepted with a warning).

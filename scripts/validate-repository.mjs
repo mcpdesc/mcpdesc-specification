@@ -49,6 +49,7 @@ const expectedWarningCodesByFixture = new Map([
     'unknown-reserved-extension-identifier'
   ]],
   ['legacy-completion-examples.json', ['legacy-protocol-validation-incomplete']],
+  ['legacy-result-meta.json', ['legacy-protocol-validation-incomplete']],
   ['legacy-sse-modern-revision.json', [
     'legacy-protocol-validation-incomplete',
     'legacy-sse-for-modern-version'
