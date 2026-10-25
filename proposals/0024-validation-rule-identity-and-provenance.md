@@ -173,22 +173,23 @@ are not separately maintained.
 
 ### 4.1 Revision support tiers
 
-Rules are inventoried for every supported MCP revision, but the depth of
-correction and the validation approach depend on the revision's tier:
+Rules are inventoried for every supported MCP revision. A revision's tier sets
+the validation approach and whether a known defect may be left uncorrected:
 
-| Tier | MCP revisions | Inventory | Corrections | Validation approach |
+| Tier | MCP revisions | Inventory | Uncorrected defects | Validation approach |
 | --- | --- | --- | --- | --- |
-| Active | `2025-11-25`, `2026-07-28` | Complete | Applied | Rule-driven validation, extended by later 0.9.0 proposals |
-| Maintained | `2025-06-18` | Complete | Applied | Existing validator logic |
-| Historical | `2024-11-05`, `2025-03-26` | Complete | Not applied; recorded as `gaps` | Existing validator logic |
+| Active | `2025-11-25`, `2026-07-28` | Complete | Not allowed | Rule-driven validation, extended by later 0.9.0 proposals |
+| Maintained | `2025-06-18` | Complete | Not allowed | Existing validator logic |
+| Historical | `2024-11-05`, `2025-03-26` | Complete | Allowed; recorded as `not-fixed` gaps | Existing validator logic |
 
-A gap records a known difference between a rule and current validator behavior
-for historical revisions. Recording a gap does not change validator behavior.
-A maintainer MAY still apply a historical correction when it is low-risk and
-makes behavior consistent across revisions; result `_meta` in examples was
-corrected this way. If keeping the existing logic for historical revisions
-becomes too costly, those revisions move to the rule-driven approach after the
-active tier is complete.
+Tiers limit effort, not corrections. MCP Description 0.9.0 is a new version, so
+a defect found in any revision is corrected like any other normative change; for
+example, result `_meta` in examples was corrected for the historical revisions.
+A `not-fixed` gap records a historical defect deliberately left uncorrected,
+for example because correcting it in the existing logic would cost more than it
+is worth. Recording a gap does not change validator behavior. If keeping the
+existing logic for historical revisions becomes too costly, those revisions
+move to the rule-driven approach after the active tier is complete.
 
 ### 5. Diagnostics
 

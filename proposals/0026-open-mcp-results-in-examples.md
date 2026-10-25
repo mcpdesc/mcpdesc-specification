@@ -78,6 +78,10 @@ Observed behavior of the candidate validator on 2026-10-25:
 | Resource or Prompt, `acmeTrace` | 2025-11-25 | No diagnostic |
 | Completion, `completion.acme` | 2025-11-25 | No diagnostic |
 | Tool, unknown field in a text content block | 2025-11-25 | Error `schema-validation` |
+| Interaction step response (sampling, elicitation, roots), `acmeTrace` or `_meta` | 2025-11-25 | Error `schema-validation` |
+
+The last row is stricter than MCP: up to MCP 2025-11-25, these responses extend
+the open `Result`, which also defines `_meta`.
 
 A related inconsistency, result `_meta` rejected before MCP 2025-06-18 in
 Resource, Prompt, and completion examples but accepted in Tool examples, was
@@ -129,6 +133,19 @@ Top-level fields of the result types carried by examples, besides `_meta`, which
 | `GetPromptResult` | `description`, `messages` | same | same, plus `resultType` |
 | `CompleteResult` | `completion` (closed: `values`, `total`, `hasMore`) | same | same, plus `resultType` |
 
+Responses carried by Tool Interaction steps change openness in MCP 2026-07-28,
+where they become input responses (`InputResponse`) embedded in the next request
+instead of results:
+
+| Response type | 2024-11-05 to 2025-11-25 | 2026-07-28 |
+| --- | --- | --- |
+| `CreateMessageResult` (sampling) | extends `Result`: open, `_meta` defined | extends `SamplingMessage` only: closed, `_meta` defined |
+| `ElicitResult` (from 2025-06-18) | extends `Result`: open, `_meta` defined | closed, no `_meta` |
+| `ListRootsResult` | extends `Result`: open, `_meta` defined | closed, no `_meta` |
+
+Nested types such as `Root`, `SamplingMessage`, and content blocks are closed in
+every revision.
+
 Section 14 already states that `x-*` keys are not MCP Description
 specification extensions inside carried MCP results; such keys follow the MCP
 type, so they are classified like any other field name.
@@ -137,11 +154,14 @@ type, so they are classified like any other field name.
 
 ### 1. Field classification
 
-The rules below apply to every MCP result carried by an example: Tool Example
-`result`, Tool Interaction Example terminal `result`, Resource and Resource
+The rules below apply to every MCP value carried by an example whose type is
+derived from MCP's `Result` in at least one supported revision: Tool Example
+`result`, Tool Interaction Example terminal `result`, Tool Interaction step
+`response` values for sampling, elicitation, and roots, Resource and Resource
 Template Example `result`, Prompt Example `result`, and completion example
 `result`, including values reached through component references. They apply to
-each MCP revision in the containing declaration's effective protocol scope.
+each MCP revision in the containing declaration's effective protocol scope,
+using that revision's type for the value.
 
 For each revision:
 
@@ -201,9 +221,9 @@ Effective Protocol Views.
 ### 6. Revision tiers
 
 This behavior applies to every supported revision, including the historical
-revisions `2024-11-05` and `2025-03-26`. This applies the low-risk historical
-correction allowance of Proposal 0024, Section 4.1: one rule and one code path,
-and symmetric behavior across revisions.
+revisions `2024-11-05` and `2025-03-26`. Correcting historical revisions is an
+ordinary normative change in 0.9.0 (Proposal 0024, Section 4.1), and one rule
+with one code path keeps behavior symmetric across revisions.
 
 ### 7. Specification text
 
@@ -221,9 +241,14 @@ and symmetric behavior across revisions.
 
 The 0.9.0 schema already accepts additional properties on example result
 objects and enforces the value constraints in Section 2 regardless of revision.
-One change: the `completion` object in completion example results becomes
-closed (`additionalProperties: false`), matching `CompleteResult` in every
-revision.
+Two changes:
+
+- the `completion` object in completion example results becomes closed
+  (`additionalProperties: false`), matching `CompleteResult` in every revision;
+- Tool Interaction step responses for sampling, elicitation, and roots accept
+  additional properties in the schema; the validator rejects them for MCP
+  2026-07-28, where those types are closed, and applies the classification for
+  earlier revisions.
 
 ## Examples
 
@@ -268,6 +293,12 @@ Other cases, for a result in MCP 2025-11-25:
 | `completion: {values: [a], acme: 1}` | Error: `completion` is closed |
 | `jsonrpc: "2.0"` | Error: JSON-RPC envelope, unchanged |
 
+For an elicitation step response in a Tool scoped to MCP 2025-11-25 and
+2026-07-28, `_meta` is accepted for 2025-11-25, where `ElicitResult` extends
+`Result`, and is an error for 2026-07-28, where `ElicitResult` is closed and has
+no `_meta`. An unknown field produces a warning for 2025-11-25 and an error for
+2026-07-28.
+
 ## Compatibility
 
 For documents:
@@ -280,6 +311,10 @@ For documents:
 - Documents with extra fields inside a completion result's `completion` object
   become invalid. This is a breaking change, consistent with fail fast, because
   `completion` is closed in every MCP revision.
+- Tool Interaction step responses for revisions up to MCP 2025-11-25 accept
+  `_meta` and, with warnings, unknown fields. Responses for MCP 2026-07-28 keep
+  rejecting unknown fields; `_meta` becomes accepted on sampling responses only,
+  where `SamplingMessage` defines it.
 
 For implementations:
 
@@ -341,12 +376,7 @@ are valid. It can be proposed separately if demand appears.
 
 ## Open questions
 
-1. Should the value constraints in Section 2 stay revision-independent, or
-   apply only in revisions that define the field?
-2. Should the same classification apply to native responses in Tool Interaction
-   steps (sampling, elicitation, and roots results), which also extend `Result`?
-   Current behavior for those responses still needs to be inventoried.
-3. One shared warning code, as proposed, or one code per example kind, matching
+1. One shared warning code, as proposed, or one code per example kind, matching
    existing codes such as `tool-example-result-version-mismatch`?
 
 ## Implementation and validation plan
@@ -356,8 +386,10 @@ are valid. It can be proposed separately if demand appears.
    review-stage content.
 2. Validator: derive per-revision defined fields for each carried result type
    from the pinned TypeScript schemas; replace the affected "not defined" errors
-   with the warning; add the warning for unknown names; close `completion`.
-3. Schema: close the `completion` object in completion example results.
+   with the warning; add the warning for unknown names; close `completion`;
+   classify step responses per revision.
+3. Schema: close the `completion` object in completion example results, and
+   open step response objects (Schema impact).
 4. Registry: give `mcp.result.additional-properties.preserve` the new diagnostic
    and fixtures, and remove the planned gaps from it and from
    `mcpdesc.example.result.revision-fidelity`.
@@ -385,3 +417,7 @@ are valid. It can be proposed separately if demand appears.
   shared with a revision that defines them.
 - 2026-10-25: Result `_meta` in examples accepted in every supported revision,
   implemented separately as a correction.
+- 2026-10-25: Accepted: closing `completion` (breaking) and keeping the value
+  constraints of Section 2 revision-independent.
+- 2026-10-25: Tool Interaction step responses are in scope, classified with
+  each revision's TypeScript type, including their closure in MCP 2026-07-28.
