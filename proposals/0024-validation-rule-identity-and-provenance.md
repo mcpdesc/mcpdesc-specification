@@ -184,9 +184,11 @@ correction and the validation approach depend on the revision's tier:
 
 A gap records a known difference between a rule and current validator behavior
 for historical revisions. Recording a gap does not change validator behavior.
-If keeping the existing logic for historical revisions becomes too costly,
-those revisions move to the rule-driven approach after the active tier is
-complete.
+A maintainer MAY still apply a historical correction when it is low-risk and
+makes behavior consistent across revisions; result `_meta` in examples was
+corrected this way. If keeping the existing logic for historical revisions
+becomes too costly, those revisions move to the rule-driven approach after the
+active tier is complete.
 
 ### 5. Diagnostics
 
