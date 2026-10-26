@@ -61,3 +61,35 @@ rules:
     notes: >-
       lastModified is defined from MCP 2025-06-18; that boundary is checked
       separately.
+
+  - id: mcp.annotations.last-modified.revision-availability
+    owner: mcp
+    summary: >-
+      Resource Annotations carry lastModified only from MCP 2025-06-18, on
+      declarations and on content blocks.
+    surface: Annotations
+    path: lastModified
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 and 2025-03-26 schema.ts, annotations (audience, priority); MCP 2025-06-18 to 2026-07-28 schema.ts, interface Annotations (adds lastModified)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 10.3
+    diagnostics:
+      - code: resource-annotation-not-supported-by-version
+        severity: error
+      - code: tool-example-content-version-mismatch
+        severity: error
+      - code: prompt-example-content-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/annotations-last-modified-before-2025-06-18.json

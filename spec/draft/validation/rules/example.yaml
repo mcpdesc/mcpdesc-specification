@@ -44,3 +44,53 @@ rules:
       mcp.result.additional-properties.preserve (accepted with a warning).
       When present, resultType must be "complete", ttlMs non-negative, and
       cacheScope "public" or "private" in every revision (document schema).
+
+  - id: mcpdesc.example.completed-result-form
+    owner: mcpdesc
+    summary: >-
+      An example result is a completed result payload: it contains no JSON-RPC
+      envelope field and no non-completed workflow field.
+    surface: Example result
+    kind: mcpdesc-semantic
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, InputRequiredResult (inputRequests, requestState) and Result.resultType
+      - tier: 1
+        reference: MCP 2025-11-25 schema.ts, CreateTaskResult (task)
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 3.6, 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
+    diagnostics:
+      - code: tool-example-json-rpc-envelope
+        severity: error
+      - code: prompt-example-json-rpc-envelope
+        severity: error
+      - code: resource-example-json-rpc-envelope
+        severity: error
+      - code: completion-example-json-rpc-envelope
+        severity: error
+      - code: incomplete-tool-example-result
+        severity: error
+      - code: incomplete-prompt-example-result
+        severity: error
+      - code: incomplete-resource-example-result
+        severity: error
+      - code: incomplete-completion-example-result
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-tool-example-result-semantics.json
+      - expected-invalid/invalid-prompt-example-semantics.json
+      - expected-invalid/resource-example-result-semantics.json
+      - expected-invalid/invalid-completion-example-semantics.json
+    notes: >-
+      Envelope fields are jsonrpc, id, and error. Non-completed workflow
+      fields are task, inputRequests, and requestState. They are excluded from
+      the field classification of mcp.result.additional-properties.preserve.

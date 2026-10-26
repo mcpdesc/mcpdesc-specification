@@ -190,3 +190,177 @@ rules:
       - expected-invalid/invalid-mcp-header-value.json
       - expected-invalid/invalid-mcp-header-placement.json
       - expected-invalid/duplicate-mcp-header.json
+
+  - id: json-schema.tool-schema.valid
+    owner: json-schema
+    summary: >-
+      An embedded Tool inputSchema or outputSchema is valid under its declared
+      or default JSON Schema dialect, and that dialect is one the validator
+      supports.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: embedded-standard
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": not-applicable
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-11-25 and 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema doc comments (default JSON Schema 2020-12 when $schema is absent)
+      - tier: 2
+        reference: JSON Schema 2020-12 Core and Validation, and draft-07, for the declared dialect
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.2 (reject unsupported dialects; never fetch external $ref targets; warn when validation is incomplete)
+    diagnostics:
+      - code: invalid-tool-schema
+        severity: error
+      - code: unsupported-tool-schema-dialect
+        severity: error
+      - code: unresolved-external-tool-schema-reference
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/malformed-tool-schema.json
+      - expected-invalid/unresolved-local-tool-ref.json
+      - expected-invalid/unsupported-tool-schema-dialect.json
+      - expected-warning/unresolved-external-tool-ref.json
+      - expected-warning/unresolved-external-tool-example-ref.json
+    notes: >-
+      The validator supports JSON Schema 2020-12 and draft-07. Earlier
+      revisions define no embedded dialect; mcp.tool.schema.legacy-shape
+      applies there instead.
+
+  - id: mcp.tool.schema.legacy-shape
+    owner: mcp
+    summary: >-
+      Before MCP 2025-11-25, Tool schema properties is an object of objects
+      and required is an array of strings; other keywords are preserved.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": not-applicable
+      "2026-07-28": not-applicable
+    sources:
+      - tier: 1
+        reference: "MCP 2024-11-05 to 2025-06-18 schema.ts, interface Tool, inputSchema (and outputSchema from 2025-06-18): properties?: { [key: string]: object }, required?: string[]"
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.2
+    diagnostics:
+      - code: invalid-legacy-tool-schema-shape
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/malformed-pre-dialect-tool-schema-shape.json
+    notes: >-
+      From MCP 2025-11-25 the embedded dialect governs these keywords
+      (json-schema.tool-schema.valid).
+
+  - id: mcp.tool.structured-content.output-schema
+    owner: mcp
+    summary: >-
+      When a Tool declares outputSchema, a successful result contains
+      structuredContent.
+    surface: CallToolResult
+    path: structuredContent
+    kind: semantic
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema ("Servers MUST provide structured results that conform to this schema")
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.3
+    diagnostics:
+      - code: missing-tool-example-structured-content
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-tool-example-result-semantics.json
+      - expected-invalid/invalid-tool-interaction-example-semantics.json
+    notes: >-
+      Conformance of structuredContent to outputSchema is checked by
+      mcpdesc.tool.example.schema-conformance. Error results are governed by
+      mcpdesc.tool.example.error-result.
+
+  - id: mcpdesc.tool.example.schema-conformance
+    owner: mcpdesc
+    summary: >-
+      A Tool example input validates against inputSchema, and its
+      structuredContent against outputSchema, for every applicable revision;
+      incomplete validation is reported.
+    surface: Tool example
+    path: examples, interactionExamples
+    kind: mcpdesc-semantic
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema (structured results conform to outputSchema)
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 9.2, 9.3, and 9.4
+    diagnostics:
+      - code: tool-example-schema-mismatch
+        severity: error
+      - code: incomplete-tool-example-validation
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/tool-example-schema-mismatches.json
+      - expected-invalid/component-contextual-examples.json
+      - expected-warning/pre-dialect-tool-example.json
+      - expected-warning/unresolved-external-tool-example-ref.json
+    notes: >-
+      Before MCP 2025-11-25 no embedded dialect is defined, so only the
+      legacy shape is checked and the warning reports the gap.
+
+  - id: mcpdesc.tool.example.error-result
+    owner: mcpdesc
+    summary: >-
+      A Tool execution-error example result sets isError to true and does not
+      contain structuredContent.
+    surface: Tool example
+    path: result
+    kind: mcpdesc-semantic
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
+    diagnostics:
+      - code: structured-tool-error-example
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-tool-example-result-semantics.json
+    notes: >-
+      MCP does not forbid structuredContent on error results; MCP Description
+      requires its absence so that example structuredContent always conforms
+      to outputSchema.
