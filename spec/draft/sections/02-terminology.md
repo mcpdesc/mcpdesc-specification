@@ -59,3 +59,5 @@ Examples, code excerpts, guides, and other companion documents are informative u
 
 Repository fixtures are test artifacts rather than independent sources of requirements. Their directory identifies whether the repository validator expects them to be valid, invalid, or valid with warnings. If a fixture conflicts with the specification, the fixture or implementation must be corrected.
 
+A citation of the form (rule `<id>`) identifies the validation rule that checks the preceding requirement; validator diagnostics carry the same identifier. Citations are informative: the requirement text governs. The [rule table](../validation/rules.md) lists every rule.
+
