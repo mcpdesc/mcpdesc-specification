@@ -12,8 +12,15 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 schema.ts, interface ElicitResult, content (present for accepted form responses)
+        locations:
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1538-L1557
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2466-L2486
+          - validation/mcp-schemas/2026-07-28/schema.ts#L3120-L3149
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-elicitation-declaration
+          - sections/09-tools.md#req-interaction-elicitation-response
     diagnostics:
       - code: unknown-elicitation-declaration
         severity: error
@@ -26,8 +33,10 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/invalid-tool-interaction-example-semantics.json
-      - expected-valid/named-tool-interaction-examples.json
+      - path: expected-invalid/invalid-tool-interaction-example-semantics.json
+        pointer: /tools/0/interactionExamples/broken/steps/0
+      - path: expected-valid/named-tool-interaction-examples.json
+        pointer: /tools/0/interactionExamples
 
   - id: mcpdesc.tool.interaction.client-requirements-consistency
     owner: mcpdesc
@@ -41,13 +50,16 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Sections 8.5 and 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-client-requirements-warning
     diagnostics:
       - code: interaction-example-client-requirements-contradiction
         severity: warning
     enforcement: internal
     status: internal
     fixtures:
-      - expected-warning/tool-interaction-client-requirements-contradictions.json
+      - path: expected-warning/tool-interaction-client-requirements-contradictions.json
+        pointer: /tools/0/interactionExamples/contradictory/steps/0
     notes: Steps never create requirements; the warning reports a contradiction only.
 
   - id: mcp.sampling.tools.revision-availability
@@ -67,15 +79,22 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-06-18 schema.ts, CreateMessageRequest (no tools); MCP 2025-11-25 and 2026-07-28 schema.ts, CreateMessageRequestParams tools and toolChoice
+        locations:
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1028-L1065
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1573-L1622
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2086-L2152
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-sampling-revision
     diagnostics:
       - code: interaction-example-version-mismatch
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/invalid-tool-interaction-example-semantics.json
+      - path: expected-invalid/invalid-tool-interaction-example-semantics.json
+        pointer: /tools/0/interactionExamples/broken/steps/2/request
 
   - id: mcp.root.uri.file-scheme
     owner: mcp
@@ -93,14 +112,25 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface Root, uri ("This *must* start with file:// for now")
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L1045-L1052
+          - validation/mcp-schemas/2025-03-26/schema.ts#L1186-L1193
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1421-L1428
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2117-L2124
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2759-L2766
       - tier: 1
         reference: MCP 2026-07-28 specification, Client Features, Roots, Data Types (uri MUST be a file:// URI)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/client/roots.mdx#L100-L102
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-revision-valid
     diagnostics:
       - code: interaction-example-roots-uri
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/invalid-tool-interaction-example-semantics.json
+      - path: expected-invalid/invalid-tool-interaction-example-semantics.json
+        pointer: /tools/0/interactionExamples/broken/steps/3/response/roots/0

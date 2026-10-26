@@ -149,12 +149,38 @@ Each validation rule has a permanent identifier and a record:
 | `kind` | structural, semantic, preservation, embedded-standard, mcpdesc-semantic, completeness, or interoperability |
 | `requirement` | Requirement level of the source: must, should, or may |
 | `applicability` | Behavior per supported MCP revision |
-| `sources` | Normative MCP text, official schema, or other evidence, by authority tier |
+| `sources` | Normative MCP text, official schema, or other evidence, by authority tier, each with precise `locations` (see below) |
 | `diagnostics` | Diagnostic codes emitted |
 | `enforcement` | Internal check, official schema, or external validator |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
-| `fixtures` | Tests covering each revision boundary |
+| `fixtures` | Tests covering each revision boundary: a fixture `path` and a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document) |
 | `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
+
+Source `locations` are immutable and relative to the specification folder:
+
+| Source | Location form |
+| --- | --- |
+| MCP `schema.ts` (tier 1) | `validation/mcp-schemas/<revision>/schema.ts#L<from>-L<to>` in the vendored copy |
+| MCP specification text (tier 1) | GitHub permalink at the pinned MCP commit, with a line range |
+| Referenced standards (tier 2), SEPs (tier 4) | HTTPS URL to the section |
+| MCP Description requirement (tier 8) | `sections/<file>.md#req-<topic>` |
+| MCP Description decisions (tier 8) | `validation/<file>.md#<heading>`, a proposal snapshot, or a released proposal |
+
+Every rule cites at least one MCP Description requirement: a tier 8 source
+located at a requirement anchor. A requirement anchor is an
+`<a id="req-<topic>"></a>` element placed in the section source immediately
+before the requirement sentence. Its identifier names the requirement, not a
+rule, and is permanent: one sentence can be checked by several rules, and one
+rule can check several sentences.
+
+Fixture pointers select the fragment of the fixture document that a reader
+needs. For an invalid or warning fixture, the pointer contains a diagnostic
+of the rule. When the fragment is a reusable component, the pointer selects
+the component value under `/components/`, because diagnostics are reported
+at use sites.
+
+`scripts/test-validation-rules.mjs` resolves every location, anchor, and
+pointer, and reports how many requirement anchors rules cite.
 
 Rules are anchored to the MCP type, not to where MCP Description carries it.
 For example, one rule covers `Annotations.lastModified` wherever annotations

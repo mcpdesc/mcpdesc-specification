@@ -14,15 +14,20 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-03-26 specification, Basic, Transports, Streamable HTTP (replaces HTTP+SSE from 2024-11-05)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L50-L277
       - tier: 8
         reference: MCP Description 0.9.0, Section 6.2
+        locations:
+          - sections/06-transports.md#req-transport-streamable-http-revisions
     diagnostics:
       - code: transport-not-supported-by-version
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/revision-inapplicable-streamable-http.json
+      - path: expected-invalid/revision-inapplicable-streamable-http.json
+        pointer: /transports/0
 
   - id: mcp.transport.legacy-sse.deprecated
     owner: mcp
@@ -41,15 +46,20 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-03-26 specification, Basic, Transports, Backwards Compatibility (deprecated HTTP+SSE transport)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L250-L277
       - tier: 8
         reference: MCP Description 0.9.0, Section 6.2
+        locations:
+          - sections/06-transports.md#req-transport-legacy-sse-warning
     diagnostics:
       - code: legacy-sse-for-modern-version
         severity: warning
     enforcement: internal
     status: internal
     fixtures:
-      - expected-warning/legacy-sse-modern-revision.json
+      - path: expected-warning/legacy-sse-modern-revision.json
+        pointer: /transports/0
 
   - id: mcpdesc.transports.coverage
     owner: mcpdesc
@@ -63,11 +73,15 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Section 6.5
+        locations:
+          - sections/06-transports.md#req-transport-coverage
     diagnostics:
       - code: transport-coverage-gap
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/root-version-without-transport.json
-      - expected-invalid/scoped-version-not-in-root.json
+      - path: expected-invalid/root-version-without-transport.json
+        pointer: /protocolVersions
+      - path: expected-invalid/scoped-version-not-in-root.json
+        pointer: /protocolVersions

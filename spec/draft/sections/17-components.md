@@ -24,7 +24,7 @@ A Reference Object contains exactly one required property:
 |----------|------|-------------|
 | `$componentRef` | string | Local JSON Pointer to one named value in the compatible `#/components` namespace. |
 
-No sibling property, including an `x-*` property, is permitted. The pointer MUST have the form `#/components/<namespace>/<name>`, where `<namespace>` is one of the five namespaces in Section 17.1 and `<name>` follows the component-name grammar. Remote URIs, relative-file references, pointers outside `#/components`, missing targets, and targets in an incompatible namespace are invalid.
+No sibling property, including an `x-*` property, is permitted. <a id="req-component-reference-form"></a>The pointer MUST have the form `#/components/<namespace>/<name>`, where `<namespace>` is one of the five namespaces in Section 17.1 and `<name>` follows the component-name grammar. Remote URIs, relative-file references, pointers outside `#/components`, missing targets, and targets in an incompatible namespace are invalid.
 
 A `$componentRef` is an MCP Description reference only at a use site that permits a Reference Object. JSON Schema `$ref` remains governed exclusively by the applicable embedded JSON Schema dialect. Implementations MUST NOT accept `$ref` as an MCP Description component reference and MUST NOT reinterpret a `$componentRef` nested inside an embedded JSON Schema.
 
@@ -40,7 +40,7 @@ Resolution substitutes the referenced JSON value before every contextual structu
 
 ### 17.4 Resolution
 
-A conforming implementation MUST resolve Reference Objects as JSON Pointers into the same parsed MCP Description document. It MUST require the target to exist in the namespace appropriate to the use site, preserve the target JSON value for validation, follow component-to-component references transitively, and reject cycles. It MUST NOT access the network, filesystem, package registry, or another document while resolving `$componentRef`.
+A conforming implementation MUST resolve Reference Objects as JSON Pointers into the same parsed MCP Description document. <a id="req-component-reference-resolution"></a>It MUST require the target to exist in the namespace appropriate to the use site, preserve the target JSON value for validation, follow component-to-component references transitively, and reject cycles. It MUST NOT access the network, filesystem, package registry, or another document while resolving `$componentRef`.
 
 Resolution errors are document-conformance errors. A validator SHOULD report the use-site or component path and distinguish a malformed pointer, missing target, incompatible namespace, and cycle.
 

@@ -10,14 +10,20 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Section 16.1, item 7
+        locations:
+          - sections/16-conformance.md#req-document-schema
+          - sections/03-document-structure.md#req-closed-objects
+          - sections/09-tools.md#req-tool-input-schema-required
     diagnostics:
       - code: schema-validation
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/missing-tool-input-schema.json
-      - expected-invalid/object-level-unknown-property.json
+      - path: expected-invalid/missing-tool-input-schema.json
+        pointer: /tools/0
+      - path: expected-invalid/object-level-unknown-property.json
+        pointer: /tools/0
 
   - id: mcp.declaration.field.revision-availability
     owner: mcp
@@ -38,16 +44,57 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interfaces BaseMetadata, Icons, Tool, Resource, ResourceTemplate, Prompt, PromptArgument, and ServerCapabilities
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L684-L704
+          - validation/mcp-schemas/2025-03-26/schema.ts#L781-L810
+          - validation/mcp-schemas/2025-06-18/schema.ts#L925-L968
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1244-L1297
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1956-L2015
+          - validation/mcp-schemas/2025-06-18/schema.ts#L304-L324
+          - validation/mcp-schemas/2025-11-25/schema.ts#L523-L543
+          - validation/mcp-schemas/2026-07-28/schema.ts#L949-L969
+          - validation/mcp-schemas/2025-11-25/schema.ts#L503-L521
+          - validation/mcp-schemas/2026-07-28/schema.ts#L929-L947
+          - validation/mcp-schemas/2024-11-05/schema.ts#L414-L450
+          - validation/mcp-schemas/2025-03-26/schema.ts#L442-L483
+          - validation/mcp-schemas/2025-06-18/schema.ts#L521-L562
+          - validation/mcp-schemas/2025-11-25/schema.ts#L797-L838
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1433-L1474
+          - validation/mcp-schemas/2024-11-05/schema.ts#L452-L481
+          - validation/mcp-schemas/2025-03-26/schema.ts#L485-L519
+          - validation/mcp-schemas/2025-06-18/schema.ts#L564-L598
+          - validation/mcp-schemas/2025-11-25/schema.ts#L840-L874
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1476-L1507
+          - validation/mcp-schemas/2024-11-05/schema.ts#L558-L574
+          - validation/mcp-schemas/2025-03-26/schema.ts#L596-L612
+          - validation/mcp-schemas/2025-06-18/schema.ts#L696-L715
+          - validation/mcp-schemas/2025-11-25/schema.ts#L979-L999
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1654-L1671
+          - validation/mcp-schemas/2024-11-05/schema.ts#L576-L592
+          - validation/mcp-schemas/2025-03-26/schema.ts#L614-L630
+          - validation/mcp-schemas/2025-06-18/schema.ts#L717-L731
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1001-L1015
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1673-L1687
+          - validation/mcp-schemas/2024-11-05/schema.ts#L205-L248
+          - validation/mcp-schemas/2025-03-26/schema.ts#L225-L272
+          - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
+          - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
+          - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
       - tier: 8
         reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
+        locations:
+          - sections/04-versioning.md#req-field-revision-availability
+          - sections/09-tools.md#req-tool-schema-dialect-keyword
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/revision-inapplicable-execution.json
-      - expected-invalid/revision-inapplicable-tool-schema-dialect.json
+      - path: expected-invalid/revision-inapplicable-execution.json
+        pointer: /tools/0
+      - path: expected-invalid/revision-inapplicable-tool-schema-dialect.json
+        pointer: /tools/0/inputSchema
     notes: >-
       outputSchema, the outputSchema root, and the tasks capability have their
       own rules; the rule property identifies which applies.
@@ -64,6 +111,11 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Sections 4.10 and 8.6
+        locations:
+          - sections/04-versioning.md#req-scope-subset
+          - sections/08-capabilities.md#req-capability-scopes-disjoint
+          - sections/09-tools.md#req-tool-names-disjoint
+          - sections/12-elicitation.md#req-elicitation-scope
     diagnostics:
       - code: protocol-scope-outside-parent
         severity: error
@@ -74,10 +126,14 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/elicitation-scope-outside-parent.json
-      - expected-invalid/scoped-version-not-in-root.json
-      - expected-invalid/overlapping-tool-scope.json
-      - expected-invalid/overlapping-capabilities.json
+      - path: expected-invalid/elicitation-scope-outside-parent.json
+        pointer: /resourceTemplates/0/elicitations/0
+      - path: expected-invalid/scoped-version-not-in-root.json
+        pointer: /transports/0
+      - path: expected-invalid/overlapping-tool-scope.json
+        pointer: /tools/1
+      - path: expected-invalid/overlapping-capabilities.json
+        pointer: /capabilities/0
 
   - id: mcpdesc.tags.references
     owner: mcpdesc
@@ -88,6 +144,9 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Sections 13.2 and 13.3
+        locations:
+          - sections/13-tags.md#req-tags-unique
+          - sections/13-tags.md#req-tags-references
     diagnostics:
       - code: duplicate-root-tag
         severity: error
@@ -96,8 +155,10 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/duplicate-root-tag.json
-      - expected-invalid/duplicate-tag-reference.json
+      - path: expected-invalid/duplicate-root-tag.json
+        pointer: /tags/1
+      - path: expected-invalid/duplicate-tag-reference.json
+        pointer: /tools/0/tags
 
   - id: mcpdesc.security.requirements
     owner: mcpdesc
@@ -111,6 +172,11 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Sections 7.1 to 7.3
+        locations:
+          - sections/07-security.md#req-security-scheme-references
+          - sections/07-security.md#req-security-scopes-unique
+          - sections/07-security.md#req-security-scopes-oauth-only
+          - sections/07-security.md#req-security-uncatalogued-scope
     diagnostics:
       - code: unknown-security-scheme
         severity: error
@@ -125,11 +191,16 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/unknown-security-reference.json
-      - expected-invalid/non-oauth-scopes.json
-      - expected-invalid/duplicate-security-scope.json
-      - expected-warning/uncatalogued-oauth-scope.json
-      - expected-warning/uncatalogued-openid-scope.json
+      - path: expected-invalid/unknown-security-reference.json
+        pointer: /security/0
+      - path: expected-invalid/non-oauth-scopes.json
+        pointer: /security/0
+      - path: expected-invalid/duplicate-security-scope.json
+        pointer: /security/0
+      - path: expected-warning/uncatalogued-oauth-scope.json
+        pointer: /tools/0/security/0/oauth
+      - path: expected-warning/uncatalogued-openid-scope.json
+        pointer: /security/0/oidc
     notes: >-
       The document schema rejects duplicate scopes first (schema-validation);
       duplicate-security-scope applies to callers of the semantic validator
@@ -147,6 +218,10 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Sections 17.2 to 17.4
+        locations:
+          - sections/17-components.md#req-component-reference-form
+          - sections/17-components.md#req-component-reference-resolution
+          - sections/09-tools.md#req-tool-schema-references-resolved
     diagnostics:
       - code: missing-component-reference-target
         severity: error
@@ -157,7 +232,8 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/component-reference-resolution.json
+      - path: expected-invalid/component-reference-resolution.json
+        pointer: /components/schemas
 
   - id: mcpdesc.legacy-revisions.validation-scope
     owner: mcpdesc
@@ -172,10 +248,14 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1 (revision tiers)
+        locations:
+          - sections/16-conformance.md#req-legacy-validation-scope
+          - proposal-snapshots/0024-validation-rule-identity-and-provenance.md
     diagnostics:
       - code: legacy-protocol-validation-incomplete
         severity: warning
     enforcement: internal
     status: internal
     fixtures:
-      - expected-warning/legacy-result-meta.json
+      - path: expected-warning/legacy-result-meta.json
+        pointer: /protocolVersions

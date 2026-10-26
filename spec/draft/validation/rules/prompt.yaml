@@ -11,8 +11,16 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface PromptArgument, required ("Whether this argument must be provided")
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L588-L591
+          - validation/mcp-schemas/2025-03-26/schema.ts#L626-L629
+          - validation/mcp-schemas/2025-06-18/schema.ts#L727-L730
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1011-L1014
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1683-L1686
       - tier: 8
         reference: MCP Description 0.9.0, Section 11.3
+        locations:
+          - sections/11-prompts.md#req-prompt-example-arguments
     diagnostics:
       - code: prompt-example-missing-required-argument
         severity: error
@@ -21,6 +29,9 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/invalid-prompt-example-semantics.json
-      - expected-invalid/component-contextual-examples.json
-      - expected-valid/named-prompt-examples.json
+      - path: expected-invalid/invalid-prompt-example-semantics.json
+        pointer: /prompts/0/examples/unknown-and-missing/arguments
+      - path: expected-invalid/component-contextual-examples.json
+        pointer: /components/promptExamples/bad-arguments
+      - path: expected-valid/named-prompt-examples.json
+        pointer: /prompts/2

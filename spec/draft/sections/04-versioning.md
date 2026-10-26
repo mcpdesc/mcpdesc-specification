@@ -111,9 +111,11 @@ The root Info Object is unscoped, document-wide MCP Description metadata. Its pr
 
 For root version set `R`, a top-level declaration's effective scope is its explicit `protocolVersions` when present and `R` otherwise. An explicit scope MUST be a non-empty subset of `R`.
 
-For a nested scoped declaration, the effective scope is its explicit `protocolVersions` when present and its parent's effective scope otherwise. An explicit child scope MUST be a non-empty subset of its parent's effective scope.
+For a nested scoped declaration, the effective scope is its explicit `protocolVersions` when present and its parent's effective scope otherwise. <a id="req-scope-subset"></a>An explicit child scope MUST be a non-empty subset of its parent's effective scope.
 
 Omission therefore means the complete effective parent scope; it does not mean unknown applicability.
+
+<a id="req-field-revision-availability"></a>A field that this specification marks as available since an MCP revision, or for one MCP revision only, MUST NOT appear in a declaration whose effective scope includes a revision outside that range.
 
 ### 4.11 Relationship Between Version Fields
 

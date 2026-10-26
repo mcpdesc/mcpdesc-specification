@@ -14,17 +14,24 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-03-26 schema.ts, interface Tool (closed; no outputSchema)
+        locations:
+          - validation/mcp-schemas/2025-03-26/schema.ts#L781-L810
       - tier: 1
         reference: MCP 2025-06-18 schema.ts, interface Tool, outputSchema
+        locations:
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table)
+        locations:
+          - sections/04-versioning.md#req-field-revision-availability
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/output-schema-before-2025-06-18.json
+      - path: expected-invalid/output-schema-before-2025-06-18.json
+        pointer: /tools/0
 
   - id: mcp.tool.output-schema.object-root
     owner: mcp
@@ -41,18 +48,27 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-06-18 and 2025-11-25 schema.ts, interface Tool, outputSchema (type "object")
+        locations:
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1272-L1284
       - tier: 1
         reference: MCP 2026-07-28 schema.ts, interface Tool, outputSchema (no root type)
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-output-schema-object-root
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/non-object-output-schema-before-2026.json
-      - expected-valid/protocol-coverage-and-tool-schemas.json
+      - path: expected-invalid/non-object-output-schema-before-2026.json
+        pointer: /tools/0/outputSchema
+      - path: expected-valid/protocol-coverage-and-tool-schemas.json
+        pointer: /tools/3/outputSchema
     gaps:
       - revisions: ["2024-11-05", "2025-03-26"]
         behavior: >-
@@ -79,16 +95,31 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2025-11-25 schema.ts, interface Tool, inputSchema and outputSchema doc comments ("A JSON Schema object")
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L696-L703
+          - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
+          - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1265
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1272-L1284
       - tier: 1
         reference: "MCP 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema (index signature [key: string]: unknown)"
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-vocabulary
+          - sections/09-tools.md#req-tool-schema-keywords-preserved
     diagnostics: []
     enforcement: internal
     status: arbitrated
     fixtures:
-      - expected-valid/custom-tool-schema-keywords.json
-      - expected-valid/revision-inapplicable-mcp-header.json
+      - path: expected-valid/custom-tool-schema-keywords.json
+        pointer: /tools/0/inputSchema
+      - path: expected-valid/revision-inapplicable-mcp-header.json
+        pointer: /tools/0/inputSchema
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
         conflict: >-
@@ -123,20 +154,34 @@ rules:
     sources:
       - tier: 1
         reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, interface Tool, inputSchema type: "object"'
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L696-L703
+          - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
+          - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1265
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
       - tier: 1
         reference: MCP 2026-07-28 specification, Server Features, Tools, Data Types, Tool (inputSchema MUST be a valid JSON Schema object, not null)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L293-L293
       - tier: 4
         reference: MCP SEP-2106 (Final), which keeps type "object" deliberately
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/seps/2106-json-schema-2020-12.md
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-input-schema-object-root
     diagnostics:
       - code: schema-validation
         severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
-      - expected-invalid/non-object-input-schema.json
-      - expected-valid/custom-tool-schema-keywords.json
+      - path: expected-invalid/non-object-input-schema.json
+        pointer: /tools/0/inputSchema
+      - path: expected-valid/custom-tool-schema-keywords.json
+        pointer: /tools/0/inputSchema
     arbitrations:
       - revisions: ["2025-11-25", "2026-07-28"]
         conflict: >-
@@ -173,10 +218,16 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2026-07-28 specification, Streamable HTTP transport, x-mcp-header validity and extraction rules
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L334-L402
       - tier: 1
         reference: MCP 2026-07-28 schema.ts, interface Tool, inputSchema doc comment
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-x-mcp-header
     diagnostics:
       - code: invalid-x-mcp-header
         severity: error
@@ -185,11 +236,16 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-valid/revision-inapplicable-mcp-header.json
-      - expected-valid/custom-tool-schema-keywords.json
-      - expected-invalid/invalid-mcp-header-value.json
-      - expected-invalid/invalid-mcp-header-placement.json
-      - expected-invalid/duplicate-mcp-header.json
+      - path: expected-valid/revision-inapplicable-mcp-header.json
+        pointer: /tools/0/inputSchema
+      - path: expected-valid/custom-tool-schema-keywords.json
+        pointer: /tools/0/inputSchema/properties/region
+      - path: expected-invalid/invalid-mcp-header-value.json
+        pointer: /tools/0/inputSchema/properties/region
+      - path: expected-invalid/invalid-mcp-header-placement.json
+        pointer: /tools/0/inputSchema/allOf/0/properties/region
+      - path: expected-invalid/duplicate-mcp-header.json
+        pointer: /tools/0/inputSchema/properties/fallbackRegion
 
   - id: json-schema.tool-schema.valid
     owner: json-schema
@@ -210,10 +266,24 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-11-25 and 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema doc comments (default JSON Schema 2020-12 when $schema is absent)
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1265
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1272-L1284
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
       - tier: 2
         reference: JSON Schema 2020-12 Core and Validation, and draft-07, for the declared dialect
+        locations:
+          - https://json-schema.org/draft/2020-12/json-schema-core
+          - https://json-schema.org/draft/2020-12/json-schema-validation
+          - https://json-schema.org/draft-07/json-schema-core
+          - https://json-schema.org/draft-07/json-schema-validation
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2 (reject unsupported dialects; never fetch external $ref targets; warn when validation is incomplete)
+        locations:
+          - sections/09-tools.md#req-tool-output-schema-valid
+          - sections/09-tools.md#req-tool-schema-dialect-valid
+          - sections/09-tools.md#req-tool-schema-external-ref
     diagnostics:
       - code: invalid-tool-schema
         severity: error
@@ -224,11 +294,16 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/malformed-tool-schema.json
-      - expected-invalid/unresolved-local-tool-ref.json
-      - expected-invalid/unsupported-tool-schema-dialect.json
-      - expected-warning/unresolved-external-tool-ref.json
-      - expected-warning/unresolved-external-tool-example-ref.json
+      - path: expected-invalid/malformed-tool-schema.json
+        pointer: /tools/0
+      - path: expected-invalid/unresolved-local-tool-ref.json
+        pointer: /tools/0
+      - path: expected-invalid/unsupported-tool-schema-dialect.json
+        pointer: /tools/0/inputSchema
+      - path: expected-warning/unresolved-external-tool-ref.json
+        pointer: /tools/0
+      - path: expected-warning/unresolved-external-tool-example-ref.json
+        pointer: /tools/0
     notes: >-
       The validator supports JSON Schema 2020-12 and draft-07. Earlier
       revisions define no embedded dialect; mcp.tool.schema.legacy-shape
@@ -252,15 +327,23 @@ rules:
     sources:
       - tier: 1
         reference: "MCP 2024-11-05 to 2025-06-18 schema.ts, interface Tool, inputSchema (and outputSchema from 2025-06-18): properties?: { [key: string]: object }, required?: string[]"
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L696-L703
+          - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
+          - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-legacy-shape
     diagnostics:
       - code: invalid-legacy-tool-schema-shape
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/malformed-pre-dialect-tool-schema-shape.json
+      - path: expected-invalid/malformed-pre-dialect-tool-schema-shape.json
+        pointer: /tools/0/inputSchema
     notes: >-
       From MCP 2025-11-25 the embedded dialect governs these keywords
       (json-schema.tool-schema.valid).
@@ -283,16 +366,24 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema ("Servers MUST provide structured results that conform to this schema")
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.3
+        locations:
+          - sections/09-tools.md#req-tool-example-structured-content
     diagnostics:
       - code: missing-tool-example-structured-content
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/invalid-tool-example-result-semantics.json
-      - expected-invalid/invalid-tool-interaction-example-semantics.json
+      - path: expected-invalid/invalid-tool-example-result-semantics.json
+        pointer: /tools/0/examples/missing/result
+      - path: expected-invalid/invalid-tool-interaction-example-semantics.json
+        pointer: /tools/0/interactionExamples/broken/result
     notes: >-
       Conformance of structuredContent to outputSchema is checked by
       mcpdesc.tool.example.schema-conformance. Error results are governed by
@@ -317,8 +408,15 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema (structured results conform to outputSchema)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
       - tier: 8
         reference: MCP Description 0.9.0, Sections 9.2, 9.3, and 9.4
+        locations:
+          - sections/09-tools.md#req-tool-example-input-valid
+          - sections/09-tools.md#req-tool-example-incomplete-validation
     diagnostics:
       - code: tool-example-schema-mismatch
         severity: error
@@ -327,10 +425,14 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/tool-example-schema-mismatches.json
-      - expected-invalid/component-contextual-examples.json
-      - expected-warning/pre-dialect-tool-example.json
-      - expected-warning/unresolved-external-tool-example-ref.json
+      - path: expected-invalid/tool-example-schema-mismatches.json
+        pointer: /tools/0/examples/wrong-types
+      - path: expected-invalid/component-contextual-examples.json
+        pointer: /components/toolExamples/bad-input
+      - path: expected-warning/pre-dialect-tool-example.json
+        pointer: /tools/0/examples/friendly
+      - path: expected-warning/unresolved-external-tool-example-ref.json
+        pointer: /tools/0/examples/external-identifier
     notes: >-
       Before MCP 2025-11-25 no embedded dialect is defined, so only the
       legacy shape is checked and the warning reports the gap.
@@ -353,13 +455,16 @@ rules:
     sources:
       - tier: 8
         reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
+        locations:
+          - sections/09-tools.md#req-tool-example-error-result
     diagnostics:
       - code: structured-tool-error-example
         severity: error
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/invalid-tool-example-result-semantics.json
+      - path: expected-invalid/invalid-tool-example-result-semantics.json
+        pointer: /tools/1/examples/business-error/result
     notes: >-
       MCP does not forbid structuredContent on error results; MCP Description
       requires its absence so that example structuredContent always conforms

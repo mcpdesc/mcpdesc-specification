@@ -59,3 +59,5 @@ Examples, code excerpts, guides, and other companion documents are informative u
 
 Repository fixtures are test artifacts rather than independent sources of requirements. Their directory identifies whether the repository validator expects them to be valid, invalid, or valid with warnings. If a fixture conflicts with the specification, the fixture or implementation must be corrected.
 
+The section sources contain invisible anchors of the form `req-<topic>` before requirement sentences. Validation rules cite them to identify the requirement they check (see [`validation/README.md`](../validation/README.md#rule-records)). Anchors are informative markup: they do not create, change, or rank requirements.
+

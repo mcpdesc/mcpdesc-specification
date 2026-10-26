@@ -62,7 +62,7 @@ A `security` value is an array of Security Requirement Objects. Each object maps
 
 Entries in the outer array are alternatives (**OR**). Multiple scheme names in one object are jointly required (**AND**). Every listed OAuth2 or OpenID Connect scope is required.
 
-Every referenced name MUST exist in root `securitySchemes`. Scope arrays MUST contain unique strings. HTTP and API-key schemes MUST use an empty scope array. An OAuth2 or OpenID Connect requirement MAY use a scope absent from a static scope catalogue; validators MAY warn but MUST NOT reject solely for that reason.
+<a id="req-security-scheme-references"></a>Every referenced name MUST exist in root `securitySchemes`. <a id="req-security-scopes-unique"></a>Scope arrays MUST contain unique strings. <a id="req-security-scopes-oauth-only"></a>HTTP and API-key schemes MUST use an empty scope array. <a id="req-security-uncatalogued-scope"></a>An OAuth2 or OpenID Connect requirement MAY use a scope absent from a static scope catalogue; validators MAY warn but MUST NOT reject solely for that reason.
 
 Array order, scheme-key order, and scope order are not semantically significant.
 

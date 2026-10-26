@@ -16,8 +16,14 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta key name format
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L134-L147
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L201-L215
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L330-L446
       - tier: 8
         reference: MCP Description 0.9.0, Section 3.5 (the same grammar applies in every revision)
+        locations:
+          - sections/03-document-structure.md#req-meta-keys
     diagnostics:
       - code: schema-validation
         severity: error
@@ -26,7 +32,8 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/meta-key-invalid.json
+      - path: expected-invalid/meta-key-invalid.json
+        pointer: /tools/0
     notes: >-
       The document schema rejects malformed keys first; meta-key-invalid
       applies to callers of the semantic validator alone.
@@ -48,13 +55,20 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta (a prefix whose second label is modelcontextprotocol or mcp is reserved for MCP use)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L140-L142
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L208-L210
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L337-L339
       - tier: 8
         reference: MCP Description 0.9.0, Section 3.5
+        locations:
+          - sections/03-document-structure.md#req-meta-reserved-prefix
     diagnostics:
       - code: meta-unknown-reserved-key
         severity: warning
     enforcement: internal
     status: internal
     fixtures:
-      - expected-warning/unknown-reserved-meta-key.json
+      - path: expected-warning/unknown-reserved-meta-key.json
+        pointer: /prompts/0/_meta
     notes: A later MCP revision may define the key, so it is preserved rather than rejected.

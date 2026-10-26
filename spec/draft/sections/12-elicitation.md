@@ -22,7 +22,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 | `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 
-`name` MUST match `^[A-Za-z0-9._-]+$`. Names are case-sensitive and MUST be unique within the containing primitive declaration.
+`name` MUST match `^[A-Za-z0-9._-]+$`. <a id="req-elicitation-name-unique"></a>Names are case-sensitive and MUST be unique within the containing primitive declaration.
 
 `message` MUST be non-empty. It documents the explanation a user should receive and MAY be representative or default wording when runtime context changes the exact text. Runtime wording SHOULD NOT materially contradict the documented purpose, but mcpdesc does not require byte-for-byte equality.
 
@@ -44,9 +44,9 @@ The schema is limited to a flat object whose properties use MCP elicitation prim
 
 MCP 2025-06-18 supports string, number, integer, boolean, and legacy string-enum property schemas. It permits string length constraints and the `email`, `uri`, `date`, and `date-time` formats, numeric bounds, boolean defaults, and optional `enumNames` corresponding to enum values. It does not define `$schema`, defaults for strings, numbers, or enums, titled `oneOf` enums, or multi-select arrays.
 
-MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitive types, standard titled single-select enums, titled and untitled multi-select enums, and the legacy `enumNames` form. Validators MUST apply the vocabulary of every applicable protocol revision.
+MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitive types, standard titled single-select enums, titled and untitled multi-select enums, and the legacy `enumNames` form. <a id="req-elicitation-form-vocabulary"></a>Validators MUST apply the vocabulary of every applicable protocol revision.
 
-A `required` entry MUST name a property declared in `properties`. `enumNames`, when present, MUST contain one display name for every enum value. An enum default MUST be one of its declared values, and every multi-select default value MUST occur in its declared item choices. Minimum constraints MUST NOT exceed their corresponding maximum constraints.
+<a id="req-elicitation-form-required"></a>A `required` entry MUST name a property declared in `properties`. <a id="req-elicitation-form-enum-names"></a>`enumNames`, when present, MUST contain one display name for every enum value. <a id="req-elicitation-form-defaults"></a>An enum default MUST be one of its declared values, and every multi-select default value MUST occur in its declared item choices. <a id="req-elicitation-form-ranges"></a>Minimum constraints MUST NOT exceed their corresponding maximum constraints.
 
 ### 12.4 URL Mode
 
@@ -62,7 +62,7 @@ Validation of `url` is syntax-only. Validators and other consumers MUST NOT retr
 
 ### 12.5 Protocol Applicability
 
-An omitted Elicitation Declaration `protocolVersions` inherits the effective scope of its containing primitive. An explicit scope MUST be non-empty and MUST be a subset of that containing scope.
+An omitted Elicitation Declaration `protocolVersions` inherits the effective scope of its containing primitive. <a id="req-elicitation-scope"></a>An explicit scope MUST be non-empty and MUST be a subset of that containing scope.
 
 Complete revision-specific validation begins with MCP 2025-06-18:
 
@@ -70,7 +70,7 @@ Complete revision-specific validation begins with MCP 2025-06-18:
 - MCP 2025-11-25 supports form and URL modes; and
 - MCP 2026-07-28 supports form and URL modes.
 
-A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
+<a id="req-elicitation-revisions"></a>A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
 
 MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.5. Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
 

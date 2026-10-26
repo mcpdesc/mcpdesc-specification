@@ -17,18 +17,34 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ServerCapabilities (no index signature)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L205-L248
+          - validation/mcp-schemas/2025-03-26/schema.ts#L225-L272
+          - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
+          - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
+          - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
       - tier: 1
         reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, ServerCapabilities doc comment ("this is not a closed set: any server can define its own, additional capabilities")'
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L205-L207
+          - validation/mcp-schemas/2025-03-26/schema.ts#L225-L227
+          - validation/mcp-schemas/2025-06-18/schema.ts#L253-L257
+          - validation/mcp-schemas/2025-11-25/schema.ts#L381-L385
+          - validation/mcp-schemas/2026-07-28/schema.ts#L788-L792
       - tier: 8
         reference: MCP Description 0.9.0, Sections 8.2 and 8.4
+        locations:
+          - sections/08-capabilities.md#req-capabilities-closed
     diagnostics:
       - code: schema-validation
         severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
-      - expected-invalid/unknown-server-capability.json
-      - expected-valid/client-capability-requirements.json
+      - path: expected-invalid/unknown-server-capability.json
+        pointer: /capabilities/0
+      - path: expected-valid/client-capability-requirements.json
+        pointer: /capabilities/0
     notes: >-
       x-* properties are MCP Description specification extensions, not
       capabilities; native projection removes them.
@@ -71,18 +87,34 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (no index signature)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L182-L203
+          - validation/mcp-schemas/2025-03-26/schema.ts#L202-L223
+          - validation/mcp-schemas/2025-06-18/schema.ts#L224-L251
+          - validation/mcp-schemas/2025-11-25/schema.ts#L305-L379
+          - validation/mcp-schemas/2026-07-28/schema.ts#L711-L786
       - tier: 1
         reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, ClientCapabilities doc comment ("this is not a closed set: any client can define its own, additional capabilities")'
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L182-L184
+          - validation/mcp-schemas/2025-03-26/schema.ts#L202-L204
+          - validation/mcp-schemas/2025-06-18/schema.ts#L224-L228
+          - validation/mcp-schemas/2025-11-25/schema.ts#L305-L309
+          - validation/mcp-schemas/2026-07-28/schema.ts#L711-L715
       - tier: 8
         reference: MCP Description 0.9.0, Section 8.5
+        locations:
+          - sections/08-capabilities.md#req-client-requirements-closed
     diagnostics:
       - code: schema-validation
         severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
-      - expected-invalid/unknown-client-capability-requirement.json
-      - expected-valid/client-capability-requirements.json
+      - path: expected-invalid/unknown-client-capability-requirement.json
+        pointer: /tools/0/clientRequirements
+      - path: expected-valid/client-capability-requirements.json
+        pointer: /prompts/0/clientRequirements
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
         conflict: >-
@@ -121,8 +153,17 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (members and nested members per revision)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L182-L203
+          - validation/mcp-schemas/2025-03-26/schema.ts#L202-L223
+          - validation/mcp-schemas/2025-06-18/schema.ts#L224-L251
+          - validation/mcp-schemas/2025-11-25/schema.ts#L305-L379
+          - validation/mcp-schemas/2026-07-28/schema.ts#L711-L786
       - tier: 8
         reference: MCP Description 0.9.0, Section 8.5
+        locations:
+          - sections/08-capabilities.md#req-client-requirements-revision-valid
+          - sections/08-capabilities.md#req-client-requirements-values
     diagnostics:
       - code: client-requirement-version-mismatch
         severity: error
@@ -131,9 +172,12 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/revision-incompatible-client-capability-requirements.json
-      - expected-invalid/invalid-client-requirement-value.json
-      - expected-valid/client-capability-requirements.json
+      - path: expected-invalid/revision-incompatible-client-capability-requirements.json
+        pointer: /tools/0/clientRequirements
+      - path: expected-invalid/invalid-client-requirement-value.json
+        pointer: /tools/0/clientRequirements/roots
+      - path: expected-valid/client-capability-requirements.json
+        pointer: /tools/0/clientRequirements
 
   - id: mcp.client-capabilities.deprecated
     owner: mcp
@@ -153,17 +197,25 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-11-25 schema.ts, CreateMessageRequest includeContext ("thisServer" and "allServers" are soft-deprecated; tied to ClientCapabilities.sampling.context)
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1588-L1595
       - tier: 1
         reference: MCP 2026-07-28 schema.ts, ClientCapabilities roots and sampling (@deprecated, SEP-2577)
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L732-L732
+          - validation/mcp-schemas/2026-07-28/schema.ts#L733-L759
       - tier: 8
         reference: MCP Description 0.9.0, Section 8.5
+        locations:
+          - sections/08-capabilities.md#req-client-requirements-deprecated
     diagnostics:
       - code: deprecated-client-requirement
         severity: warning
     enforcement: internal
     status: internal
     fixtures:
-      - expected-warning/deprecated-client-capability-requirements.json
+      - path: expected-warning/deprecated-client-capability-requirements.json
+        pointer: /prompts/0/clientRequirements
 
   - id: mcp.capabilities.extensions.revision-availability
     owner: mcp
@@ -183,15 +235,25 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2025-11-25 schema.ts, interface ServerCapabilities (no extensions); MCP 2026-07-28 schema.ts, ServerCapabilities extensions
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L205-L248
+          - validation/mcp-schemas/2025-03-26/schema.ts#L225-L272
+          - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
+          - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
+          - validation/mcp-schemas/2026-07-28/schema.ts#L871-L882
       - tier: 8
         reference: MCP Description 0.9.0, Section 8.4; Proposal 0021 (pre-standard extension capabilities)
+        locations:
+          - sections/08-capabilities.md#req-capabilities-extensions-pre-standard
+          - ../../proposals/0021-pre-standard-extension-capabilities.md
     diagnostics:
       - code: extensions-not-supported-by-version
         severity: warning
     enforcement: internal
     status: arbitrated
     fixtures:
-      - expected-warning/pre-standard-extension-capabilities.json
+      - path: expected-warning/pre-standard-extension-capabilities.json
+        pointer: /capabilities/0
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
         conflict: >-
@@ -221,8 +283,13 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2026-07-28 specification, Basic, General fields, _meta key name format (second label modelcontextprotocol or mcp is reserved)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L337-L339
       - tier: 8
         reference: MCP Description 0.9.0, Sections 8.4 and 8.5; validator extension catalogue (effective 2026-09-04)
+        locations:
+          - sections/08-capabilities.md#req-extensions-reserved-identifiers
+          - sections/08-capabilities.md#req-extensions-catalogue-maturity
     diagnostics:
       - code: unknown-reserved-extension-identifier
         severity: warning
@@ -231,8 +298,10 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-warning/unknown-reserved-extension-identifier.json
-      - expected-warning/deprecated-client-capability-requirements.json
+      - path: expected-warning/unknown-reserved-extension-identifier.json
+        pointer: /capabilities/0/extensions
+      - path: expected-warning/deprecated-client-capability-requirements.json
+        pointer: /prompts/0/clientRequirements/extensions
     notes: >-
       The pinned catalogue lists no experimental identifiers, so no document
       currently produces experimental-reserved-extension-identifier.
@@ -255,8 +324,15 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2025-11-25 schema.ts, ServerCapabilities tasks; MCP 2025-06-18 and 2026-07-28 schema.ts, ServerCapabilities (no tasks)
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L430-L456
+          - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
+          - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
       - tier: 8
         reference: MCP Description 0.9.0, Section 8.3
+        locations:
+          - sections/08-capabilities.md#req-capabilities-tasks-distinct
+          - sections/04-versioning.md#req-field-revision-availability
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
@@ -265,7 +341,8 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - expected-invalid/tasks-capability-2026.json
+      - path: expected-invalid/tasks-capability-2026.json
+        pointer: /capabilities/0
 
   - id: mcp.capabilities.logging.deprecated
     owner: mcp
@@ -283,12 +360,18 @@ rules:
     sources:
       - tier: 1
         reference: MCP 2026-07-28 schema.ts, ServerCapabilities logging (@deprecated, SEP-2577); specification, Server Features, Utilities, Logging (deprecated)
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L798-L808
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/utilities/logging.mdx#L8-L18
       - tier: 8
         reference: MCP Description 0.9.0, Section 8.2
+        locations:
+          - sections/08-capabilities.md#req-capabilities-logging-deprecated
     diagnostics:
       - code: logging-deprecated-in-2026
         severity: warning
     enforcement: internal
     status: internal
     fixtures:
-      - expected-warning/logging-deprecated-2026.json
+      - path: expected-warning/logging-deprecated-2026.json
+        pointer: /capabilities/0

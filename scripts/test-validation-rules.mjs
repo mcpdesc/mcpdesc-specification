@@ -59,6 +59,60 @@ const codesForFixture = (relative) => new Set(diagnosticsForFixture(relative).ma
 const rulesForFixture = (relative) => new Set(diagnosticsForFixture(relative).map((diagnostic) => diagnostic.rule));
 const registeredRules = new Map();
 
+const specificationDirectory = path.join(root, specificationRoot);
+const readText = (relative) => fs.readFileSync(path.join(specificationDirectory, relative), 'utf8');
+const pinnedMcpCommit = (() => {
+  try {
+    return JSON.parse(readText('validation/mcp-schemas/manifest.json')).commit;
+  } catch {
+    return undefined;
+  }
+})();
+const headingSlug = (heading) => heading.trim().toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, '').replace(/\s/g, '-');
+
+const anchorIds = new Map();
+const sectionsDirectory = path.join(specificationDirectory, 'sections');
+for (const name of fs.existsSync(sectionsDirectory) ? fs.readdirSync(sectionsDirectory).filter((file) => file.endsWith('.md')).sort() : []) {
+  for (const match of readText(`sections/${name}`).matchAll(/<a id="(req-[a-z0-9-]+)"><\/a>/g)) {
+    if (anchorIds.has(match[1])) fail(`${specificationRoot}/sections/${name}: duplicate requirement anchor ${match[1]}`);
+    anchorIds.set(match[1], name);
+  }
+}
+const citedAnchors = new Set();
+
+// Returns an error message, or undefined when the location resolves.
+function checkLocation(location) {
+  const [target, fragment] = location.split('#');
+  if (target.startsWith('https://')) {
+    const pinned = location.match(/^https:\/\/github\.com\/modelcontextprotocol\/modelcontextprotocol\/blob\/([0-9a-f]+)\//);
+    if (pinned && pinned[1] !== pinnedMcpCommit) return `MCP permalink must use the pinned commit ${pinnedMcpCommit}`;
+    return undefined;
+  }
+  const full = path.join(specificationDirectory, target);
+  if (!fs.existsSync(full)) return `${target} does not exist`;
+  if (target.startsWith('validation/mcp-schemas/')) {
+    const [first, last = first] = fragment.replaceAll('L', '').split('-').map(Number);
+    const lineCount = fs.readFileSync(full, 'utf8').split('\n').length;
+    if (!(first >= 1 && first <= last && last <= lineCount)) return `line range ${fragment} is outside ${target}`;
+  } else if (target.startsWith('sections/')) {
+    if (anchorIds.get(fragment) !== path.basename(target)) return `requirement anchor ${fragment} is not in ${target}`;
+    citedAnchors.add(fragment);
+  } else if (fragment && !readText(target).split('\n').some((line) => /^#{1,6} /.test(line) && headingSlug(line.replace(/^#+/, '')) === fragment)) {
+    return `heading #${fragment} is not in ${target}`;
+  }
+  return undefined;
+}
+
+function resolvePointer(document, pointer) {
+  let node = document;
+  for (const token of pointer.split('/').slice(1).map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'))) {
+    if (node === null || typeof node !== 'object' || !Object.hasOwn(node, Array.isArray(node) ? Number(token) : token)) return { found: false };
+    node = node[Array.isArray(node) ? Number(token) : token];
+  }
+  return { found: true };
+}
+const pointerOf = (segments) => segments.map((segment) => `/${String(segment).replaceAll('~', '~0').replaceAll('/', '~1')}`).join('');
+
 const ruleIds = new Set();
 const coveredCodes = new Set();
 const files = fs.readdirSync(rulesDirectory).filter((name) => /\.ya?ml$/.test(name)).sort();
@@ -94,6 +148,15 @@ for (const filename of files) {
     if (rule.owner === 'mcp' && !rule.sources.some((source) => source.tier <= 3)) {
       fail(`${where}: an mcp rule must cite a tier 1 to 3 source`);
     }
+    for (const source of rule.sources) {
+      for (const location of source.locations) {
+        const problem = checkLocation(location);
+        if (problem) fail(`${where}: source location ${location}: ${problem}`);
+      }
+    }
+    if (!rule.sources.some((source) => source.tier === 8 && source.locations.some((location) => location.startsWith('sections/')))) {
+      fail(`${where}: a rule must cite the MCP Description requirement it checks (a tier 8 source located at a requirement anchor)`);
+    }
     if (rule.owner === 'mcp' && ['should', 'may'].includes(rule.requirement) && rule.diagnostics.some((diagnostic) => diagnostic.severity === 'error')) {
       fail(`${where}: a ${rule.requirement}-level mcp rule must not emit error diagnostics`);
     }
@@ -113,10 +176,18 @@ for (const filename of files) {
       coveredCodes.add(code);
     }
 
-    for (const fixture of rule.fixtures) {
+    for (const { path: fixture, pointer } of rule.fixtures) {
       if (!fs.existsSync(path.join(fixtureRoot, fixture))) {
         fail(`${where}: missing fixture ${fixture}`);
         continue;
+      }
+      const full = path.join(fixtureRoot, fixture);
+      const document = decodeDocumentSource(fs.readFileSync(full, 'utf8'), documentFormatForPath(full), fixture);
+      if (!resolvePointer(document, pointer).found) fail(`${where}: pointer ${JSON.stringify(pointer)} does not resolve in ${fixture}`);
+      const rulePaths = diagnosticsForFixture(fixture).filter((diagnostic) => diagnostic.rule === rule.id).map((diagnostic) => pointerOf(diagnostic.path));
+      // Diagnostics are reported at use sites, so a pointer to a referenced component cannot contain one.
+      if (rulePaths.length && !pointer.startsWith('/components/') && !rulePaths.some((diagnosticPointer) => diagnosticPointer === pointer || diagnosticPointer.startsWith(`${pointer}/`))) {
+        fail(`${where}: pointer ${JSON.stringify(pointer)} in ${fixture} does not contain a diagnostic of this rule`);
       }
       if (fixture.startsWith('expected-invalid/')) {
         if (!ruleCodes.size) fail(`${where}: a rule without diagnostics cannot cite expected-invalid fixture ${fixture}`);
@@ -185,10 +256,12 @@ for (const code of emittedCodes) {
   if (!coveredCodes.has(code)) fail(`diagnostic code ${code} is emitted by the candidate validator but declared by no rule`);
 }
 
+const uncitedAnchors = [...anchorIds.keys()].filter((id) => !citedAnchors.has(id));
+
 if (errors.length) {
   console.error(`Validation rule registry check failed with ${errors.length} error(s):`);
   for (const error of errors.sort()) console.error(`- ${error}`);
   process.exit(1);
 }
 
-console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s) declare all ${emittedCodes.size} candidate diagnostic codes; ${attributed} fixture diagnostic(s) identify a rule.`);
+console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s) declare all ${emittedCodes.size} candidate diagnostic codes; ${attributed} fixture diagnostic(s) identify a rule; ${citedAnchors.size} of ${anchorIds.size} requirement anchor(s) cited by a rule${uncitedAnchors.length ? ` (uncited: ${uncitedAnchors.join(', ')})` : ''}.`);

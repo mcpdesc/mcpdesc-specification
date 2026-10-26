@@ -56,11 +56,11 @@ Absence of a primitive collection MUST NOT be interpreted as proof that no other
 
 ### 3.5 MCP `_meta`
 
-The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result, content, Tool Interaction step response, and root objects in named examples. It MAY appear only when every revision in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
+The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result, content, Tool Interaction step response, and root objects in named examples. <a id="req-meta-revision-availability"></a>It MAY appear only when every revision in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
 
 Metadata in a named example describes only that example. It does not define a reusable metadata schema or require a server to send the same metadata.
 
-Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol revision. A recognized violation is a document-conformance error. A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A protocol-version projection MUST preserve `_meta` and MUST NOT combine metadata from variants that cover different protocol revisions.
+<a id="req-meta-keys"></a>Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol revision. A recognized violation is a document-conformance error. <a id="req-meta-reserved-prefix"></a>A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A protocol-version projection MUST preserve `_meta` and MUST NOT combine metadata from variants that cover different protocol revisions.
 
 
 ### 3.6 Carried MCP Values
@@ -69,13 +69,13 @@ Named examples carry MCP values: Tool Example and Tool Interaction Example `resu
 
 For each applicable revision and each field of a carried value:
 
-1. A field that the revision defines MUST satisfy its type, and a field that the revision requires MUST be present.
-2. A field that the revision does not define, on a type that is open in that revision, MUST be accepted and preserved. Implementations MUST NOT apply the meaning that another revision gives the same name. Validators MUST report the warning `result-field-not-defined-by-version`, identifying the field and the revision.
-3. A field that the revision does not define, on a type that is closed in that revision, MUST be rejected.
+1. <a id="req-carried-defined-fields"></a>A field that the revision defines MUST satisfy its type, and a field that the revision requires MUST be present.
+2. <a id="req-carried-open-preserve"></a>A field that the revision does not define, on a type that is open in that revision, MUST be accepted and preserved. Implementations MUST NOT apply the meaning that another revision gives the same name. Validators MUST report the warning `result-field-not-defined-by-version`, identifying the field and the revision.
+3. <a id="req-carried-closed-reject"></a>A field that the revision does not define, on a type that is closed in that revision, MUST be rejected.
 
 JSON-RPC envelope fields and non-completed workflow fields are governed by the example rules of Sections 9.3, 9.4, 10.4, and 11 instead.
 
-Every result type carried by examples extends the open MCP `Result` in every supported revision. Sampling, elicitation, and roots responses extend `Result` through MCP 2025-11-25; in MCP 2026-07-28 they are closed input responses, and only the sampling response defines `_meta`. Nested objects such as content blocks, resource contents, roots, and the `completion` object of a completion result are closed.
+Every result type carried by examples extends the open MCP `Result` in every supported revision. Sampling, elicitation, and roots responses extend `Result` through MCP 2025-11-25; in MCP 2026-07-28 they are closed input responses, and only the sampling response defines `_meta`. <a id="req-carried-nested-closed"></a>Nested objects such as content blocks, resource contents, roots, and the `completion` object of a completion result are closed.
 
 Example `result` values are completed results. When present, in every revision, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative number, and `cacheScope` MUST be `"public"` or `"private"`.
 
@@ -91,7 +91,7 @@ Any property whose name matches the pattern `^x-` on the root or another eligibl
 
 ### 3.9 Additional Properties
 
-Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear on the root or another closed eligible semantic object. Implementations MUST reject such unknown properties. An `x-*` property does not make an otherwise ineligible object extensible.
+<a id="req-closed-objects"></a>Properties not defined in this specification and not matching the `x-` extension pattern MUST NOT appear on the root or another closed eligible semantic object. Implementations MUST reject such unknown properties. An `x-*` property does not make an otherwise ineligible object extensible.
 
 ### 3.10 Example
 
