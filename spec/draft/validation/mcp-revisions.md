@@ -7,7 +7,8 @@ specification.
 
 Source: the official MCP schemas at upstream commit
 `dae694f61a31f7a3ec2af3aff709e11f70f61e48` of
-`modelcontextprotocol/modelcontextprotocol` (2026-10-23). MCP defines its
+`modelcontextprotocol/modelcontextprotocol` (2026-10-23), vendored unmodified in
+[`mcp-schemas/`](mcp-schemas/). MCP defines its
 schema in TypeScript (`schema/<revision>/schema.ts`), which is the basis of its
 authoritative requirements, and generates `schema.json` from it. Where the two
 differ, the TypeScript schema and normative MCP text take precedence.

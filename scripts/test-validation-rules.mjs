@@ -7,6 +7,7 @@
 // rule inventory is complete.
 
 import fs from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import process from 'node:process';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -15,7 +16,7 @@ import { candidateSpecification } from './candidate-specification.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { supportedProtocolVersions, validateDocument } from './validate-document.mjs';
 
-// Revisions whose rule defects are recorded but not corrected (Proposal 0024, Section 4.1).
+// Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
 const historicalRevisions = new Set(['2024-11-05', '2025-03-26']);
 
 const root = process.cwd();
@@ -120,6 +121,36 @@ for (const filename of files) {
         }
       }
     }
+  }
+}
+
+const mcpSchemasDirectory = path.join(validationRoot, 'mcp-schemas');
+const mcpSchemasRel = `${specificationRoot}/validation/mcp-schemas`;
+if (!fs.existsSync(path.join(mcpSchemasDirectory, 'manifest.json'))) {
+  fail(`${mcpSchemasRel}/manifest.json is missing`);
+} else {
+  const manifest = JSON.parse(fs.readFileSync(path.join(mcpSchemasDirectory, 'manifest.json'), 'utf8'));
+  if (!/^[0-9a-f]{40}$/.test(manifest.commit ?? '')) fail(`${mcpSchemasRel}/manifest.json: commit must be a full commit ID`);
+  const listed = new Set();
+  for (const entry of manifest.files ?? []) {
+    listed.add(entry.path);
+    const full = path.join(mcpSchemasDirectory, entry.path);
+    if (!fs.existsSync(full)) {
+      fail(`${mcpSchemasRel}/${entry.path} is listed in the manifest but missing`);
+    } else if (createHash('sha256').update(fs.readFileSync(full)).digest('hex') !== entry.sha256) {
+      fail(`${mcpSchemasRel}/${entry.path}: SHA-256 differs from the manifest; vendored MCP files must stay byte-identical`);
+    }
+  }
+  for (const revision of supportedProtocolVersions) {
+    for (const file of ['schema.ts', 'schema.json']) {
+      if (!listed.has(`${revision}/${file}`)) fail(`${mcpSchemasRel}: manifest does not list ${revision}/${file}`);
+    }
+  }
+  const present = fs.readdirSync(mcpSchemasDirectory, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => path.relative(mcpSchemasDirectory, path.join(entry.parentPath, entry.name)).split(path.sep).join('/'));
+  for (const file of present) {
+    if (file !== 'manifest.json' && !listed.has(file)) fail(`${mcpSchemasRel}/${file} is not listed in the manifest`);
   }
 }
 

@@ -1,0 +1,20 @@
+{
+  "repository": "https://github.com/modelcontextprotocol/modelcontextprotocol",
+  "commit": "dae694f61a31f7a3ec2af3aff709e11f70f61e48",
+  "commitDate": "2026-10-23",
+  "license": "Apache-2.0 AND MIT, during the upstream licensing transition; see LICENSE",
+  "modified": false,
+  "files": [
+    { "path": "LICENSE", "source": "LICENSE", "sha256": "0382b0057770ca05e9c350a50aa3b1c1fea84da0bc81d723bf00b9aa841be58a" },
+    { "path": "2024-11-05/schema.ts", "source": "schema/2024-11-05/schema.ts", "sha256": "8e87348b6c1a9de1ec7ac136f407b687521bcdeb357adedbf5367bfc19c18d38" },
+    { "path": "2024-11-05/schema.json", "source": "schema/2024-11-05/schema.json", "sha256": "61cea2392d4f284092d09bc84b9ac488c0d5618ac2b38a56942fc5b99fd960ce" },
+    { "path": "2025-03-26/schema.ts", "source": "schema/2025-03-26/schema.ts", "sha256": "bdc457208cb1b49061f3fbbae24144b7dbae282c746d82aa689ddd98329743e7" },
+    { "path": "2025-03-26/schema.json", "source": "schema/2025-03-26/schema.json", "sha256": "e720669548c8100a4282c49e580efd6ddf7f28899ea786fc8db251dbdb356131" },
+    { "path": "2025-06-18/schema.ts", "source": "schema/2025-06-18/schema.ts", "sha256": "7d7f4cc6f3adb76e3fd5e1eee6bab8b1e183cfaf719da66d2aa5661737ca9539" },
+    { "path": "2025-06-18/schema.json", "source": "schema/2025-06-18/schema.json", "sha256": "af845e7e5b9d27107d1690f0936022546177a1403e63ffb11470135b296a2e01" },
+    { "path": "2025-11-25/schema.ts", "source": "schema/2025-11-25/schema.ts", "sha256": "e74b56e73b2e37bdb595f74ba22e428ad7f07aa3519355ba661d681298ed38ac" },
+    { "path": "2025-11-25/schema.json", "source": "schema/2025-11-25/schema.json", "sha256": "268a5f82ba70fd7e4b6dc4aa1e64f116f74b4d0edcb69dc046829c79dd4e97e7" },
+    { "path": "2026-07-28/schema.ts", "source": "schema/2026-07-28/schema.ts", "sha256": "742750af0bb8c716e7030c4977c992b55d1adc4407e9e66997db5846baedc2cd" },
+    { "path": "2026-07-28/schema.json", "source": "schema/2026-07-28/schema.json", "sha256": "ef70b61f99b6d2e5e3b46863822eab08dff6a45bedc7a08914e0e5b133f40203" }
+  ]
+}
