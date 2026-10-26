@@ -18,24 +18,19 @@ rules:
       - tier: 2
         reference: RFC 6570, URI Template
       - tier: 8
-        reference: MCP Description 0.9.0, Sections 10.2 and 10.4.3
+        reference: MCP Description 0.9.0, Section 10.2.1
     diagnostics:
-      - code: resource-template-example-invalid-template
-        severity: error
-      - code: resource-template-completion-example-invalid-template
+      - code: invalid-resource-template-uri-template
         severity: error
     enforcement: internal
     status: internal
     fixtures:
+      - expected-invalid/malformed-uri-template-without-examples.json
       - expected-invalid/malformed-resource-template-example.json
       - expected-invalid/invalid-completion-example-semantics.json
-    gaps:
-      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
-        behavior: >-
-          The template is parsed only when the Resource Template has examples
-          or completion examples; a malformed template without examples is not
-          reported.
-        resolution: planned
+    notes: >-
+      Reported once per Resource Template, whether or not it has examples;
+      example checks that need the parsed template are skipped.
 
   - id: mcp.resource-contents.blob.base64
     owner: mcp

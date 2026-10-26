@@ -54,6 +54,8 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 | `security` | Security Requirement Array | No | Primitive security override. |
 | `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required to read a concrete URI produced from the template; does not apply to template listing. |
 
+`uriTemplate` MUST be a valid RFC 6570 URI template, whether or not the Resource Template has examples.
+
 ### 10.3 Resource Annotations
 
 Resource Annotations provide optional client hints about how a Resource, Resource Template, or content block may be used or displayed. They are distinct from the behavioral [Tool Annotations](#96-tool-annotations) on a Tool Object.

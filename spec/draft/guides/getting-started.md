@@ -272,6 +272,5 @@ These tools are implementations, not normative parts of the specification. See [
 - See [examples/multi-version.yaml](../examples/multi-version.yaml) for shared declarations and protocol-scoped capability variants across MCP 2025-11-25 and MCP 2026-07-28
 - Read the [full specification](../mcp-description.md)
 - Learn about [vendor extensions](vendor-extensions-guide.md) for adding custom metadata
-- Read the [0.7.0 to 0.8.0 migration guide](migration-0.7-to-0.8.md)
 - Read the [0.8.0 to 0.9.0 migration guide](migration-0.8-to-0.9.md)
 - Compare with [OpenAPI concepts](comparison-with-openapi.md) if you have API background

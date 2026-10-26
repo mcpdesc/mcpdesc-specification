@@ -262,8 +262,7 @@ const ruleForCode = new Map([
   ['resource-template-completion-example-unknown-variable', 'mcpdesc.completion-example.target'],
   ['resource-template-completion-example-context-unknown-variable', 'mcpdesc.completion-example.target'],
   ['completion-example-duplicate-target-context', 'mcpdesc.completion-example.target'],
-  ['resource-template-completion-example-invalid-template', 'mcp.resource-template.uri-template'],
-  ['resource-template-example-invalid-template', 'mcp.resource-template.uri-template'],
+  ['invalid-resource-template-uri-template', 'mcp.resource-template.uri-template'],
   ['prompt-example-unknown-argument', 'mcpdesc.prompt.example.arguments'],
   ['prompt-example-missing-required-argument', 'mcpdesc.prompt.example.arguments'],
   ['invalid-resource-example-base64', 'mcp.resource-contents.blob.base64'],
@@ -920,13 +919,8 @@ function validateCompletionExamples(document) {
       } else {
         try {
           allowedNames = extractUriTemplateVariables(owner.uriTemplate);
-        } catch (error) {
-          diagnostics.push(semanticDiagnostic(
-            'resource-template-completion-example-invalid-template',
-            'error',
-            `${ownerLocation}.uriTemplate is not a valid RFC 6570 template: ${error.message}`,
-            [kind, ownerIndex, 'uriTemplate']
-          ));
+        } catch {
+          // The base validator reports invalid-resource-template-uri-template.
           allowedNames = undefined;
         }
       }

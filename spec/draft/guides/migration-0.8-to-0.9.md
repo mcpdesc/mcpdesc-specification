@@ -99,6 +99,11 @@ Other output changes:
   diagnostics. Previously they were strings below the document root.
 - New codes include `result-field-not-defined-by-version` (warning). Some
   conditions that were errors in 0.8.0 are now warnings with that code.
+- `invalid-resource-template-uri-template` replaces
+  `resource-template-example-invalid-template` and
+  `resource-template-completion-example-invalid-template`. It reports a
+  malformed `uriTemplate` once, also on Resource Templates without examples,
+  which 0.8.0 accepted.
 - The `completion-example-version-mismatch` message for MCP 2024-11-05 says the
   revision is not supported by MCP Description.
 

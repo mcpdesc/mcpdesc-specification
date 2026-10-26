@@ -54,7 +54,7 @@ One document therefore reads the two capability types in opposite ways.
 ## Goals
 
 - Make carried annotation values match MCP's closed types in every revision.
-- Record the capabilities conflict as an arbitration, with a recommendation.
+- Record the capabilities conflict as an arbitration and decide it.
 - Read server and client capabilities the same way.
 
 ## Non-goals
@@ -64,7 +64,8 @@ One document therefore reads the two capability types in opposite ways.
 - Changing `experimental`, `extensions`, or the nested capability objects that
   MCP defines as `object`.
 - Changing `x-*` specification extensions on MCP Description-defined objects.
-- Filing an upstream MCP issue without maintainer approval.
+- Filing an upstream MCP issue or comment. MCP issue 1898 is tracked as the
+  upstream reference.
 
 ## Background and primary references
 
@@ -242,21 +243,11 @@ real conflict. Proposal 0024 requires an arbitration with a review trigger.
 
 ## Open questions
 
-1. Does Part A stand, given MCP issue 1898 and the SDK behavior recorded under
-   Background?
-2. Upstream: MCP issue 1898 already asks which types are closed. Add the
-   capabilities doc comment to that discussion rather than opening a separate
-   issue? A draft comment follows.
-
-> The capabilities types are a concrete case of the question in this issue.
-> In every revision from 2024-11-05 to 2026-07-28, `schema.ts` documents
-> `ClientCapabilities` and `ServerCapabilities` as "not a closed set: any
-> client/server can define its own, additional capabilities", but neither
-> interface declares an index signature, unlike `Result` and `_meta`.
-> Validators that follow the type reject an unknown top-level capability;
-> validators that follow the comment accept it. Should additional capabilities
-> go only under `experimental` (and `extensions` from 2026-07-28), or should the
-> interfaces gain `[key: string]: unknown`?
+None. Part A stands after review of MCP issue 1898 and the SDK behavior
+recorded under Background: annotations are part of the protocol, so MCP
+Description follows the TypeScript types, and opening them later would not
+invalidate any document. No upstream issue or comment is filed; MCP issue
+1898 is tracked as the upstream reference.
 
 ## Implementation and validation plan
 
@@ -272,5 +263,8 @@ real conflict. Proposal 0024 requires an arbitration with a review trigger.
 ## Decision record
 
 Part A: maintainer approval of the breaking change on issue #72, 2026-10-26;
-reconfirmation requested after MCP issue 1898 was found.
+reconfirmed the same day after review of MCP issue 1898: follow the
+TypeScript types.
 Part B: option A, maintainer decision on issue #72, 2026-10-26.
+Upstream: no MCP issue or comment, maintainer decision on issue #72,
+2026-10-26.

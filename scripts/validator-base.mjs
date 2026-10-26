@@ -1422,9 +1422,9 @@ function validateResourceExamples(document, rel, diagnostics) {
         try {
           template = new UriTemplateMatcher();
           template.add(owner.uriTemplate);
-        } catch (error) {
+        } catch {
+          // Reported once by validateResourceTemplateUris.
           template = undefined;
-          diagnostics.push(makeDiagnostic('resource-template-example-invalid-template', 'error', `${kind}[${ownerIndex}].uriTemplate is not a valid RFC 6570 template: ${error.message}`, [kind, ownerIndex, 'uriTemplate']));
         }
       }
 
@@ -1447,6 +1447,17 @@ function validateResourceExamples(document, rel, diagnostics) {
   }
 }
 
+function validateResourceTemplateUris(document, rel, diagnostics) {
+  (document.resourceTemplates ?? []).forEach((owner, ownerIndex) => {
+    if (typeof owner.uriTemplate !== 'string') return;
+    try {
+      new UriTemplateMatcher().add(owner.uriTemplate);
+    } catch (error) {
+      diagnostics.push(makeDiagnostic('invalid-resource-template-uri-template', 'error', `resourceTemplates[${ownerIndex}].uriTemplate is not a valid RFC 6570 template: ${error.message}`, ['resourceTemplates', ownerIndex, 'uriTemplate']));
+    }
+  });
+}
+
 export function semanticValidateDocument(document, rel = 'document') {
   const diagnostics = [];
   validateProtocolScopes(document, rel, diagnostics);
@@ -1457,6 +1468,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   validateMeta(document, rel, diagnostics);
   validateToolSchemas(document, rel, diagnostics);
   validateToolExamples(document, rel, diagnostics);
+  validateResourceTemplateUris(document, rel, diagnostics);
   validateResourceExamples(document, rel, diagnostics);
   diagnostics.sort(
     (left, right) => left.code.localeCompare(right.code)
