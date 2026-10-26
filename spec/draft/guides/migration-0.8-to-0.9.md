@@ -50,6 +50,15 @@ applicable MCP revisions define (Section 8.5). Move custom requirements into
 
 Server capabilities were already closed in 0.8.0.
 
+## Tool schema dialects
+
+For MCP 2025-11-25 and later, a Tool `inputSchema` or `outputSchema` that
+declares `$schema` must declare JSON Schema 2020-12 or draft-07 (Section 9.2).
+In 0.8.0 the accepted set depended on the validator; the reference validator
+already accepted only these two, so its results do not change. Replace any
+other declared dialect, preferably by removing `$schema` to use the 2020-12
+default.
+
 ## Example results
 
 Example results and Tool Interaction step responses are checked against each

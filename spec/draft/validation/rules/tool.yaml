@@ -251,8 +251,8 @@ rules:
     owner: json-schema
     summary: >-
       An embedded Tool inputSchema or outputSchema is valid under its declared
-      or default JSON Schema dialect, and that dialect is one the validator
-      supports.
+      or default JSON Schema dialect, and a declared dialect is JSON Schema
+      2020-12 or draft-07.
     surface: Tool
     path: inputSchema, outputSchema
     kind: embedded-standard
@@ -264,12 +264,18 @@ rules:
       "2025-11-25": applies
       "2026-07-28": applies
     specification:
-      - reference: MCP Description 0.9.0, Section 9.2 (reject unsupported dialects; never fetch external $ref targets; warn when validation is incomplete)
+      - reference: MCP Description 0.9.0, Section 9.2 (declared dialects limited to 2020-12 and draft-07; never fetch external $ref targets; warn when validation is incomplete)
         locations:
           - sections/09-tools.md#req-tool-output-schema-valid
           - sections/09-tools.md#req-tool-schema-dialect-valid
+          - sections/09-tools.md#req-tool-schema-dialect-set
           - sections/09-tools.md#req-tool-schema-external-ref
     sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 and 2026-07-28 specification, Basic, JSON Schema usage, Schema Dialect (implementations must support 2020-12 and must return an error for unsupported dialects)"
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L251-L297
       - tier: 1
         reference: MCP 2025-11-25 and 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema doc comments (default JSON Schema 2020-12 when $schema is absent)
         locations:
@@ -305,9 +311,14 @@ rules:
       - path: expected-warning/unresolved-external-tool-example-ref.json
         pointer: /tools/0
     notes: >-
-      The validator supports JSON Schema 2020-12 and draft-07. Earlier
-      revisions define no embedded dialect; mcp.tool.schema.legacy-shape
-      applies there instead.
+      The declared dialect set is fixed by the specification, not by the
+      validator: an unsupported dialect is an error, not a warning, because
+      MCP guarantees only 2020-12 support and peers return an error for other
+      dialects, and because Tool examples cannot be checked against a schema
+      in an unknown dialect (maintainer decision on issue #72, 2026-10-26).
+      Unresolved external references differ: offline validation forbids
+      retrieving them, so they only warn. Earlier revisions define no embedded
+      dialect; mcp.tool.schema.legacy-shape applies there instead.
 
   - id: mcp.tool.schema.legacy-shape
     owner: mcp
