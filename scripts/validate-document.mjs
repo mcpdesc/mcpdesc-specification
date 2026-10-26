@@ -214,6 +214,7 @@ function structuralRule({ keyword, instancePath, schemaPath, params }) {
   if (schemaPath.startsWith('#/$defs/resourceAnnotations/')) return 'mcp.annotations.members';
   if (schemaPath === '#/$defs/completionResult/additionalProperties') return 'mcp.completion.result-closed';
   if (keyword === 'additionalProperties' && /^\/capabilities\/\d+$/.test(instancePath)) return 'mcp.server-capabilities.members';
+  if (keyword === 'additionalProperties' && /^\/(?:tools|resources|resourceTemplates|prompts)\/\d+\/clientRequirements$/.test(instancePath)) return 'mcp.client-capabilities.members';
   if ((keyword === 'const' && /^\/tools\/\d+\/inputSchema\/type$/.test(instancePath))
     || (keyword === 'required' && params.missingProperty === 'type' && /^\/tools\/\d+\/inputSchema$/.test(instancePath))) {
     return 'mcp.tool.input-schema.object-root';

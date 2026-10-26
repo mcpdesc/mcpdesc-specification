@@ -162,9 +162,9 @@ MCP Description 0.9.0 closes them too; 0.8.0 allowed additional properties.
 The TypeScript capability types declare no index signature, but their
 documentation states that the set "is not a closed set: any server can define
 its own, additional capabilities". `experimental`, and from `2026-07-28`
-`extensions`, are open maps for that purpose. MCP Description rejects unknown
-server capabilities but accepts unknown client capability requirements; a
-proposed arbitration (Proposal 0027) closes both. In `2026-07-28`, clients opt in to
+`extensions`, are open maps for that purpose. MCP Description follows the types:
+unknown top-level members are rejected in server capabilities and in client
+capability requirements (Proposal 0027). In `2026-07-28`, clients opt in to
 log messages per request instead of through `logging/setLevel`; MCP Description
 treats the `logging` server capability as deprecated for that revision and
 warns about it.

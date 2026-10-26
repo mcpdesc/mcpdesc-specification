@@ -206,9 +206,7 @@
       "type": "object"
     },
     "clientCapabilityRequirements": {
-      "additionalProperties": {
-        "$ref": "#/$defs/clientCapabilityValue"
-      },
+      "additionalProperties": false,
       "minProperties": 1,
       "patternProperties": {
         "^x-": {

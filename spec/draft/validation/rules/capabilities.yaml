@@ -48,8 +48,9 @@ rules:
           structural source of truth governs. Closing is also the reversible
           choice: opening the object later invalidates no document, while
           closing it later would.
-        reviewTrigger: An upstream clarification of the doc comment, or a later MCP revision adding an index signature.
-        status: proposed
+        reviewTrigger: Resolution of MCP issue 1898, an upstream clarification of the doc comment, or a later MCP revision adding an index signature.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1898
+        status: active
 
   - id: mcp.client-capabilities.members
     owner: mcp
@@ -74,21 +75,14 @@ rules:
         reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, ClientCapabilities doc comment ("this is not a closed set: any client can define its own, additional capabilities")'
       - tier: 8
         reference: MCP Description 0.9.0, Section 8.5
-    diagnostics: []
+    diagnostics:
+      - code: schema-validation
+        severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
-      - expected-valid/unknown-client-capability-requirement.json
+      - expected-invalid/unknown-client-capability-requirement.json
       - expected-valid/client-capability-requirements.json
-    gaps:
-      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
-        behavior: >-
-          Unknown top-level requirements are accepted and preserved without a
-          diagnostic. Section 8.5 accepts them "where the applicable MCP
-          ClientCapabilities type is open", which no revision's TypeScript type
-          is. Server capabilities are already closed.
-        resolution: planned
-        reference: Proposal 0027, contingent on the proposed arbitration
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
         conflict: >-
@@ -104,5 +98,6 @@ rules:
           Same reading as mcp.server-capabilities.members, so one document
           does not treat the two capability types differently. Closing is the
           reversible choice.
-        reviewTrigger: An upstream clarification of the doc comment, or a later MCP revision adding an index signature.
-        status: proposed
+        reviewTrigger: Resolution of MCP issue 1898, an upstream clarification of the doc comment, or a later MCP revision adding an index signature.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1898
+        status: active
