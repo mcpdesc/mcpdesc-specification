@@ -75,8 +75,8 @@ MCP Description does not support completion examples for MCP 2024-11-05.
 
 ## Validator output
 
-Diagnostics for registered validation rules carry a `rule` property next to
-`code`, `severity`, `message`, and `path`:
+Every diagnostic carries a `rule` property naming the validation rule it
+reports, next to `code`, `severity`, `message`, and `path`:
 
 ```json
 {

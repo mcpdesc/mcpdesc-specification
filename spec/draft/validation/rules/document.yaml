@@ -18,3 +18,164 @@ rules:
     fixtures:
       - expected-invalid/missing-tool-input-schema.json
       - expected-invalid/object-level-unknown-property.json
+
+  - id: mcp.declaration.field.revision-availability
+    owner: mcp
+    summary: >-
+      A declaration field is used only in revisions whose MCP type defines it:
+      title and _meta from 2025-06-18, Tool annotations from 2025-03-26, icons
+      and Tool schema $schema from 2025-11-25, Tool execution only in
+      2025-11-25, and the completions capability from 2025-03-26.
+    surface: Tool, Resource, ResourceTemplate, Prompt, PromptArgument, ServerCapabilities
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interfaces BaseMetadata, Icons, Tool, Resource, ResourceTemplate, Prompt, PromptArgument, and ServerCapabilities
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
+    diagnostics:
+      - code: field-not-supported-by-version
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/revision-inapplicable-execution.json
+      - expected-invalid/revision-inapplicable-tool-schema-dialect.json
+    notes: >-
+      outputSchema, the outputSchema root, and the tasks capability have their
+      own rules; the rule property identifies which applies.
+
+  - id: mcpdesc.protocol-scope.consistency
+    owner: mcpdesc
+    summary: >-
+      Nested protocol scopes stay within their parent scope, and same-named
+      primitives and capability objects do not overlap in protocol scope.
+    surface: Document
+    path: protocolVersions
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 4.10 and 8.6
+    diagnostics:
+      - code: protocol-scope-outside-parent
+        severity: error
+      - code: primitive-scope-overlap
+        severity: error
+      - code: capability-scope-overlap
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/elicitation-scope-outside-parent.json
+      - expected-invalid/scoped-version-not-in-root.json
+      - expected-invalid/overlapping-tool-scope.json
+      - expected-invalid/overlapping-capabilities.json
+
+  - id: mcpdesc.tags.references
+    owner: mcpdesc
+    summary: Root tag names are unique, and primitives reference only declared tags.
+    surface: Tag
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 13.2 and 13.3
+    diagnostics:
+      - code: duplicate-root-tag
+        severity: error
+      - code: unknown-tag-reference
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/duplicate-root-tag.json
+      - expected-invalid/duplicate-tag-reference.json
+
+  - id: mcpdesc.security.requirements
+    owner: mcpdesc
+    summary: >-
+      Security requirements name declared schemes, list scopes only for OAuth
+      2.0 and OpenID Connect schemes, do not repeat scopes, and use catalogued
+      scopes when the scheme declares a static catalogue.
+    surface: Security Requirement
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 7.1 to 7.3
+    diagnostics:
+      - code: unknown-security-scheme
+        severity: error
+      - code: non-oauth-scope-misuse
+        severity: error
+      - code: duplicate-security-scope
+        severity: error
+      - code: schema-validation
+        severity: error
+      - code: uncatalogued-oauth-scope
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/unknown-security-reference.json
+      - expected-invalid/non-oauth-scopes.json
+      - expected-invalid/duplicate-security-scope.json
+      - expected-warning/uncatalogued-oauth-scope.json
+      - expected-warning/uncatalogued-openid-scope.json
+    notes: >-
+      The document schema rejects duplicate scopes first (schema-validation);
+      duplicate-security-scope applies to callers of the semantic validator
+      alone.
+
+  - id: mcpdesc.components.references
+    owner: mcpdesc
+    summary: >-
+      A Reference Object targets an existing component in the namespace its
+      use site requires, without cycles.
+    surface: Reference Object
+    path: $componentRef
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 17.2 to 17.4
+    diagnostics:
+      - code: missing-component-reference-target
+        severity: error
+      - code: wrong-component-reference-namespace
+        severity: error
+      - code: component-reference-cycle
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/component-reference-resolution.json
+
+  - id: mcpdesc.legacy-revisions.validation-scope
+    owner: mcpdesc
+    summary: >-
+      A document applying to MCP 2024-11-05 or 2025-03-26 is reported as
+      receiving structural and selected checks only, not complete MCP semantic
+      conformance.
+    surface: Document
+    path: protocolVersions
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1 (revision tiers)
+    diagnostics:
+      - code: legacy-protocol-validation-incomplete
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-warning/legacy-result-meta.json

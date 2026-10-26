@@ -1,0 +1,106 @@
+rules:
+  - id: mcpdesc.tool.interaction.elicitation-consistency
+    owner: mcpdesc
+    summary: >-
+      An elicitation step matches the Tool's named Elicitation Declaration, and
+      its response content is present exactly when an accepted form response
+      requires it and validates against the requested schema.
+    surface: Tool interaction example
+    path: steps
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 schema.ts, interface ElicitResult, content (present for accepted form responses)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.4
+    diagnostics:
+      - code: unknown-elicitation-declaration
+        severity: error
+      - code: interaction-example-elicitation-declaration-mismatch
+        severity: error
+      - code: interaction-example-elicitation-response-mismatch
+        severity: error
+      - code: interaction-example-elicitation-content-schema-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-tool-interaction-example-semantics.json
+      - expected-valid/named-tool-interaction-examples.json
+
+  - id: mcpdesc.tool.interaction.client-requirements-consistency
+    owner: mcpdesc
+    summary: >-
+      Interaction steps do not contradict the Tool's explicit client capability
+      requirements.
+    surface: Tool interaction example
+    path: steps
+    kind: mcpdesc-semantic
+    requirement: should
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 8.5 and 9.4
+    diagnostics:
+      - code: interaction-example-client-requirements-contradiction
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-warning/tool-interaction-client-requirements-contradictions.json
+    notes: Steps never create requirements; the warning reports a contradiction only.
+
+  - id: mcp.sampling.tools.revision-availability
+    owner: mcp
+    summary: >-
+      A sampling request uses tools and toolChoice only from MCP 2025-11-25.
+    surface: CreateMessageRequest
+    path: tools, toolChoice
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 schema.ts, CreateMessageRequest (no tools); MCP 2025-11-25 and 2026-07-28 schema.ts, CreateMessageRequestParams tools and toolChoice
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.4
+    diagnostics:
+      - code: interaction-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-tool-interaction-example-semantics.json
+
+  - id: mcp.root.uri.file-scheme
+    owner: mcp
+    summary: A root URI in a roots response starts with file://.
+    surface: Root
+    path: uri
+    kind: semantic
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface Root, uri ("This *must* start with file:// for now")
+      - tier: 1
+        reference: MCP 2026-07-28 specification, Client Features, Roots, Data Types (uri MUST be a file:// URI)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.4
+    diagnostics:
+      - code: interaction-example-roots-uri
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-tool-interaction-example-semantics.json

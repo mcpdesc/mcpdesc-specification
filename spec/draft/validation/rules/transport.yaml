@@ -1,0 +1,73 @@
+rules:
+  - id: mcp.transport.streamable-http.revision-availability
+    owner: mcp
+    summary: Streamable HTTP is used only from MCP 2025-03-26.
+    surface: Transport
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 specification, Basic, Transports, Streamable HTTP (replaces HTTP+SSE from 2024-11-05)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 6.2
+    diagnostics:
+      - code: transport-not-supported-by-version
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/revision-inapplicable-streamable-http.json
+
+  - id: mcp.transport.legacy-sse.deprecated
+    owner: mcp
+    summary: >-
+      Legacy HTTP+SSE associated with MCP 2025-03-26 or later is reported,
+      because Streamable HTTP replaces it.
+    surface: Transport
+    kind: semantic
+    requirement: should
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 specification, Basic, Transports, Backwards Compatibility (deprecated HTTP+SSE transport)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 6.2
+    diagnostics:
+      - code: legacy-sse-for-modern-version
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-warning/legacy-sse-modern-revision.json
+
+  - id: mcpdesc.transports.coverage
+    owner: mcpdesc
+    summary: >-
+      Every protocol version at the root is covered by at least one transport
+      when transports are declared.
+    surface: Document
+    path: transports
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 6.5
+    diagnostics:
+      - code: transport-coverage-gap
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/root-version-without-transport.json
+      - expected-invalid/scoped-version-not-in-root.json

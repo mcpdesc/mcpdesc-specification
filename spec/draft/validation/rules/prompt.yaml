@@ -1,0 +1,26 @@
+rules:
+  - id: mcpdesc.prompt.example.arguments
+    owner: mcpdesc
+    summary: >-
+      A Prompt example supplies every required Prompt argument and no
+      undeclared argument.
+    surface: Prompt example
+    path: arguments
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface PromptArgument, required ("Whether this argument must be provided")
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 11.3
+    diagnostics:
+      - code: prompt-example-missing-required-argument
+        severity: error
+      - code: prompt-example-unknown-argument
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-prompt-example-semantics.json
+      - expected-invalid/component-contextual-examples.json
+      - expected-valid/named-prompt-examples.json

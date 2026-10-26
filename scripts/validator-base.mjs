@@ -741,7 +741,7 @@ function validateElicitations(document, rel, diagnostics) {
 function validateVersionSpecificSemantics(document, rel, diagnostics) {
   const rootScope = normalizeScope(document.protocolVersions ?? []);
 
-  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope, rule) {
+  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope, rule = 'mcp.declaration.field.revision-availability') {
     if (!(fieldName in object)) return;
     for (const version of scope) {
       if (protocolOrder.get(version) < protocolOrder.get(minimumVersion)) {
@@ -767,7 +767,8 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
             'field-not-supported-by-version',
             'error',
             `${location}.${fieldName} is defined only for MCP ${supportedVersion}, not MCP ${version}`,
-            [...locationPath, fieldName]
+            [...locationPath, fieldName],
+            'mcp.declaration.field.revision-availability'
           )
         );
       }
@@ -859,7 +860,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
     const capabilityPath = ['capabilities', index];
     if ('completions' in capability) checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'completions', '2025-03-26', scope);
     if ('tasks' in capability) {
-      checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'tasks', '2025-11-25', scope);
+      checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'tasks', '2025-11-25', scope, 'mcp.capabilities.tasks.revision-availability');
       if (scope.includes('2026-07-28')) {
         diagnostics.push(
           makeDiagnostic(
@@ -1101,7 +1102,8 @@ function validateToolSchemas(document, rel, diagnostics) {
               'field-not-supported-by-version',
               'error',
               `${location}.$schema is not defined for MCP ${version}; it requires ${toolSchemaDialectVersion} or later`,
-              [...locationPath, '$schema']
+              [...locationPath, '$schema'],
+              'mcp.declaration.field.revision-availability'
             )
           );
         }

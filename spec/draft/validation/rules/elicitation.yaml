@@ -1,0 +1,113 @@
+rules:
+  - id: mcp.elicitation.revision-availability
+    owner: mcp
+    summary: >-
+      Elicitation is used only from MCP 2025-06-18, and URL mode only from MCP
+      2025-11-25, in declarations and in Tool interaction steps.
+    surface: ElicitRequest
+    path: mode
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 schema.ts (no elicitation/create); MCP 2025-06-18 schema.ts, ElicitRequest (form only); MCP 2025-11-25 and 2026-07-28 schema.ts, ElicitRequestURLParams (mode "url")
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 9.4 and 12.5
+    diagnostics:
+      - code: elicitation-mode-not-supported-by-version
+        severity: error
+      - code: interaction-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/elicitation-version-mismatch.json
+      - expected-invalid/invalid-tool-interaction-example-semantics.json
+    notes: >-
+      Elicitation Declarations scoped before MCP 2025-06-18 are outside the
+      complete semantic checks (Section 16.2).
+
+  - id: mcp.elicitation.form-schema.revision-shape
+    owner: mcp
+    summary: >-
+      In MCP 2025-06-18, a form requestedSchema has no $schema, no array or
+      titled enum properties, and default only on boolean properties.
+    surface: ElicitRequest
+    path: requestedSchema
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": applies
+      "2025-11-25": not-applicable
+      "2026-07-28": not-applicable
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 schema.ts, ElicitRequest requestedSchema and PrimitiveSchemaDefinition (default only on BooleanSchema; EnumSchema with enum and enumNames)
+      - tier: 1
+        reference: MCP 2025-11-25 schema.ts, requestedSchema $schema, default on all primitive schemas, titled and multi-select enum schemas
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 12.3
+    diagnostics:
+      - code: elicitation-form-schema-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/elicitation-form-schema-2025-06-18.json
+
+  - id: mcpdesc.elicitation.form-schema.consistency
+    owner: mcpdesc
+    summary: >-
+      A form requestedSchema is internally consistent: required names declared
+      properties, enumNames match enum values, defaults lie within enums, and
+      minimum bounds do not exceed maximum bounds.
+    surface: Elicitation Declaration
+    path: requestedSchema
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 schema.ts, PrimitiveSchemaDefinition and EnumSchema (enumNames are display names for enum values)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 12.3
+    diagnostics:
+      - code: elicitation-form-required-property-unknown
+        severity: error
+      - code: elicitation-form-enum-names-mismatch
+        severity: error
+      - code: elicitation-form-default-outside-enum
+        severity: error
+      - code: elicitation-form-invalid-range
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/elicitation-form-semantics.json
+      - expected-invalid/elicitation-form-invalid-range.json
+      - expected-valid/elicitation-declarations.json
+
+  - id: mcpdesc.elicitation.name-unique
+    owner: mcpdesc
+    summary: Elicitation Declaration names are unique within their primitive.
+    surface: Elicitation Declaration
+    path: name
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 12.2
+    diagnostics:
+      - code: duplicate-elicitation-name
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/elicitation-form-semantics.json

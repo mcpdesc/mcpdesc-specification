@@ -18,7 +18,7 @@ validator does not consume the registry yet. Design background is tracked in
 | --- | --- | --- |
 | [`mcp-revisions.md`](mcp-revisions.md) | Introductory guide to how MCP structures used by MCP Description differ across supported protocol revisions | Initial version |
 | [`rule.schema.json`](rule.schema.json) | JSON Schema for rule registry files | Pilot |
-| [`rules/`](rules/) | Validation rule records in YAML, one file per surface (Tool, Result, Capabilities, MCP Description core) | Pilot: thirteen rules; checked by `scripts/test-validation-rules.mjs` |
+| [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: 58 rules declaring every candidate diagnostic code; checked by `scripts/test-validation-rules.mjs` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported revision (`<revision>/schema.ts`, `<revision>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
 
 The folder is part of the versioned specification: it is frozen with each
@@ -184,11 +184,11 @@ property next to `code`, `severity`, `message`, and `path`:
 ```
 
 `code` names the condition and can be shared by several rules; `rule` names
-the requirement. Every `schema-validation` diagnostic has a rule: a specific
-one where the failing schema location identifies it, otherwise
-`mcpdesc.document.schema`. Diagnostics for codes not yet in the registry have
-no `rule` property.
+the requirement. Every diagnostic of the candidate validator identifies a
+registered rule. A `schema-validation` diagnostic identifies a specific rule
+where the failing schema location does, otherwise `mcpdesc.document.schema`.
 
-`scripts/test-validation-rules.mjs` checks that every rule identifier in a
-fixture diagnostic is registered and declares that code and severity, and that
-each `expected-invalid` fixture a rule cites has a diagnostic identifying it.
+`scripts/test-validation-rules.mjs` checks that every diagnostic code the
+candidate validator emits is declared by a rule, that every fixture diagnostic
+identifies a registered rule declaring that code and severity, and that each
+`expected-invalid` fixture a rule cites has a diagnostic identifying it.

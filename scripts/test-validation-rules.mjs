@@ -3,8 +3,8 @@
 // Validates registry files against rule.schema.json and checks identifier
 // ownership, revision applicability, source tiers, the revision support-tier
 // policy for gaps, fixtures, and diagnostic codes against the candidate
-// validator. Reports diagnostic-code coverage without failing until the
-// rule inventory is complete.
+// validator. Every emitted diagnostic code must be registered, and every
+// fixture diagnostic must identify a registered rule that declares it.
 
 import fs from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -136,8 +136,10 @@ for (const category of fs.readdirSync(fixtureRoot).filter((name) => name.startsW
   for (const name of fs.readdirSync(path.join(fixtureRoot, category)).filter((file) => /\.(?:json|ya?ml)$/.test(file)).sort()) {
     const fixture = `${category}/${name}`;
     for (const diagnostic of diagnosticsForFixture(fixture)) {
-      if (diagnostic.code === 'schema-validation' && !diagnostic.rule) fail(`${fixture}: schema-validation diagnostic without a rule`);
-      if (!diagnostic.rule) continue;
+      if (!diagnostic.rule) {
+        fail(`${fixture}: diagnostic ${diagnostic.code} does not identify a rule`);
+        continue;
+      }
       attributed += 1;
       const rule = registeredRules.get(diagnostic.rule);
       if (!rule) {
@@ -179,10 +181,14 @@ if (!fs.existsSync(path.join(mcpSchemasDirectory, 'manifest.json'))) {
   }
 }
 
+for (const code of emittedCodes) {
+  if (!coveredCodes.has(code)) fail(`diagnostic code ${code} is emitted by the candidate validator but declared by no rule`);
+}
+
 if (errors.length) {
   console.error(`Validation rule registry check failed with ${errors.length} error(s):`);
   for (const error of errors.sort()) console.error(`- ${error}`);
   process.exit(1);
 }
 
-console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); ${attributed} fixture diagnostic(s) identify a rule; covers ${coveredCodes.size} of ${emittedCodes.size} candidate diagnostic codes.`);
+console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s) declare all ${emittedCodes.size} candidate diagnostic codes; ${attributed} fixture diagnostic(s) identify a rule.`);

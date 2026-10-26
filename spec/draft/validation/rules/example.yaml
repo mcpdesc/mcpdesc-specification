@@ -94,3 +94,64 @@ rules:
       Envelope fields are jsonrpc, id, and error. Non-completed workflow
       fields are task, inputRequests, and requestState. They are excluded from
       the field classification of mcp.result.additional-properties.preserve.
+
+  - id: mcp.completion.context.revision-availability
+    owner: mcp
+    summary: >-
+      A completion example carries context only from MCP 2025-06-18, where
+      CompleteRequest defines it.
+    surface: CompleteRequest
+    path: context
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 schema.ts, interface CompleteRequest (no context); MCP 2025-06-18 to 2026-07-28 schema.ts, CompleteRequest params context
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+    diagnostics:
+      - code: completion-example-context-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-completion-example-semantics.json
+    notes: MCP Description does not support completion examples for MCP 2024-11-05 (mcp.completion.revision-availability).
+
+  - id: mcpdesc.completion-example.target
+    owner: mcpdesc
+    summary: >-
+      A completion example completes a declared Prompt argument or URI template
+      variable, and its context names other declared arguments or variables
+      only.
+    surface: Completion example
+    path: argument, context
+    kind: mcpdesc-semantic
+    requirement: must
+    sources:
+      - tier: 1
+        reference: "MCP 2025-06-18 to 2026-07-28 schema.ts, CompleteRequest context.arguments (previously-resolved variables in a URI template or prompt)"
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+    diagnostics:
+      - code: prompt-completion-example-unknown-argument
+        severity: error
+      - code: prompt-completion-example-context-unknown-argument
+        severity: error
+      - code: resource-template-completion-example-unknown-variable
+        severity: error
+      - code: resource-template-completion-example-context-unknown-variable
+        severity: error
+      - code: completion-example-duplicate-target-context
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/invalid-completion-example-semantics.json
+      - expected-valid/named-completion-examples.json

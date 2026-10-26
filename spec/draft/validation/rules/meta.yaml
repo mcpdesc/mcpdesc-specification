@@ -1,0 +1,60 @@
+rules:
+  - id: mcp.meta.key-format
+    owner: mcp
+    summary: >-
+      A _meta key has an optional prefix of dot-separated labels followed by a
+      slash, and a name that begins and ends with an alphanumeric character.
+    surface: _meta
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta key name format
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 3.5 (the same grammar applies in every revision)
+    diagnostics:
+      - code: schema-validation
+        severity: error
+      - code: meta-key-invalid
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/meta-key-invalid.json
+    notes: >-
+      The document schema rejects malformed keys first; meta-key-invalid
+      applies to callers of the semantic validator alone.
+
+  - id: mcp.meta.reserved-prefix
+    owner: mcp
+    summary: >-
+      A _meta key under an MCP-reserved prefix that the revision does not
+      define is preserved with a warning.
+    surface: _meta
+    kind: semantic
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta (a prefix whose second label is modelcontextprotocol or mcp is reserved for MCP use)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 3.5
+    diagnostics:
+      - code: meta-unknown-reserved-key
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-warning/unknown-reserved-meta-key.json
+    notes: A later MCP revision may define the key, so it is preserved rather than rejected.

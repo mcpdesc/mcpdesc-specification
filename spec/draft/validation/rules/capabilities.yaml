@@ -101,3 +101,194 @@ rules:
         reviewTrigger: Resolution of MCP issue 1898, an upstream clarification of the doc comment, or a later MCP revision adding an index signature.
         upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1898
         status: active
+
+  - id: mcp.client-capabilities.revision-shape
+    owner: mcp
+    summary: >-
+      Each client capability requirement and nested member exists in every
+      applicable revision's ClientCapabilities type, with object values and a
+      boolean listChanged.
+    surface: ClientCapabilities
+    path: clientRequirements
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (members and nested members per revision)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 8.5
+    diagnostics:
+      - code: client-requirement-version-mismatch
+        severity: error
+      - code: invalid-client-requirement-value
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/revision-incompatible-client-capability-requirements.json
+      - expected-invalid/invalid-client-requirement-value.json
+      - expected-valid/client-capability-requirements.json
+
+  - id: mcp.client-capabilities.deprecated
+    owner: mcp
+    summary: >-
+      A client capability requirement that the applicable revision deprecates
+      is reported.
+    surface: ClientCapabilities
+    path: clientRequirements
+    kind: semantic
+    requirement: should
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": not-applicable
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-11-25 schema.ts, CreateMessageRequest includeContext ("thisServer" and "allServers" are soft-deprecated; tied to ClientCapabilities.sampling.context)
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, ClientCapabilities roots and sampling (@deprecated, SEP-2577)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 8.5
+    diagnostics:
+      - code: deprecated-client-requirement
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-warning/deprecated-client-capability-requirements.json
+
+  - id: mcp.capabilities.extensions.revision-availability
+    owner: mcp
+    summary: >-
+      Server capabilities.extensions is defined from MCP 2026-07-28; for
+      earlier revisions a pre-standard extensions map is preserved with a
+      warning.
+    surface: ServerCapabilities
+    path: extensions
+    kind: structural
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2025-11-25 schema.ts, interface ServerCapabilities (no extensions); MCP 2026-07-28 schema.ts, ServerCapabilities extensions
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 8.4; Proposal 0021 (pre-standard extension capabilities)
+    diagnostics:
+      - code: extensions-not-supported-by-version
+        severity: warning
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - expected-warning/pre-standard-extension-capabilities.json
+    arbitrations:
+      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
+        conflict: >-
+          ServerCapabilities is closed and has no extensions member before MCP
+          2026-07-28, so mcp.server-capabilities.members would reject it, but
+          deployed servers advertise extensions with a pre-standard convention.
+        authority: MCP Description decision (Proposal 0021)
+        behavior: >-
+          Accept and preserve a server extensions map for earlier revisions
+          with a warning; client requirements stay revision-strict.
+        rationale: >-
+          Rejecting it would make descriptions of deployed servers inaccurate.
+          The warning keeps the departure from the type visible.
+        reviewTrigger: Retirement of the pre-standard convention, or a decision to drop support for it.
+        status: active
+
+  - id: mcpdesc.extensions.catalogue-maturity
+    owner: mcpdesc
+    summary: >-
+      An extension identifier under an MCP-reserved prefix that the pinned
+      extension catalogue lists as experimental, or does not list, is preserved
+      with a warning.
+    surface: Extension identifier
+    path: capabilities.extensions, clientRequirements.extensions
+    kind: mcpdesc-semantic
+    requirement: should
+    sources:
+      - tier: 1
+        reference: MCP 2026-07-28 specification, Basic, General fields, _meta key name format (second label modelcontextprotocol or mcp is reserved)
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 8.4 and 8.5; validator extension catalogue (effective 2026-09-04)
+    diagnostics:
+      - code: unknown-reserved-extension-identifier
+        severity: warning
+      - code: experimental-reserved-extension-identifier
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-warning/unknown-reserved-extension-identifier.json
+      - expected-warning/deprecated-client-capability-requirements.json
+    notes: >-
+      The pinned catalogue lists no experimental identifiers, so no document
+      currently produces experimental-reserved-extension-identifier.
+
+  - id: mcp.capabilities.tasks.revision-availability
+    owner: mcp
+    summary: >-
+      The core tasks server capability exists only in MCP 2025-11-25; MCP
+      2026-07-28 uses the tasks extension instead.
+    surface: ServerCapabilities
+    path: tasks
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-11-25 schema.ts, ServerCapabilities tasks; MCP 2025-06-18 and 2026-07-28 schema.ts, ServerCapabilities (no tasks)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 8.3
+    diagnostics:
+      - code: field-not-supported-by-version
+        severity: error
+      - code: tasks-core-not-valid-in-2026
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/tasks-capability-2026.json
+
+  - id: mcp.capabilities.logging.deprecated
+    owner: mcp
+    summary: The logging server capability is reported as deprecated in MCP 2026-07-28.
+    surface: ServerCapabilities
+    path: logging
+    kind: semantic
+    requirement: should
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": not-applicable
+      "2025-11-25": not-applicable
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, ServerCapabilities logging (@deprecated, SEP-2577); specification, Server Features, Utilities, Logging (deprecated)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 8.2
+    diagnostics:
+      - code: logging-deprecated-in-2026
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-warning/logging-deprecated-2026.json

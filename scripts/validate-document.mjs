@@ -219,6 +219,8 @@ function structuralRule({ keyword, instancePath, schemaPath, params }) {
     || (keyword === 'required' && params.missingProperty === 'type' && /^\/tools\/\d+\/inputSchema$/.test(instancePath))) {
     return 'mcp.tool.input-schema.object-root';
   }
+  if (schemaPath.startsWith('#/$defs/metaObject/propertyNames')) return 'mcp.meta.key-format';
+  if (schemaPath === '#/$defs/securityRequirement/additionalProperties/uniqueItems') return 'mcpdesc.security.requirements';
   return 'mcpdesc.document.schema';
 }
 
@@ -253,7 +255,61 @@ const ruleForCode = new Map([
   ['invalid-tool-schema', 'json-schema.tool-schema.valid'],
   ['unsupported-tool-schema-dialect', 'json-schema.tool-schema.valid'],
   ['unresolved-external-tool-schema-reference', 'json-schema.tool-schema.valid'],
-  ['invalid-legacy-tool-schema-shape', 'mcp.tool.schema.legacy-shape']
+  ['invalid-legacy-tool-schema-shape', 'mcp.tool.schema.legacy-shape'],
+  ['completion-example-context-version-mismatch', 'mcp.completion.context.revision-availability'],
+  ['prompt-completion-example-unknown-argument', 'mcpdesc.completion-example.target'],
+  ['prompt-completion-example-context-unknown-argument', 'mcpdesc.completion-example.target'],
+  ['resource-template-completion-example-unknown-variable', 'mcpdesc.completion-example.target'],
+  ['resource-template-completion-example-context-unknown-variable', 'mcpdesc.completion-example.target'],
+  ['completion-example-duplicate-target-context', 'mcpdesc.completion-example.target'],
+  ['resource-template-completion-example-invalid-template', 'mcp.resource-template.uri-template'],
+  ['resource-template-example-invalid-template', 'mcp.resource-template.uri-template'],
+  ['prompt-example-unknown-argument', 'mcpdesc.prompt.example.arguments'],
+  ['prompt-example-missing-required-argument', 'mcpdesc.prompt.example.arguments'],
+  ['invalid-resource-example-base64', 'mcp.resource-contents.blob.base64'],
+  ['resource-example-mime-type-mismatch', 'mcpdesc.resource.example.consistency'],
+  ['resource-example-requested-uri-not-returned', 'mcpdesc.resource.example.consistency'],
+  ['resource-example-size-mismatch', 'mcpdesc.resource.example.consistency'],
+  ['resource-template-example-invalid-expansion', 'mcpdesc.resource-template.example.expansion'],
+  ['duplicate-elicitation-name', 'mcpdesc.elicitation.name-unique'],
+  ['elicitation-mode-not-supported-by-version', 'mcp.elicitation.revision-availability'],
+  ['elicitation-form-schema-version-mismatch', 'mcp.elicitation.form-schema.revision-shape'],
+  ['elicitation-form-required-property-unknown', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['elicitation-form-enum-names-mismatch', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['elicitation-form-default-outside-enum', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['elicitation-form-invalid-range', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['unknown-elicitation-declaration', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-elicitation-declaration-mismatch', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-elicitation-response-mismatch', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-elicitation-content-schema-mismatch', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-client-requirements-contradiction', 'mcpdesc.tool.interaction.client-requirements-consistency'],
+  ['interaction-example-roots-uri', 'mcp.root.uri.file-scheme'],
+  ['capability-scope-overlap', 'mcpdesc.protocol-scope.consistency'],
+  ['primitive-scope-overlap', 'mcpdesc.protocol-scope.consistency'],
+  ['protocol-scope-outside-parent', 'mcpdesc.protocol-scope.consistency'],
+  ['transport-coverage-gap', 'mcpdesc.transports.coverage'],
+  ['client-requirement-version-mismatch', 'mcp.client-capabilities.revision-shape'],
+  ['invalid-client-requirement-value', 'mcp.client-capabilities.revision-shape'],
+  ['deprecated-client-requirement', 'mcp.client-capabilities.deprecated'],
+  ['extensions-not-supported-by-version', 'mcp.capabilities.extensions.revision-availability'],
+  ['experimental-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
+  ['unknown-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
+  ['tasks-core-not-valid-in-2026', 'mcp.capabilities.tasks.revision-availability'],
+  ['logging-deprecated-in-2026', 'mcp.capabilities.logging.deprecated'],
+  ['transport-not-supported-by-version', 'mcp.transport.streamable-http.revision-availability'],
+  ['legacy-sse-for-modern-version', 'mcp.transport.legacy-sse.deprecated'],
+  ['legacy-protocol-validation-incomplete', 'mcpdesc.legacy-revisions.validation-scope'],
+  ['duplicate-root-tag', 'mcpdesc.tags.references'],
+  ['unknown-tag-reference', 'mcpdesc.tags.references'],
+  ['unknown-security-scheme', 'mcpdesc.security.requirements'],
+  ['non-oauth-scope-misuse', 'mcpdesc.security.requirements'],
+  ['duplicate-security-scope', 'mcpdesc.security.requirements'],
+  ['uncatalogued-oauth-scope', 'mcpdesc.security.requirements'],
+  ['component-reference-cycle', 'mcpdesc.components.references'],
+  ['missing-component-reference-target', 'mcpdesc.components.references'],
+  ['wrong-component-reference-namespace', 'mcpdesc.components.references'],
+  ['meta-key-invalid', 'mcp.meta.key-format'],
+  ['meta-unknown-reserved-key', 'mcp.meta.reserved-prefix']
 ]);
 
 function attributeRule(diagnostic) {
@@ -443,7 +499,8 @@ function validateToolInteractionExamples(document) {
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.type is not defined for MCP ${version}`,
-                [...stepPath, 'type']
+                [...stepPath, 'type'],
+                'mcp.elicitation.revision-availability'
               ));
             }
             if (request.mode === 'url' && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
@@ -451,7 +508,8 @@ function validateToolInteractionExamples(document) {
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.request.mode "url" is not defined for MCP ${version}`,
-                [...stepPath, 'request', 'mode']
+                [...stepPath, 'request', 'mode'],
+                'mcp.elicitation.revision-availability'
               ));
             }
           }
@@ -536,7 +594,8 @@ function validateToolInteractionExamples(document) {
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.request uses sampling Tool fields that are not defined for MCP ${version}`,
-                [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice']
+                [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice'],
+                'mcp.sampling.tools.revision-availability'
               ));
             }
           }
