@@ -1,0 +1,8 @@
+{
+  "description": "MCP 2025-06-18 is absent from root protocolVersions.",
+  "document": "../fixtures/expected-valid/named-completion-examples.json",
+  "revision": "2025-06-18",
+  "kind": "resourceTemplate",
+  "identifier": "repo://{owner}/{repository}/issues/{issue}",
+  "expectedError": "projection-revision-not-declared"
+}

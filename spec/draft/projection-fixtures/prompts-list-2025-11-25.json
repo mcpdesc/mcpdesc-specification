@@ -1,0 +1,42 @@
+{
+  "description": "The Prompt list contains every Prompt of the Effective Protocol View, in document order.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2025-11-25",
+  "kind": "prompt",
+  "expected": [
+    {
+      "name": "summarize",
+      "description": "Summarize a text.",
+      "arguments": [
+        {
+          "name": "text",
+          "description": "Text to summarize.",
+          "required": true
+        },
+        {
+          "name": "style"
+        }
+      ]
+    },
+    {
+      "name": "greet",
+      "arguments": [
+        {
+          "name": "person",
+          "title": "Person",
+          "required": true
+        }
+      ],
+      "title": "Greeting",
+      "icons": [
+        {
+          "src": "https://example.com/greet.png",
+          "mimeType": "image/png",
+          "sizes": [
+            "48x48"
+          ]
+        }
+      ]
+    }
+  ]
+}

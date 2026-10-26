@@ -1,0 +1,34 @@
+{
+  "description": "title, outputSchema, and _meta appear from MCP 2025-06-18; examples are omitted.",
+  "document": "documents/tools.json",
+  "revision": "2025-06-18",
+  "kind": "tool",
+  "identifier": "report",
+  "expected": {
+    "name": "report",
+    "description": "Build a usage report.",
+    "inputSchema": {
+      "type": "object"
+    },
+    "annotations": {
+      "title": "Usage report",
+      "readOnlyHint": true,
+      "openWorldHint": false
+    },
+    "title": "Usage report",
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "total"
+      ]
+    },
+    "_meta": {
+      "example.com/team": "reports"
+    }
+  }
+}

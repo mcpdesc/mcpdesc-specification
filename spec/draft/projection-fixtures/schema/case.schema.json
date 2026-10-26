@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MCP Description native projection fixture case",
+  "description": "Structure of each JSON file directly under projection-fixtures/. See Section 4.14 and Proposal 0025.",
+  "type": "object",
+  "required": [
+    "description",
+    "document",
+    "revision",
+    "kind"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "document": {
+      "description": "Source MCP Description document: a path relative to this file, or an inline document.",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(documents/[a-z0-9-]+\\.json|\\.\\./fixtures/expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml))$"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "kind": {
+      "enum": [
+        "tool",
+        "resource",
+        "resourceTemplate",
+        "prompt"
+      ]
+    },
+    "identifier": {
+      "description": "Tool name, Resource uri, Resource Template uriTemplate, or Prompt name. Absent for a list case.",
+      "type": "string",
+      "minLength": 1
+    },
+    "expected": {
+      "description": "Exact MCP value, or the ordered list of MCP values for a list case; compared as canonical JSON.",
+      "type": [
+        "object",
+        "array"
+      ],
+      "items": {
+        "type": "object"
+      }
+    },
+    "expectedError": {
+      "enum": [
+        "projection-source-invalid",
+        "projection-revision-not-declared",
+        "projection-declaration-not-applicable"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "expected"
+      ]
+    },
+    {
+      "required": [
+        "expectedError"
+      ]
+    }
+  ],
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "identifier",
+          "expected"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "required": [
+            "identifier"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "type": "array"
+          },
+          "expectedError": {
+            "not": {
+              "const": "projection-declaration-not-applicable"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

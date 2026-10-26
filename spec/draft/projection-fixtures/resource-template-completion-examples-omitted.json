@@ -1,0 +1,11 @@
+{
+  "description": "completionExamples are omitted.",
+  "document": "../fixtures/expected-valid/named-completion-examples.json",
+  "revision": "2026-07-28",
+  "kind": "resourceTemplate",
+  "identifier": "repo://{owner}/{repository}/issues/{issue}",
+  "expected": {
+    "uriTemplate": "repo://{owner}/{repository}/issues/{issue}",
+    "name": "repository_issue"
+  }
+}

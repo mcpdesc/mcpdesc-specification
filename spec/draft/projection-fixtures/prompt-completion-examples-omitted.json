@@ -1,0 +1,20 @@
+{
+  "description": "completionExamples are omitted.",
+  "document": "../fixtures/expected-valid/named-completion-examples.json",
+  "revision": "2025-11-25",
+  "kind": "prompt",
+  "identifier": "team_lead",
+  "expected": {
+    "name": "team_lead",
+    "arguments": [
+      {
+        "name": "department",
+        "required": true
+      },
+      {
+        "name": "name",
+        "required": true
+      }
+    ]
+  }
+}

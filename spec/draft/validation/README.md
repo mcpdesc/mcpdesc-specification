@@ -177,9 +177,9 @@ Each validation rule has a permanent identifier and a record:
 | `specification` | MCP Description requirements the rule checks and the decisions behind it, each with precise `locations` (see below) |
 | `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `diagnostics` | Diagnostic codes emitted |
-| `enforcement` | Internal check, official schema, or external validator |
+| `enforcement` | Internal check, official schema, or external implementation, such as native projection in `@mcpdesc/core` |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
-| `fixtures` | Tests covering each revision boundary: a fixture `path` and a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document) |
+| `fixtures` | Tests covering each revision boundary: a fixture `path` and a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document). The path is relative to `fixtures/`, or names a native projection case under `projection-fixtures/` |
 | `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
 
 Locations are immutable and relative to the specification folder:

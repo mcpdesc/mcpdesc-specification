@@ -1,0 +1,12 @@
+{
+  "description": "Resource Template examples are omitted.",
+  "document": "../fixtures/expected-valid/named-resource-examples.json",
+  "revision": "2026-07-28",
+  "kind": "resourceTemplate",
+  "identifier": "chess://games/{game_id}",
+  "expected": {
+    "uriTemplate": "chess://games/{game_id}",
+    "name": "game_detail",
+    "mimeType": "application/json"
+  }
+}

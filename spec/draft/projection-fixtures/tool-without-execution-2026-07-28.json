@@ -1,0 +1,14 @@
+{
+  "description": "The MCP 2026-07-28 variant has no execution and none is added.",
+  "document": "../fixtures/expected-valid/protocol-scoped-primitives.json",
+  "revision": "2026-07-28",
+  "kind": "tool",
+  "identifier": "run_job",
+  "expected": {
+    "name": "run_job",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false
+    }
+  }
+}

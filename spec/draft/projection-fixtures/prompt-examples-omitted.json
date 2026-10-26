@@ -1,0 +1,19 @@
+{
+  "description": "Prompt examples are omitted.",
+  "document": "../fixtures/expected-valid/named-prompt-examples.json",
+  "revision": "2026-07-28",
+  "kind": "prompt",
+  "identifier": "city_briefing",
+  "expected": {
+    "name": "city_briefing",
+    "arguments": [
+      {
+        "name": "city",
+        "required": true
+      },
+      {
+        "name": "audience"
+      }
+    ]
+  }
+}

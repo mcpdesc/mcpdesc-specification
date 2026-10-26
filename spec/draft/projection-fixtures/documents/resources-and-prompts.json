@@ -1,0 +1,203 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "projection-resources-and-prompts",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2024-11-05",
+    "2025-03-26",
+    "2025-06-18",
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "resources": [
+    {
+      "uri": "file:///docs/readme.md",
+      "name": "readme",
+      "description": "Project overview.",
+      "mimeType": "text/markdown",
+      "size": 1024,
+      "annotations": {
+        "audience": [
+          "user"
+        ],
+        "priority": 0.5
+      },
+      "tags": [
+        "docs"
+      ],
+      "deprecated": true,
+      "x-example-owner": "docs-team"
+    },
+    {
+      "uri": "file:///etc/app.json",
+      "name": "config",
+      "protocolVersions": [
+        "2024-11-05",
+        "2025-03-26"
+      ],
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "file:///etc/app.json",
+      "name": "config",
+      "protocolVersions": [
+        "2025-06-18"
+      ],
+      "title": "Application configuration",
+      "mimeType": "application/json",
+      "annotations": {
+        "lastModified": "2026-01-15T10:00:00Z"
+      },
+      "_meta": {
+        "example.com/owner": "platform"
+      }
+    },
+    {
+      "uri": "file:///etc/app.json",
+      "name": "config",
+      "protocolVersions": [
+        "2025-11-25",
+        "2026-07-28"
+      ],
+      "title": "Application configuration",
+      "mimeType": "application/json",
+      "icons": [
+        {
+          "src": "https://example.com/config.svg",
+          "mimeType": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "uri": "file:///var/audit.log",
+      "name": "audit",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "mimeType": "text/plain"
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "file:///logs/{date}.log",
+      "name": "logs",
+      "description": "Daily logs.",
+      "mimeType": "text/plain",
+      "annotations": {
+        "audience": [
+          "assistant"
+        ]
+      },
+      "deprecated": true
+    },
+    {
+      "uriTemplate": "users://{id}/profile",
+      "name": "user-profile",
+      "protocolVersions": [
+        "2025-06-18"
+      ],
+      "title": "User profile",
+      "mimeType": "application/json",
+      "_meta": {
+        "example.com/owner": "identity"
+      }
+    },
+    {
+      "uriTemplate": "users://{id}/profile",
+      "name": "user-profile",
+      "protocolVersions": [
+        "2025-11-25",
+        "2026-07-28"
+      ],
+      "title": "User profile",
+      "mimeType": "application/json",
+      "icons": [
+        {
+          "src": "https://example.com/user.png",
+          "mimeType": "image/png"
+        }
+      ],
+      "_meta": {
+        "example.com/owner": "identity"
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "summarize",
+      "description": "Summarize a text.",
+      "arguments": [
+        {
+          "name": "text",
+          "description": "Text to summarize.",
+          "required": true
+        },
+        {
+          "name": "style",
+          "x-example-hint": "formal or casual"
+        }
+      ],
+      "tags": [
+        "writing"
+      ],
+      "x-example-owner": "writing-team"
+    },
+    {
+      "name": "greet",
+      "protocolVersions": [
+        "2024-11-05",
+        "2025-03-26"
+      ],
+      "arguments": [
+        {
+          "name": "person",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "greet",
+      "protocolVersions": [
+        "2025-06-18"
+      ],
+      "title": "Greeting",
+      "arguments": [
+        {
+          "name": "person",
+          "title": "Person",
+          "required": true
+        }
+      ],
+      "_meta": {
+        "example.com/owner": "social"
+      }
+    },
+    {
+      "name": "greet",
+      "protocolVersions": [
+        "2025-11-25",
+        "2026-07-28"
+      ],
+      "title": "Greeting",
+      "arguments": [
+        {
+          "name": "person",
+          "title": "Person",
+          "required": true
+        }
+      ],
+      "icons": [
+        {
+          "src": "https://example.com/greet.png",
+          "mimeType": "image/png",
+          "sizes": [
+            "48x48"
+          ]
+        }
+      ]
+    }
+  ]
+}

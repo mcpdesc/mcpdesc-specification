@@ -1,0 +1,38 @@
+{
+  "description": "The Resource list contains every Resource of the Effective Protocol View, in document order.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2026-07-28",
+  "kind": "resource",
+  "expected": [
+    {
+      "uri": "file:///docs/readme.md",
+      "name": "readme",
+      "description": "Project overview.",
+      "mimeType": "text/markdown",
+      "size": 1024,
+      "annotations": {
+        "audience": [
+          "user"
+        ],
+        "priority": 0.5
+      }
+    },
+    {
+      "uri": "file:///etc/app.json",
+      "name": "config",
+      "mimeType": "application/json",
+      "title": "Application configuration",
+      "icons": [
+        {
+          "src": "https://example.com/config.svg",
+          "mimeType": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "uri": "file:///var/audit.log",
+      "name": "audit",
+      "mimeType": "text/plain"
+    }
+  ]
+}

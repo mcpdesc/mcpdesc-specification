@@ -1,0 +1,16 @@
+{
+  "description": "title and _meta appear from MCP 2025-06-18.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2025-06-18",
+  "kind": "resourceTemplate",
+  "identifier": "users://{id}/profile",
+  "expected": {
+    "uriTemplate": "users://{id}/profile",
+    "name": "user-profile",
+    "mimeType": "application/json",
+    "title": "User profile",
+    "_meta": {
+      "example.com/owner": "identity"
+    }
+  }
+}

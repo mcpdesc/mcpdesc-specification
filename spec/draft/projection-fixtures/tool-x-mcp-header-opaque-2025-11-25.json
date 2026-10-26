@@ -1,0 +1,37 @@
+{
+  "description": "x-mcp-header keywords, opaque before MCP 2026-07-28, are kept unchanged inside inputSchema.",
+  "document": "../fixtures/expected-valid/revision-inapplicable-mcp-header.json",
+  "revision": "2025-11-25",
+  "kind": "tool",
+  "identifier": "early_header",
+  "expected": {
+    "name": "early_header",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "region": {
+          "type": "object",
+          "x-mcp-header": 7
+        },
+        "primary": {
+          "type": "string",
+          "x-mcp-header": "X-Region"
+        },
+        "fallback": {
+          "type": "string",
+          "x-mcp-header": "x-region"
+        }
+      },
+      "allOf": [
+        {
+          "properties": {
+            "composed": {
+              "type": "array",
+              "x-mcp-header": "Invalid Header"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

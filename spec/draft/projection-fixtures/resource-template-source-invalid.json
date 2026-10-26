@@ -1,0 +1,8 @@
+{
+  "description": "A document with validation errors is not projected.",
+  "document": "../fixtures/expected-invalid/malformed-uri-template-without-examples.json",
+  "revision": "2025-11-25",
+  "kind": "resourceTemplate",
+  "identifier": "file:///{path",
+  "expectedError": "projection-source-invalid"
+}

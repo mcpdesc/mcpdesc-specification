@@ -1,0 +1,14 @@
+{
+  "description": "clientRequirements are omitted.",
+  "document": "../fixtures/expected-valid/client-capability-requirements.json",
+  "revision": "2026-07-28",
+  "kind": "tool",
+  "identifier": "rebuild",
+  "expected": {
+    "name": "rebuild",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false
+    }
+  }
+}
