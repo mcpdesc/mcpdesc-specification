@@ -6,7 +6,7 @@ draft-iteration: 1
 snapshot-tag: v0.9.0-draft.1
 released: false
 baseline: 0.8.0
-date: 2026-10-24
+date: 2026-10-26
 ---
 
 # MCP Description Specification
@@ -17,7 +17,7 @@ date: 2026-10-24
 
 **Baseline**: v0.8.0
 
-**Date**: 2026-10-24
+**Date**: 2026-10-26
 
 ## Abstract
 
