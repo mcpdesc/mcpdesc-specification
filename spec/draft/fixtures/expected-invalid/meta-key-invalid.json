@@ -1,0 +1,28 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "meta-key-invalid",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "meta-key-invalid"
+    }
+  ],
+  "tools": [
+    {
+      "name": "inspect",
+      "inputSchema": {
+        "type": "object"
+      },
+      "_meta": {
+        "com.example/bad key": true
+      }
+    }
+  ]
+}

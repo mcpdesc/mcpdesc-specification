@@ -7,6 +7,7 @@ import addFormats from 'ajv-formats';
 import { UriTemplateMatcher } from 'uri-template-matcher';
 import schema from '../schemas/mcp-description/0.9.0.json' with { type: 'json' };
 import {
+  classifyCarriedFields,
   mcpExtensionCatalogue,
   mcpExtensionMaturity,
   semanticValidateDocument as validateBaseSemantics,
@@ -35,8 +36,8 @@ const clientCapabilitiesByVersion = {
   '2026-07-28': new Set(['roots', 'sampling', 'elicitation', 'extensions', 'experimental'])
 };
 
-function semanticDiagnostic(code, severity, message, path) {
-  return { code, severity, message, path };
+function semanticDiagnostic(code, severity, message, path, rule) {
+  return rule ? { code, severity, message, path, rule } : { code, severity, message, path };
 }
 
 function usesMcpReservedPrefix(identifier) {
@@ -180,15 +181,20 @@ export function resolveComponentReferences(document, rel = 'document') {
 }
 
 function structuralPath(document, error) {
-  const path = error.instancePath
+  const segments = error.instancePath
     ? error.instancePath.slice(1).split('/').map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'))
     : [];
   if (error.keyword === 'required' && typeof error.params.missingProperty === 'string') {
-    path.push(error.params.missingProperty);
+    segments.push(error.params.missingProperty);
   } else if (error.keyword === 'additionalProperties' && typeof error.params.additionalProperty === 'string') {
-    path.push(error.params.additionalProperty);
+    segments.push(error.params.additionalProperty);
   }
-  return path.map((segment) => Array.isArray(document) && /^(?:0|[1-9][0-9]*)$/.test(segment) ? Number(segment) : segment);
+  let node = document;
+  return segments.map((segment) => {
+    const index = Array.isArray(node) && /^(?:0|[1-9][0-9]*)$/.test(segment) ? Number(segment) : segment;
+    node = node !== null && typeof node === 'object' ? node[index] : undefined;
+    return index;
+  });
 }
 
 function structuralDiagnostics(document) {
@@ -197,8 +203,117 @@ function structuralDiagnostics(document) {
     code: 'schema-validation',
     severity: 'error',
     message: `does not validate against ${specificationVersion}: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
-    path: structuralPath(document, error)
+    path: structuralPath(document, error),
+    rule: structuralRule(error)
   }));
+}
+
+// Registered rule for a JSON Schema failure (Proposal 0024, Section 5).
+function structuralRule({ keyword, instancePath, schemaPath, params }) {
+  if (schemaPath.startsWith('#/$defs/toolAnnotations/')) return 'mcp.tool-annotations.members';
+  if (schemaPath.startsWith('#/$defs/resourceAnnotations/')) return 'mcp.annotations.members';
+  if (schemaPath === '#/$defs/completionResult/additionalProperties') return 'mcp.completion.result-closed';
+  if (keyword === 'additionalProperties' && /^\/capabilities\/\d+$/.test(instancePath)) return 'mcp.server-capabilities.members';
+  if (keyword === 'additionalProperties' && /^\/(?:tools|resources|resourceTemplates|prompts)\/\d+\/clientRequirements$/.test(instancePath)) return 'mcp.client-capabilities.members';
+  if ((keyword === 'const' && /^\/tools\/\d+\/inputSchema\/type$/.test(instancePath))
+    || (keyword === 'required' && params.missingProperty === 'type' && /^\/tools\/\d+\/inputSchema$/.test(instancePath))) {
+    return 'mcp.tool.input-schema.object-root';
+  }
+  if (schemaPath.startsWith('#/$defs/metaObject/propertyNames')) return 'mcp.meta.key-format';
+  if (schemaPath === '#/$defs/securityRequirement/additionalProperties/uniqueItems') return 'mcpdesc.security.requirements';
+  return 'mcpdesc.document.schema';
+}
+
+// Rules for diagnostic codes that only one registered rule emits. Codes shared
+// by several rules are attributed where they are emitted.
+const ruleForCode = new Map([
+  ['result-field-not-defined-by-version', 'mcp.result.additional-properties.preserve'],
+  ['completion-example-version-mismatch', 'mcp.completion.revision-availability'],
+  ['meta-reserved-key-context', 'mcp.meta.reserved-key-context'],
+  ['meta-reserved-key-value', 'mcp.meta.reserved-key-context'],
+  ['invalid-x-mcp-header', 'mcp.tool.input-schema.x-mcp-header'],
+  ['duplicate-x-mcp-header', 'mcp.tool.input-schema.x-mcp-header'],
+  ['tool-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['resource-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['resource-example-cache-fields-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['prompt-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['completion-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['resource-example-content-version-mismatch', 'mcp.resource-contents.meta.revision-availability'],
+  ['resource-annotation-not-supported-by-version', 'mcp.annotations.last-modified.revision-availability'],
+  ['tool-example-schema-mismatch', 'mcpdesc.tool.example.schema-conformance'],
+  ['incomplete-tool-example-validation', 'mcpdesc.tool.example.schema-conformance'],
+  ['missing-tool-example-structured-content', 'mcp.tool.structured-content.output-schema'],
+  ['structured-tool-error-example', 'mcpdesc.tool.example.error-result'],
+  ['tool-example-json-rpc-envelope', 'mcpdesc.example.completed-result-form'],
+  ['prompt-example-json-rpc-envelope', 'mcpdesc.example.completed-result-form'],
+  ['resource-example-json-rpc-envelope', 'mcpdesc.example.completed-result-form'],
+  ['completion-example-json-rpc-envelope', 'mcpdesc.example.completed-result-form'],
+  ['incomplete-tool-example-result', 'mcpdesc.example.completed-result-form'],
+  ['incomplete-prompt-example-result', 'mcpdesc.example.completed-result-form'],
+  ['incomplete-resource-example-result', 'mcpdesc.example.completed-result-form'],
+  ['incomplete-completion-example-result', 'mcpdesc.example.completed-result-form'],
+  ['invalid-tool-schema', 'json-schema.tool-schema.valid'],
+  ['unsupported-tool-schema-dialect', 'json-schema.tool-schema.valid'],
+  ['unresolved-external-tool-schema-reference', 'json-schema.tool-schema.valid'],
+  ['invalid-legacy-tool-schema-shape', 'mcp.tool.schema.legacy-shape'],
+  ['completion-example-context-version-mismatch', 'mcp.completion.context.revision-availability'],
+  ['prompt-completion-example-unknown-argument', 'mcpdesc.completion-example.target'],
+  ['prompt-completion-example-context-unknown-argument', 'mcpdesc.completion-example.target'],
+  ['resource-template-completion-example-unknown-variable', 'mcpdesc.completion-example.target'],
+  ['resource-template-completion-example-context-unknown-variable', 'mcpdesc.completion-example.target'],
+  ['completion-example-duplicate-target-context', 'mcpdesc.completion-example.target'],
+  ['invalid-resource-template-uri-template', 'mcp.resource-template.uri-template'],
+  ['prompt-example-unknown-argument', 'mcpdesc.prompt.example.arguments'],
+  ['prompt-example-missing-required-argument', 'mcpdesc.prompt.example.arguments'],
+  ['invalid-resource-example-base64', 'mcp.resource-contents.blob.base64'],
+  ['resource-example-mime-type-mismatch', 'mcpdesc.resource.example.consistency'],
+  ['resource-example-requested-uri-not-returned', 'mcpdesc.resource.example.consistency'],
+  ['resource-example-size-mismatch', 'mcpdesc.resource.example.consistency'],
+  ['resource-template-example-invalid-expansion', 'mcpdesc.resource-template.example.expansion'],
+  ['duplicate-elicitation-name', 'mcpdesc.elicitation.name-unique'],
+  ['elicitation-mode-not-supported-by-version', 'mcp.elicitation.revision-availability'],
+  ['elicitation-form-schema-version-mismatch', 'mcp.elicitation.form-schema.revision-shape'],
+  ['elicitation-form-required-property-unknown', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['elicitation-form-enum-names-mismatch', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['elicitation-form-default-outside-enum', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['elicitation-form-invalid-range', 'mcpdesc.elicitation.form-schema.consistency'],
+  ['unknown-elicitation-declaration', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-elicitation-declaration-mismatch', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-elicitation-response-mismatch', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-elicitation-content-schema-mismatch', 'mcpdesc.tool.interaction.elicitation-consistency'],
+  ['interaction-example-client-requirements-contradiction', 'mcpdesc.tool.interaction.client-requirements-consistency'],
+  ['interaction-example-roots-uri', 'mcp.root.uri.file-scheme'],
+  ['capability-scope-overlap', 'mcpdesc.protocol-scope.consistency'],
+  ['primitive-scope-overlap', 'mcpdesc.protocol-scope.consistency'],
+  ['protocol-scope-outside-parent', 'mcpdesc.protocol-scope.consistency'],
+  ['transport-coverage-gap', 'mcpdesc.transports.coverage'],
+  ['client-requirement-version-mismatch', 'mcp.client-capabilities.revision-shape'],
+  ['invalid-client-requirement-value', 'mcp.client-capabilities.revision-shape'],
+  ['deprecated-client-requirement', 'mcp.client-capabilities.deprecated'],
+  ['extensions-not-supported-by-version', 'mcp.capabilities.extensions.revision-availability'],
+  ['experimental-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
+  ['unknown-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
+  ['tasks-core-not-valid-in-2026', 'mcp.capabilities.tasks.revision-availability'],
+  ['logging-deprecated-in-2026', 'mcp.capabilities.logging.deprecated'],
+  ['transport-not-supported-by-version', 'mcp.transport.streamable-http.revision-availability'],
+  ['legacy-sse-for-modern-version', 'mcp.transport.legacy-sse.deprecated'],
+  ['legacy-protocol-validation-incomplete', 'mcpdesc.legacy-revisions.validation-scope'],
+  ['duplicate-root-tag', 'mcpdesc.tags.references'],
+  ['unknown-tag-reference', 'mcpdesc.tags.references'],
+  ['unknown-security-scheme', 'mcpdesc.security.requirements'],
+  ['non-oauth-scope-misuse', 'mcpdesc.security.requirements'],
+  ['duplicate-security-scope', 'mcpdesc.security.requirements'],
+  ['uncatalogued-oauth-scope', 'mcpdesc.security.requirements'],
+  ['component-reference-cycle', 'mcpdesc.components.references'],
+  ['missing-component-reference-target', 'mcpdesc.components.references'],
+  ['wrong-component-reference-namespace', 'mcpdesc.components.references'],
+  ['meta-key-invalid', 'mcp.meta.key-format'],
+  ['meta-unknown-reserved-key', 'mcp.meta.reserved-prefix']
+]);
+
+function attributeRule(diagnostic) {
+  if (diagnostic.rule || !ruleForCode.has(diagnostic.code)) return diagnostic;
+  return { ...diagnostic, rule: ruleForCode.get(diagnostic.code) };
 }
 
 function canonicalize(value) {
@@ -356,6 +471,20 @@ function validateToolInteractionExamples(document) {
         const stepPath = [...examplePath, 'steps', stepIndex];
         warnClientRequirementsContradiction(tool, step, stepLocation, stepPath, diagnostics);
 
+        const responseType = { sampling: 'CreateMessageResult', elicitation: 'ElicitResult', roots: 'ListRootsResult' }[step.type];
+        for (const version of scope) {
+          if (!responseType || (step.type === 'elicitation' && protocolOrder.get(version) < protocolOrder.get('2025-06-18'))) continue;
+          diagnostics.push(...classifyCarriedFields(
+            step.response,
+            responseType,
+            version,
+            `${stepLocation}.response`,
+            [...stepPath, 'response'],
+            'interaction-example-version-mismatch',
+            'mcp.input-response.closed'
+          ));
+        }
+
         if (step.type === 'elicitation') {
           const request = step.request ?? {};
           const response = step.response ?? {};
@@ -369,7 +498,8 @@ function validateToolInteractionExamples(document) {
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.type is not defined for MCP ${version}`,
-                [...stepPath, 'type']
+                [...stepPath, 'type'],
+                'mcp.elicitation.revision-availability'
               ));
             }
             if (request.mode === 'url' && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
@@ -377,7 +507,8 @@ function validateToolInteractionExamples(document) {
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.request.mode "url" is not defined for MCP ${version}`,
-                [...stepPath, 'request', 'mode']
+                [...stepPath, 'request', 'mode'],
+                'mcp.elicitation.revision-availability'
               ));
             }
           }
@@ -462,7 +593,8 @@ function validateToolInteractionExamples(document) {
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.request uses sampling Tool fields that are not defined for MCP ${version}`,
-                [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice']
+                [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice'],
+                'mcp.sampling.tools.revision-availability'
               ));
             }
           }
@@ -470,6 +602,17 @@ function validateToolInteractionExamples(document) {
 
         if (step.type === 'roots') {
           for (const [rootIndex, root] of (step.response.roots ?? []).entries()) {
+            for (const version of scope) {
+              if (Object.hasOwn(root, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
+                diagnostics.push(semanticDiagnostic(
+                  'interaction-example-version-mismatch',
+                  'error',
+                  `${stepLocation}.response.roots[${rootIndex}]._meta is not defined for MCP ${version}`,
+                  [...stepPath, 'response', 'roots', rootIndex, '_meta'],
+                  'mcp.root.meta.revision-availability'
+                ));
+              }
+            }
             if (typeof root.uri === 'string' && !root.uri.startsWith('file://')) {
               diagnostics.push(semanticDiagnostic(
                 'interaction-example-roots-uri',
@@ -623,22 +766,22 @@ function validateClientRequirements(document) {
 
 function validatePromptContentVersion(content, contentLocation, contentPath, version, diagnostics) {
   if (content.type === 'audio' && protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type']));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability'));
   }
   if (content.type === 'resource_link' && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type']));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability'));
   }
   if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta']));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.revision-availability'));
   }
   if (content.type === 'resource' && Object.hasOwn(content.resource ?? {}, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta']));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.revision-availability'));
   }
   if (content.type === 'resource_link' && Array.isArray(content.icons) && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons']));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.revision-availability'));
   }
   if (content.annotations?.lastModified !== undefined && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified']));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.revision-availability'));
   }
 }
 
@@ -699,12 +842,7 @@ function validatePromptExamples(document) {
         if (version === '2026-07-28' && result.resultType !== 'complete') {
           diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType']));
         }
-        if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
-          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType is not defined for MCP ${version}`, [...resultPath, 'resultType']));
-        }
-        if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}._meta is not defined for MCP ${version}`, [...resultPath, '_meta']));
-        }
+        diagnostics.push(...classifyCarriedFields(result, 'GetPromptResult', version, resultLocation, resultPath));
         (result.messages ?? []).forEach((message, messageIndex) => {
           const contentLocation = `${resultLocation}.messages[${messageIndex}].content`;
           const contentPath = [...resultPath, 'messages', messageIndex, 'content'];
@@ -759,22 +897,7 @@ function validateCompletionExampleResult(result, exampleLocation, examplePath, v
       [...resultPath, 'resultType']
     ));
   }
-  if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
-    diagnostics.push(semanticDiagnostic(
-      'completion-example-result-version-mismatch',
-      'error',
-      `${resultLocation}.resultType is not defined for MCP ${version}`,
-      [...resultPath, 'resultType']
-    ));
-  }
-  if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic(
-      'completion-example-result-version-mismatch',
-      'error',
-      `${resultLocation}._meta is not defined for MCP ${version}`,
-      [...resultPath, '_meta']
-    ));
-  }
+  diagnostics.push(...classifyCarriedFields(result, 'CompleteResult', version, resultLocation, resultPath));
 }
 
 function validateCompletionExamples(document) {
@@ -796,13 +919,8 @@ function validateCompletionExamples(document) {
       } else {
         try {
           allowedNames = extractUriTemplateVariables(owner.uriTemplate);
-        } catch (error) {
-          diagnostics.push(semanticDiagnostic(
-            'resource-template-completion-example-invalid-template',
-            'error',
-            `${ownerLocation}.uriTemplate is not a valid RFC 6570 template: ${error.message}`,
-            [kind, ownerIndex, 'uriTemplate']
-          ));
+        } catch {
+          // The base validator reports invalid-resource-template-uri-template.
           allowedNames = undefined;
         }
       }
@@ -858,7 +976,7 @@ function validateCompletionExamples(document) {
             diagnostics.push(semanticDiagnostic(
               'completion-example-version-mismatch',
               'error',
-              `${exampleLocation} is not defined for MCP ${version}`,
+              `${exampleLocation} is not supported by MCP Description for MCP ${version}`,
               examplePath
             ));
             continue;
@@ -972,7 +1090,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   const filtered = Object.hasOwn(document, 'transports')
     ? diagnostics
     : diagnostics.filter((diagnostic) => diagnostic.code !== 'transport-coverage-gap');
-  return filtered.sort(
+  return filtered.map(attributeRule).sort(
     (left, right) => left.code.localeCompare(right.code)
       || left.message.localeCompare(right.message)
       || JSON.stringify(left.path).localeCompare(JSON.stringify(right.path))

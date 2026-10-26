@@ -1,0 +1,145 @@
+rules:
+  - id: mcp.resource-template.uri-template
+    owner: mcp
+    summary: A Resource Template uriTemplate is a valid RFC 6570 URI template.
+    surface: ResourceTemplate
+    path: uriTemplate
+    kind: embedded-standard
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.2.1
+        locations:
+          - sections/10-resources.md#req-resource-template-uri-template
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ResourceTemplate, uriTemplate ("A URI template (according to RFC 6570)")
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L456-L461
+          - validation/mcp-schemas/2025-03-26/schema.ts#L489-L494
+          - validation/mcp-schemas/2025-06-18/schema.ts#L570-L575
+          - validation/mcp-schemas/2025-11-25/schema.ts#L846-L851
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1482-L1487
+      - tier: 2
+        reference: RFC 6570, URI Template
+        locations:
+          - https://www.rfc-editor.org/rfc/rfc6570#section-3
+    diagnostics:
+      - code: invalid-resource-template-uri-template
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-uri-template-without-examples.json
+        pointer: /resourceTemplates/0
+      - path: expected-invalid/malformed-resource-template-example.json
+        pointer: /resourceTemplates/0
+      - path: expected-invalid/invalid-completion-example-semantics.json
+        pointer: /resourceTemplates/0
+    notes: >-
+      Reported once per Resource Template, whether or not it has examples;
+      example checks that need the parsed template are skipped.
+
+  - id: mcp.resource-contents.blob.base64
+    owner: mcp
+    summary: A blob in Resource Contents is canonical base64.
+    surface: BlobResourceContents
+    path: blob
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.4
+        locations:
+          - sections/10-resources.md#req-resource-example-blob-base64
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface BlobResourceContents, blob (@format byte)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L507-L512
+          - validation/mcp-schemas/2025-03-26/schema.ts#L545-L550
+          - validation/mcp-schemas/2025-06-18/schema.ts#L637-L642
+          - validation/mcp-schemas/2025-11-25/schema.ts#L913-L918
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1549-L1554
+      - tier: 2
+        reference: RFC 4648, Section 4
+        locations:
+          - https://www.rfc-editor.org/rfc/rfc4648#section-4
+    diagnostics:
+      - code: invalid-resource-example-base64
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/resource-example-result-semantics.json
+        pointer: /resources/0/examples/invalid-result/result/contents/0
+
+  - id: mcpdesc.resource.example.consistency
+    owner: mcpdesc
+    summary: >-
+      Resource example contents agree with their declaration: the requested
+      URI is returned, MIME types match, and raw size matches a declared size.
+    surface: Resource example
+    path: result.contents
+    kind: mcpdesc-semantic
+    requirement: should
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.4
+        locations:
+          - sections/10-resources.md#req-resource-example-requested-uri
+          - sections/10-resources.md#req-resource-example-mime-type
+          - sections/10-resources.md#req-resource-example-size
+    diagnostics:
+      - code: resource-example-requested-uri-not-returned
+        severity: warning
+      - code: resource-example-mime-type-mismatch
+        severity: warning
+      - code: resource-example-size-mismatch
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-warning/resource-example-consistency.json
+        pointer: /resources/0/examples/collection-snapshot/result
+    notes: Collections and indirect reads may legitimately differ, so these are warnings.
+
+  - id: mcpdesc.resource-template.example.expansion
+    owner: mcpdesc
+    summary: >-
+      A Resource Template example uri is a valid RFC 6570 expansion of the
+      template.
+    surface: Resource Template example
+    path: uri
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.3
+        locations:
+          - sections/10-resources.md#req-resource-template-example-expansion
+    sources:
+      - tier: 2
+        reference: RFC 6570, URI Template
+        locations:
+          - https://www.rfc-editor.org/rfc/rfc6570#section-3
+    diagnostics:
+      - code: resource-template-example-invalid-expansion
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/resource-example-result-semantics.json
+        pointer: /resourceTemplates/0/examples/not-an-expansion
+      - path: expected-invalid/component-contextual-examples.json
+        pointer: /components/resourceTemplateExamples/bad-uri
+      - path: expected-valid/named-resource-examples.json
+        pointer: /resourceTemplates/0

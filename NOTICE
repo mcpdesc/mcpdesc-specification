@@ -30,3 +30,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 -------------------------------------------------------------------------------
+
+Third-party material
+
+spec/*/validation/mcp-schemas/ contains unmodified copies of the Model Context
+Protocol TypeScript and JSON schemas, from
+https://github.com/modelcontextprotocol/modelcontextprotocol at the commit
+recorded in its manifest.json. Copyright (c) 2024-2025 Model Context Protocol a
+Series of LF Projects, LLC, and its contributors. The upstream project licenses
+this material under the Apache License, Version 2.0, and the MIT License during
+its licensing transition; the upstream LICENSE file is reproduced in the same
+folder.

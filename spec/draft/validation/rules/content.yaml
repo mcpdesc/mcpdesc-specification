@@ -1,0 +1,101 @@
+rules:
+  - id: mcp.content-block.revision-availability
+    owner: mcp
+    summary: >-
+      Content blocks in example results use only content types and fields the
+      applicable revision defines: audio from MCP 2025-03-26, resource links
+      and block _meta from 2025-06-18, and resource-link icons from
+      2025-11-25.
+    surface: ContentBlock
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.3 and 11.3
+        locations:
+          - sections/09-tools.md#req-tool-example-content-revision
+          - sections/11-prompts.md#req-prompt-example-content-revision
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 schema.ts, TextContent, ImageContent, and EmbeddedResource (no AudioContent, no ResourceLink, no content _meta)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L842-L851
+          - validation/mcp-schemas/2024-11-05/schema.ts#L853-L868
+          - validation/mcp-schemas/2024-11-05/schema.ts#L610-L619
+      - tier: 1
+        reference: MCP 2025-03-26 schema.ts, AudioContent
+        locations:
+          - validation/mcp-schemas/2025-03-26/schema.ts#L987-L1009
+      - tier: 1
+        reference: MCP 2025-06-18 schema.ts, ResourceLink and ContentBlock, _meta on content types
+        locations:
+          - validation/mcp-schemas/2025-06-18/schema.ts#L753-L762
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1130-L1134
+      - tier: 1
+        reference: MCP 2025-11-25 schema.ts, Resource extends Icons (inherited by ResourceLink)
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L797-L838
+    diagnostics:
+      - code: tool-example-content-version-mismatch
+        severity: error
+      - code: prompt-example-content-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/revision-incompatible-tool-example.json
+        pointer: /tools/0/examples/future-result/result/content/0
+      - path: expected-invalid/invalid-prompt-example-semantics.json
+        pointer: /prompts/4/examples/resource-link-too-new/result/messages/0/content
+    notes: >-
+      The same diagnostic codes also report embedded resource _meta
+      (mcp.resource-contents.meta.revision-availability) and
+      annotations.lastModified
+      (mcp.annotations.last-modified.revision-availability); the rule
+      property identifies which.
+
+  - id: mcp.resource-contents.meta.revision-availability
+    owner: mcp
+    summary: >-
+      Resource contents carry _meta only from MCP 2025-06-18, in Resource
+      examples and in embedded resources.
+    surface: ResourceContents
+    path: _meta
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.4
+        locations:
+          - sections/10-resources.md#req-resource-contents-meta
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 and 2025-03-26 schema.ts, interface ResourceContents (uri, mimeType); MCP 2025-06-18 to 2026-07-28 schema.ts, interface ResourceContents (adds _meta)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L483-L497
+          - validation/mcp-schemas/2025-03-26/schema.ts#L521-L535
+          - validation/mcp-schemas/2025-06-18/schema.ts#L600-L621
+          - validation/mcp-schemas/2025-11-25/schema.ts#L876-L897
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1509-L1527
+    diagnostics:
+      - code: resource-example-content-version-mismatch
+        severity: error
+      - code: tool-example-content-version-mismatch
+        severity: error
+      - code: prompt-example-content-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/resource-example-result-semantics.json
+        pointer: /resources/1/examples/unsupported-metadata/result/contents/0

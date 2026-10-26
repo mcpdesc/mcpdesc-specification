@@ -1,0 +1,63 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "legacy-result-meta",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2024-11-05",
+    "2025-03-26"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "legacy-result-meta"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "test://legacy",
+      "name": "legacy",
+      "examples": {
+        "with-result-meta": {
+          "result": {
+            "contents": [
+              {
+                "uri": "test://legacy",
+                "text": "legacy"
+              }
+            ],
+            "_meta": {
+              "trace": "r1"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "greeting",
+      "arguments": [
+        { "name": "audience" }
+      ],
+      "examples": {
+        "with-result-meta": {
+          "arguments": {},
+          "result": {
+            "messages": [
+              {
+                "role": "assistant",
+                "content": { "type": "text", "text": "Hello." }
+              }
+            ],
+            "_meta": {
+              "trace": "p1"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

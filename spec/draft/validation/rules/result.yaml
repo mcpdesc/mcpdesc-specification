@@ -1,0 +1,257 @@
+rules:
+  - id: mcp.completion.revision-availability
+    owner: mcp
+    summary: >-
+      Completion examples are available in every revision that defines
+      completion/complete and CompleteResult.
+    surface: CompleteResult
+    kind: structural
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4 (no completion examples for MCP 2024-11-05)
+        locations:
+          - sections/10-resources.md#req-template-completion-revisions
+          - sections/11-prompts.md#req-prompt-completion-revisions
+    sources:
+      - tier: 1
+        reference: "MCP 2024-11-05 schema.ts, interfaces CompleteRequest (method completion/complete) and CompleteResult; the ServerCapabilities.completions capability is added in MCP 2025-03-26"
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L951-L972
+          - validation/mcp-schemas/2024-11-05/schema.ts#L974-L992
+          - validation/mcp-schemas/2025-03-26/schema.ts#L237-L240
+    diagnostics:
+      - code: completion-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/invalid-completion-example-semantics.json
+        pointer: /prompts/0/completionExamples
+      - path: expected-warning/legacy-completion-examples.json
+        pointer: /resourceTemplates/0/completionExamples/issue-prefix
+    gaps:
+      - revisions: ["2024-11-05"]
+        behavior: >-
+          Completion examples are rejected with
+          completion-example-version-mismatch, although MCP 2024-11-05 defines
+          completion/complete. MCP Description does not support completion
+          examples for this revision: it is old and the use case is narrow.
+        resolution: not-fixed
+        reference: "Maintainer decision on issue #72, 2026-10-25"
+  - id: mcp.result.additional-properties.preserve
+    owner: mcp
+    summary: >-
+      A field that an open MCP result type allows but the revision does not
+      define is accepted and preserved without meaning, with a warning
+      attributed to that revision.
+    surface: Result
+    kind: preservation
+    requirement: may
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 3.6 (Carried MCP Values)
+        locations:
+          - sections/03-document-structure.md#req-carried-open-preserve
+    sources:
+      - tier: 1
+        reference: "MCP 2024-11-05 to 2026-07-28 schema.ts, interface Result (index signature [key: string]: unknown, inherited by every result type)"
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L42-L48
+          - validation/mcp-schemas/2025-03-26/schema.ts#L61-L67
+          - validation/mcp-schemas/2025-06-18/schema.ts#L60-L69
+          - validation/mcp-schemas/2025-11-25/schema.ts#L88-L97
+          - validation/mcp-schemas/2026-07-28/schema.ts#L218-L236
+      - tier: 1
+        reference: MCP 2024-11-05 to 2025-11-25 schema.ts, CreateMessageResult, ElicitResult, and ListRootsResult extend Result
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L793-L805
+          - validation/mcp-schemas/2025-03-26/schema.ts#L899-L911
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1067-L1081
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1649-L1674
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1538-L1557
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2466-L2486
+          - validation/mcp-schemas/2024-11-05/schema.ts#L1032-L1039
+          - validation/mcp-schemas/2025-03-26/schema.ts#L1173-L1180
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1404-L1413
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2100-L2109
+    diagnostics:
+      - code: result-field-not-defined-by-version
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-warning/open-result-unknown-properties.json
+        pointer: /tools/0/examples/traced/result
+      - path: expected-warning/open-results-shared-across-revisions.json
+        pointer: /prompts/0/examples/default/result
+      - path: expected-warning/open-step-responses-before-2026.json
+        pointer: /tools/0/interactionExamples/approved/steps/0/response
+      - path: expected-warning/component-protocol-scope.json
+        pointer: /components/resourceExamples/current/result
+    notes: >-
+      The warnings of this rule for a document equal the union of its warnings
+      for each per-revision Effective Protocol View (scripts/test-views.mjs).
+  - id: mcp.input-response.closed
+    owner: mcp
+    summary: >-
+      In MCP 2026-07-28, sampling, elicitation, and roots responses are input
+      responses, not results, and accept only the fields their types define.
+    surface: InputResponse
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": not-applicable
+      "2025-11-25": not-applicable
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.6 and 9.4
+        locations:
+          - sections/03-document-structure.md#req-carried-closed-reject
+          - sections/09-tools.md#req-interaction-revision-valid
+    sources:
+      - tier: 1
+        reference: "MCP 2026-07-28 schema.ts, type InputResponse (CreateMessageResult, ListRootsResult, ElicitResult); none extends Result; only CreateMessageResult defines _meta, through SamplingMessage"
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L541-L542
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2190-L2228
+          - validation/mcp-schemas/2026-07-28/schema.ts#L3120-L3149
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2725-L2744
+    diagnostics:
+      - code: interaction-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/closed-step-responses-2026.json
+        pointer: /tools/0/interactionExamples/approved/steps/0/response
+  - id: mcp.root.meta.revision-availability
+    owner: mcp
+    summary: >-
+      A root in a roots response may carry _meta from MCP 2025-06-18.
+    surface: Root
+    path: _meta
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.5, 3.6, and 9.4
+        locations:
+          - sections/03-document-structure.md#req-meta-revision-availability
+          - sections/09-tools.md#req-interaction-revision-valid
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 and 2025-03-26 schema.ts, interface Root (uri, name); MCP 2025-06-18 to 2026-07-28 schema.ts, interface Root (adds _meta)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L1041-L1059
+          - validation/mcp-schemas/2025-03-26/schema.ts#L1182-L1200
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1415-L1440
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2111-L2136
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2746-L2775
+    diagnostics:
+      - code: interaction-example-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/root-meta-before-2025-06-18.json
+        pointer: /tools/0/interactionExamples/with-root-meta/steps/0/response/roots/0
+      - path: expected-warning/open-step-responses-before-2026.json
+        pointer: /tools/0/interactionExamples/approved/steps/0/response/roots/0
+  - id: mcp.meta.reserved-key-context
+    owner: mcp
+    summary: >-
+      A reserved _meta key appears only in the message context, and with the
+      value, that the revision defines for it.
+    surface: _meta
+    kind: semantic
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 3.5
+        locations:
+          - sections/03-document-structure.md#req-meta-keys
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta (reserved keys and where they apply)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L123-L147
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L190-L215
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L322-L446
+    diagnostics:
+      - code: meta-reserved-key-context
+        severity: error
+      - code: meta-reserved-key-value
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/meta-reserved-key-misuse.json
+        pointer: /tools/0/_meta
+      - path: expected-invalid/meta-reserved-keys-in-carried-values.json
+        pointer: /prompts/0/completionExamples/request-key-in-result/result/_meta
+    notes: >-
+      Checked on declarations and on every carried value: example results,
+      their content, interaction step responses, and roots. MCP 2024-11-05 and
+      2025-03-26 do not define reserved keys; Section 16.2 limits validation
+      for those revisions.
+  - id: mcp.completion.result-closed
+    owner: mcp
+    summary: >-
+      The completion object of a completion result contains only values,
+      total, and hasMore.
+    surface: CompleteResult
+    path: completion
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+        locations:
+          - sections/03-document-structure.md#req-carried-nested-closed
+          - sections/03-document-structure.md#req-carried-closed-reject
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface CompleteResult, completion (no index signature)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L974-L992
+          - validation/mcp-schemas/2025-03-26/schema.ts#L1115-L1133
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1342-L1362
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2037-L2057
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2633-L2661
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/completion-result-extra-field.json
+        pointer: /resourceTemplates/0/completionExamples/issue-prefix/result/completion
+      - path: expected-valid/named-completion-examples.json
+        pointer: /resourceTemplates/0/completionExamples

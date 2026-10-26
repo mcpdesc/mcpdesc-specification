@@ -1,0 +1,27 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "resource-annotations-unknown-property",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "resource-annotations-unknown-property"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "test://resource",
+      "name": "resource",
+      "annotations": {
+        "priority": 0.5,
+        "x-acme-tier": "gold"
+      }
+    }
+  ]
+}

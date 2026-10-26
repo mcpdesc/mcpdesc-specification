@@ -101,8 +101,7 @@
         },
         "experimental": {
           "com.example/review": {}
-        },
-        "futureCapability": {}
+        }
       }
     }
   ]

@@ -1,0 +1,124 @@
+rules:
+  - id: mcp.tool-annotations.members
+    owner: mcp
+    summary: >-
+      A Tool annotations object contains only title, readOnlyHint,
+      destructiveHint, idempotentHint, and openWorldHint.
+    surface: ToolAnnotations
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.6
+        locations:
+          - sections/09-tools.md#req-tool-annotations-closed
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 to 2026-07-28 schema.ts, interface ToolAnnotations (no index signature)
+        locations:
+          - validation/mcp-schemas/2025-03-26/schema.ts#L727-L779
+          - validation/mcp-schemas/2025-06-18/schema.ts#L869-L923
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1168-L1222
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1900-L1954
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/tool-annotations-unknown-property.json
+        pointer: /tools/0/annotations
+      - path: expected-valid/distinct-tool-and-resource-annotations.json
+        pointer: /tools/0/annotations
+    notes: >-
+      Tool annotations are not available in MCP 2024-11-05; that boundary is
+      checked separately.
+
+  - id: mcp.annotations.members
+    owner: mcp
+    summary: >-
+      Resource Annotations on resources, resource templates, and content
+      blocks contain only audience, priority, and lastModified.
+    surface: Annotations
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.3
+        locations:
+          - sections/10-resources.md#req-resource-annotations-closed
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 schema.ts, inline annotations on Resource, ResourceTemplate, and content types; MCP 2025-03-26 to 2026-07-28 schema.ts, interface Annotations (no index signature)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L815-L840
+          - validation/mcp-schemas/2025-03-26/schema.ts#L921-L944
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1093-L1128
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1700-L1735
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2265-L2300
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/resource-annotations-unknown-property.json
+        pointer: /resources/0/annotations
+      - path: expected-invalid/content-annotations-unknown-property.json
+        pointer: /tools/0/examples/basic/result/content/0/annotations
+      - path: expected-valid/distinct-tool-and-resource-annotations.json
+        pointer: /resources/0/annotations
+    notes: >-
+      lastModified is defined from MCP 2025-06-18; that boundary is checked
+      separately.
+
+  - id: mcp.annotations.last-modified.revision-availability
+    owner: mcp
+    summary: >-
+      Resource Annotations carry lastModified only from MCP 2025-06-18, on
+      declarations and on content blocks.
+    surface: Annotations
+    path: lastModified
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.3
+        locations:
+          - sections/10-resources.md#req-resource-annotations-last-modified
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 and 2025-03-26 schema.ts, annotations (audience, priority); MCP 2025-06-18 to 2026-07-28 schema.ts, interface Annotations (adds lastModified)
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L815-L840
+          - validation/mcp-schemas/2025-03-26/schema.ts#L921-L944
+          - validation/mcp-schemas/2025-06-18/schema.ts#L1093-L1128
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1700-L1735
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2265-L2300
+    diagnostics:
+      - code: resource-annotation-not-supported-by-version
+        severity: error
+      - code: tool-example-content-version-mismatch
+        severity: error
+      - code: prompt-example-content-version-mismatch
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/annotations-last-modified-before-2025-06-18.json
+        pointer: /resources/0/annotations

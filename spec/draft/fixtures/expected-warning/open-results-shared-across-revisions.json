@@ -1,0 +1,74 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "open-results-shared-across-revisions",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2025-11-25", "2026-07-28"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "open-results-shared-across-revisions"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get_weather",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "city": { "type": "string" }
+        }
+      },
+      "examples": {
+        "paris": {
+          "input": { "city": "Paris" },
+          "result": {
+            "resultType": "complete",
+            "content": [
+              { "type": "text", "text": "Paris: 18 C" }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "data://status",
+      "name": "status",
+      "examples": {
+        "current": {
+          "result": {
+            "resultType": "complete",
+            "ttlMs": 60000,
+            "cacheScope": "public",
+            "contents": [
+              { "uri": "data://status", "text": "ready" }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "prompts": [
+    {
+      "name": "greeting",
+      "examples": {
+        "default": {
+          "arguments": {},
+          "result": {
+            "resultType": "complete",
+            "messages": [
+              {
+                "role": "assistant",
+                "content": { "type": "text", "text": "Hello." }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

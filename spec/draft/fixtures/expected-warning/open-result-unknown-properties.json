@@ -1,0 +1,65 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "open-result-unknown-properties",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "tools": [
+    {
+      "name": "lookup",
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "inputSchema": {
+        "type": "object"
+      },
+      "examples": {
+        "traced": {
+          "input": {},
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "found"
+              }
+            ],
+            "vendorTrace": {
+              "id": "a1"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "lookup",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "inputSchema": {
+        "type": "object"
+      },
+      "examples": {
+        "traced": {
+          "input": {},
+          "result": {
+            "resultType": "complete",
+            "content": [
+              {
+                "type": "text",
+                "text": "found"
+              }
+            ],
+            "vendorTrace": {
+              "id": "a1"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

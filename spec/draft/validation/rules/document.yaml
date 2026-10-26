@@ -1,0 +1,255 @@
+rules:
+  - id: mcpdesc.document.schema
+    owner: mcpdesc
+    summary: >-
+      A document validates against the JSON Schema for its declared mcpdesc
+      version. Used for structural failures not attributed to a more specific
+      rule.
+    surface: Document
+    kind: structural
+    specification:
+      - reference: MCP Description 0.9.0, Section 16.1, item 7
+        locations:
+          - sections/16-conformance.md#req-document-schema
+          - sections/03-document-structure.md#req-closed-objects
+          - sections/09-tools.md#req-tool-input-schema-required
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/missing-tool-input-schema.json
+        pointer: /tools/0
+      - path: expected-invalid/object-level-unknown-property.json
+        pointer: /tools/0
+
+  - id: mcp.declaration.field.revision-availability
+    owner: mcp
+    summary: >-
+      A declaration field is used only in revisions whose MCP type defines it:
+      title and _meta from 2025-06-18, Tool annotations from 2025-03-26, icons
+      and Tool schema $schema from 2025-11-25, Tool execution only in
+      2025-11-25, and the completions capability from 2025-03-26.
+    surface: Tool, Resource, ResourceTemplate, Prompt, PromptArgument, ServerCapabilities
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
+        locations:
+          - sections/04-versioning.md#req-field-revision-availability
+          - sections/09-tools.md#req-tool-schema-dialect-keyword
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interfaces BaseMetadata, Icons, Tool, Resource, ResourceTemplate, Prompt, PromptArgument, and ServerCapabilities
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L684-L704
+          - validation/mcp-schemas/2025-03-26/schema.ts#L781-L810
+          - validation/mcp-schemas/2025-06-18/schema.ts#L925-L968
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1244-L1297
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1956-L2015
+          - validation/mcp-schemas/2025-06-18/schema.ts#L304-L324
+          - validation/mcp-schemas/2025-11-25/schema.ts#L523-L543
+          - validation/mcp-schemas/2026-07-28/schema.ts#L949-L969
+          - validation/mcp-schemas/2025-11-25/schema.ts#L503-L521
+          - validation/mcp-schemas/2026-07-28/schema.ts#L929-L947
+          - validation/mcp-schemas/2024-11-05/schema.ts#L414-L450
+          - validation/mcp-schemas/2025-03-26/schema.ts#L442-L483
+          - validation/mcp-schemas/2025-06-18/schema.ts#L521-L562
+          - validation/mcp-schemas/2025-11-25/schema.ts#L797-L838
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1433-L1474
+          - validation/mcp-schemas/2024-11-05/schema.ts#L452-L481
+          - validation/mcp-schemas/2025-03-26/schema.ts#L485-L519
+          - validation/mcp-schemas/2025-06-18/schema.ts#L564-L598
+          - validation/mcp-schemas/2025-11-25/schema.ts#L840-L874
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1476-L1507
+          - validation/mcp-schemas/2024-11-05/schema.ts#L558-L574
+          - validation/mcp-schemas/2025-03-26/schema.ts#L596-L612
+          - validation/mcp-schemas/2025-06-18/schema.ts#L696-L715
+          - validation/mcp-schemas/2025-11-25/schema.ts#L979-L999
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1654-L1671
+          - validation/mcp-schemas/2024-11-05/schema.ts#L576-L592
+          - validation/mcp-schemas/2025-03-26/schema.ts#L614-L630
+          - validation/mcp-schemas/2025-06-18/schema.ts#L717-L731
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1001-L1015
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1673-L1687
+          - validation/mcp-schemas/2024-11-05/schema.ts#L205-L248
+          - validation/mcp-schemas/2025-03-26/schema.ts#L225-L272
+          - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
+          - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
+          - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
+    diagnostics:
+      - code: field-not-supported-by-version
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/revision-inapplicable-execution.json
+        pointer: /tools/0
+      - path: expected-invalid/revision-inapplicable-tool-schema-dialect.json
+        pointer: /tools/0/inputSchema
+    notes: >-
+      outputSchema, the outputSchema root, and the tasks capability have their
+      own rules; the rule property identifies which applies.
+
+  - id: mcpdesc.protocol-scope.consistency
+    owner: mcpdesc
+    summary: >-
+      Nested protocol scopes stay within their parent scope, and same-named
+      primitives and capability objects do not overlap in protocol scope.
+    surface: Document
+    path: protocolVersions
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 4.10 and 8.6
+        locations:
+          - sections/04-versioning.md#req-scope-subset
+          - sections/08-capabilities.md#req-capability-scopes-disjoint
+          - sections/09-tools.md#req-tool-names-disjoint
+          - sections/12-elicitation.md#req-elicitation-scope
+    diagnostics:
+      - code: protocol-scope-outside-parent
+        severity: error
+      - code: primitive-scope-overlap
+        severity: error
+      - code: capability-scope-overlap
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/elicitation-scope-outside-parent.json
+        pointer: /resourceTemplates/0/elicitations/0
+      - path: expected-invalid/scoped-version-not-in-root.json
+        pointer: /transports/0
+      - path: expected-invalid/overlapping-tool-scope.json
+        pointer: /tools/1
+      - path: expected-invalid/overlapping-capabilities.json
+        pointer: /capabilities/0
+
+  - id: mcpdesc.tags.references
+    owner: mcpdesc
+    summary: Root tag names are unique, and primitives reference only declared tags.
+    surface: Tag
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 13.2 and 13.3
+        locations:
+          - sections/13-tags.md#req-tags-unique
+          - sections/13-tags.md#req-tags-references
+    diagnostics:
+      - code: duplicate-root-tag
+        severity: error
+      - code: unknown-tag-reference
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/duplicate-root-tag.json
+        pointer: /tags/1
+      - path: expected-invalid/duplicate-tag-reference.json
+        pointer: /tools/0/tags
+
+  - id: mcpdesc.security.requirements
+    owner: mcpdesc
+    summary: >-
+      Security requirements name declared schemes, list scopes only for OAuth
+      2.0 and OpenID Connect schemes, do not repeat scopes, and use catalogued
+      scopes when the scheme declares a static catalogue.
+    surface: Security Requirement
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 7.1 to 7.3
+        locations:
+          - sections/07-security.md#req-security-scheme-references
+          - sections/07-security.md#req-security-scopes-unique
+          - sections/07-security.md#req-security-scopes-oauth-only
+          - sections/07-security.md#req-security-uncatalogued-scope
+    diagnostics:
+      - code: unknown-security-scheme
+        severity: error
+      - code: non-oauth-scope-misuse
+        severity: error
+      - code: duplicate-security-scope
+        severity: error
+      - code: schema-validation
+        severity: error
+      - code: uncatalogued-oauth-scope
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/unknown-security-reference.json
+        pointer: /security/0
+      - path: expected-invalid/non-oauth-scopes.json
+        pointer: /security/0
+      - path: expected-invalid/duplicate-security-scope.json
+        pointer: /security/0
+      - path: expected-warning/uncatalogued-oauth-scope.json
+        pointer: /tools/0/security/0/oauth
+      - path: expected-warning/uncatalogued-openid-scope.json
+        pointer: /security/0/oidc
+    notes: >-
+      The document schema rejects duplicate scopes first (schema-validation);
+      duplicate-security-scope applies to callers of the semantic validator
+      alone.
+
+  - id: mcpdesc.components.references
+    owner: mcpdesc
+    summary: >-
+      A Reference Object targets an existing component in the namespace its
+      use site requires, without cycles.
+    surface: Reference Object
+    path: $componentRef
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 17.2 to 17.4
+        locations:
+          - sections/17-components.md#req-component-reference-form
+          - sections/17-components.md#req-component-reference-resolution
+          - sections/09-tools.md#req-tool-schema-references-resolved
+    diagnostics:
+      - code: missing-component-reference-target
+        severity: error
+      - code: wrong-component-reference-namespace
+        severity: error
+      - code: component-reference-cycle
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/component-reference-resolution.json
+        pointer: /components/schemas
+
+  - id: mcpdesc.legacy-revisions.validation-scope
+    owner: mcpdesc
+    summary: >-
+      A document applying to MCP 2024-11-05 or 2025-03-26 is reported as
+      receiving structural and selected checks only, not complete MCP semantic
+      conformance.
+    surface: Document
+    path: protocolVersions
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1 (revision tiers)
+        locations:
+          - sections/16-conformance.md#req-legacy-validation-scope
+          - proposal-snapshots/0024-validation-rule-identity-and-provenance.md
+    diagnostics:
+      - code: legacy-protocol-validation-incomplete
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-warning/legacy-result-meta.json
+        pointer: /protocolVersions

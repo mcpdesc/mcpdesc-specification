@@ -13,13 +13,13 @@ When present, `tags` declares all valid tags that MAY be referenced by tools, re
 
 ### 13.2 Tag Uniqueness
 
-Tag names MUST be unique across all tags in the array. Implementations MUST reject documents containing duplicate tag names.
+<a id="req-tags-unique"></a>Tag names MUST be unique across all tags in the array. Implementations MUST reject documents containing duplicate tag names.
 
 ### 13.3 Tag References
 
 Per-entity `tags` arrays (on tools, resources, resource templates, and prompts) MUST be non-empty when present and contain plain strings referencing tag names. When a root-level `tags` array is present:
 
-- Every tag referenced by an entity MUST be declared in the root `tags` array.
+- <a id="req-tags-references"></a>Every tag referenced by an entity MUST be declared in the root `tags` array.
 - Implementations MUST treat a reference to an undeclared tag as a validation error.
 - Per-entity tag arrays MUST NOT contain duplicate values.
 

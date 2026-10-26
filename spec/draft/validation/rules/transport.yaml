@@ -1,0 +1,86 @@
+rules:
+  - id: mcp.transport.streamable-http.revision-availability
+    owner: mcp
+    summary: Streamable HTTP is used only from MCP 2025-03-26.
+    surface: Transport
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 6.2
+        locations:
+          - sections/06-transports.md#req-transport-streamable-http-revisions
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 specification, Basic, Transports, Streamable HTTP (replaces HTTP+SSE from 2024-11-05)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L50-L277
+    diagnostics:
+      - code: transport-not-supported-by-version
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/revision-inapplicable-streamable-http.json
+        pointer: /transports/0
+
+  - id: mcp.transport.legacy-sse.deprecated
+    owner: mcp
+    summary: >-
+      Legacy HTTP+SSE associated with MCP 2025-03-26 or later is reported,
+      because Streamable HTTP replaces it.
+    surface: Transport
+    kind: semantic
+    requirement: should
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 6.2
+        locations:
+          - sections/06-transports.md#req-transport-legacy-sse-warning
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 specification, Basic, Transports, Backwards Compatibility (deprecated HTTP+SSE transport)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L250-L277
+    diagnostics:
+      - code: legacy-sse-for-modern-version
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-warning/legacy-sse-modern-revision.json
+        pointer: /transports/0
+
+  - id: mcpdesc.transports.coverage
+    owner: mcpdesc
+    summary: >-
+      Every protocol version at the root is covered by at least one transport
+      when transports are declared.
+    surface: Document
+    path: transports
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Section 6.5
+        locations:
+          - sections/06-transports.md#req-transport-coverage
+    diagnostics:
+      - code: transport-coverage-gap
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/root-version-without-transport.json
+        pointer: /protocolVersions
+      - path: expected-invalid/scoped-version-not-in-root.json
+        pointer: /protocolVersions

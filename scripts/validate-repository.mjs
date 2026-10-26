@@ -42,6 +42,11 @@ const errors = [];
 const warnings = [];
 const expectedFixtureWarnings = [];
 const expectedWarningCodesByFixture = new Map([
+  ['component-protocol-scope.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
   ['deprecated-client-capability-requirements.json', [
     'deprecated-client-requirement',
     'deprecated-client-requirement',
@@ -49,11 +54,27 @@ const expectedWarningCodesByFixture = new Map([
     'unknown-reserved-extension-identifier'
   ]],
   ['legacy-completion-examples.json', ['legacy-protocol-validation-incomplete']],
+  ['legacy-result-meta.json', ['legacy-protocol-validation-incomplete']],
   ['legacy-sse-modern-revision.json', [
     'legacy-protocol-validation-incomplete',
     'legacy-sse-for-modern-version'
   ]],
   ['logging-deprecated-2026.json', ['logging-deprecated-in-2026']],
+  ['open-result-unknown-properties.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
+  ['open-results-shared-across-revisions.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
+  ['open-step-responses-before-2026.json', [
+    'result-field-not-defined-by-version',
+    'result-field-not-defined-by-version'
+  ]],
   ['pre-dialect-tool-example.json', [
     'incomplete-tool-example-validation',
     'legacy-protocol-validation-incomplete'
@@ -233,7 +254,12 @@ const releasedProposalSnapshots = [
   ['0022-protocol-independent-info-metadata.md', '87b2d493cfa87a9cbea8148ae1f6638bd1aae786', 'proposals/0022-protocol-independent-info-metadata.md', '45c66ad65bbdae67c0afea416e025ddb1ce3dd4125306b40742fb6f887824785']
 ];
 // Proposal revisions captured for the active draft: [file, commit, source path, SHA-256].
-const draftProposalSnapshots = [];
+const draftProposalSnapshots = [
+  ['0024-validation-rule-identity-and-provenance.md', '62f1f8e726c69398f8bc3edc1c0bb737c9f5b53c', 'proposals/0024-validation-rule-identity-and-provenance.md', 'fc25d6b6a0fb47e1bc6aba31cb4b6e08cc31bc029319e3c66b2c8776eb732374'],
+  ['0025-native-mcp-projection.md', '77cf9e6e027abc42bf60b838cd744704b2ef000b', 'proposals/0025-native-mcp-projection.md', '3574b5b3b8c063dd3cb287505d596119b107765eae62325ae1cd8b66e231c324'],
+  ['0026-open-mcp-results-in-examples.md', '3d4e5ce773f5f61ecb67177aa34cbfbb302d06e0', 'proposals/0026-open-mcp-results-in-examples.md', '3a50753bf217c0ceb5fb60f28766c05b06f073524eafc3c899661b6810d6cd3b'],
+  ['0027-closed-mcp-types.md', '609700bac005e182a0e65970b59f0a5c1f3dfc25', 'proposals/0027-closed-mcp-types.md', '8e83c57fc4c243bd8cde0e2d15c8f93e148311e54399445eecba171cb95a8f79']
+];
 
 function checkProposalSnapshots(specificationPath, snapshots) {
   const manifestPath = `${specificationPath}/PROPOSALS.md`;

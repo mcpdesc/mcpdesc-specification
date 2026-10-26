@@ -10,7 +10,7 @@ A conforming MCP Description document MUST:
 4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.9.0 (Section 4).
 5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
 6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
-7. Validate against the JSON Schema for the declared `mcpdesc` version.
+7. <a id="req-document-schema"></a>Validate against the JSON Schema for the declared `mcpdesc` version.
 8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
@@ -33,7 +33,7 @@ The published JSON Schema expresses structural constraints only. JSON-Schema-onl
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
-Complete revision-specific `_meta` validation begins with MCP 2025-06-18. For the recognized legacy compatibility revisions MCP 2024-11-05 and MCP 2025-03-26, validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
+Complete revision-specific `_meta` validation begins with MCP 2025-06-18. <a id="req-legacy-validation-scope"></a>For the recognized legacy compatibility revisions MCP 2024-11-05 and MCP 2025-03-26, validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
 
 A conforming implementation SHOULD:
 

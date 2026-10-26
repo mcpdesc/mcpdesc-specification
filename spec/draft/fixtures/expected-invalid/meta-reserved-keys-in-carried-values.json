@@ -1,0 +1,130 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "meta-reserved-keys-in-carried-values",
+    "version": "1.0.0"
+  },
+  "protocolVersions": ["2025-11-25", "2026-07-28"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "meta-reserved-keys-in-carried-values"
+    }
+  ],
+  "capabilities": [
+    {
+      "completions": {}
+    }
+  ],
+  "prompts": [
+    {
+      "name": "greeting",
+      "protocolVersions": ["2025-11-25"],
+      "arguments": [
+        { "name": "audience" }
+      ],
+      "examples": {
+        "request-key-in-result": {
+          "arguments": {},
+          "result": {
+            "_meta": { "progressToken": "p1" },
+            "messages": [
+              {
+                "role": "assistant",
+                "content": {
+                  "type": "text",
+                  "text": "Hello.",
+                  "_meta": { "io.modelcontextprotocol/related-task": { "taskId": "t1" } }
+                }
+              }
+            ]
+          }
+        }
+      },
+      "completionExamples": {
+        "request-key-in-result": {
+          "argument": { "name": "audience", "value": "eng" },
+          "result": {
+            "_meta": { "progressToken": "c1" },
+            "completion": { "values": ["engineering"] }
+          }
+        }
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "prepare_release",
+      "protocolVersions": ["2025-11-25"],
+      "inputSchema": {
+        "type": "object"
+      },
+      "interactionExamples": {
+        "reserved-keys-in-responses": {
+          "input": {},
+          "steps": [
+            {
+              "type": "roots",
+              "request": {},
+              "response": {
+                "roots": [
+                  {
+                    "uri": "file:///workspace/example",
+                    "_meta": { "io.modelcontextprotocol/related-task": { "taskId": "t1" } }
+                  }
+                ],
+                "_meta": { "progressToken": "r1" }
+              }
+            }
+          ],
+          "result": {
+            "content": [
+              { "type": "text", "text": "Prepared." }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "prepare_release",
+      "protocolVersions": ["2026-07-28"],
+      "inputSchema": {
+        "type": "object"
+      },
+      "interactionExamples": {
+        "server-info-in-input-response": {
+          "input": {},
+          "steps": [
+            {
+              "type": "sampling",
+              "request": {
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": { "type": "text", "text": "Summarize the release plan." }
+                  }
+                ],
+                "maxTokens": 50
+              },
+              "response": {
+                "role": "assistant",
+                "content": { "type": "text", "text": "Ready to publish." },
+                "model": "example-model",
+                "_meta": {
+                  "io.modelcontextprotocol/serverInfo": { "name": "example", "version": "1.0.0" }
+                }
+              }
+            }
+          ],
+          "result": {
+            "resultType": "complete",
+            "content": [
+              { "type": "text", "text": "Prepared." }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

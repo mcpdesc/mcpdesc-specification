@@ -1,0 +1,74 @@
+rules:
+  - id: mcp.meta.key-format
+    owner: mcp
+    summary: >-
+      A _meta key has an optional prefix of dot-separated labels followed by a
+      slash, and a name that begins and ends with an alphanumeric character.
+    surface: _meta
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 3.5 (the same grammar applies in every revision)
+        locations:
+          - sections/03-document-structure.md#req-meta-keys
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta key name format
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L134-L147
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L201-L215
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L330-L446
+    diagnostics:
+      - code: schema-validation
+        severity: error
+      - code: meta-key-invalid
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/meta-key-invalid.json
+        pointer: /tools/0
+    notes: >-
+      The document schema rejects malformed keys first; meta-key-invalid
+      applies to callers of the semantic validator alone.
+
+  - id: mcp.meta.reserved-prefix
+    owner: mcp
+    summary: >-
+      A _meta key under an MCP-reserved prefix that the revision does not
+      define is preserved with a warning.
+    surface: _meta
+    kind: semantic
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": not-applicable
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 3.5
+        locations:
+          - sections/03-document-structure.md#req-meta-reserved-prefix
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta (a prefix whose second label is modelcontextprotocol or mcp is reserved for MCP use)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L140-L142
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L208-L210
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L337-L339
+    diagnostics:
+      - code: meta-unknown-reserved-key
+        severity: warning
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-warning/unknown-reserved-meta-key.json
+        pointer: /prompts/0/_meta
+    notes: A later MCP revision may define the key, so it is preserved rather than rejected.

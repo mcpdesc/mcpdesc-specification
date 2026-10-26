@@ -102,9 +102,49 @@ function schemaForPartialOfflineCompilation(schema) {
   return { schema: visit(schema), externalReferences };
 }
 
-function makeDiagnostic(code, severity, message, path) {
+function makeDiagnostic(code, severity, message, path, rule) {
   if (!Array.isArray(path)) throw new TypeError(`Diagnostic ${code} is missing an explicit path`);
-  return { code, severity, message, path };
+  return rule ? { code, severity, message, path, rule } : { code, severity, message, path };
+}
+
+// Reported by the example-form rules (JSON-RPC envelope, non-completed workflow), not by field classification.
+const exampleFormFields = new Set(['jsonrpc', 'id', 'error', 'task', 'inputRequests', 'requestState']);
+
+function isAtLeast(version, minimum) {
+  return protocolOrder.get(version) >= protocolOrder.get(minimum);
+}
+
+// Top-level fields and openness of MCP types carried by examples, from each revision's schema.ts.
+function carriedTypeDefinition(type, version) {
+  const current = version === '2026-07-28';
+  switch (type) {
+    case 'CallToolResult':
+      return { open: true, fields: ['_meta', 'content', 'isError', ...(isAtLeast(version, '2025-06-18') ? ['structuredContent'] : []), ...(current ? ['resultType'] : [])] };
+    case 'ReadResourceResult':
+      return { open: true, fields: ['_meta', 'contents', ...(current ? ['resultType', 'ttlMs', 'cacheScope'] : [])] };
+    case 'GetPromptResult':
+      return { open: true, fields: ['_meta', 'description', 'messages', ...(current ? ['resultType'] : [])] };
+    case 'CompleteResult':
+      return { open: true, fields: ['_meta', 'completion', ...(current ? ['resultType'] : [])] };
+    case 'CreateMessageResult':
+      return { open: !current, fields: ['_meta', 'role', 'content', 'model', 'stopReason'] };
+    case 'ElicitResult':
+      return { open: !current, fields: ['action', 'content', ...(current ? [] : ['_meta'])] };
+    case 'ListRootsResult':
+      return { open: !current, fields: ['roots', ...(current ? [] : ['_meta'])] };
+    default:
+      throw new Error(`Unknown carried MCP type ${type}`);
+  }
+}
+
+export function classifyCarriedFields(value, type, version, location, path, closedCode, closedRule) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return [];
+  const { open, fields } = carriedTypeDefinition(type, version);
+  return Object.keys(value)
+    .filter((key) => !fields.includes(key) && !exampleFormFields.has(key))
+    .map((key) => open
+      ? makeDiagnostic('result-field-not-defined-by-version', 'warning', `${location}.${key} is not defined for MCP ${version}; it is preserved without meaning`, [...path, key])
+      : makeDiagnostic(closedCode, 'error', `${location}.${key} is not defined for MCP ${version}`, [...path, key], closedRule));
 }
 
 function usesMcpReservedPrefix(identifier) {
@@ -218,7 +258,8 @@ function validateMeta(document, rel, diagnostics) {
         continue;
       }
       for (const version of scope.filter((candidate) => protocolOrder.get(candidate) >= protocolOrder.get(completeSemanticConformanceVersion))) {
-        if (validateKnownReservedKey(key, value, context, version, location, locationPath)) continue;
+        const versionContext = typeof context === 'function' ? context(version) : context;
+        if (validateKnownReservedKey(key, value, versionContext, version, location, locationPath)) continue;
         if (usesMcpReservedMetaPrefix(key, version)) {
           diagnostics.push(
             makeDiagnostic(
@@ -274,6 +315,47 @@ function validateMeta(document, rel, diagnostics) {
               `${resultLocation}.contents[${contentIndex}]._meta`,
               [...resultPath, 'contents', contentIndex, '_meta']
             );
+          });
+        }
+      }
+      if (kind === 'prompts') {
+        for (const [exampleName, example] of Object.entries(item.examples ?? {})) {
+          const result = example?.result;
+          if (!result || typeof result !== 'object' || Array.isArray(result)) continue;
+          const resultLocation = `${kind}[${itemIndex}].examples[${JSON.stringify(exampleName)}].result`;
+          const resultPath = [...itemPath, 'examples', exampleName, 'result'];
+          check(result._meta, 'result', scope, `${resultLocation}._meta`, [...resultPath, '_meta']);
+          (Array.isArray(result.messages) ? result.messages : []).forEach((message, messageIndex) => {
+            const content = message?.content;
+            const contentLocation = `${resultLocation}.messages[${messageIndex}].content`;
+            const contentPath = [...resultPath, 'messages', messageIndex, 'content'];
+            check(content?._meta, 'content', scope, `${contentLocation}._meta`, [...contentPath, '_meta']);
+            if (content?.type === 'resource') {
+              check(content.resource?._meta, 'content', scope, `${contentLocation}.resource._meta`, [...contentPath, 'resource', '_meta']);
+            }
+          });
+        }
+      }
+      if (kind === 'prompts' || kind === 'resourceTemplates') {
+        for (const [exampleName, example] of Object.entries(item.completionExamples ?? {})) {
+          const result = example?.result;
+          if (!result || typeof result !== 'object' || Array.isArray(result)) continue;
+          const resultLocation = `${kind}[${itemIndex}].completionExamples[${JSON.stringify(exampleName)}].result`;
+          check(result._meta, 'result', scope, `${resultLocation}._meta`, [...itemPath, 'completionExamples', exampleName, 'result', '_meta']);
+        }
+      }
+      if (kind === 'tools') {
+        for (const [exampleName, example] of Object.entries(item.interactionExamples ?? {})) {
+          (Array.isArray(example?.steps) ? example.steps : []).forEach((step, stepIndex) => {
+            const response = step?.response;
+            if (!response || typeof response !== 'object' || Array.isArray(response)) return;
+            const responseLocation = `${kind}[${itemIndex}].interactionExamples[${JSON.stringify(exampleName)}].steps[${stepIndex}].response`;
+            const responsePath = [...itemPath, 'interactionExamples', exampleName, 'steps', stepIndex, 'response'];
+            // Client responses are results through MCP 2025-11-25 and input responses in 2026-07-28.
+            check(response._meta, (version) => version === '2026-07-28' ? 'client-response' : 'result', scope, `${responseLocation}._meta`, [...responsePath, '_meta']);
+            (Array.isArray(response.roots) ? response.roots : []).forEach((root, rootIndex) => {
+              check(root?._meta, 'root', scope, `${responseLocation}.roots[${rootIndex}]._meta`, [...responsePath, 'roots', rootIndex, '_meta']);
+            });
           });
         }
       }
@@ -659,7 +741,7 @@ function validateElicitations(document, rel, diagnostics) {
 function validateVersionSpecificSemantics(document, rel, diagnostics) {
   const rootScope = normalizeScope(document.protocolVersions ?? []);
 
-  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope) {
+  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope, rule = 'mcp.declaration.field.revision-availability') {
     if (!(fieldName in object)) return;
     for (const version of scope) {
       if (protocolOrder.get(version) < protocolOrder.get(minimumVersion)) {
@@ -668,7 +750,8 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
             'field-not-supported-by-version',
             'error',
             `${location}.${fieldName} is not defined for MCP ${version}; it requires ${minimumVersion} or later`,
-            [...locationPath, fieldName]
+            [...locationPath, fieldName],
+            rule
           )
         );
       }
@@ -684,7 +767,8 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
             'field-not-supported-by-version',
             'error',
             `${location}.${fieldName} is defined only for MCP ${supportedVersion}, not MCP ${version}`,
-            [...locationPath, fieldName]
+            [...locationPath, fieldName],
+            'mcp.declaration.field.revision-availability'
           )
         );
       }
@@ -725,7 +809,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
     const scope = effectiveScope(document, tool, rootScope);
     const toolPath = ['tools', index];
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'title', '2025-06-18', scope);
-    checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'outputSchema', '2025-06-18', scope);
+    checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'outputSchema', '2025-06-18', scope, 'mcp.tool.output-schema.revision-availability');
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, '_meta', '2025-06-18', scope);
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'annotations', '2025-03-26', scope);
     checkOnlyVersion(`tools[${index}]`, toolPath, tool, 'execution', '2025-11-25', scope);
@@ -776,7 +860,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
     const capabilityPath = ['capabilities', index];
     if ('completions' in capability) checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'completions', '2025-03-26', scope);
     if ('tasks' in capability) {
-      checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'tasks', '2025-11-25', scope);
+      checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'tasks', '2025-11-25', scope, 'mcp.capabilities.tasks.revision-availability');
       if (scope.includes('2026-07-28')) {
         diagnostics.push(
           makeDiagnostic(
@@ -1018,7 +1102,8 @@ function validateToolSchemas(document, rel, diagnostics) {
               'field-not-supported-by-version',
               'error',
               `${location}.$schema is not defined for MCP ${version}; it requires ${toolSchemaDialectVersion} or later`,
-              [...locationPath, '$schema']
+              [...locationPath, '$schema'],
+              'mcp.declaration.field.revision-availability'
             )
           );
         }
@@ -1088,7 +1173,8 @@ function validateToolSchemas(document, rel, diagnostics) {
               'field-not-supported-by-version',
               'error',
               `${location} must have type "object" when it applies to MCP ${version}`,
-              [...locationPath, 'type']
+              [...locationPath, 'type'],
+              'mcp.tool.output-schema.object-root'
             )
           );
         }
@@ -1177,35 +1263,30 @@ function validateToolExamples(document, rel, diagnostics) {
         if (version === '2026-07-28' && result.resultType !== 'complete') {
           diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType']));
         }
-        if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
-          diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${resultLocation}.resultType is not defined for MCP ${version}`, [...resultPath, 'resultType']));
-        }
-        if (Object.hasOwn(result, 'structuredContent') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-          diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${resultLocation}.structuredContent is not defined for MCP ${version}`, [...resultPath, 'structuredContent']));
-        }
-        if (Object.hasOwn(result, 'structuredContent') && version !== '2026-07-28' && (!result.structuredContent || typeof result.structuredContent !== 'object' || Array.isArray(result.structuredContent))) {
+        diagnostics.push(...classifyCarriedFields(result, 'CallToolResult', version, resultLocation, resultPath));
+        if (Object.hasOwn(result, 'structuredContent') && isAtLeast(version, '2025-06-18') && version !== '2026-07-28' && (!result.structuredContent || typeof result.structuredContent !== 'object' || Array.isArray(result.structuredContent))) {
           diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${resultLocation}.structuredContent must be an object for MCP ${version}`, [...resultPath, 'structuredContent']));
         }
         (result.content ?? []).forEach((content, contentIndex) => {
           const contentLocation = `${resultLocation}.content[${contentIndex}]`;
           const contentPath = [...resultPath, 'content', contentIndex];
           if (content.type === 'audio' && protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type']));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability'));
           }
           if (content.type === 'resource_link' && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type']));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability'));
           }
           if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta']));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.revision-availability'));
           }
           if (content.type === 'resource' && Object.hasOwn(content.resource ?? {}, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta']));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.revision-availability'));
           }
           if (content.type === 'resource_link' && Array.isArray(content.icons) && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons']));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.revision-availability'));
           }
           if (content.annotations?.lastModified !== undefined && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified']));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.revision-availability'));
           }
         });
       }
@@ -1284,17 +1365,7 @@ function validateCompletedResourceResult(result, scope, location, locationPath, 
     if (version === '2026-07-28' && !Object.hasOwn(result, 'cacheScope')) {
       diagnostics.push(makeDiagnostic('resource-example-cache-fields-version-mismatch', 'error', `${location}.cacheScope is required for MCP ${version}`, [...locationPath, 'cacheScope']));
     }
-    if (version !== '2026-07-28' && Object.hasOwn(result, 'resultType')) {
-      diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${location}.resultType is not defined for MCP ${version}`, [...locationPath, 'resultType']));
-    }
-    for (const cacheField of ['ttlMs', 'cacheScope']) {
-      if (version !== '2026-07-28' && Object.hasOwn(result, cacheField)) {
-        diagnostics.push(makeDiagnostic('resource-example-cache-fields-version-mismatch', 'error', `${location}.${cacheField} is not defined for MCP ${version}`, [...locationPath, cacheField]));
-      }
-    }
-    if (Object.hasOwn(result, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-      diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${location}._meta is not defined for MCP ${version}`, [...locationPath, '_meta']));
-    }
+    diagnostics.push(...classifyCarriedFields(result, 'ReadResourceResult', version, location, locationPath));
     (result.contents ?? []).forEach((content, contentIndex) => {
       if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
         diagnostics.push(makeDiagnostic('resource-example-content-version-mismatch', 'error', `${location}.contents[${contentIndex}]._meta is not defined for MCP ${version}`, [...locationPath, 'contents', contentIndex, '_meta']));
@@ -1351,9 +1422,9 @@ function validateResourceExamples(document, rel, diagnostics) {
         try {
           template = new UriTemplateMatcher();
           template.add(owner.uriTemplate);
-        } catch (error) {
+        } catch {
+          // Reported once by validateResourceTemplateUris.
           template = undefined;
-          diagnostics.push(makeDiagnostic('resource-template-example-invalid-template', 'error', `${kind}[${ownerIndex}].uriTemplate is not a valid RFC 6570 template: ${error.message}`, [kind, ownerIndex, 'uriTemplate']));
         }
       }
 
@@ -1376,6 +1447,17 @@ function validateResourceExamples(document, rel, diagnostics) {
   }
 }
 
+function validateResourceTemplateUris(document, rel, diagnostics) {
+  (document.resourceTemplates ?? []).forEach((owner, ownerIndex) => {
+    if (typeof owner.uriTemplate !== 'string') return;
+    try {
+      new UriTemplateMatcher().add(owner.uriTemplate);
+    } catch (error) {
+      diagnostics.push(makeDiagnostic('invalid-resource-template-uri-template', 'error', `resourceTemplates[${ownerIndex}].uriTemplate is not a valid RFC 6570 template: ${error.message}`, ['resourceTemplates', ownerIndex, 'uriTemplate']));
+    }
+  });
+}
+
 export function semanticValidateDocument(document, rel = 'document') {
   const diagnostics = [];
   validateProtocolScopes(document, rel, diagnostics);
@@ -1386,6 +1468,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   validateMeta(document, rel, diagnostics);
   validateToolSchemas(document, rel, diagnostics);
   validateToolExamples(document, rel, diagnostics);
+  validateResourceTemplateUris(document, rel, diagnostics);
   validateResourceExamples(document, rel, diagnostics);
   diagnostics.sort(
     (left, right) => left.code.localeCompare(right.code)

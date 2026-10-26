@@ -38,6 +38,9 @@
               ],
               "hasMore": true,
               "total": 14
+            },
+            "_meta": {
+              "trace": "c1"
             }
           }
         }

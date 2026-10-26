@@ -206,9 +206,7 @@
       "type": "object"
     },
     "clientCapabilityRequirements": {
-      "additionalProperties": {
-        "$ref": "#/$defs/clientCapabilityValue"
-      },
+      "additionalProperties": false,
       "minProperties": 1,
       "patternProperties": {
         "^x-": {
@@ -424,7 +422,7 @@
       "type": "object"
     },
     "completionResult": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "hasMore": {
           "type": "boolean"
@@ -935,8 +933,11 @@
       "type": "object"
     },
     "elicitationInteractionAcceptedResponse": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
+        "_meta": {
+          "$ref": "#/$defs/metaObject"
+        },
         "action": {
           "const": "accept"
         },
@@ -953,8 +954,11 @@
       "type": "object"
     },
     "elicitationInteractionDeclinedResponse": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
+        "_meta": {
+          "$ref": "#/$defs/metaObject"
+        },
         "action": {
           "enum": [
             "decline",
@@ -1563,7 +1567,7 @@
       "type": "object"
     },
     "resourceAnnotations": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "audience": {
           "items": {
@@ -1784,6 +1788,9 @@
     "rootDeclaration": {
       "additionalProperties": false,
       "properties": {
+        "_meta": {
+          "$ref": "#/$defs/metaObject"
+        },
         "name": {
           "type": "string"
         },
@@ -1803,8 +1810,11 @@
       "type": "object"
     },
     "rootsListResult": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
+        "_meta": {
+          "$ref": "#/$defs/metaObject"
+        },
         "roots": {
           "items": {
             "$ref": "#/$defs/rootDeclaration"
@@ -1890,8 +1900,11 @@
       "type": "object"
     },
     "samplingCreateMessageResult": {
-      "additionalProperties": false,
+      "additionalProperties": true,
       "properties": {
+        "_meta": {
+          "$ref": "#/$defs/metaObject"
+        },
         "content": {
           "$ref": "#/$defs/samplingMessageContent"
         },
@@ -2403,7 +2416,7 @@
       "type": "object"
     },
     "toolAnnotations": {
-      "additionalProperties": true,
+      "additionalProperties": false,
       "properties": {
         "destructiveHint": {
           "type": "boolean"
