@@ -12,6 +12,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.2.1
+        locations:
+          - sections/10-resources.md#req-resource-template-uri-template
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ResourceTemplate, uriTemplate ("A URI template (according to RFC 6570)")
@@ -25,10 +29,6 @@ rules:
         reference: RFC 6570, URI Template
         locations:
           - https://www.rfc-editor.org/rfc/rfc6570#section-3
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 10.2.1
-        locations:
-          - sections/10-resources.md#req-resource-template-uri-template
     diagnostics:
       - code: invalid-resource-template-uri-template
         severity: error
@@ -58,6 +58,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.4
+        locations:
+          - sections/10-resources.md#req-resource-example-blob-base64
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface BlobResourceContents, blob (@format byte)
@@ -71,10 +75,6 @@ rules:
         reference: RFC 4648, Section 4
         locations:
           - https://www.rfc-editor.org/rfc/rfc4648#section-4
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 10.4.4
-        locations:
-          - sections/10-resources.md#req-resource-example-blob-base64
     diagnostics:
       - code: invalid-resource-example-base64
         severity: error
@@ -93,9 +93,8 @@ rules:
     path: result.contents
     kind: mcpdesc-semantic
     requirement: should
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 10.4.4
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.4
         locations:
           - sections/10-resources.md#req-resource-example-requested-uri
           - sections/10-resources.md#req-resource-example-mime-type
@@ -123,15 +122,15 @@ rules:
     path: uri
     kind: mcpdesc-semantic
     requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.3
+        locations:
+          - sections/10-resources.md#req-resource-template-example-expansion
     sources:
       - tier: 2
         reference: RFC 6570, URI Template
         locations:
           - https://www.rfc-editor.org/rfc/rfc6570#section-3
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 10.4.3
-        locations:
-          - sections/10-resources.md#req-resource-template-example-expansion
     diagnostics:
       - code: resource-template-example-invalid-expansion
         severity: error

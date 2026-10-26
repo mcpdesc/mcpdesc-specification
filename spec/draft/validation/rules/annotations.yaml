@@ -13,6 +13,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.6
+        locations:
+          - sections/09-tools.md#req-tool-annotations-closed
     sources:
       - tier: 1
         reference: MCP 2025-03-26 to 2026-07-28 schema.ts, interface ToolAnnotations (no index signature)
@@ -21,10 +25,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L869-L923
           - validation/mcp-schemas/2025-11-25/schema.ts#L1168-L1222
           - validation/mcp-schemas/2026-07-28/schema.ts#L1900-L1954
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.6
-        locations:
-          - sections/09-tools.md#req-tool-annotations-closed
     diagnostics:
       - code: schema-validation
         severity: error
@@ -53,6 +53,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.3
+        locations:
+          - sections/10-resources.md#req-resource-annotations-closed
     sources:
       - tier: 1
         reference: MCP 2024-11-05 schema.ts, inline annotations on Resource, ResourceTemplate, and content types; MCP 2025-03-26 to 2026-07-28 schema.ts, interface Annotations (no index signature)
@@ -62,10 +66,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1093-L1128
           - validation/mcp-schemas/2025-11-25/schema.ts#L1700-L1735
           - validation/mcp-schemas/2026-07-28/schema.ts#L2265-L2300
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 10.3
-        locations:
-          - sections/10-resources.md#req-resource-annotations-closed
     diagnostics:
       - code: schema-validation
         severity: error
@@ -97,6 +97,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.3
+        locations:
+          - sections/10-resources.md#req-resource-annotations-last-modified
     sources:
       - tier: 1
         reference: MCP 2024-11-05 and 2025-03-26 schema.ts, annotations (audience, priority); MCP 2025-06-18 to 2026-07-28 schema.ts, interface Annotations (adds lastModified)
@@ -106,10 +110,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1093-L1128
           - validation/mcp-schemas/2025-11-25/schema.ts#L1700-L1735
           - validation/mcp-schemas/2026-07-28/schema.ts#L2265-L2300
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 10.3
-        locations:
-          - sections/10-resources.md#req-resource-annotations-last-modified
     diagnostics:
       - code: resource-annotation-not-supported-by-version
         severity: error

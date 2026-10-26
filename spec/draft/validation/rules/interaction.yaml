@@ -9,6 +9,11 @@ rules:
     path: steps
     kind: mcpdesc-semantic
     requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-elicitation-declaration
+          - sections/09-tools.md#req-interaction-elicitation-response
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 schema.ts, interface ElicitResult, content (present for accepted form responses)
@@ -16,11 +21,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1538-L1557
           - validation/mcp-schemas/2025-11-25/schema.ts#L2466-L2486
           - validation/mcp-schemas/2026-07-28/schema.ts#L3120-L3149
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.4
-        locations:
-          - sections/09-tools.md#req-interaction-elicitation-declaration
-          - sections/09-tools.md#req-interaction-elicitation-response
     diagnostics:
       - code: unknown-elicitation-declaration
         severity: error
@@ -47,9 +47,8 @@ rules:
     path: steps
     kind: mcpdesc-semantic
     requirement: should
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 8.5 and 9.4
+    specification:
+      - reference: MCP Description 0.9.0, Sections 8.5 and 9.4
         locations:
           - sections/09-tools.md#req-interaction-client-requirements-warning
     diagnostics:
@@ -76,6 +75,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-sampling-revision
     sources:
       - tier: 1
         reference: MCP 2025-06-18 schema.ts, CreateMessageRequest (no tools); MCP 2025-11-25 and 2026-07-28 schema.ts, CreateMessageRequestParams tools and toolChoice
@@ -83,10 +86,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1028-L1065
           - validation/mcp-schemas/2025-11-25/schema.ts#L1573-L1622
           - validation/mcp-schemas/2026-07-28/schema.ts#L2086-L2152
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.4
-        locations:
-          - sections/09-tools.md#req-interaction-sampling-revision
     diagnostics:
       - code: interaction-example-version-mismatch
         severity: error
@@ -109,6 +108,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-revision-valid
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface Root, uri ("This *must* start with file:// for now")
@@ -122,10 +125,6 @@ rules:
         reference: MCP 2026-07-28 specification, Client Features, Roots, Data Types (uri MUST be a file:// URI)
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/client/roots.mdx#L100-L102
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.4
-        locations:
-          - sections/09-tools.md#req-interaction-revision-valid
     diagnostics:
       - code: interaction-example-roots-uri
         severity: error

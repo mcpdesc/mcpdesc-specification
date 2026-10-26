@@ -63,8 +63,11 @@ recommendation, so an MCP rule at that level produces warnings, not errors.
 
 ### Source tiers
 
-Every rule source has a tier. Tiers rank how much a source can decide about
-MCP behavior, highest first (Proposal 0024, Section 7):
+A rule record separates the requirement from the evidence. Its
+`specification` field cites the MCP Description requirements the rule checks
+and the decisions behind it. Its `sources` field cites external evidence, each
+source with a tier. Tiers rank how much a source can decide about MCP
+behavior, highest first (Proposal 0024, Section 7):
 
 | Tier | Source |
 | --- | --- |
@@ -75,14 +78,12 @@ MCP behavior, highest first (Proposal 0024, Section 7):
 | 5 | Official SDKs and reference implementations |
 | 6 | MCP Inspector and the official conformance framework |
 | 7 | Other ecosystem tooling |
-| 8 | MCP Description: its specification text and decisions |
 
-MCP Description is tier 8 because it cannot decide what MCP means: for an
-`mcp` rule it only adopts or arbitrates what tiers 1 to 3 say, and an `mcp`
-rule must cite one of them. For `mcpdesc` rules it is the authority, and every
-rule cites the MCP Description requirement it checks. A lower tier can reveal
-ambiguity or a defect in a higher one but does not override it without an
-arbitration.
+MCP Description is not ranked among these sources. For an `mcpdesc` rule it
+is the authority, and the rule may have no external source. For an `mcp` rule
+it cannot decide what MCP means: it adopts or arbitrates what tiers 1 to 3
+say, and the rule must cite one of them. A lower tier can reveal ambiguity or
+a defect in a higher one but does not override it without an arbitration.
 
 ## Ownership model
 
@@ -172,25 +173,26 @@ Each validation rule has a permanent identifier and a record:
 | `kind` | structural, semantic, preservation, embedded-standard, mcpdesc-semantic, completeness, or interoperability |
 | `requirement` | Requirement level of the source: must, should, or may |
 | `applicability` | Behavior per supported MCP revision |
-| `sources` | Normative MCP text, official schema, or other evidence, by authority tier, each with precise `locations` (see below) |
+| `specification` | MCP Description requirements the rule checks and the decisions behind it, each with precise `locations` (see below) |
+| `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `diagnostics` | Diagnostic codes emitted |
 | `enforcement` | Internal check, official schema, or external validator |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
 | `fixtures` | Tests covering each revision boundary: a fixture `path` and a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document) |
 | `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
 
-Source `locations` are immutable and relative to the specification folder:
+Locations are immutable and relative to the specification folder:
 
-| Source | Location form |
-| --- | --- |
-| MCP `schema.ts` (tier 1) | `validation/mcp-schemas/<revision>/schema.ts#L<from>-L<to>` in the vendored copy |
-| MCP specification text (tier 1) | GitHub permalink at the pinned MCP commit, with a line range |
-| Referenced standards (tier 2), SEPs (tier 4) | HTTPS URL to the section |
-| MCP Description requirement (tier 8) | `sections/<file>.md#req-<topic>` |
-| MCP Description decisions (tier 8) | `validation/<file>.md#<heading>`, a proposal snapshot, or a released proposal |
+| Field | Cited text | Location form |
+| --- | --- | --- |
+| `sources` | MCP `schema.ts` (tier 1) | `validation/mcp-schemas/<revision>/schema.ts#L<from>-L<to>` in the vendored copy |
+| `sources` | MCP specification text (tier 1) | GitHub permalink at the pinned MCP commit, with a line range |
+| `sources` | Referenced standards (tier 2), SEPs (tier 4) | HTTPS URL to the section |
+| `specification` | MCP Description requirement | `sections/<file>.md#req-<topic>` |
+| `specification` | MCP Description decision | `validation/<file>.md#<heading>`, a proposal snapshot, or a released proposal |
 
-Every rule cites at least one MCP Description requirement: a tier 8 source
-located at a requirement anchor. A requirement anchor is an
+Every rule cites at least one MCP Description requirement: a `specification`
+location at a requirement anchor. A requirement anchor is an
 `<a id="req-<topic>"></a>` element placed in the section source immediately
 before the requirement sentence. Its identifier names the requirement, not a
 rule, and is permanent: one sentence can be checked by several rules, and one

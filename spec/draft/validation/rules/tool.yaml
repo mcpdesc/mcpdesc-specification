@@ -11,6 +11,10 @@ rules:
       "2025-06-18": not-applicable
       "2025-11-25": not-applicable
       "2026-07-28": not-applicable
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table)
+        locations:
+          - sections/04-versioning.md#req-field-revision-availability
     sources:
       - tier: 1
         reference: MCP 2025-03-26 schema.ts, interface Tool (closed; no outputSchema)
@@ -20,10 +24,6 @@ rules:
         reference: MCP 2025-06-18 schema.ts, interface Tool, outputSchema
         locations:
           - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table)
-        locations:
-          - sections/04-versioning.md#req-field-revision-availability
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
@@ -45,6 +45,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": not-applicable
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-output-schema-object-root
     sources:
       - tier: 1
         reference: MCP 2025-06-18 and 2025-11-25 schema.ts, interface Tool, outputSchema (type "object")
@@ -55,10 +59,6 @@ rules:
         reference: MCP 2026-07-28 schema.ts, interface Tool, outputSchema (no root type)
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.2
-        locations:
-          - sections/09-tools.md#req-tool-output-schema-object-root
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
@@ -92,6 +92,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-vocabulary
+          - sections/09-tools.md#req-tool-schema-keywords-preserved
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2025-11-25 schema.ts, interface Tool, inputSchema and outputSchema doc comments ("A JSON Schema object")
@@ -107,11 +112,6 @@ rules:
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
           - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.2
-        locations:
-          - sections/09-tools.md#req-tool-schema-vocabulary
-          - sections/09-tools.md#req-tool-schema-keywords-preserved
     diagnostics: []
     enforcement: internal
     status: arbitrated
@@ -151,6 +151,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-input-schema-object-root
     sources:
       - tier: 1
         reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, interface Tool, inputSchema type: "object"'
@@ -168,10 +172,6 @@ rules:
         reference: MCP SEP-2106 (Final), which keeps type "object" deliberately
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/seps/2106-json-schema-2020-12.md
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.2
-        locations:
-          - sections/09-tools.md#req-tool-input-schema-object-root
     diagnostics:
       - code: schema-validation
         severity: error
@@ -215,6 +215,10 @@ rules:
       "2025-06-18": opaque
       "2025-11-25": opaque
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-x-mcp-header
     sources:
       - tier: 1
         reference: MCP 2026-07-28 specification, Streamable HTTP transport, x-mcp-header validity and extraction rules
@@ -224,10 +228,6 @@ rules:
         reference: MCP 2026-07-28 schema.ts, interface Tool, inputSchema doc comment
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.2
-        locations:
-          - sections/09-tools.md#req-tool-x-mcp-header
     diagnostics:
       - code: invalid-x-mcp-header
         severity: error
@@ -263,6 +263,12 @@ rules:
       "2025-06-18": not-applicable
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2 (reject unsupported dialects; never fetch external $ref targets; warn when validation is incomplete)
+        locations:
+          - sections/09-tools.md#req-tool-output-schema-valid
+          - sections/09-tools.md#req-tool-schema-dialect-valid
+          - sections/09-tools.md#req-tool-schema-external-ref
     sources:
       - tier: 1
         reference: MCP 2025-11-25 and 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema doc comments (default JSON Schema 2020-12 when $schema is absent)
@@ -278,12 +284,6 @@ rules:
           - https://json-schema.org/draft/2020-12/json-schema-validation
           - https://json-schema.org/draft-07/json-schema-core
           - https://json-schema.org/draft-07/json-schema-validation
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.2 (reject unsupported dialects; never fetch external $ref targets; warn when validation is incomplete)
-        locations:
-          - sections/09-tools.md#req-tool-output-schema-valid
-          - sections/09-tools.md#req-tool-schema-dialect-valid
-          - sections/09-tools.md#req-tool-schema-external-ref
     diagnostics:
       - code: invalid-tool-schema
         severity: error
@@ -324,6 +324,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": not-applicable
       "2026-07-28": not-applicable
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-legacy-shape
     sources:
       - tier: 1
         reference: "MCP 2024-11-05 to 2025-06-18 schema.ts, interface Tool, inputSchema (and outputSchema from 2025-06-18): properties?: { [key: string]: object }, required?: string[]"
@@ -332,10 +336,6 @@ rules:
           - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
           - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
           - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.2
-        locations:
-          - sections/09-tools.md#req-tool-schema-legacy-shape
     diagnostics:
       - code: invalid-legacy-tool-schema-shape
         severity: error
@@ -363,6 +363,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.3
+        locations:
+          - sections/09-tools.md#req-tool-example-structured-content
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema ("Servers MUST provide structured results that conform to this schema")
@@ -370,10 +374,6 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.3
-        locations:
-          - sections/09-tools.md#req-tool-example-structured-content
     diagnostics:
       - code: missing-tool-example-structured-content
         severity: error
@@ -405,6 +405,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.2, 9.3, and 9.4
+        locations:
+          - sections/09-tools.md#req-tool-example-input-valid
+          - sections/09-tools.md#req-tool-example-incomplete-validation
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema (structured results conform to outputSchema)
@@ -412,11 +417,6 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 9.2, 9.3, and 9.4
-        locations:
-          - sections/09-tools.md#req-tool-example-input-valid
-          - sections/09-tools.md#req-tool-example-incomplete-validation
     diagnostics:
       - code: tool-example-schema-mismatch
         severity: error
@@ -452,9 +452,8 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
         locations:
           - sections/09-tools.md#req-tool-example-error-result
     diagnostics:

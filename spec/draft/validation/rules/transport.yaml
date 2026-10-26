@@ -11,15 +11,15 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 6.2
+        locations:
+          - sections/06-transports.md#req-transport-streamable-http-revisions
     sources:
       - tier: 1
         reference: MCP 2025-03-26 specification, Basic, Transports, Streamable HTTP (replaces HTTP+SSE from 2024-11-05)
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L50-L277
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 6.2
-        locations:
-          - sections/06-transports.md#req-transport-streamable-http-revisions
     diagnostics:
       - code: transport-not-supported-by-version
         severity: error
@@ -43,15 +43,15 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 6.2
+        locations:
+          - sections/06-transports.md#req-transport-legacy-sse-warning
     sources:
       - tier: 1
         reference: MCP 2025-03-26 specification, Basic, Transports, Backwards Compatibility (deprecated HTTP+SSE transport)
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L250-L277
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 6.2
-        locations:
-          - sections/06-transports.md#req-transport-legacy-sse-warning
     diagnostics:
       - code: legacy-sse-for-modern-version
         severity: warning
@@ -70,9 +70,8 @@ rules:
     path: transports
     kind: mcpdesc-semantic
     requirement: must
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 6.5
+    specification:
+      - reference: MCP Description 0.9.0, Section 6.5
         locations:
           - sections/06-transports.md#req-transport-coverage
     diagnostics:

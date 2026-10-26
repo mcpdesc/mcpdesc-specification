@@ -7,9 +7,8 @@ rules:
       rule.
     surface: Document
     kind: structural
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 16.1, item 7
+    specification:
+      - reference: MCP Description 0.9.0, Section 16.1, item 7
         locations:
           - sections/16-conformance.md#req-document-schema
           - sections/03-document-structure.md#req-closed-objects
@@ -41,6 +40,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
+        locations:
+          - sections/04-versioning.md#req-field-revision-availability
+          - sections/09-tools.md#req-tool-schema-dialect-keyword
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interfaces BaseMetadata, Icons, Tool, Resource, ResourceTemplate, Prompt, PromptArgument, and ServerCapabilities
@@ -80,11 +84,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
           - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
           - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
-        locations:
-          - sections/04-versioning.md#req-field-revision-availability
-          - sections/09-tools.md#req-tool-schema-dialect-keyword
     diagnostics:
       - code: field-not-supported-by-version
         severity: error
@@ -108,9 +107,8 @@ rules:
     path: protocolVersions
     kind: mcpdesc-semantic
     requirement: must
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 4.10 and 8.6
+    specification:
+      - reference: MCP Description 0.9.0, Sections 4.10 and 8.6
         locations:
           - sections/04-versioning.md#req-scope-subset
           - sections/08-capabilities.md#req-capability-scopes-disjoint
@@ -141,9 +139,8 @@ rules:
     surface: Tag
     kind: mcpdesc-semantic
     requirement: must
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 13.2 and 13.3
+    specification:
+      - reference: MCP Description 0.9.0, Sections 13.2 and 13.3
         locations:
           - sections/13-tags.md#req-tags-unique
           - sections/13-tags.md#req-tags-references
@@ -169,9 +166,8 @@ rules:
     surface: Security Requirement
     kind: mcpdesc-semantic
     requirement: must
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 7.1 to 7.3
+    specification:
+      - reference: MCP Description 0.9.0, Sections 7.1 to 7.3
         locations:
           - sections/07-security.md#req-security-scheme-references
           - sections/07-security.md#req-security-scopes-unique
@@ -215,9 +211,8 @@ rules:
     path: $componentRef
     kind: mcpdesc-semantic
     requirement: must
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 17.2 to 17.4
+    specification:
+      - reference: MCP Description 0.9.0, Sections 17.2 to 17.4
         locations:
           - sections/17-components.md#req-component-reference-form
           - sections/17-components.md#req-component-reference-resolution
@@ -245,9 +240,8 @@ rules:
     path: protocolVersions
     kind: mcpdesc-semantic
     requirement: must
-    sources:
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1 (revision tiers)
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1 (revision tiers)
         locations:
           - sections/16-conformance.md#req-legacy-validation-scope
           - proposal-snapshots/0024-validation-rule-identity-and-provenance.md

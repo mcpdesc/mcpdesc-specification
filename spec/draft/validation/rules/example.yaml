@@ -12,23 +12,22 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
+        locations:
+          - sections/03-document-structure.md#req-carried-defined-fields
+          - sections/09-tools.md#req-tool-example-result-shape
+          - sections/10-resources.md#req-resource-example-result-shape
+          - sections/11-prompts.md#req-prompt-example-result-shape
+      - reference: "Examples fail fast decision (validation README, 2026-10-25, issue #72)"
+        locations:
+          - validation/README.md#examples-fail-fast
     sources:
       - tier: 1
         reference: "MCP 2026-07-28 schema.ts, interface Result (resultType required) and interface CacheableResult (ttlMs, cacheScope required)"
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L218-L236
           - validation/mcp-schemas/2026-07-28/schema.ts#L1076-L1110
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
-        locations:
-          - sections/03-document-structure.md#req-carried-defined-fields
-          - sections/09-tools.md#req-tool-example-result-shape
-          - sections/10-resources.md#req-resource-example-result-shape
-          - sections/11-prompts.md#req-prompt-example-result-shape
-      - tier: 8
-        reference: "Examples fail fast decision (validation README, 2026-10-25, issue #72)"
-        locations:
-          - validation/README.md#examples-fail-fast
     diagnostics:
       - code: tool-example-result-version-mismatch
         severity: error
@@ -75,6 +74,12 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.6, 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
+        locations:
+          - sections/09-tools.md#req-tool-example-completed-form
+          - sections/10-resources.md#req-resource-example-completed-form
+          - sections/11-prompts.md#req-prompt-example-completed-form
     sources:
       - tier: 1
         reference: MCP 2026-07-28 schema.ts, InputRequiredResult (inputRequests, requestState) and Result.resultType
@@ -85,12 +90,6 @@ rules:
         reference: MCP 2025-11-25 schema.ts, CreateTaskResult (task)
         locations:
           - validation/mcp-schemas/2025-11-25/schema.ts#L1386-L1393
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 3.6, 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
-        locations:
-          - sections/09-tools.md#req-tool-example-completed-form
-          - sections/10-resources.md#req-resource-example-completed-form
-          - sections/11-prompts.md#req-prompt-example-completed-form
     diagnostics:
       - code: tool-example-json-rpc-envelope
         severity: error
@@ -139,6 +138,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+        locations:
+          - sections/10-resources.md#req-template-completion-context-revision
+          - sections/11-prompts.md#req-prompt-completion-context-revision
     sources:
       - tier: 1
         reference: MCP 2025-03-26 schema.ts, interface CompleteRequest (no context); MCP 2025-06-18 to 2026-07-28 schema.ts, CompleteRequest params context
@@ -147,11 +151,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1307-L1340
           - validation/mcp-schemas/2025-11-25/schema.ts#L1995-L2025
           - validation/mcp-schemas/2026-07-28/schema.ts#L2582-L2618
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
-        locations:
-          - sections/10-resources.md#req-template-completion-context-revision
-          - sections/11-prompts.md#req-prompt-completion-context-revision
     diagnostics:
       - code: completion-example-context-version-mismatch
         severity: error
@@ -172,6 +171,11 @@ rules:
     path: argument, context
     kind: mcpdesc-semantic
     requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+        locations:
+          - sections/10-resources.md#req-template-completion-target
+          - sections/11-prompts.md#req-prompt-completion-target
     sources:
       - tier: 1
         reference: "MCP 2025-06-18 to 2026-07-28 schema.ts, CompleteRequest context.arguments (previously-resolved variables in a URI template or prompt)"
@@ -179,11 +183,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1307-L1340
           - validation/mcp-schemas/2025-11-25/schema.ts#L1995-L2025
           - validation/mcp-schemas/2026-07-28/schema.ts#L2582-L2618
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
-        locations:
-          - sections/10-resources.md#req-template-completion-target
-          - sections/11-prompts.md#req-prompt-completion-target
     diagnostics:
       - code: prompt-completion-example-unknown-argument
         severity: error

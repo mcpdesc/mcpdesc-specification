@@ -145,17 +145,18 @@ for (const filename of files) {
         fail(`${where}: applicability must list exactly ${supportedProtocolVersions.join(', ')}`);
       }
     }
-    if (rule.owner === 'mcp' && !rule.sources.some((source) => source.tier <= 3)) {
+    if (rule.owner === 'mcp' && !(rule.sources ?? []).some((source) => source.tier <= 3)) {
       fail(`${where}: an mcp rule must cite a tier 1 to 3 source`);
     }
-    for (const source of rule.sources) {
-      for (const location of source.locations) {
+    if (rule.owner === 'json-schema' && !rule.sources) fail(`${where}: a json-schema rule must cite its sources`);
+    for (const [field, entries] of [['specification', rule.specification], ['source', rule.sources ?? []]]) {
+      for (const location of entries.flatMap((entry) => entry.locations)) {
         const problem = checkLocation(location);
-        if (problem) fail(`${where}: source location ${location}: ${problem}`);
+        if (problem) fail(`${where}: ${field} location ${location}: ${problem}`);
       }
     }
-    if (!rule.sources.some((source) => source.tier === 8 && source.locations.some((location) => location.startsWith('sections/')))) {
-      fail(`${where}: a rule must cite the MCP Description requirement it checks (a tier 8 source located at a requirement anchor)`);
+    if (!rule.specification.some((entry) => entry.locations.some((location) => location.startsWith('sections/')))) {
+      fail(`${where}: a rule must cite the MCP Description requirement it checks (a specification location at a requirement anchor)`);
     }
     if (rule.owner === 'mcp' && ['should', 'may'].includes(rule.requirement) && rule.diagnostics.some((diagnostic) => diagnostic.severity === 'error')) {
       fail(`${where}: a ${rule.requirement}-level mcp rule must not emit error diagnostics`);

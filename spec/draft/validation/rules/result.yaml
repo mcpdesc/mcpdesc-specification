@@ -12,6 +12,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4 (no completion examples for MCP 2024-11-05)
+        locations:
+          - sections/10-resources.md#req-template-completion-revisions
+          - sections/11-prompts.md#req-prompt-completion-revisions
     sources:
       - tier: 1
         reference: "MCP 2024-11-05 schema.ts, interfaces CompleteRequest (method completion/complete) and CompleteResult; the ServerCapabilities.completions capability is added in MCP 2025-03-26"
@@ -19,11 +24,6 @@ rules:
           - validation/mcp-schemas/2024-11-05/schema.ts#L951-L972
           - validation/mcp-schemas/2024-11-05/schema.ts#L974-L992
           - validation/mcp-schemas/2025-03-26/schema.ts#L237-L240
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4 (no completion examples for MCP 2024-11-05)
-        locations:
-          - sections/10-resources.md#req-template-completion-revisions
-          - sections/11-prompts.md#req-prompt-completion-revisions
     diagnostics:
       - code: completion-example-version-mismatch
         severity: error
@@ -58,6 +58,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 3.6 (Carried MCP Values)
+        locations:
+          - sections/03-document-structure.md#req-carried-open-preserve
     sources:
       - tier: 1
         reference: "MCP 2024-11-05 to 2026-07-28 schema.ts, interface Result (index signature [key: string]: unknown, inherited by every result type)"
@@ -80,10 +84,6 @@ rules:
           - validation/mcp-schemas/2025-03-26/schema.ts#L1173-L1180
           - validation/mcp-schemas/2025-06-18/schema.ts#L1404-L1413
           - validation/mcp-schemas/2025-11-25/schema.ts#L2100-L2109
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 3.6 (Carried MCP Values)
-        locations:
-          - sections/03-document-structure.md#req-carried-open-preserve
     diagnostics:
       - code: result-field-not-defined-by-version
         severity: warning
@@ -115,6 +115,11 @@ rules:
       "2025-06-18": not-applicable
       "2025-11-25": not-applicable
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.6 and 9.4
+        locations:
+          - sections/03-document-structure.md#req-carried-closed-reject
+          - sections/09-tools.md#req-interaction-revision-valid
     sources:
       - tier: 1
         reference: "MCP 2026-07-28 schema.ts, type InputResponse (CreateMessageResult, ListRootsResult, ElicitResult); none extends Result; only CreateMessageResult defines _meta, through SamplingMessage"
@@ -123,11 +128,6 @@ rules:
           - validation/mcp-schemas/2026-07-28/schema.ts#L2190-L2228
           - validation/mcp-schemas/2026-07-28/schema.ts#L3120-L3149
           - validation/mcp-schemas/2026-07-28/schema.ts#L2725-L2744
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 3.6 and 9.4
-        locations:
-          - sections/03-document-structure.md#req-carried-closed-reject
-          - sections/09-tools.md#req-interaction-revision-valid
     diagnostics:
       - code: interaction-example-version-mismatch
         severity: error
@@ -150,6 +150,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.5, 3.6, and 9.4
+        locations:
+          - sections/03-document-structure.md#req-meta-revision-availability
+          - sections/09-tools.md#req-interaction-revision-valid
     sources:
       - tier: 1
         reference: MCP 2024-11-05 and 2025-03-26 schema.ts, interface Root (uri, name); MCP 2025-06-18 to 2026-07-28 schema.ts, interface Root (adds _meta)
@@ -159,11 +164,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1415-L1440
           - validation/mcp-schemas/2025-11-25/schema.ts#L2111-L2136
           - validation/mcp-schemas/2026-07-28/schema.ts#L2746-L2775
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 3.5, 3.6, and 9.4
-        locations:
-          - sections/03-document-structure.md#req-meta-revision-availability
-          - sections/09-tools.md#req-interaction-revision-valid
     diagnostics:
       - code: interaction-example-version-mismatch
         severity: error
@@ -188,6 +188,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 3.5
+        locations:
+          - sections/03-document-structure.md#req-meta-keys
     sources:
       - tier: 1
         reference: MCP 2025-06-18 to 2026-07-28 specification, Basic, General fields, _meta (reserved keys and where they apply)
@@ -195,10 +199,6 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L123-L147
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L190-L215
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L322-L446
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 3.5
-        locations:
-          - sections/03-document-structure.md#req-meta-keys
     diagnostics:
       - code: meta-reserved-key-context
         severity: error
@@ -231,6 +231,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
+        locations:
+          - sections/03-document-structure.md#req-carried-nested-closed
+          - sections/03-document-structure.md#req-carried-closed-reject
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface CompleteResult, completion (no index signature)
@@ -240,11 +245,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1342-L1362
           - validation/mcp-schemas/2025-11-25/schema.ts#L2037-L2057
           - validation/mcp-schemas/2026-07-28/schema.ts#L2633-L2661
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
-        locations:
-          - sections/03-document-structure.md#req-carried-nested-closed
-          - sections/03-document-structure.md#req-carried-closed-reject
     diagnostics:
       - code: schema-validation
         severity: error

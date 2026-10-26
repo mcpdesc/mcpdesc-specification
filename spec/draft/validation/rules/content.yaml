@@ -15,6 +15,11 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.3 and 11.3
+        locations:
+          - sections/09-tools.md#req-tool-example-content-revision
+          - sections/11-prompts.md#req-prompt-example-content-revision
     sources:
       - tier: 1
         reference: MCP 2024-11-05 schema.ts, TextContent, ImageContent, and EmbeddedResource (no AudioContent, no ResourceLink, no content _meta)
@@ -35,11 +40,6 @@ rules:
         reference: MCP 2025-11-25 schema.ts, Resource extends Icons (inherited by ResourceLink)
         locations:
           - validation/mcp-schemas/2025-11-25/schema.ts#L797-L838
-      - tier: 8
-        reference: MCP Description 0.9.0, Sections 9.3 and 11.3
-        locations:
-          - sections/09-tools.md#req-tool-example-content-revision
-          - sections/11-prompts.md#req-prompt-example-content-revision
     diagnostics:
       - code: tool-example-content-version-mismatch
         severity: error
@@ -74,6 +74,10 @@ rules:
       "2025-06-18": applies
       "2025-11-25": applies
       "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 10.4.4
+        locations:
+          - sections/10-resources.md#req-resource-contents-meta
     sources:
       - tier: 1
         reference: MCP 2024-11-05 and 2025-03-26 schema.ts, interface ResourceContents (uri, mimeType); MCP 2025-06-18 to 2026-07-28 schema.ts, interface ResourceContents (adds _meta)
@@ -83,10 +87,6 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L600-L621
           - validation/mcp-schemas/2025-11-25/schema.ts#L876-L897
           - validation/mcp-schemas/2026-07-28/schema.ts#L1509-L1527
-      - tier: 8
-        reference: MCP Description 0.9.0, Section 10.4.4
-        locations:
-          - sections/10-resources.md#req-resource-contents-meta
     diagnostics:
       - code: resource-example-content-version-mismatch
         severity: error

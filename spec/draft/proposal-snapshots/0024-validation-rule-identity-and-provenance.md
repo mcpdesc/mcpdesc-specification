@@ -138,7 +138,8 @@ Each rule record contains:
 | `kind` | yes | `structural`, `semantic`, `preservation`, `embedded-standard`, `mcpdesc-semantic`, `completeness`, or `interoperability` |
 | `requirement` | no | Requirement level of the source: `must`, `should`, or `may`. An `mcp` rule whose level is `should` or `may` MUST NOT emit `error` diagnostics |
 | `applicability` | `mcp` and `json-schema` rules | Behavior for every MCP revision supported by the specification version (Section 4) |
-| `sources` | yes | Normative references, each with an authority tier (Section 7) and a section anchor or schema pointer |
+| `specification` | yes | MCP Description requirements the rule checks, at least one at a requirement anchor in a section, and the decisions behind the rule |
+| `sources` | `mcp` and `json-schema` rules | External evidence, each with an authority tier (Section 7) and a section anchor or schema pointer |
 | `diagnostics` | yes | Diagnostic codes the rule emits, with their severity |
 | `enforcement` | yes | How validators check the rule: `internal`, `official-schema`, or `external` |
 | `status` | yes | `internal`, `externally-verified`, `delegated`, `arbitrated`, or `retired` |
@@ -239,8 +240,12 @@ ranked as follows, highest first:
    design rationale but defer to the current specification;
 5. official SDKs and reference implementations;
 6. MCP Inspector and the official conformance framework;
-7. other ecosystem tooling;
-8. MCP Description decisions, for MCP Description-owned rules and arbitrations.
+7. other ecosystem tooling.
+
+MCP Description itself is not a ranked source. A rule cites the MCP Description
+requirements and decisions it implements in `specification`, separately from
+its `sources`: for an `mcpdesc` rule MCP Description is the authority, and for
+an `mcp` rule it only adopts or arbitrates what the sources say.
 
 An `mcp` rule MUST cite at least one tier 1 to 3 source. Lower tiers can reveal
 ambiguity or defects but do not override a higher tier without an arbitration.

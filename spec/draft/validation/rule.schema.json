@@ -29,7 +29,7 @@
         "summary",
         "surface",
         "kind",
-        "sources",
+        "specification",
         "diagnostics",
         "enforcement",
         "status",
@@ -89,7 +89,37 @@
             "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
           }
         },
+        "specification": {
+          "description": "The MCP Description requirements the rule checks, and the decisions behind it.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "reference",
+              "locations"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "reference": {
+                "type": "string",
+                "minLength": 1
+              },
+              "locations": {
+                "description": "Locations relative to the specification folder: a requirement anchor in a section, a Markdown heading under validation/, a proposal snapshot, or a released proposal.",
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "pattern": "^(sections/[0-9]{2}-[a-z-]+\\.md#req-[a-z0-9-]+|validation/[A-Za-z0-9-]+\\.md#[a-z0-9-]+|proposal-snapshots/[0-9]{4}-[a-z0-9-]+\\.md|\\.\\./\\.\\./proposals/[0-9]{4}-[a-z0-9-]+\\.md)$"
+                }
+              }
+            }
+          }
+        },
         "sources": {
+          "description": "External evidence for the rule, by authority tier.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -104,20 +134,20 @@
               "tier": {
                 "type": "integer",
                 "minimum": 1,
-                "maximum": 8
+                "maximum": 7
               },
               "reference": {
                 "type": "string",
                 "minLength": 1
               },
               "locations": {
-                "description": "Precise, immutable locations, relative to the specification folder: a vendored MCP schema line range, a requirement anchor in a section, a Markdown heading, a proposal, or an HTTPS URL.",
+                "description": "Precise, immutable locations: a vendored MCP schema line range, relative to the specification folder, or an HTTPS URL.",
                 "type": "array",
                 "minItems": 1,
                 "uniqueItems": true,
                 "items": {
                   "type": "string",
-                  "pattern": "^(validation/mcp-schemas/[0-9]{4}-[0-9]{2}-[0-9]{2}/schema\\.(ts|json)#L[0-9]+(-L[0-9]+)?|sections/[0-9]{2}-[a-z-]+\\.md#req-[a-z0-9-]+|validation/[A-Za-z0-9-]+\\.md#[a-z0-9-]+|proposal-snapshots/[0-9]{4}-[a-z0-9-]+\\.md|\\.\\./\\.\\./proposals/[0-9]{4}-[a-z0-9-]+\\.md|https://[^\\s]+)$"
+                  "pattern": "^(validation/mcp-schemas/[0-9]{4}-[0-9]{2}-[0-9]{2}/schema\\.(ts|json)#L[0-9]+(-L[0-9]+)?|https://[^\\s]+)$"
                 }
               }
             }
