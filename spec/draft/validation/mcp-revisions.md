@@ -96,8 +96,8 @@ trusted. When a hint is absent, MCP defines its meaning:
 | `openWorldHint` | `true` |
 
 An absent hint and an explicit value with the same meaning are different
-documents. MCP Description 0.8.0 allows additional Tool Annotation properties,
-which is more permissive than MCP.
+documents. MCP Description 0.9.0 accepts only these properties, as MCP does;
+0.8.0 allowed additional properties.
 
 ## Results
 
@@ -140,9 +140,8 @@ Resource requires `uri` and `name`; ResourceTemplate requires `uriTemplate` and
 | `lastModified` | — | — | yes |
 
 In `2024-11-05`, resource annotations are defined inline on each structure;
-from `2025-03-26` they use the shared `Annotations` type. Both are closed. MCP
-Description 0.8.0 allows additional annotation properties, which is more
-permissive than MCP.
+from `2025-03-26` they use the shared `Annotations` type. Both are closed, and
+MCP Description 0.9.0 closes them too; 0.8.0 allowed additional properties.
 
 ## Capabilities
 
@@ -163,7 +162,9 @@ permissive than MCP.
 The TypeScript capability types declare no index signature, but their
 documentation states that the set "is not a closed set: any server can define
 its own, additional capabilities". `experimental`, and from `2026-07-28`
-`extensions`, are open maps for that purpose. In `2026-07-28`, clients opt in to
+`extensions`, are open maps for that purpose. MCP Description rejects unknown
+server capabilities but accepts unknown client capability requirements; a
+proposed arbitration (Proposal 0027) closes both. In `2026-07-28`, clients opt in to
 log messages per request instead of through `logging/setLevel`; MCP Description
 treats the `logging` server capability as deprecated for that revision and
 warns about it.

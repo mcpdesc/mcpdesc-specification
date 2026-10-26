@@ -12,8 +12,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 | `description` | string | No | Human-readable tool description. |
 | `inputSchema` | object or Reference Object | **Yes** | Inline or reusable JSON Schema whose root describes an object containing tool input parameters. |
 | `outputSchema` | object or Reference Object | No | Inline or reusable JSON Schema for structured tool output. Since MCP 2025-06-18. |
-| `annotations` | [Tool Annotations Object](#95-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
-| `execution` | [Execution Object](#96-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
+| `annotations` | [Tool Annotations Object](#96-tool-annotations) | No | Behavioral hints. Since MCP 2025-03-26. |
+| `execution` | [Execution Object](#97-execution-object) | No | Execution properties. MCP 2025-11-25 only. |
 | `examples` | map&lt;string, Tool Example Object&gt; | No | Named complete Tool invocation/result pairs. |
 | `interactionExamples` | map&lt;string, Tool Interaction Example Object&gt; | No | Named ordered semantic client-input scenarios attached to one Tool invocation. |
 | `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
@@ -141,7 +141,7 @@ All Tool Annotation properties are advisory. They are not guaranteed to describe
 | `idempotentHint` | boolean | `false` | Repeated calls with same arguments have no additional effect |
 | `openWorldHint` | boolean | `true` | Tool may interact with external entities |
 
-The Tool Annotations object allows additional properties for forward compatibility. Consumers MUST preserve unrecognized properties where round-tripping is required and MUST NOT assign them the semantics of Resource Annotations.
+The Tool Annotations object contains only the properties above. MCP defines `ToolAnnotations` as a closed type in every supported revision, so other properties, including `x-*` keys, MUST NOT appear. Resource Annotation fields MUST NOT be used here.
 
 ### 9.7 Execution Object
 

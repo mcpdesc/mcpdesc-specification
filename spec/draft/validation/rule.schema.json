@@ -251,6 +251,7 @@
               "status": {
                 "enum": [
                   "active",
+                  "proposed",
                   "retired"
                 ]
               }

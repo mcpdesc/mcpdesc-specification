@@ -1,0 +1,108 @@
+rules:
+  - id: mcp.server-capabilities.members
+    owner: mcp
+    summary: >-
+      A server Capabilities Object contains only the capabilities the
+      applicable MCP revision defines; custom capabilities go in experimental
+      and, from MCP 2026-07-28, in extensions.
+    surface: ServerCapabilities
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ServerCapabilities (no index signature)
+      - tier: 1
+        reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, ServerCapabilities doc comment ("this is not a closed set: any server can define its own, additional capabilities")'
+      - tier: 8
+        reference: MCP Description 0.9.0, Sections 8.2 and 8.4
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - expected-invalid/unknown-server-capability.json
+      - expected-valid/client-capability-requirements.json
+    notes: >-
+      x-* properties are MCP Description specification extensions, not
+      capabilities; native projection removes them.
+    arbitrations:
+      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
+        conflict: >-
+          The TypeScript type declares a fixed set of members and no index
+          signature, while its doc comment says the set is not closed and any
+          server can define additional capabilities. The comment does not say
+          where such capabilities go; experimental is the defined container.
+        authority: MCP schema.ts type, the source of truth for message structures
+        behavior: >-
+          Reject unknown top-level members. Custom capabilities belong in
+          experimental and, from MCP 2026-07-28, in extensions.
+        rationale: >-
+          Capabilities are sent on the wire during initialization, so the
+          structural source of truth governs. Closing is also the reversible
+          choice: opening the object later invalidates no document, while
+          closing it later would.
+        reviewTrigger: An upstream clarification of the doc comment, or a later MCP revision adding an index signature.
+        status: proposed
+
+  - id: mcp.client-capabilities.members
+    owner: mcp
+    summary: >-
+      A Client Capability Requirements Object names only client capabilities
+      the applicable MCP revision defines; custom requirements go in
+      experimental and, from MCP 2026-07-28, in extensions.
+    surface: ClientCapabilities
+    path: clientRequirements
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (no index signature)
+      - tier: 1
+        reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, ClientCapabilities doc comment ("this is not a closed set: any client can define its own, additional capabilities")'
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 8.5
+    diagnostics: []
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - expected-valid/unknown-client-capability-requirement.json
+      - expected-valid/client-capability-requirements.json
+    gaps:
+      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
+        behavior: >-
+          Unknown top-level requirements are accepted and preserved without a
+          diagnostic. Section 8.5 accepts them "where the applicable MCP
+          ClientCapabilities type is open", which no revision's TypeScript type
+          is. Server capabilities are already closed.
+        resolution: planned
+        reference: Proposal 0027, contingent on the proposed arbitration
+    arbitrations:
+      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
+        conflict: >-
+          The TypeScript type declares a fixed set of members and no index
+          signature, while its doc comment says the set is not closed and any
+          client can define additional capabilities.
+        authority: MCP schema.ts type, the source of truth for message structures
+        behavior: >-
+          Reject unknown top-level requirements, as for server capabilities.
+          Custom requirements belong in experimental and, from MCP 2026-07-28,
+          in extensions.
+        rationale: >-
+          Same reading as mcp.server-capabilities.members, so one document
+          does not treat the two capability types differently. Closing is the
+          reversible choice.
+        reviewTrigger: An upstream clarification of the doc comment, or a later MCP revision adding an index signature.
+        status: proposed

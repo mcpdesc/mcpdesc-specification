@@ -164,3 +164,6 @@ Protocol View without redefining them.
 When authoritative sources disagree, MCP Description records an explicit
 arbitration: the conflicting sources, the chosen authority (normative MCP text
 by default), the rationale, an upstream reference, and when to revisit it.
+An arbitration is `active` when decided, `proposed` while it awaits a
+maintainer decision (validator behavior is then unchanged, and any difference
+is recorded as a gap), or `retired`.

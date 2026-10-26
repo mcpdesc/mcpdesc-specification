@@ -1,0 +1,63 @@
+rules:
+  - id: mcp.tool-annotations.members
+    owner: mcp
+    summary: >-
+      A Tool annotations object contains only title, readOnlyHint,
+      destructiveHint, idempotentHint, and openWorldHint.
+    surface: ToolAnnotations
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": not-applicable
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 to 2026-07-28 schema.ts, interface ToolAnnotations (no index signature)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 9.6
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/tool-annotations-unknown-property.json
+      - expected-valid/distinct-tool-and-resource-annotations.json
+    notes: >-
+      Tool annotations are not available in MCP 2024-11-05; that boundary is
+      checked separately.
+
+  - id: mcp.annotations.members
+    owner: mcp
+    summary: >-
+      Resource Annotations on resources, resource templates, and content
+      blocks contain only audience, priority, and lastModified.
+    surface: Annotations
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 schema.ts, inline annotations on Resource, ResourceTemplate, and content types; MCP 2025-03-26 to 2026-07-28 schema.ts, interface Annotations (no index signature)
+      - tier: 8
+        reference: MCP Description 0.9.0, Section 10.3
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: internal
+    fixtures:
+      - expected-invalid/resource-annotations-unknown-property.json
+      - expected-invalid/content-annotations-unknown-property.json
+      - expected-valid/distinct-tool-and-resource-annotations.json
+    notes: >-
+      lastModified is defined from MCP 2025-06-18; that boundary is checked
+      separately.

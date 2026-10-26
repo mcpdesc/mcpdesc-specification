@@ -1,0 +1,28 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "unknown-client-capability-requirement",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "unknown-client-capability-requirement"
+    }
+  ],
+  "tools": [
+    {
+      "name": "replay",
+      "inputSchema": {
+        "type": "object"
+      },
+      "clientRequirements": {
+        "acmeReplay": {}
+      }
+    }
+  ]
+}
