@@ -14,14 +14,15 @@
 
 ## Summary
 
-Define how an MCP Description Tool declaration becomes the MCP `Tool` value a
-server returns from `tools/list` for one MCP revision.
+Define how MCP Description primitive declarations become the MCP values a
+server returns from `tools/list`, `resources/list`, `resources/templates/list`,
+and `prompts/list` for one MCP revision.
 
 Native projection selects the declaration that applies to the revision,
 resolves local references, keeps exactly the fields that the revision's MCP
-`Tool` type defines, and drops MCP Description metadata. It never adds a
-field, never fills in a protocol default, and never rewrites a value. The
-result MUST validate against the revision's pinned MCP schema.
+type defines, and drops MCP Description metadata. It never adds a field, never
+fills in a protocol default, and never rewrites a value. The result MUST
+validate against the revision's pinned MCP schema.
 
 The specification repository owns the normative rules and a set of
 conformance fixtures. The implementation lives in `@mcpdesc/core` and runs the
@@ -33,23 +34,24 @@ code.
 Section 4.12 defines the Effective Protocol View: a projection from an MCP
 Description document to another MCP Description document. Nothing defines the
 step that tools such as mock servers, SDK generators, and catalog exporters
-need: producing the native MCP value itself.
+need: producing the native MCP values themselves.
 
-Fragments of that step are scattered. Sections 9.3 and 9.4 say that projection
-to a `tools/list` Tool value omits `examples` and `interactionExamples`.
-Section 17.5 covers components in views only. Implementations therefore decide
-on their own which fields to keep, whether to resolve `$componentRef`, and
-whether to materialize defaults such as `readOnlyHint: false`. Each of those
-choices changes what a client receives.
+Fragments of that step are scattered. Sections 9.3, 9.4, 10.4.5, 10.4.6, 11.3,
+and 11.4 say that projection to MCP list values omits examples. Section 17.5
+covers components in views only. Implementations therefore decide on their own
+which fields to keep, whether to resolve `$componentRef`, and whether to
+materialize defaults such as `readOnlyHint: false`. Each of those choices
+changes what a client receives.
 
-MCP Description 0.8.0 also allowed values that no MCP `Tool` could carry, such
+MCP Description 0.8.0 also allowed values that no MCP type could carry, such
 as extra annotation properties. Proposal 0027 closed those gaps. Native
 projection makes the remaining guarantee explicit and testable: a valid
-description projects to a schema-valid MCP value.
+description projects to schema-valid MCP values.
 
 ## Goals
 
-- Define native projection of Tool declarations for each supported revision.
+- Define native projection of Tools, Resources, Resource Templates, and
+  Prompts for each supported revision.
 - Guarantee that every projected value validates against the pinned MCP schema
   of its revision.
 - Provide conformance fixtures that any implementation can run.
@@ -57,9 +59,7 @@ description projects to a schema-valid MCP value.
 
 ## Non-goals
 
-- Resources, Resource Templates, and Prompts. The same mechanics apply; they
-  follow in a later proposal once Tool projection is implemented.
-- Server capabilities, `initialize` results, and transports.
+- Server capabilities, the `initialize` result, and transports.
 - Runtime behavior: pagination, caching, list-change notifications, or the
   JSON-RPC envelope.
 - Materializing protocol defaults, repairing invalid values, or converting a
@@ -69,45 +69,66 @@ description projects to a schema-valid MCP value.
 
 ## Background and primary references
 
-- MCP `schema.ts` per revision, vendored in
-  [`validation/mcp-schemas/`](../validation/mcp-schemas/) at
-  `modelcontextprotocol/modelcontextprotocol@dae694f61a31f7a3ec2af3aff709e11f70f61e48`,
-  defines the `Tool` type. Its fields per revision:
+MCP `schema.ts` per revision, vendored in
+[`validation/mcp-schemas/`](../validation/mcp-schemas/) at
+`modelcontextprotocol/modelcontextprotocol@dae694f61a31f7a3ec2af3aff709e11f70f61e48`,
+defines the four types. Their fields per revision:
 
-  | Field | 2024-11-05 | 2025-03-26 | 2025-06-18 | 2025-11-25 | 2026-07-28 |
-  | --- | --- | --- | --- | --- | --- |
-  | `name`, `description`, `inputSchema` | yes | yes | yes | yes | yes |
-  | `annotations` | — | yes | yes | yes | yes |
-  | `title`, `outputSchema`, `_meta` | — | — | yes | yes | yes |
-  | `icons` | — | — | — | yes | yes |
-  | `execution` | — | — | — | yes | — |
+| Type | Field | 2024-11-05 | 2025-03-26 | 2025-06-18 | 2025-11-25 | 2026-07-28 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Tool` | `name`, `description`, `inputSchema` | yes | yes | yes | yes | yes |
+| | `annotations` | — | yes | yes | yes | yes |
+| | `title`, `outputSchema`, `_meta` | — | — | yes | yes | yes |
+| | `icons` | — | — | — | yes | yes |
+| | `execution` | — | — | — | yes | — |
+| `Resource` | `uri`, `name`, `description`, `mimeType`, `size`, `annotations` | yes | yes | yes | yes | yes |
+| | `title`, `_meta` | — | — | yes | yes | yes |
+| | `icons` | — | — | — | yes | yes |
+| `ResourceTemplate` | `uriTemplate`, `name`, `description`, `mimeType`, `annotations` | yes | yes | yes | yes | yes |
+| | `title`, `_meta` | — | — | yes | yes | yes |
+| | `icons` | — | — | — | yes | yes |
+| `Prompt` | `name`, `description`, `arguments` | yes | yes | yes | yes | yes |
+| | `title`, `_meta` | — | — | yes | yes | yes |
+| | `icons` | — | — | — | yes | yes |
+| `PromptArgument` | `name`, `description`, `required` | yes | yes | yes | yes | yes |
+| | `title` | — | — | yes | yes | yes |
 
-- The generated `schema.json` of each revision is the postcondition check
-  (Proposal 0024, Section 7: it is evidence, generated from `schema.ts`).
-- MCP Description Sections 4.12, 9, and 17.
+In MCP 2024-11-05, Resource and Resource Template `annotations` come from the
+`Annotated` interface. Every MCP field above has a matching MCP Description
+field, so projection only removes fields.
+
+The generated `schema.json` of each revision is the postcondition check
+(Proposal 0024, Section 7: it is evidence, generated from `schema.ts`). It
+places definitions under `definitions` up to MCP 2025-06-18 and under `$defs`
+from MCP 2025-11-25.
 
 ## Proposed normative behavior
 
 ### 1. Definition
 
-Native Tool projection `N_V(D, n)` takes a document `D`, an MCP revision `V`,
-and a Tool name `n`, and produces one MCP `Tool` value or an error.
+Native projection `N_V(D, k, i)` takes a document `D`, an MCP revision `V`, a
+primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an
+identifier `i`, and produces one MCP value or an error. The identifier is the
+one that Sections 9.5, 10.5, and 11.1 require to be unique per revision: the
+Tool `name`, the Resource `uri`, the Resource Template `uriTemplate`, or the
+Prompt `name`.
 
 A conforming implementation MUST:
 
 1. validate `D` and stop with `projection-source-invalid` if it has errors;
 2. require `V` to occur in root `protocolVersions`, otherwise stop with
    `projection-revision-not-declared`;
-3. select the Tool named `n` in the Effective Protocol View `P_V(D)`
-   (Section 4.12); if there is none, stop with
-   `projection-tool-not-applicable`;
-4. resolve every Reference Object in `inputSchema` and `outputSchema`
-   (Section 17);
+3. select the declaration of kind `k` with identifier `i` in the Effective
+   Protocol View `P_V(D)` (Section 4.12); if there is none, stop with
+   `projection-declaration-not-applicable`;
+4. resolve every Reference Object that the projected value contains (Tool
+   `inputSchema` and `outputSchema`; Section 17);
 5. build the value from the fields that both the declaration contains and the
-   MCP `Tool` type of `V` defines, copying each value unchanged;
-6. check the value against the `Tool` definition of the pinned `schema.json`
-   of `V`; a failure is reported as `projection-postcondition-failed` and the
-   value is not returned.
+   MCP type of `k` in `V` defines, copying each value unchanged; Prompt
+   `arguments` entries keep the fields that `PromptArgument` defines;
+6. check the value against the definition of that type in the pinned
+   `schema.json` of `V`; a failure is reported as
+   `projection-postcondition-failed` and the value is not returned.
 
 Step 5 is a filter, not a transformation. Validation (step 1) already rejects
 fields that `V` does not define, so a valid declaration loses only MCP
@@ -117,20 +138,21 @@ Description fields.
 
 | Declaration field | Result |
 | --- | --- |
-| MCP `Tool` fields defined by `V` | Copied unchanged |
-| `inputSchema`, `outputSchema` | Copied after reference resolution; embedded keywords, including `x-*` and `x-mcp-header`, are kept |
-| `annotations`, `_meta`, `icons`, `execution` | Copied unchanged when `V` defines them |
-| `protocolVersions`, `examples`, `interactionExamples`, `tags`, `elicitations`, `deprecated`, `security`, `clientRequirements` | Omitted |
-| Tool-level `x-*` specification extensions | Omitted |
+| MCP fields that `V` defines for the type (Background table) | Copied unchanged |
+| Tool `inputSchema`, `outputSchema` | Copied after reference resolution; embedded keywords, including `x-*` and `x-mcp-header`, are kept |
+| `annotations`, `_meta`, `icons`, Tool `execution` | Copied unchanged when `V` defines them |
+| `protocolVersions`, `examples`, `interactionExamples`, `completionExamples`, `tags`, `elicitations`, `deprecated`, `security`, `clientRequirements` | Omitted |
+| Declaration-level `x-*` specification extensions | Omitted |
 
-`deprecated` has no MCP `Tool` field; it is omitted rather than moved to
-`_meta` or `description`.
+`deprecated` has no field in any of the four MCP types; it is omitted rather
+than moved to `_meta` or `description`.
 
 ### 3. What projection never does
 
 - It never adds a field that the declaration does not contain. An absent
   annotation hint stays absent; `execution.taskSupport` is not set to
-  `"forbidden"`; no `$schema` is inserted into an embedded schema.
+  `"forbidden"`; no `$schema` is inserted into an embedded schema; a Prompt
+  argument without `required` stays without it.
 - It never copies a value into another field, for example `annotations.title`
   into `title`.
 - It never rewrites a value, for example wrapping an array `outputSchema` in an
@@ -138,10 +160,12 @@ Description fields.
   invalid for that revision (rule `mcp.tool.output-schema.object-root`), so
   step 1 fails.
 
-### 4. Tool lists
+### 4. Lists
 
-`tools/list` projection for `V` is the sequence of `N_V(D, n)` for every Tool
-in `P_V(D)`, in document order. An error for any Tool fails the whole list.
+The list projection of kind `k` for `V` is the sequence of `N_V(D, k, i)` for
+every declaration of kind `k` in `P_V(D)`, in document order. An error for any
+declaration fails the whole list. The four lists correspond to `tools/list`,
+`resources/list`, `resources/templates/list`, and `prompts/list`.
 
 ### 5. Diagnostics
 
@@ -151,7 +175,7 @@ Projection diagnostics use the diagnostic form of Proposal 0024, including the
 | Rule | Codes |
 | --- | --- |
 | `mcpdesc.projection.source-valid` | `projection-source-invalid`, `projection-revision-not-declared` |
-| `mcpdesc.projection.tool-applicable` | `projection-tool-not-applicable` |
+| `mcpdesc.projection.declaration-applicable` | `projection-declaration-not-applicable` |
 | `mcpdesc.projection.native-schema` | `projection-postcondition-failed` |
 
 A postcondition failure indicates a defect in the specification, the
@@ -167,7 +191,8 @@ file per case:
   "description": "Examples are dropped; both schemas are kept unchanged.",
   "document": "../fixtures/expected-valid/named-tool-examples.json",
   "revision": "2026-07-28",
-  "tool": "weather",
+  "kind": "tool",
+  "identifier": "weather",
   "expected": {
     "name": "weather",
     "inputSchema": {
@@ -186,15 +211,17 @@ file per case:
 }
 ```
 
-`document` is a path to a fixture or an inline document. A case has either
-`expected`, the exact MCP `Tool` value, or `expectedError`, a diagnostic code.
-Comparison is by canonical JSON (`scripts/canonical-json.mjs`), so key order
-does not matter.
+`document` is a path to a fixture or an inline document. `kind` is `tool`,
+`resource`, `resourceTemplate`, or `prompt`. A case has either `expected`, the
+exact MCP value, or `expectedError`, a diagnostic code. A list case omits
+`identifier` and has an `expected` array. Comparison is by canonical JSON
+(`scripts/canonical-json.mjs`), so key order does not matter.
 
-The fixtures cover at least: each revision boundary in the field table;
-component references in both schemas; every omitted MCP Description field;
-absent defaults staying absent; `execution` kept for 2025-11-25 only; an array
-`outputSchema` for 2026-07-28; and each error code.
+The fixtures cover at least, for each kind: each revision boundary in the
+Background table; every omitted MCP Description field; absent defaults staying
+absent; one list case; and each error code. They also cover Tool component
+references in both schemas, `execution` kept for MCP 2025-11-25 only, and an
+array `outputSchema` for MCP 2026-07-28.
 
 ## Validation of the fixtures in this repository
 
@@ -203,22 +230,20 @@ it already has:
 
 - every `document` validates without errors with the candidate validator,
   except cases expecting `projection-source-invalid`;
-- every `expected` value validates against `$defs/Tool` of the pinned
-  `schema.json` of its revision;
+- every `expected` value validates against the definition of its type in the
+  pinned `schema.json` of its revision;
 - no `expected` value contains an MCP Description field from Section 2;
-- every `tool` exists in `P_V(document)` unless the case expects
-  `projection-tool-not-applicable`.
+- every `identifier` exists in `P_V(document)` for its kind, unless the case
+  expects `projection-declaration-not-applicable`.
 
 The fixtures are exported with the validator snapshot bundle.
 
 ## Implementation in core
 
-`@mcpdesc/core` implements `N_V` and the list projection, and runs the
-exported fixtures in its test suite. A draft, release candidate, or stable
-release of this specification records the core version that passes its
-projection fixtures; the release checklist in `GOVERNANCE.md` gains that item.
-Until a core version passes, the release check reports projection as
-unimplemented.
+`@mcpdesc/core` implements `N_V` and the list projections, and runs the
+exported fixtures in its test suite. The release notes of each draft, release
+candidate, or stable release of this specification name the core version that
+passes its projection fixtures, or state that none does yet.
 
 ## Schema impact
 
@@ -226,7 +251,7 @@ None. Projection does not change the MCP Description schema.
 
 ## Examples
 
-Declaration, scoped to MCP 2025-11-25 and 2026-07-28:
+Tool declaration, scoped to MCP 2025-11-25:
 
 ```json
 {
@@ -252,14 +277,38 @@ Projection for 2025-11-25:
 }
 ```
 
-For 2026-07-28 the declaration is invalid, because `execution` is defined for
-MCP 2025-11-25 only; the author splits it into two protocol-scoped variants.
+For 2026-07-28 the same declaration is invalid, because `execution` is defined
+for MCP 2025-11-25 only; the author splits it into two protocol-scoped
+variants.
+
+Prompt declaration for MCP 2025-06-18:
+
+```json
+{
+  "name": "summarize",
+  "title": "Summarize",
+  "arguments": [{ "name": "topic", "required": true }],
+  "examples": { "basic": { "arguments": { "topic": "MCP" }, "result": { "messages": [] } } },
+  "tags": ["writing"]
+}
+```
+
+Projection:
+
+```json
+{
+  "name": "summarize",
+  "title": "Summarize",
+  "arguments": [{ "name": "topic", "required": true }]
+}
+```
 
 ## Compatibility
 
-Additive. No document changes validity. Sections 9.3 and 9.4 already require
-omitting examples; this proposal states the full rule. Implementations that
-materialize defaults or keep MCP Description fields change their output.
+Additive. No document changes validity. Sections 9.3, 9.4, 10.4.5, 10.4.6,
+11.3, and 11.4 already require omitting examples; this proposal states the full
+rule. Implementations that materialize defaults or keep MCP Description fields
+change their output.
 
 ## Migration
 
@@ -269,9 +318,9 @@ the fixtures.
 ## Security and privacy considerations
 
 Projection exposes only what the author declared for MCP. `security`,
-`clientRequirements`, and examples stay out of the native value, so internal
-authorization notes and example data do not leak into `tools/list`.
-Annotations remain untrusted hints (Section 9.6).
+`clientRequirements`, Elicitation Declarations, and examples stay out of the
+native values, so internal authorization notes and example data do not leak
+into list results. Annotations remain untrusted hints (Sections 9.6 and 10.3).
 
 ## Alternatives considered
 
@@ -281,6 +330,13 @@ Rejected. Validation needs code here, because this repository validates its
 own examples and fixtures while the draft changes. Projection does not: no
 specification artifact needs projecting, and fixture correctness is checked
 against MCP's own schemas. Two implementations would drift.
+
+### Tools only
+
+Rejected. The other three types use the same mechanics, the same field
+filter, and the same postcondition, and validation already covers their
+revision boundaries. Projecting only Tools would leave consumers to invent the
+rest.
 
 ### Move deprecated into `_meta`
 
@@ -294,21 +350,22 @@ apply the defaults themselves.
 
 ## Open questions
 
-1. Should 0.9.0 also cover Resources, Resource Templates, and Prompts, or
-   leave them to a later proposal as proposed?
-2. How should a core release that passes the fixtures be recorded: a
-   field in `specification-status.json`, or the release notes only?
+None.
 
 ## Implementation and validation plan
 
 - This repository: Section 4.14 "Native MCP Projection", the three rule
   records, `projection-fixtures/`, the fixture self-checks in `npm test`,
-  export of the fixtures in the snapshot bundle, the governance release item,
-  and the changelog.
-- Core: `projectNativeTool` and `projectNativeTools`, fixture runner, and a
-  release that passes them.
+  export of the fixtures in the snapshot bundle, the release-notes item, and
+  the changelog.
+- Core: native projection of the four kinds and their lists, a fixture runner,
+  and a release that passes the fixtures.
 
 ## Decision record
 
 Implementation location: core, with fixtures and self-checks in this
 repository; maintainer decision on issue #72, 2026-10-26.
+Scope: Tools, Resources, Resource Templates, and Prompts; maintainer decision
+on issue #72, 2026-10-26.
+Core version passing the fixtures: recorded in release notes only; maintainer
+decision on issue #72, 2026-10-26.
