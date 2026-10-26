@@ -115,7 +115,7 @@ For a nested scoped declaration, the effective scope is its explicit `protocolVe
 
 Omission therefore means the complete effective parent scope; it does not mean unknown applicability.
 
-<a id="req-field-revision-availability"></a>A field that this specification marks as available since an MCP revision, or for one MCP revision only, MUST NOT appear in a declaration whose effective scope includes a revision outside that range.
+<a id="req-field-revision-availability"></a>As a consequence, a field that this specification marks as available since an MCP revision, or for one MCP revision only, MUST NOT appear in a declaration whose effective scope includes a revision outside that range.
 
 ### 4.11 Relationship Between Version Fields
 

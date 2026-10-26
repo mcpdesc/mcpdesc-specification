@@ -61,6 +61,29 @@ When sources disagree:
 The requirement level of the source matters: a `SHOULD` in MCP is a
 recommendation, so an MCP rule at that level produces warnings, not errors.
 
+### Source tiers
+
+Every rule source has a tier. Tiers rank how much a source can decide about
+MCP behavior, highest first (Proposal 0024, Section 7):
+
+| Tier | Source |
+| --- | --- |
+| 1 | The revision's `schema.ts`, for structures, and its normative specification text, for semantics |
+| 2 | Normative referenced standards, such as JSON Schema for embedded schemas or RFC 6570 |
+| 3 | The `schema.json` generated from `schema.ts` |
+| 4 | Official MCP clarifications and final SEPs |
+| 5 | Official SDKs and reference implementations |
+| 6 | MCP Inspector and the official conformance framework |
+| 7 | Other ecosystem tooling |
+| 8 | MCP Description: its specification text and decisions |
+
+MCP Description is tier 8 because it cannot decide what MCP means: for an
+`mcp` rule it only adopts or arbitrates what tiers 1 to 3 say, and an `mcp`
+rule must cite one of them. For `mcpdesc` rules it is the authority, and every
+rule cites the MCP Description requirement it checks. A lower tier can reveal
+ambiguity or a defect in a higher one but does not override it without an
+arbitration.
+
 ## Ownership model
 
 Every validated structure has exactly one owner:
