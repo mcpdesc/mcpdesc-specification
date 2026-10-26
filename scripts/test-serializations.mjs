@@ -3,9 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { decodeDocumentSource } from './decode-document.mjs';
-import { validateMcpdesc08Document } from './validate-0.8.mjs';
+import { candidateSpecification } from './candidate-specification.mjs';
+import { validateDocument } from './validate-document.mjs';
 
-const specificationRoot = fs.existsSync(path.join(process.cwd(), 'spec', 'draft')) ? 'spec/draft' : 'spec/0.8.0';
+const { specificationRoot } = candidateSpecification();
 const fixtureRoot = path.join(process.cwd(), specificationRoot, 'serialization-fixtures');
 const readFixture = (relative) => fs.readFileSync(path.join(fixtureRoot, relative), 'utf8');
 
@@ -20,7 +21,7 @@ const jsonDocument = decodeDocumentSource(
   'equivalent/document.json'
 );
 assert.deepEqual(yamlDocument, jsonDocument);
-assert.deepEqual(validateMcpdesc08Document(yamlDocument), validateMcpdesc08Document(jsonDocument));
+assert.deepEqual(validateDocument(yamlDocument), validateDocument(jsonDocument));
 
 const integratedSource = fs.readFileSync(
   path.join(process.cwd(), specificationRoot, 'fixtures', 'expected-valid', 'integrated-draft2-features.yaml'),
@@ -40,10 +41,10 @@ assert.deepEqual(integratedYamlDocument, integratedJsonDocument);
 assert.equal('transports' in integratedJsonDocument, false);
 assert.deepEqual(integratedJsonDocument.security, [{ 'api-key': [] }]);
 assert.deepEqual(integratedJsonDocument.tools[0].security, []);
-const integratedDiagnostics = validateMcpdesc08Document(integratedYamlDocument);
+const integratedDiagnostics = validateDocument(integratedYamlDocument);
 assert.deepEqual(integratedDiagnostics, []);
-assert.deepEqual(validateMcpdesc08Document(integratedYamlDocument), integratedDiagnostics);
-assert.deepEqual(validateMcpdesc08Document(integratedJsonDocument), integratedDiagnostics);
+assert.deepEqual(validateDocument(integratedYamlDocument), integratedDiagnostics);
+assert.deepEqual(validateDocument(integratedJsonDocument), integratedDiagnostics);
 
 assert.throws(
   () => decodeDocumentSource(`components:

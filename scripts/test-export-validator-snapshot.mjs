@@ -5,13 +5,25 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
+import { candidateSpecification } from './candidate-specification.mjs';
 
 const root = process.cwd();
+const candidate = candidateSpecification(root);
 const repository = fs.mkdtempSync(path.join(root, '.tmp-validator-export-'));
 const output = path.join(repository, 'bundle');
-const selector = '0.8.0-rev.20261021';
+const selector = candidate.isDraft
+  ? candidate.status.draft.snapshotTag.slice(1)
+  : `${candidate.version}-rev.20261021`;
 const snapshotTag = `v${selector}`;
-const expectedSchemaDigest = '36686f92ba0cc98bde2c34eaad31c0304d6e5cebdd2c4d2be1be06aecef41119';
+const candidateSchemaBytes = fs.readFileSync(path.join(root, candidate.schemaPath));
+const expectedSchemaDigest = createHash('sha256').update(candidateSchemaBytes).digest('hex');
+const expectedSchemaId = JSON.parse(candidateSchemaBytes.toString('utf8')).$id;
+
+assert.equal(
+  createHash('sha256').update(fs.readFileSync(path.join(root, 'schemas/mcp-description/0.8.0.json'))).digest('hex'),
+  '36686f92ba0cc98bde2c34eaad31c0304d6e5cebdd2c4d2be1be06aecef41119',
+  'frozen 0.8.0 schema bytes changed'
+);
 
 function copy(relativePath) {
   const source = path.join(root, relativePath);
@@ -35,10 +47,10 @@ function filesUnder(directory, prefix = '') {
 try {
   for (const relativePath of [
     'scripts/export-validator-snapshot.mjs',
-    'scripts/validate-0.8.mjs',
+    'scripts/validate-document.mjs',
     'scripts/validator-base.mjs',
-    'schemas/mcp-description/0.8.0.json',
-    'spec/0.8.0/fixtures'
+    candidate.schemaPath,
+    `${candidate.specificationRoot}/fixtures`
   ]) copy(relativePath);
 
   git('init', '--quiet');
@@ -71,10 +83,7 @@ try {
 
   const schemaBytes = fs.readFileSync(path.join(output, 'runtime/schema.json'));
   assert.equal(createHash('sha256').update(schemaBytes).digest('hex'), expectedSchemaDigest);
-  assert.equal(
-    JSON.parse(schemaBytes.toString('utf8')).$id,
-    'https://mcpdesc.org/schema/mcp-description/0.8.0.json'
-  );
+  assert.equal(JSON.parse(schemaBytes.toString('utf8')).$id, expectedSchemaId);
 
   const runtime = await import(pathToFileURL(path.join(output, 'runtime/index.js')).href);
   assert.equal(runtime.specification, selector);

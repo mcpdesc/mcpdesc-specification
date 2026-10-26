@@ -19,11 +19,14 @@ import {
   mcpExtensionMaturity,
   resolveComponentReferences,
   semanticValidateDocument,
-  validateMcpdesc08Document
-} from './validate-0.8.mjs';
+  specificationVersion,
+  validateDocument
+} from './validate-document.mjs';
+import { candidateSpecification } from './candidate-specification.mjs';
 
 const root = process.cwd();
-const specificationRoot = fs.existsSync(path.join(root, 'spec', 'draft')) ? 'spec/draft' : 'spec/0.8.0';
+const candidate = candidateSpecification(root);
+const { specificationRoot } = candidate;
 
 assert.equal(mcpExtensionCatalogue.effectiveDate, '2026-09-04');
 assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/ui'), 'official');
@@ -40,7 +43,8 @@ function fixture(relativePath) {
 
 const ajv = new Ajv2020({ allErrors: true, strict: false });
 addFormats(ajv);
-const validate = ajv.compile(fixture('schemas/mcp-description/0.8.0.json'));
+const validate = ajv.compile(fixture(candidate.schemaPath));
+assert.equal(specificationVersion, candidate.version);
 
 function assertStructurallyConforming(document) {
   assert.equal(
@@ -102,7 +106,7 @@ function toolSchemaDocument(protocolVersions, inputSchema) {
 }
 
 function errorCodes(document) {
-  return validateMcpdesc08Document(document)
+  return validateDocument(document)
     .filter((diagnostic) => diagnostic.severity === 'error')
     .map((diagnostic) => diagnostic.code);
 }
@@ -307,12 +311,12 @@ assert.equal(evaluateClientRequirements(
 
 const invalidClientRequirement = structuredClone(clientRequirementView2026);
 invalidClientRequirement.tools[0].clientRequirements = { roots: { listChanged: true } };
-assert.ok(validateMcpdesc08Document(invalidClientRequirement).some(
+assert.ok(validateDocument(invalidClientRequirement).some(
   (diagnostic) => diagnostic.code === 'client-requirement-version-mismatch'
 ));
 const malformedClientRequirement = structuredClone(clientRequirementView2025);
 malformedClientRequirement.tools[0].clientRequirements = { tasks: { requests: { sampling: null } } };
-assert.ok(validateMcpdesc08Document(malformedClientRequirement).some(
+assert.ok(validateDocument(malformedClientRequirement).some(
   (diagnostic) => diagnostic.code === 'invalid-client-requirement-value'
 ));
 
@@ -599,7 +603,7 @@ assert.deepEqual(
 
 const componentSource = fixture('spec/draft/fixtures/expected-valid/reusable-components.json');
 assertStructurallyConforming(componentSource);
-assert.deepEqual(validateMcpdesc08Document(componentSource).filter((diagnostic) => diagnostic.severity === 'error'), []);
+assert.deepEqual(validateDocument(componentSource).filter((diagnostic) => diagnostic.severity === 'error'), []);
 const componentResolution = resolveComponentReferences(componentSource);
 const resolvedComponents = componentResolution.document;
 assert.equal(componentResolution.provenance.length, 8);
@@ -634,7 +638,7 @@ for (const [label, mutate] of [
 
 const schemaKeywordBoundary = structuredClone(componentSource);
 schemaKeywordBoundary.components.schemas.Input.properties.query.$componentRef = 'not-an-mcp-description-reference';
-assert.deepEqual(validateMcpdesc08Document(schemaKeywordBoundary).filter((diagnostic) => diagnostic.severity === 'error'), []);
+assert.deepEqual(validateDocument(schemaKeywordBoundary).filter((diagnostic) => diagnostic.severity === 'error'), []);
 assert.equal(
   resolveComponentReferences(schemaKeywordBoundary).document.tools[0].inputSchema.properties.query.$componentRef,
   'not-an-mcp-description-reference'
@@ -647,7 +651,7 @@ assert.ok(invalidResolutionCodes.includes('wrong-component-reference-namespace')
 assert.ok(invalidResolutionCodes.includes('component-reference-cycle'));
 
 const invalidComponentSchemas = fixture('spec/draft/fixtures/expected-invalid/component-contextual-schemas.json');
-assert.ok(validateMcpdesc08Document(invalidComponentSchemas).some((diagnostic) => diagnostic.code === 'schema-validation'));
+assert.ok(validateDocument(invalidComponentSchemas).some((diagnostic) => diagnostic.code === 'schema-validation'));
 const invalidComponentExamples = fixture('spec/draft/fixtures/expected-invalid/component-contextual-examples.json');
 const referencedExampleDiagnostics = semanticValidateDocument(invalidComponentExamples);
 assert.ok(referencedExampleDiagnostics.some(
@@ -690,7 +694,7 @@ assert.deepEqual(Object.keys(projectedComponents.components.promptExamples), ['d
 assert.equal(projectedComponents.components['x-example-owner'], 'documentation');
 
 const integratedSource = fixture('spec/draft/fixtures/expected-valid/integrated-draft2-features.yaml');
-assert.deepEqual(validateMcpdesc08Document(integratedSource), []);
+assert.deepEqual(validateDocument(integratedSource), []);
 assert.equal('transports' in integratedSource, false);
 const integratedView = projectProtocolView(integratedSource, '2026-07-28');
 assert.deepEqual(Object.keys(integratedView.components.schemas), ['Input']);
@@ -701,19 +705,19 @@ assert.deepEqual(integratedView.tools[0].clientRequirements, { elicitation: { fo
 assert.deepEqual(integratedView.security, [{ 'api-key': [] }]);
 assert.deepEqual(integratedView.tools[0].security, []);
 assert.equal('transports' in integratedView, false);
-assert.deepEqual(validateMcpdesc08Document(integratedView), []);
+assert.deepEqual(validateDocument(integratedView), []);
 const integratedInvalid = structuredClone(integratedSource);
 integratedInvalid.tools[0].clientRequirements = { roots: {} };
-const integratedInvalidDiagnostics = validateMcpdesc08Document(integratedInvalid);
+const integratedInvalidDiagnostics = validateDocument(integratedInvalid);
 assert.deepEqual(
   integratedInvalidDiagnostics.map((diagnostic) => diagnostic.code),
   ['deprecated-client-requirement']
 );
-assert.deepEqual(validateMcpdesc08Document(structuredClone(integratedInvalid)), integratedInvalidDiagnostics);
+assert.deepEqual(validateDocument(structuredClone(integratedInvalid)), integratedInvalidDiagnostics);
 
 function componentMergeInput(version, schema, extension = 'shared') {
   return {
-    mcpdesc: '0.8.0',
+    mcpdesc: specificationVersion,
     info: { name: 'component-merge', version: '1.0.0' },
     protocolVersions: [version],
     components: {
@@ -833,7 +837,7 @@ assert.throws(
 );
 
 const protocolIndependentInfoSource = {
-  mcpdesc: '0.8.0',
+  mcpdesc: specificationVersion,
   info: {
     name: 'metadata-server',
     title: 'Metadata Server',

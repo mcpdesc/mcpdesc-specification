@@ -25,8 +25,8 @@ if (Number.isNaN(parsedDate.valueOf()) || parsedDate.toISOString().slice(0, 10) 
 const statusPath = path.join(root, 'specification-status.json');
 const manifestPath = path.join(root, 'schemas', 'draft.json');
 const sectionPath = path.join(root, 'spec', 'draft', 'sections', '00-front-matter.md');
-const schemaPath = path.join(root, 'schemas', 'mcp-description', '0.8.0.json');
 const status = JSON.parse(fs.readFileSync(statusPath, 'utf8'));
+const schemaPath = path.join(root, 'schemas', 'mcp-description', `${status.draft?.version}.json`);
 const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
 const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 const previous = status.draft;

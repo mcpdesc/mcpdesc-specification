@@ -13,5 +13,16 @@
     "editionTag": "v0.8.0+editorial.1",
     "editionDate": "2026-10-19",
     "target": "stable"
+  },
+  "draft": {
+    "version": "0.9.0",
+    "status": "community-working-draft",
+    "iteration": 1,
+    "snapshotTag": "v0.9.0-draft.1",
+    "snapshotDate": "2026-10-24",
+    "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
+    "branch": "main",
+    "path": "spec/draft",
+    "released": false
   }
 }

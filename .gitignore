@@ -9,5 +9,5 @@ node_modules/
 .env
 .env.local
 
-# Local v0.8 draft source material is tracked
-# spec/draft/materials
+# Source material used for edits
+ref/

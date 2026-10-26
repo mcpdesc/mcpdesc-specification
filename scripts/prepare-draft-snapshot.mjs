@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { formatCanonicalJson } from './canonical-json.mjs';
 
 const root = process.cwd();
 const iteration = Number(process.argv[2]);
@@ -37,10 +38,13 @@ const previousIteration = status.draft?.iteration;
 const previousDate = status.draft?.snapshotDate;
 const version = status.draft?.version;
 if (!version || !Number.isInteger(previousIteration)) die('invalid draft status in specification-status.json');
-if (iteration <= previousIteration) die(`iteration must be greater than current iteration ${previousIteration}`);
 
 const previousTag = `v${version}-draft.${previousIteration}`;
 const snapshotTag = `v${version}-draft.${iteration}`;
+const previousTagPublished = execFileSync('git', ['tag', '--list', previousTag], { cwd: root, encoding: 'utf8' }).trim() !== '';
+if (iteration < previousIteration || (iteration === previousIteration && previousTagPublished)) {
+  die(`iteration must be greater than published iteration ${previousIteration}, or equal to it while ${previousTag} is untagged`);
+}
 let section = fs.readFileSync(sectionPath, 'utf8');
 for (const [search, replacement, label] of [
   [`status: Community working draft ${previousIteration}`, `status: Community working draft ${iteration}`, 'status'],
@@ -58,6 +62,13 @@ for (const [search, replacement, label] of [
 
 delete status.editorialEdition;
 status.draft = { ...status.draft, iteration, snapshotTag, snapshotDate: date, released: false };
+const previousSchemaId = draft.schemaId;
+const schemaId = `https://mcpdesc.org/schema/mcp-description/${snapshotTag.slice(1)}.json`;
+const schemaPath = path.join(root, draft.schema ?? `schemas/mcp-description/${version}.json`);
+const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+if (previousSchemaId && schema.$id !== previousSchemaId) die(`${path.relative(root, schemaPath)} $id does not match schemas/draft.json schemaId`);
+schema.$id = schemaId;
+draft.schemaId = schemaId;
 draft.iteration = iteration;
 draft.snapshotTag = snapshotTag;
 draft.snapshotDate = date;
@@ -66,7 +77,25 @@ draft.note = `${snapshotTag} identifies Community Working Draft ${iteration}, no
 
 fs.writeFileSync(statusPath, `${JSON.stringify(status, null, 2)}\n`);
 fs.writeFileSync(draftPath, `${JSON.stringify(draft, null, 2)}\n`);
+fs.writeFileSync(schemaPath, formatCanonicalJson(schema));
 fs.writeFileSync(sectionPath, section);
+
+if (previousSchemaId && previousSchemaId !== schemaId) {
+  const pending = ['examples', 'fixtures', 'serialization-fixtures', 'guides', 'sections']
+    .map((directory) => path.join(root, 'spec', 'draft', directory))
+    .filter((directory) => fs.existsSync(directory));
+  while (pending.length > 0) {
+    const current = pending.pop();
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const target = path.join(current, entry.name);
+      if (entry.isDirectory()) pending.push(target);
+      else if (/\.(?:json|md|ya?ml)$/.test(entry.name)) {
+        const source = fs.readFileSync(target, 'utf8');
+        if (source.includes(previousSchemaId)) fs.writeFileSync(target, source.replaceAll(previousSchemaId, schemaId));
+      }
+    }
+  }
+}
 
 execFileSync(process.execPath, ['scripts/assemble-draft.mjs'], { cwd: root, stdio: 'inherit' });
 console.log('Draft metadata prepared. Update README/status prose, PROPOSALS.md, and CHANGELOG.md, then run:');

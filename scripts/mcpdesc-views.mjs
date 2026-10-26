@@ -1,11 +1,11 @@
-// Build and combine Effective Protocol Views for MCP Description v0.8.0.
+// Build and combine Effective Protocol Views for the candidate MCP Description version.
 //
 // This module projects a multi-revision description to one protocol revision,
 // merges compatible revision-specific views, and compares descriptions using
 // semantic normalization. Public operations validate their inputs and outputs
-// with both the v0.8.0 structural schema and its semantic rules.
+// with both the candidate structural schema and its semantic rules.
 
-import { validateMcpdesc08Document } from './validate-0.8.mjs';
+import { specificationVersion, validateDocument } from './validate-document.mjs';
 
 const scopedCollections = ['transports', 'capabilities', 'tools', 'resources', 'resourceTemplates', 'prompts'];
 const primitiveCollections = new Set(['tools', 'resources', 'resourceTemplates', 'prompts']);
@@ -154,10 +154,10 @@ function pruneComponents(document) {
 }
 
 function assertConforming(document, label) {
-  const errors = validateMcpdesc08Document(document)
+  const errors = validateDocument(document)
     .filter((diagnostic) => diagnostic.severity === 'error');
   if (errors.length) {
-    throw new Error(`${label} is not a conforming mcpdesc 0.8.0 document: ${errors.map((diagnostic) => `[${diagnostic.code}] ${diagnostic.message}`).join(' | ')}`);
+    throw new Error(`${label} is not a conforming mcpdesc ${specificationVersion} document: ${errors.map((diagnostic) => `[${diagnostic.code}] ${diagnostic.message}`).join(' | ')}`);
   }
 }
 
