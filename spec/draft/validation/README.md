@@ -6,8 +6,9 @@ Description 0.9.0 makes protocol alignment explicit: every MCP-related
 validation behavior should state who owns it, which MCP revisions it applies to,
 where it comes from, and how it is tested.
 
-Status: pilot for the 0.9.0 working draft, implementing draft
-[Proposal 0024](../proposal-snapshots/0024-validation-rule-identity-and-provenance.md).
+Status: 0.9.0 working draft, implementing review-stage
+[Proposal 0024](../proposal-snapshots/0024-validation-rule-identity-and-provenance.md)
+([PR #76](https://github.com/mcpdesc/mcpdesc-specification/pull/76)).
 The content is non-normative until that proposal is accepted. The candidate
 validator does not consume the registry yet. Design background is tracked in
 [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72).

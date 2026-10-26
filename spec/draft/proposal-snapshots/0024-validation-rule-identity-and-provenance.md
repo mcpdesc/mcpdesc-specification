@@ -1,6 +1,6 @@
 # Proposal 0024: Validation Rule Identity, Provenance, and Outcomes
 
-- Status: Draft
+- Status: Review
 - Author(s): @ObjectIsAdvantag
 - Created: 2026-10-24
 - Target version: 0.9.0
@@ -449,18 +449,16 @@ inventory will provide the evidence to answer them:
    `id`, `owner`, `kind`, `applicability`, and severities binding; `sources`,
    `enforcement`, `status`, and `fixtures` are maintained notes that can be
    corrected at any time. Should some of the notes also become binding?
-2. **How JSON Schema failures are labeled.** When a document fails the JSON
-   Schema, the validator knows only which schema keyword failed and where.
-   This proposal labels all such failures with one catch-all rule,
-   `mcpdesc.document.schema`. Should they instead be labeled with finer rules,
-   for example one per object type?
-3. **Who computes the outcome.** Either the validator returns the outcome
+2. **Who computes the outcome.** Either the validator returns the outcome
    (`valid`, `valid-with-warnings`, `incomplete`, or `invalid`) with its
    diagnostics, or each consumer computes it from the diagnostics and the
    registry. To be decided with the validator package.
 
-Resolved: rules are inventoried for all supported revisions, and corrections
-are limited to MCP 2025-06-18 and later (Section 4.1).
+Resolved: rules are inventoried for all supported revisions; tiers limit
+effort, not corrections, and only defects in historical revisions may be left
+as `not-fixed` gaps (Section 4.1). JSON Schema failures are attributed, by the
+failing schema location, to the rule that owns it; only failures that no rule
+owns use `mcpdesc.document.schema` (Section 5).
 
 ## Implementation and validation plan
 
@@ -472,8 +470,8 @@ are limited to MCP 2025-06-18 and later (Section 4.1).
    `mcpdesc.document.schema`. Confirm the record format before continuing.
 3. Inventory the remaining Tool rules and the rules for Results carried in Tool,
    Prompt, and Resource examples, then the other surfaces, for all supported
-   revisions. Correct defects for MCP 2025-06-18 and later; record defects for
-   earlier revisions as gaps.
+   revisions. Correct defects in any revision; defects in historical revisions
+   may instead be recorded as `not-fixed` gaps.
 4. Add a registry consistency test: every code the candidate validator can emit
    belongs to at least one rule, every listed fixture exists, every `mcp` rule
    cites a tier 1 to 3 source, and identifiers are unique and well formed.

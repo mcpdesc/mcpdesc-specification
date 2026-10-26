@@ -255,10 +255,10 @@ const releasedProposalSnapshots = [
 ];
 // Proposal revisions captured for the active draft: [file, commit, source path, SHA-256].
 const draftProposalSnapshots = [
-  ['0024-validation-rule-identity-and-provenance.md', 'd11743b5502298df434b420e1f160da4800dd1c2', 'spec/draft/proposal-snapshots/0024-validation-rule-identity-and-provenance.md', 'b23624f7ea90a8730fd385f3145c7393c1fadf6da6bec7febbf638c8e5d3e2aa'],
-  ['0025-native-mcp-projection.md', '7570143c51322efd4d376a2dd44d93eaae9b3094', 'spec/draft/proposal-snapshots/0025-native-mcp-projection.md', '80a1ddf1e7c70f8c9ed82ef0c4bda04e2f4daae872f7ea81597637ca3428ea5e'],
-  ['0026-open-mcp-results-in-examples.md', 'dea2f100e654e4d0c765f3d2687e3e977bc0f2a0', 'proposals/0026-open-mcp-results-in-examples.md', '2a22ddc3c25749c188ccb08a94a76e1045545483e920ef23fc432b534235736c'],
-  ['0027-closed-mcp-types.md', 'a7c75e83da8487c080c44d0d21a9b2d43ed2c562', 'spec/draft/proposal-snapshots/0027-closed-mcp-types.md', '7c0f7386d20dcaa9deed980165108c985dade9fe3490fb6760f35e796f254a3e']
+  ['0024-validation-rule-identity-and-provenance.md', '62f1f8e726c69398f8bc3edc1c0bb737c9f5b53c', 'proposals/0024-validation-rule-identity-and-provenance.md', 'fc25d6b6a0fb47e1bc6aba31cb4b6e08cc31bc029319e3c66b2c8776eb732374'],
+  ['0025-native-mcp-projection.md', '77cf9e6e027abc42bf60b838cd744704b2ef000b', 'proposals/0025-native-mcp-projection.md', '3574b5b3b8c063dd3cb287505d596119b107765eae62325ae1cd8b66e231c324'],
+  ['0026-open-mcp-results-in-examples.md', '3d4e5ce773f5f61ecb67177aa34cbfbb302d06e0', 'proposals/0026-open-mcp-results-in-examples.md', '3a50753bf217c0ceb5fb60f28766c05b06f073524eafc3c899661b6810d6cd3b'],
+  ['0027-closed-mcp-types.md', '609700bac005e182a0e65970b59f0a5c1f3dfc25', 'proposals/0027-closed-mcp-types.md', '8e83c57fc4c243bd8cde0e2d15c8f93e148311e54399445eecba171cb95a8f79']
 ];
 
 function checkProposalSnapshots(specificationPath, snapshots) {

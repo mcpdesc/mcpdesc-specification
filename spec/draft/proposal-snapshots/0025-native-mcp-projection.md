@@ -1,6 +1,6 @@
 # Proposal 0025: Native MCP Projection
 
-- Status: Draft
+- Status: Review
 - Author(s): @ObjectIsAdvantag
 - Created: 2026-10-26
 - Target version: 0.9.0
@@ -70,7 +70,7 @@ description projects to schema-valid MCP values.
 ## Background and primary references
 
 MCP `schema.ts` per revision, vendored in
-[`validation/mcp-schemas/`](../validation/mcp-schemas/) at
+[`validation/mcp-schemas/`](https://github.com/mcpdesc/mcpdesc-specification/tree/main/spec/draft/validation/mcp-schemas) at
 `modelcontextprotocol/modelcontextprotocol@dae694f61a31f7a3ec2af3aff709e11f70f61e48`,
 defines the four types. Their fields per revision:
 

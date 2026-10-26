@@ -1,6 +1,6 @@
 # Proposal 0026: Open MCP Results in Examples
 
-- Status: Draft
+- Status: Review
 - Author(s): @ObjectIsAdvantag
 - Created: 2026-10-25
 - Target version: 0.9.0
@@ -102,10 +102,10 @@ every supported revision.
 
 - Changing whether MCP Tool, Resource, Resource Template, or Prompt declarations
   accept unknown fields. Their MCP types are closed and stay closed.
-- Changing Tool Annotations or Resource Annotations, which MCP Description
-  currently keeps more permissive than MCP. That is a separate decision.
+- Changing Tool Annotations or Resource Annotations. That is a separate
+  decision (Proposal 0027).
 - Resolving the conflict between MCP's closed capability types and their
-  "not a closed set" documentation. That is a separate decision.
+  "not a closed set" documentation. That is a separate decision (Proposal 0027).
 - Delegating example checks to a linter or to per-organization severities. This
   was considered and rejected; see [Alternatives considered](#alternatives-considered).
 - Native MCP projection, which omits examples and is covered by a separate
