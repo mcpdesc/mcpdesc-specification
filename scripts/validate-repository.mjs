@@ -256,7 +256,7 @@ const releasedProposalSnapshots = [
 // Proposal revisions captured for the active draft: [file, commit, source path, SHA-256].
 const draftProposalSnapshots = [
   ['0024-validation-rule-identity-and-provenance.md', '75ab964c9a3799d3f39b5ee433e45d38e4fabe58', 'spec/draft/proposal-snapshots/0024-validation-rule-identity-and-provenance.md', '55cac58454794345d3e9a1b6409b8ae9e8a4892b5d9ded16d59bb10fccf287d1'],
-  ['0025-native-mcp-projection.md', '238b5c964d47be953e7b6e82d6f61e8840f99b76', 'spec/draft/proposal-snapshots/0025-native-mcp-projection.md', '80a1ddf1e7c70f8c9ed82ef0c4bda04e2f4daae872f7ea81597637ca3428ea5e'],
+  ['0025-native-mcp-projection.md', '7570143c51322efd4d376a2dd44d93eaae9b3094', 'spec/draft/proposal-snapshots/0025-native-mcp-projection.md', '80a1ddf1e7c70f8c9ed82ef0c4bda04e2f4daae872f7ea81597637ca3428ea5e'],
   ['0026-open-mcp-results-in-examples.md', 'dea2f100e654e4d0c765f3d2687e3e977bc0f2a0', 'proposals/0026-open-mcp-results-in-examples.md', '2a22ddc3c25749c188ccb08a94a76e1045545483e920ef23fc432b534235736c'],
   ['0027-closed-mcp-types.md', 'a7c75e83da8487c080c44d0d21a9b2d43ed2c562', 'spec/draft/proposal-snapshots/0027-closed-mcp-types.md', '7c0f7386d20dcaa9deed980165108c985dade9fe3490fb6760f35e796f254a3e']
 ];
