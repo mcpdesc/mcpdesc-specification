@@ -225,8 +225,8 @@ under `projection-fixtures/documents/` or to a conformance fixture under
 value, or `expectedError`, a diagnostic code. A list case omits `identifier`
 and has an `expected` array. Comparison is by canonical JSON
 (`scripts/canonical-json.mjs`), so key order does not matter. The case format
-is published as `projection-fixtures/schema/case.schema.json`; cases are the
-JSON files directly under `projection-fixtures/`.
+is published as `projection-fixtures/schema/projection-case.schema.json`;
+cases are the JSON files directly under `projection-fixtures/`.
 
 The fixtures cover at least, for each kind: a projected declaration for every
 supported revision, which includes each revision boundary in the Background
