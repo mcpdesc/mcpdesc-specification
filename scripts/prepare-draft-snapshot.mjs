@@ -60,7 +60,8 @@ for (const [search, replacement, label] of [
   section = replaceRequired(section, search, replacement, label);
 }
 
-delete status.editorialEdition;
+// A new snapshot supersedes a release-candidate editorial edition, not the stable release's.
+if (status.editorialEdition?.target !== 'stable') delete status.editorialEdition;
 status.draft = { ...status.draft, iteration, snapshotTag, snapshotDate: date, released: false };
 const previousSchemaId = draft.schemaId;
 const schemaId = `https://mcpdesc.org/schema/mcp-description/${snapshotTag.slice(1)}.json`;

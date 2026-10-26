@@ -24,9 +24,11 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
-### Community Working Draft 1 — 2026-10-24 (`v0.9.0-draft.1`)
+### Community Working Draft 1 — 2026-10-26 (`v0.9.0-draft.1`)
 
-Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-draft.1` tag has not been published. Normative changes made since initialization are listed in the sections below.
+First 0.9.0 snapshot: MCP-native alignment from [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72), implementing review-stage Proposals 0024, 0025, 0026, and 0027 recorded in [`PROPOSALS.md`](PROPOSALS.md). It is a prerelease, not an accepted specification, and contains breaking changes; see the [0.8.0 to 0.9.0 migration guide](guides/migration-0.8-to-0.9.md). The changes since initialization from 0.8.0 are listed in the sections below.
+
+Initialization from the stable 0.8.0 release:
 
 - Copied the 0.8.0 sections, examples, fixtures, serialization fixtures, and guides into `spec/draft/`.
 - Draft documents use `mcpdesc: 0.9.0`, and the draft schema [`schemas/mcp-description/0.9.0.json`](../../schemas/mcp-description/0.9.0.json) uses the prerelease identity `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`. At initialization its validation rules were otherwise identical to 0.8.0.

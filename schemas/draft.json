@@ -5,10 +5,10 @@
   "status": "community-working-draft",
   "iteration": 1,
   "snapshotTag": "v0.9.0-draft.1",
-  "snapshotDate": "2026-10-24",
+  "snapshotDate": "2026-10-26",
   "released": false,
   "branch": "main",
   "schema": "schemas/mcp-description/0.9.0.json",
   "schemaId": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
-  "note": "v0.9.0-draft.1 identifies the upcoming Community Working Draft 1, not a stable release or a distinct mcpdesc conformance version. The tag has not been published. schemas/latest.json remains pinned to the stable 0.8.0 release."
+  "note": "v0.9.0-draft.1 identifies Community Working Draft 1, not a stable release or a distinct mcpdesc conformance version. schemas/latest.json remains pinned to the stable 0.8.0 release."
 }

@@ -16,6 +16,8 @@ The machine-readable form of this status is in [`specification-status.json`](spe
 
 MCP Description 0.8.0 adds MCP `2026-07-28` support, multi-revision server descriptions, and deterministic Effective Protocol Views. It also introduces reusable components, richer examples and interactions, primitive client capability requirements, elicitation declarations, formal MCP extension support, reusable security schemes, and conforming JSON and YAML serializations. See the [changelog](CHANGELOG.md) for details. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
 
+Draft 1 of 0.9.0 is an in-review interoperability snapshot that aligns MCP Description with MCP's native types: a validation rule registry with rule identifiers in diagnostics, open MCP results in examples, closed MCP annotation and client-capability types, and native MCP projection with conformance fixtures. It includes breaking changes and remains subject to review and incompatible change; its [proposal manifest](spec/draft/PROPOSALS.md) records the review-stage proposal revisions it implements, and its [changelog](spec/draft/CHANGELOG.md) and [migration guide](spec/draft/guides/migration-0.8-to-0.9.md) describe the changes.
+
 ## Repository roles
 
 - `main` is the integration branch and the default view of the project. It carries every released specification version and, when development is active, the in-progress `spec/draft/`.
