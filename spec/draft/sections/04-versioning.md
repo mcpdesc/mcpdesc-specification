@@ -177,5 +177,5 @@ Because validation already rejects fields that `V` does not define, step 5 remov
 
 A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation; implementations MUST NOT repair the value.
 
-The `projection-fixtures/` folder of this specification gives, for each kind and supported revision, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/case.schema.json`. Values are compared as canonical JSON.
+The `projection-fixtures/` folder of this specification gives, for each kind and supported revision, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
 

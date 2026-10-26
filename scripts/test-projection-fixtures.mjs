@@ -36,7 +36,7 @@ const errors = [];
 const fail = (message) => errors.push(message);
 
 const caseAjv = new Ajv2020({ allErrors: true, strict: true, strictRequired: false, allowUnionTypes: true });
-const validateCase = caseAjv.compile(JSON.parse(fs.readFileSync(path.join(fixtureDirectory, 'schema', 'case.schema.json'), 'utf8')));
+const validateCase = caseAjv.compile(JSON.parse(fs.readFileSync(path.join(fixtureDirectory, 'schema', 'projection-case.schema.json'), 'utf8')));
 
 const mcpType = { tool: 'Tool', resource: 'Resource', resourceTemplate: 'ResourceTemplate', prompt: 'Prompt' };
 const collection = { tool: 'tools', resource: 'resources', resourceTemplate: 'resourceTemplates', prompt: 'prompts' };
