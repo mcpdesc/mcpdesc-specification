@@ -102,9 +102,9 @@ function schemaForPartialOfflineCompilation(schema) {
   return { schema: visit(schema), externalReferences };
 }
 
-function makeDiagnostic(code, severity, message, path) {
+function makeDiagnostic(code, severity, message, path, rule) {
   if (!Array.isArray(path)) throw new TypeError(`Diagnostic ${code} is missing an explicit path`);
-  return { code, severity, message, path };
+  return rule ? { code, severity, message, path, rule } : { code, severity, message, path };
 }
 
 // Reported by the example-form rules (JSON-RPC envelope, non-completed workflow), not by field classification.
@@ -137,14 +137,14 @@ function carriedTypeDefinition(type, version) {
   }
 }
 
-export function classifyCarriedFields(value, type, version, location, path, closedCode) {
+export function classifyCarriedFields(value, type, version, location, path, closedCode, closedRule) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return [];
   const { open, fields } = carriedTypeDefinition(type, version);
   return Object.keys(value)
     .filter((key) => !fields.includes(key) && !exampleFormFields.has(key))
     .map((key) => open
       ? makeDiagnostic('result-field-not-defined-by-version', 'warning', `${location}.${key} is not defined for MCP ${version}; it is preserved without meaning`, [...path, key])
-      : makeDiagnostic(closedCode, 'error', `${location}.${key} is not defined for MCP ${version}`, [...path, key]));
+      : makeDiagnostic(closedCode, 'error', `${location}.${key} is not defined for MCP ${version}`, [...path, key], closedRule));
 }
 
 function usesMcpReservedPrefix(identifier) {
@@ -741,7 +741,7 @@ function validateElicitations(document, rel, diagnostics) {
 function validateVersionSpecificSemantics(document, rel, diagnostics) {
   const rootScope = normalizeScope(document.protocolVersions ?? []);
 
-  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope) {
+  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope, rule) {
     if (!(fieldName in object)) return;
     for (const version of scope) {
       if (protocolOrder.get(version) < protocolOrder.get(minimumVersion)) {
@@ -750,7 +750,8 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
             'field-not-supported-by-version',
             'error',
             `${location}.${fieldName} is not defined for MCP ${version}; it requires ${minimumVersion} or later`,
-            [...locationPath, fieldName]
+            [...locationPath, fieldName],
+            rule
           )
         );
       }
@@ -807,7 +808,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
     const scope = effectiveScope(document, tool, rootScope);
     const toolPath = ['tools', index];
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'title', '2025-06-18', scope);
-    checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'outputSchema', '2025-06-18', scope);
+    checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'outputSchema', '2025-06-18', scope, 'mcp.tool.output-schema.revision-availability');
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, '_meta', '2025-06-18', scope);
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'annotations', '2025-03-26', scope);
     checkOnlyVersion(`tools[${index}]`, toolPath, tool, 'execution', '2025-11-25', scope);
@@ -1170,7 +1171,8 @@ function validateToolSchemas(document, rel, diagnostics) {
               'field-not-supported-by-version',
               'error',
               `${location} must have type "object" when it applies to MCP ${version}`,
-              [...locationPath, 'type']
+              [...locationPath, 'type'],
+              'mcp.tool.output-schema.object-root'
             )
           );
         }

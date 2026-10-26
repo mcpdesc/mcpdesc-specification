@@ -36,8 +36,8 @@ const clientCapabilitiesByVersion = {
   '2026-07-28': new Set(['roots', 'sampling', 'elicitation', 'extensions', 'experimental'])
 };
 
-function semanticDiagnostic(code, severity, message, path) {
-  return { code, severity, message, path };
+function semanticDiagnostic(code, severity, message, path, rule) {
+  return rule ? { code, severity, message, path, rule } : { code, severity, message, path };
 }
 
 function usesMcpReservedPrefix(identifier) {
@@ -203,8 +203,43 @@ function structuralDiagnostics(document) {
     code: 'schema-validation',
     severity: 'error',
     message: `does not validate against ${specificationVersion}: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
-    path: structuralPath(document, error)
+    path: structuralPath(document, error),
+    rule: structuralRule(error)
   }));
+}
+
+// Registered rule for a JSON Schema failure (Proposal 0024, Section 5).
+function structuralRule({ keyword, instancePath, schemaPath, params }) {
+  if (schemaPath.startsWith('#/$defs/toolAnnotations/')) return 'mcp.tool-annotations.members';
+  if (schemaPath.startsWith('#/$defs/resourceAnnotations/')) return 'mcp.annotations.members';
+  if (schemaPath === '#/$defs/completionResult/additionalProperties') return 'mcp.completion.result-closed';
+  if (keyword === 'additionalProperties' && /^\/capabilities\/\d+$/.test(instancePath)) return 'mcp.server-capabilities.members';
+  if ((keyword === 'const' && /^\/tools\/\d+\/inputSchema\/type$/.test(instancePath))
+    || (keyword === 'required' && params.missingProperty === 'type' && /^\/tools\/\d+\/inputSchema$/.test(instancePath))) {
+    return 'mcp.tool.input-schema.object-root';
+  }
+  return 'mcpdesc.document.schema';
+}
+
+// Rules for diagnostic codes that only one registered rule emits. Codes shared
+// by several rules are attributed where they are emitted.
+const ruleForCode = new Map([
+  ['result-field-not-defined-by-version', 'mcp.result.additional-properties.preserve'],
+  ['completion-example-version-mismatch', 'mcp.completion.revision-availability'],
+  ['meta-reserved-key-context', 'mcp.meta.reserved-key-context'],
+  ['meta-reserved-key-value', 'mcp.meta.reserved-key-context'],
+  ['invalid-x-mcp-header', 'mcp.tool.input-schema.x-mcp-header'],
+  ['duplicate-x-mcp-header', 'mcp.tool.input-schema.x-mcp-header'],
+  ['tool-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['resource-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['resource-example-cache-fields-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['prompt-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
+  ['completion-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity']
+]);
+
+function attributeRule(diagnostic) {
+  if (diagnostic.rule || !ruleForCode.has(diagnostic.code)) return diagnostic;
+  return { ...diagnostic, rule: ruleForCode.get(diagnostic.code) };
 }
 
 function canonicalize(value) {
@@ -371,7 +406,8 @@ function validateToolInteractionExamples(document) {
             version,
             `${stepLocation}.response`,
             [...stepPath, 'response'],
-            'interaction-example-version-mismatch'
+            'interaction-example-version-mismatch',
+            'mcp.input-response.closed'
           ));
         }
 
@@ -495,7 +531,8 @@ function validateToolInteractionExamples(document) {
                   'interaction-example-version-mismatch',
                   'error',
                   `${stepLocation}.response.roots[${rootIndex}]._meta is not defined for MCP ${version}`,
-                  [...stepPath, 'response', 'roots', rootIndex, '_meta']
+                  [...stepPath, 'response', 'roots', rootIndex, '_meta'],
+                  'mcp.root.meta.revision-availability'
                 ));
               }
             }
@@ -981,7 +1018,7 @@ export function semanticValidateDocument(document, rel = 'document') {
   const filtered = Object.hasOwn(document, 'transports')
     ? diagnostics
     : diagnostics.filter((diagnostic) => diagnostic.code !== 'transport-coverage-gap');
-  return filtered.sort(
+  return filtered.map(attributeRule).sort(
     (left, right) => left.code.localeCompare(right.code)
       || left.message.localeCompare(right.message)
       || JSON.stringify(left.path).localeCompare(JSON.stringify(right.path))

@@ -46,15 +46,18 @@ for (const file of ['scripts/validator-base.mjs', 'scripts/validate-document.mjs
 }
 
 const fixtureRoot = path.join(root, specificationRoot, 'fixtures');
-const fixtureCodes = new Map();
-function codesForFixture(relative) {
-  if (!fixtureCodes.has(relative)) {
+const fixtureDiagnostics = new Map();
+function diagnosticsForFixture(relative) {
+  if (!fixtureDiagnostics.has(relative)) {
     const full = path.join(fixtureRoot, relative);
     const document = decodeDocumentSource(fs.readFileSync(full, 'utf8'), documentFormatForPath(full), relative);
-    fixtureCodes.set(relative, new Set(validateDocument(document).map((diagnostic) => diagnostic.code)));
+    fixtureDiagnostics.set(relative, validateDocument(document));
   }
-  return fixtureCodes.get(relative);
+  return fixtureDiagnostics.get(relative);
 }
+const codesForFixture = (relative) => new Set(diagnosticsForFixture(relative).map((diagnostic) => diagnostic.code));
+const rulesForFixture = (relative) => new Set(diagnosticsForFixture(relative).map((diagnostic) => diagnostic.rule));
+const registeredRules = new Map();
 
 const ruleIds = new Set();
 const coveredCodes = new Set();
@@ -79,6 +82,7 @@ for (const filename of files) {
     const where = `${rel}: ${rule.id}`;
     if (ruleIds.has(rule.id)) fail(`${where}: duplicate rule identifier`);
     ruleIds.add(rule.id);
+    registeredRules.set(rule.id, rule);
     if (rule.id.split('.')[0] !== rule.owner) fail(`${where}: owner ${rule.owner} does not match the identifier namespace`);
 
     if (rule.applicability || rule.owner !== 'mcpdesc') {
@@ -118,7 +122,28 @@ for (const filename of files) {
         if (!ruleCodes.size) fail(`${where}: a rule without diagnostics cannot cite expected-invalid fixture ${fixture}`);
         else if (![...ruleCodes].some((code) => codesForFixture(fixture).has(code))) {
           fail(`${where}: ${fixture} does not emit any of ${[...ruleCodes].join(', ')}`);
+        } else if (!rulesForFixture(fixture).has(rule.id)) {
+          fail(`${where}: no diagnostic in ${fixture} identifies this rule`);
         }
+      }
+    }
+  }
+}
+
+// Diagnostics identify registered rules consistently (Proposal 0024, Section 5).
+let attributed = 0;
+for (const category of fs.readdirSync(fixtureRoot).filter((name) => name.startsWith('expected-')).sort()) {
+  for (const name of fs.readdirSync(path.join(fixtureRoot, category)).filter((file) => /\.(?:json|ya?ml)$/.test(file)).sort()) {
+    const fixture = `${category}/${name}`;
+    for (const diagnostic of diagnosticsForFixture(fixture)) {
+      if (diagnostic.code === 'schema-validation' && !diagnostic.rule) fail(`${fixture}: schema-validation diagnostic without a rule`);
+      if (!diagnostic.rule) continue;
+      attributed += 1;
+      const rule = registeredRules.get(diagnostic.rule);
+      if (!rule) {
+        fail(`${fixture}: diagnostic ${diagnostic.code} identifies unregistered rule ${diagnostic.rule}`);
+      } else if (!rule.diagnostics.some(({ code, severity }) => code === diagnostic.code && severity === diagnostic.severity)) {
+        fail(`${fixture}: rule ${diagnostic.rule} does not declare ${diagnostic.severity} ${diagnostic.code}`);
       }
     }
   }
@@ -160,4 +185,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); covers ${coveredCodes.size} of ${emittedCodes.size} candidate diagnostic codes.`);
+console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); ${attributed} fixture diagnostic(s) identify a rule; covers ${coveredCodes.size} of ${emittedCodes.size} candidate diagnostic codes.`);

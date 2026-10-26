@@ -39,6 +39,7 @@ Initialization of the 0.9.0 draft from the stable 0.8.0 release; the `v0.9.0-dra
 - Recorded the tension between dialect selection and the literal `type: "object"` root of `inputSchema` (MCP issue #3238) as an arbitration on `mcp.tool.input-schema.object-root`; validation is unchanged. Added fixture `expected-invalid/non-object-input-schema.json`.
 - Recorded the "examples fail fast" principle in [`validation/README.md`](validation/README.md): incorrect examples are conformance errors rather than an optional linter concern, measured against MCP's own types. Fields an applicable revision allows but does not define are planned to be accepted with a warning; until then, the differences are recorded as rule gaps.
 - Added fixtures `expected-invalid/output-schema-before-2025-06-18.json` and `expected-warning/open-result-unknown-properties.json` for revision boundaries not covered before.
+- Diagnostics for registered rules carry a `rule` property with the rule identifier, next to `code` (Proposal 0024, Section 5). Every `schema-validation` diagnostic has one: a specific rule where the failing schema location identifies it, otherwise `mcpdesc.document.schema`. Diagnostics for codes not yet registered have no `rule`. Consumers that compare whole diagnostic objects must allow the new property.
 
 ### Open MCP results in examples (draft Proposal 0026; subject to review and possible incompatible change or removal)
 

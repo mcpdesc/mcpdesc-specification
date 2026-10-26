@@ -167,3 +167,28 @@ by default), the rationale, an upstream reference, and when to revisit it.
 An arbitration is `active` when decided, `proposed` while it awaits a
 maintainer decision (validator behavior is then unchanged, and any difference
 is recorded as a gap), or `retired`.
+
+## Rules in diagnostics
+
+A diagnostic for a registered rule carries the rule identifier in a `rule`
+property next to `code`, `severity`, `message`, and `path`:
+
+```json
+{
+  "code": "schema-validation",
+  "severity": "error",
+  "message": "does not validate against 0.9.0: /tools/0/annotations must NOT have additional properties",
+  "path": ["tools", 0, "annotations", "audience"],
+  "rule": "mcp.tool-annotations.members"
+}
+```
+
+`code` names the condition and can be shared by several rules; `rule` names
+the requirement. Every `schema-validation` diagnostic has a rule: a specific
+one where the failing schema location identifies it, otherwise
+`mcpdesc.document.schema`. Diagnostics for codes not yet in the registry have
+no `rule` property.
+
+`scripts/test-validation-rules.mjs` checks that every rule identifier in a
+fixture diagnostic is registered and declares that code and severity, and that
+each `expected-invalid` fixture a rule cites has a diagnostic identifying it.
