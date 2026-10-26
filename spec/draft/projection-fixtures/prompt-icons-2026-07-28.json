@@ -1,0 +1,27 @@
+{
+  "description": "icons appear from MCP 2025-11-25 and are copied unchanged.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2026-07-28",
+  "kind": "prompt",
+  "identifier": "greet",
+  "expected": {
+    "name": "greet",
+    "arguments": [
+      {
+        "name": "person",
+        "title": "Person",
+        "required": true
+      }
+    ],
+    "title": "Greeting",
+    "icons": [
+      {
+        "src": "https://example.com/greet.png",
+        "mimeType": "image/png",
+        "sizes": [
+          "48x48"
+        ]
+      }
+    ]
+  }
+}

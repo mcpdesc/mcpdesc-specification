@@ -23,7 +23,7 @@ A conforming implementation (tool, validator, or platform) MUST:
 3. Emit only conforming documents in every serialization for which it claims output support.
 4. Reject documents that fail the requirements in Section 16.1 or the restricted profile of a claimed input serialization.
 5. Ignore unrecognized specification extensions when interpreting core semantics and accept them without error at eligible locations (Section 14.4).
-6. Preserve root and object-level specification extensions when processing, projecting, merging, and reserializing documents unless explicitly requested to strip them (Sections 14.4 and 14.5).
+6. Preserve root and object-level specification extensions when processing, projecting, merging, and reserializing documents unless explicitly requested to strip them (Sections 14.4 and 14.5). Native MCP projection produces MCP values, not documents, and omits them (Section 4.14).
 7. Apply the same structural JSON Schema validation and cross-object semantic requirements after decoding JSON or YAML.
 8. Use safe YAML parsing and reject unsupported YAML constructs when claiming YAML input support (Section 15.3).
 9. Apply reasonable document-size, nesting-depth, scalar-length, and collection-size limits to supported input serializations.

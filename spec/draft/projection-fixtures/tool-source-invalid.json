@@ -1,0 +1,8 @@
+{
+  "description": "A document with validation errors is not projected.",
+  "document": "../fixtures/expected-invalid/missing-tool-input-schema.json",
+  "revision": "2026-07-28",
+  "kind": "tool",
+  "identifier": "missing_schema",
+  "expectedError": "projection-source-invalid"
+}

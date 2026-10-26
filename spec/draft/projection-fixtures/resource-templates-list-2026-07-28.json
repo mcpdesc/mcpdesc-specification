@@ -1,0 +1,34 @@
+{
+  "description": "The Resource Template list contains every Resource Template of the Effective Protocol View, in document order.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2026-07-28",
+  "kind": "resourceTemplate",
+  "expected": [
+    {
+      "uriTemplate": "file:///logs/{date}.log",
+      "name": "logs",
+      "description": "Daily logs.",
+      "mimeType": "text/plain",
+      "annotations": {
+        "audience": [
+          "assistant"
+        ]
+      }
+    },
+    {
+      "uriTemplate": "users://{id}/profile",
+      "name": "user-profile",
+      "mimeType": "application/json",
+      "title": "User profile",
+      "_meta": {
+        "example.com/owner": "identity"
+      },
+      "icons": [
+        {
+          "src": "https://example.com/user.png",
+          "mimeType": "image/png"
+        }
+      ]
+    }
+  ]
+}

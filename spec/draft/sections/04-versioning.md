@@ -156,3 +156,26 @@ Semantic equivalence need not preserve property order, redundant scopes, array o
 
 Omission contributes no entries to an ordinary declaration collection during merge. A merge result MUST omit an ordinary declaration collection when it has no entries. Merge output MUST satisfy transport protocol coverage whenever it contains `transports`.
 
+### 4.14 Native MCP Projection
+
+Native projection produces the MCP values that a server returns from `tools/list`, `resources/list`, `resources/templates/list`, and `prompts/list` for one MCP revision. Unlike the Effective Protocol View (Section 4.12), its result is not an MCP Description document.
+
+Native projection `N_V(D, k, i)` takes a document `D`, an MCP revision `V`, a primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an identifier `i`: the Tool `name`, Resource `uri`, Resource Template `uriTemplate`, or Prompt `name`, which is unique within `P_V(D)` (Sections 9.5, 10.5, and 11.5). A conforming native projection implementation MUST:
+
+1. <a id="req-native-projection-source-valid"></a>validate `D` and fail with `projection-source-invalid` when validation reports an error;
+2. <a id="req-native-projection-revision-declared"></a>require `V` to occur in root `protocolVersions`, otherwise fail with `projection-revision-not-declared`;
+3. <a id="req-native-projection-declaration-applicable"></a>select the declaration of kind `k` with identifier `i` in `P_V(D)`, otherwise fail with `projection-declaration-not-applicable`;
+4. <a id="req-native-projection-references-resolved"></a>resolve every Reference Object in Tool `inputSchema` and `outputSchema` (Section 17);
+5. <a id="req-native-projection-fields"></a>build the value from the declaration fields that the MCP type of `k` defines in `V`, copying each value unchanged, where Prompt `arguments` entries and `icons` entries keep only the fields that MCP `PromptArgument` and `Icon` define in `V`; and
+6. <a id="req-native-projection-postcondition"></a>validate the value against the definition of that MCP type in the pinned MCP `schema.json` of `V`, and fail with `projection-postcondition-failed`, without returning the value, when it does not validate.
+
+Because validation already rejects fields that `V` does not define, step 5 removes only MCP Description metadata: `protocolVersions`, `examples`, `interactionExamples`, `completionExamples`, `tags`, `elicitations`, `deprecated`, `security`, `clientRequirements`, and the `x-*` specification extensions of the declaration, its Prompt arguments, and its icons. Embedded JSON Schema keywords in `inputSchema` and `outputSchema`, including `x-*` keywords and `x-mcp-header`, and `_meta` entries are copied unchanged.
+
+<a id="req-native-projection-no-synthesis"></a>Native projection MUST NOT add a field that the declaration does not contain, materialize a protocol default, copy a value into another field, or rewrite a value. An absent annotation hint stays absent, `execution.taskSupport` is not set to `"forbidden"`, no `$schema` is inserted into an embedded schema, and a Prompt argument without `required` stays without it. `deprecated` has no MCP counterpart and is omitted rather than moved into `_meta` or `description`.
+
+<a id="req-native-projection-lists"></a>The list projection of kind `k` for `V` is the sequence of `N_V(D, k, i)` for every declaration of kind `k` in `P_V(D)`, in document order. A failure for any declaration fails the whole list.
+
+A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation; implementations MUST NOT repair the value.
+
+The `projection-fixtures/` folder of this specification gives, for each kind and supported revision, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
+

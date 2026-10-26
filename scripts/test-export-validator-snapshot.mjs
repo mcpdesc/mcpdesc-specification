@@ -52,6 +52,9 @@ try {
     candidate.schemaPath,
     `${candidate.specificationRoot}/fixtures`
   ]) copy(relativePath);
+  const projectionFixtures = `${candidate.specificationRoot}/projection-fixtures`;
+  const hasProjectionFixtures = fs.existsSync(path.join(root, projectionFixtures));
+  if (hasProjectionFixtures) copy(projectionFixtures);
 
   git('init', '--quiet');
   git('config', 'user.email', 'test@example.com');
@@ -98,6 +101,17 @@ try {
   assert.equal(runtime.validate(fixture('expected-invalid', 'invalid-mcp-header-value.json')).valid, false);
   assert.equal(runtime.validate(fixture('expected-invalid', 'invalid-mcp-header-placement.json')).valid, false);
   assert.equal(runtime.validate(fixture('expected-invalid', 'duplicate-mcp-header.json')).valid, false);
+
+  if (hasProjectionFixtures) {
+    const cases = fs.readdirSync(path.join(output, 'projection-fixtures')).filter((name) => name.endsWith('.json'));
+    assert.ok(cases.length > 0, 'projection fixtures are exported');
+    for (const name of cases) {
+      const { document } = JSON.parse(fs.readFileSync(path.join(output, 'projection-fixtures', name), 'utf8'));
+      if (typeof document === 'string') {
+        assert.ok(fs.existsSync(path.join(output, 'projection-fixtures', document)), `${name}: ${document} resolves in the bundle`);
+      }
+    }
+  }
 } finally {
   fs.rmSync(repository, { recursive: true, force: true });
 }

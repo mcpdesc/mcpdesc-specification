@@ -125,7 +125,8 @@ A conforming implementation MUST:
    `inputSchema` and `outputSchema`; Section 17);
 5. build the value from the fields that both the declaration contains and the
    MCP type of `k` in `V` defines, copying each value unchanged; Prompt
-   `arguments` entries keep the fields that `PromptArgument` defines;
+   `arguments` entries and `icons` entries keep the fields that
+   `PromptArgument` and `Icon` define;
 6. check the value against the definition of that type in the pinned
    `schema.json` of `V`; a failure is reported as
    `projection-postcondition-failed` and the value is not returned.
@@ -140,9 +141,15 @@ Description fields.
 | --- | --- |
 | MCP fields that `V` defines for the type (Background table) | Copied unchanged |
 | Tool `inputSchema`, `outputSchema` | Copied after reference resolution; embedded keywords, including `x-*` and `x-mcp-header`, are kept |
-| `annotations`, `_meta`, `icons`, Tool `execution` | Copied unchanged when `V` defines them |
+| `annotations`, `_meta`, Tool `execution` | Copied unchanged when `V` defines them |
+| `icons`, Prompt `arguments` | Each entry keeps the fields that MCP `Icon` or `PromptArgument` defines in `V` |
 | `protocolVersions`, `examples`, `interactionExamples`, `completionExamples`, `tags`, `elicitations`, `deprecated`, `security`, `clientRequirements` | Omitted |
-| Declaration-level `x-*` specification extensions | Omitted |
+| `x-*` specification extensions on the declaration, its Prompt arguments, and its icons | Omitted |
+
+MCP Description allows `x-*` properties on Icon and Prompt Argument objects,
+but MCP's `Icon` and `PromptArgument` types are closed. Copying those entries
+unchanged would produce values that MCP's types do not allow, and the
+generated `schema.json` would not detect it.
 
 `deprecated` has no field in any of the four MCP types; it is omitted rather
 than moved to `_meta` or `description`.
@@ -211,17 +218,24 @@ file per case:
 }
 ```
 
-`document` is a path to a fixture or an inline document. `kind` is `tool`,
-`resource`, `resourceTemplate`, or `prompt`. A case has either `expected`, the
-exact MCP value, or `expectedError`, a diagnostic code. A list case omits
-`identifier` and has an `expected` array. Comparison is by canonical JSON
-(`scripts/canonical-json.mjs`), so key order does not matter.
+`document` is a path relative to the case file, either to a source document
+under `projection-fixtures/documents/` or to a conformance fixture under
+`../fixtures/`, or an inline document. `kind` is `tool`, `resource`,
+`resourceTemplate`, or `prompt`. A case has either `expected`, the exact MCP
+value, or `expectedError`, a diagnostic code. A list case omits `identifier`
+and has an `expected` array. Comparison is by canonical JSON
+(`scripts/canonical-json.mjs`), so key order does not matter. The case format
+is published as `projection-fixtures/schema/projection-case.schema.json`;
+cases are the JSON files directly under `projection-fixtures/`.
 
-The fixtures cover at least, for each kind: each revision boundary in the
-Background table; every omitted MCP Description field; absent defaults staying
-absent; one list case; and each error code. They also cover Tool component
-references in both schemas, `execution` kept for MCP 2025-11-25 only, and an
-array `outputSchema` for MCP 2026-07-28.
+The fixtures cover at least, for each kind: a projected declaration for every
+supported revision, which includes each revision boundary in the Background
+table; every omitted MCP Description field; absent defaults staying absent;
+one list case; and each error code except `projection-postcondition-failed`,
+which only a defect can produce. They also cover Tool component references in
+both schemas, `execution` kept for MCP 2025-11-25 only, an array
+`outputSchema` for MCP 2026-07-28, and `x-*` extensions on icons and Prompt
+arguments.
 
 ## Validation of the fixtures in this repository
 
@@ -229,12 +243,19 @@ This repository contains no projection code. It checks the fixtures with what
 it already has:
 
 - every `document` validates without errors with the candidate validator,
-  except cases expecting `projection-source-invalid`;
+  except cases expecting `projection-source-invalid`, which must have errors;
+- the revision is in root `protocolVersions`, except cases expecting
+  `projection-revision-not-declared`;
 - every `expected` value validates against the definition of its type in the
   pinned `schema.json` of its revision;
-- no `expected` value contains an MCP Description field from Section 2;
 - every `identifier` exists in `P_V(document)` for its kind, unless the case
-  expects `projection-declaration-not-applicable`.
+  expects `projection-declaration-not-applicable`, and list entries follow the
+  view's document order;
+- every `expected` value equals the selected declaration, after reference
+  resolution, without the MCP Description fields of Section 2. Validation
+  already rejects fields that the revision does not define, so this pins every
+  field without a second field table;
+- the coverage above is complete.
 
 The fixtures are exported with the validator snapshot bundle.
 

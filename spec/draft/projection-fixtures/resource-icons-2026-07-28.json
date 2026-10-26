@@ -1,0 +1,19 @@
+{
+  "description": "icons appear from MCP 2025-11-25.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2026-07-28",
+  "kind": "resource",
+  "identifier": "file:///etc/app.json",
+  "expected": {
+    "uri": "file:///etc/app.json",
+    "name": "config",
+    "mimeType": "application/json",
+    "title": "Application configuration",
+    "icons": [
+      {
+        "src": "https://example.com/config.svg",
+        "mimeType": "image/svg+xml"
+      }
+    ]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "description": "No report declaration applies to MCP 2024-11-05.",
+  "document": "documents/tools.json",
+  "revision": "2024-11-05",
+  "kind": "tool",
+  "identifier": "report",
+  "expectedError": "projection-declaration-not-applicable"
+}

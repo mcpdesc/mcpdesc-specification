@@ -1,0 +1,177 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "projection-tools",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2024-11-05",
+    "2025-03-26",
+    "2025-06-18",
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "description": "Search the catalog.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "tags": [
+        "catalog"
+      ],
+      "deprecated": true,
+      "x-example-owner": "catalog-team"
+    },
+    {
+      "name": "report",
+      "protocolVersions": [
+        "2025-03-26"
+      ],
+      "description": "Build a usage report.",
+      "inputSchema": {
+        "type": "object"
+      },
+      "annotations": {
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "report",
+      "protocolVersions": [
+        "2025-06-18"
+      ],
+      "title": "Usage report",
+      "description": "Build a usage report.",
+      "inputSchema": {
+        "type": "object"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total"
+        ]
+      },
+      "annotations": {
+        "title": "Usage report",
+        "readOnlyHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "example.com/team": "reports"
+      },
+      "examples": {
+        "weekly": {
+          "input": {},
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "{\"total\":3}"
+              }
+            ],
+            "structuredContent": {
+              "total": 3
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "report",
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "title": "Usage report",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "x-ui-order": 1
+          }
+        }
+      },
+      "outputSchema": {
+        "$componentRef": "#/components/schemas/ReportOutput"
+      },
+      "icons": [
+        {
+          "src": "https://example.com/report.png",
+          "mimeType": "image/png"
+        }
+      ],
+      "execution": {
+        "taskSupport": "optional"
+      },
+      "deprecated": false
+    },
+    {
+      "name": "report",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "title": "Usage report",
+      "inputSchema": {
+        "$componentRef": "#/components/schemas/ReportInput"
+      },
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        }
+      },
+      "icons": [
+        {
+          "src": "https://example.com/report.png",
+          "mimeType": "image/png",
+          "theme": "light",
+          "x-example-alt": "Bar chart"
+        }
+      ],
+      "_meta": {
+        "example.com/team": "reports"
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "ReportInput": {
+        "type": "object",
+        "properties": {
+          "region": {
+            "type": "string",
+            "x-mcp-header": "Region"
+          }
+        }
+      },
+      "ReportOutput": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total"
+        ]
+      }
+    }
+  }
+}

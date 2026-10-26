@@ -1,0 +1,8 @@
+{
+  "description": "A document with validation errors is not projected.",
+  "document": "../fixtures/expected-invalid/invalid-prompt-example-semantics.json",
+  "revision": "2025-03-26",
+  "kind": "prompt",
+  "identifier": "city_briefing",
+  "expectedError": "projection-source-invalid"
+}

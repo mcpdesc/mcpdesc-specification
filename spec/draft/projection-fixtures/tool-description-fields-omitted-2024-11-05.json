@@ -1,0 +1,22 @@
+{
+  "description": "tags, deprecated, and a specification extension are omitted; only Tool fields defined in MCP 2024-11-05 remain.",
+  "document": "documents/tools.json",
+  "revision": "2024-11-05",
+  "kind": "tool",
+  "identifier": "search",
+  "expected": {
+    "name": "search",
+    "description": "Search the catalog.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ]
+    }
+  }
+}

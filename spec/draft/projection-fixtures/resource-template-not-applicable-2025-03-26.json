@@ -1,0 +1,8 @@
+{
+  "description": "The user-profile template applies only from MCP 2025-06-18.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2025-03-26",
+  "kind": "resourceTemplate",
+  "identifier": "users://{id}/profile",
+  "expectedError": "projection-declaration-not-applicable"
+}

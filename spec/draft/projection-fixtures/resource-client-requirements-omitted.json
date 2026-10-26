@@ -1,0 +1,11 @@
+{
+  "description": "clientRequirements are omitted.",
+  "document": "../fixtures/expected-valid/client-capability-requirements.json",
+  "revision": "2025-06-18",
+  "kind": "resource",
+  "identifier": "workspace://current",
+  "expected": {
+    "uri": "workspace://current",
+    "name": "current_workspace"
+  }
+}

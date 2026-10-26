@@ -1,0 +1,8 @@
+{
+  "description": "MCP 2025-06-18 is absent from root protocolVersions.",
+  "document": "../fixtures/expected-valid/protocol-scoped-primitives.json",
+  "revision": "2025-06-18",
+  "kind": "tool",
+  "identifier": "run_job",
+  "expectedError": "projection-revision-not-declared"
+}

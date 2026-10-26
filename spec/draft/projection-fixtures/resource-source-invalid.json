@@ -1,0 +1,8 @@
+{
+  "description": "A document with validation errors is not projected.",
+  "document": "../fixtures/expected-invalid/invalid-resource-annotations.json",
+  "revision": "2024-11-05",
+  "kind": "resource",
+  "identifier": "test://resource",
+  "expectedError": "projection-source-invalid"
+}

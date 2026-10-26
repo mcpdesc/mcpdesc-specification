@@ -173,11 +173,23 @@ for (const filename of files) {
 
     const ruleCodes = new Set(rule.diagnostics.map((diagnostic) => diagnostic.code));
     for (const code of ruleCodes) {
-      if (!emittedCodes.has(code)) fail(`${where}: diagnostic code ${code} is not emitted by the candidate validator`);
+      // External rules are enforced outside the validator, for example native projection in @mcpdesc/core.
+      if (rule.enforcement !== 'external' && !emittedCodes.has(code)) fail(`${where}: diagnostic code ${code} is not emitted by the candidate validator`);
       coveredCodes.add(code);
     }
 
     for (const { path: fixture, pointer } of rule.fixtures) {
+      if (fixture.startsWith('projection-fixtures/')) {
+        const full = path.join(specificationDirectory, fixture);
+        if (!fs.existsSync(full)) {
+          fail(`${where}: missing fixture ${fixture}`);
+          continue;
+        }
+        const testCase = JSON.parse(fs.readFileSync(full, 'utf8'));
+        if (!resolvePointer(testCase, pointer).found) fail(`${where}: pointer ${JSON.stringify(pointer)} does not resolve in ${fixture}`);
+        if (testCase.expectedError && !ruleCodes.has(testCase.expectedError)) fail(`${where}: ${fixture} expects ${testCase.expectedError}, which the rule does not declare`);
+        continue;
+      }
       if (!fs.existsSync(path.join(fixtureRoot, fixture))) {
         fail(`${where}: missing fixture ${fixture}`);
         continue;

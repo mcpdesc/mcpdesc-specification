@@ -1,0 +1,20 @@
+{
+  "description": "tags, deprecated, and a specification extension are omitted; size and annotations are copied.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2024-11-05",
+  "kind": "resource",
+  "identifier": "file:///docs/readme.md",
+  "expected": {
+    "uri": "file:///docs/readme.md",
+    "name": "readme",
+    "description": "Project overview.",
+    "mimeType": "text/markdown",
+    "size": 1024,
+    "annotations": {
+      "audience": [
+        "user"
+      ],
+      "priority": 0.5
+    }
+  }
+}

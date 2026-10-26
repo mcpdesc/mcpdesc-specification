@@ -1,0 +1,8 @@
+{
+  "description": "The audit Resource applies only to MCP 2026-07-28.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2025-11-25",
+  "kind": "resource",
+  "identifier": "file:///var/audit.log",
+  "expectedError": "projection-declaration-not-applicable"
+}

@@ -61,6 +61,8 @@ const schemaSource = path.join(
   `${version}.json`,
 );
 const fixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'fixtures');
+const projectionFixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'projection-fixtures');
+const projectionFixtureTarget = path.join(output, 'projection-fixtures');
 const baseSource = path.join(root, 'scripts', 'validator-base.mjs');
 for (const [source, label] of [
   [schemaSource, `schema for ${version}`],
@@ -107,6 +109,8 @@ if (semantic.includes('../schemas/') || semantic.includes('validator-base.mjs'))
 
 fs.mkdirSync(runtimeTarget, { recursive: true });
 fs.cpSync(fixtureSource, fixtureTarget, { recursive: true });
+// Projection cases reference ../fixtures/, so both folders keep their relative layout.
+if (fs.existsSync(projectionFixtureSource)) fs.cpSync(projectionFixtureSource, projectionFixtureTarget, { recursive: true });
 fs.copyFileSync(schemaSource, path.join(runtimeTarget, 'schema.json'));
 fs.copyFileSync(baseSource, path.join(runtimeTarget, 'base.js'));
 fs.writeFileSync(path.join(runtimeTarget, 'semantic.js'), semantic);
@@ -131,6 +135,7 @@ function filesUnder(directory, prefix) {
 const files = [
   ...filesUnder(runtimeTarget, 'runtime'),
   ...filesUnder(fixtureTarget, 'fixtures'),
+  ...(fs.existsSync(projectionFixtureTarget) ? filesUnder(projectionFixtureTarget, 'projection-fixtures') : []),
 ]
   .sort()
   .map((relativePath) => ({

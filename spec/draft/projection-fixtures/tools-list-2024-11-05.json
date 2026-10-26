@@ -1,0 +1,23 @@
+{
+  "description": "Declarations scoped to other revisions are not listed.",
+  "document": "documents/tools.json",
+  "revision": "2024-11-05",
+  "kind": "tool",
+  "expected": [
+    {
+      "name": "search",
+      "description": "Search the catalog.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    }
+  ]
+}

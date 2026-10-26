@@ -1,0 +1,41 @@
+{
+  "description": "A component outputSchema is resolved; $schema and custom keywords are kept; icons and execution are copied; deprecated is omitted.",
+  "document": "documents/tools.json",
+  "revision": "2025-11-25",
+  "kind": "tool",
+  "identifier": "report",
+  "expected": {
+    "name": "report",
+    "inputSchema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "properties": {
+        "period": {
+          "type": "string",
+          "x-ui-order": 1
+        }
+      }
+    },
+    "title": "Usage report",
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "total"
+      ]
+    },
+    "icons": [
+      {
+        "src": "https://example.com/report.png",
+        "mimeType": "image/png"
+      }
+    ],
+    "execution": {
+      "taskSupport": "optional"
+    }
+  }
+}

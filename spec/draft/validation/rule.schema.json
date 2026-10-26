@@ -205,8 +205,9 @@
             "additionalProperties": false,
             "properties": {
               "path": {
+                "description": "A validation fixture relative to fixtures/, or a native projection case under projection-fixtures/.",
                 "type": "string",
-                "pattern": "^expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)$"
+                "pattern": "^(expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)|projection-fixtures/[a-z0-9-]+\\.json)$"
               },
               "pointer": {
                 "description": "JSON Pointer to the fragment that illustrates the rule; the empty string selects the whole document.",

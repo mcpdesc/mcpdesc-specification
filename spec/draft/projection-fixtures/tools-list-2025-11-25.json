@@ -1,0 +1,57 @@
+{
+  "description": "The Tool list contains every Tool of the Effective Protocol View, in document order.",
+  "document": "documents/tools.json",
+  "revision": "2025-11-25",
+  "kind": "tool",
+  "expected": [
+    {
+      "name": "search",
+      "description": "Search the catalog.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "report",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "x-ui-order": 1
+          }
+        }
+      },
+      "title": "Usage report",
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "total"
+        ]
+      },
+      "icons": [
+        {
+          "src": "https://example.com/report.png",
+          "mimeType": "image/png"
+        }
+      ],
+      "execution": {
+        "taskSupport": "optional"
+      }
+    }
+  ]
+}

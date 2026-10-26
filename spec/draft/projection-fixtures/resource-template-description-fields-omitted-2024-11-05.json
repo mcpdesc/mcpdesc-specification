@@ -1,0 +1,18 @@
+{
+  "description": "deprecated is omitted; annotations are copied.",
+  "document": "documents/resources-and-prompts.json",
+  "revision": "2024-11-05",
+  "kind": "resourceTemplate",
+  "identifier": "file:///logs/{date}.log",
+  "expected": {
+    "uriTemplate": "file:///logs/{date}.log",
+    "name": "logs",
+    "description": "Daily logs.",
+    "mimeType": "text/plain",
+    "annotations": {
+      "audience": [
+        "assistant"
+      ]
+    }
+  }
+}
