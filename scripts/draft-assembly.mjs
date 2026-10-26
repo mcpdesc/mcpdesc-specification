@@ -17,7 +17,6 @@ export function assembleSpecification(root, versionDirectory = 'draft') {
     .replaceAll('../PROPOSALS.md', 'PROPOSALS.md')
     .replaceAll('../examples/', 'examples/')
     .replaceAll('../fixtures/', 'fixtures/')
-    .replaceAll('../validation/', 'validation/')
     .replaceAll('../../../schemas/', '../../schemas/');
 
   return { content: `${content}\n`, sections };

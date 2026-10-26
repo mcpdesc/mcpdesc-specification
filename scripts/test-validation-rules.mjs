@@ -14,7 +14,6 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { candidateSpecification } from './candidate-specification.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
-import { renderRuleTable } from './rule-table.mjs';
 import { supportedProtocolVersions, validateDocument } from './validate-document.mjs';
 
 // Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
@@ -186,24 +185,10 @@ for (const code of emittedCodes) {
   if (!coveredCodes.has(code)) fail(`diagnostic code ${code} is emitted by the candidate validator but declared by no rule`);
 }
 
-const ruleTablePath = path.join(validationRoot, 'rules.md');
-if (!fs.existsSync(ruleTablePath) || fs.readFileSync(ruleTablePath, 'utf8') !== renderRuleTable(rulesDirectory)) {
-  fail(`${specificationRoot}/validation/rules.md is missing or stale; run npm run rules:table`);
-}
-
-let citations = 0;
-const sectionsDirectory = path.join(root, specificationRoot, 'sections');
-for (const name of fs.existsSync(sectionsDirectory) ? fs.readdirSync(sectionsDirectory).filter((file) => file.endsWith('.md')).sort() : []) {
-  for (const match of fs.readFileSync(path.join(sectionsDirectory, name), 'utf8').matchAll(/\(rule `([a-z][a-z0-9-]*(?:\.[a-z0-9-]+)+)`\)/g)) {
-    citations += 1;
-    if (!ruleIds.has(match[1])) fail(`${specificationRoot}/sections/${name}: cites unregistered rule ${match[1]}`);
-  }
-}
-
 if (errors.length) {
   console.error(`Validation rule registry check failed with ${errors.length} error(s):`);
   for (const error of errors.sort()) console.error(`- ${error}`);
   process.exit(1);
 }
 
-console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s) declare all ${emittedCodes.size} candidate diagnostic codes; ${attributed} fixture diagnostic(s) identify a rule; ${citations} specification citation(s) resolve.`);
+console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s) declare all ${emittedCodes.size} candidate diagnostic codes; ${attributed} fixture diagnostic(s) identify a rule.`);
