@@ -75,8 +75,9 @@ documents in this repository, 43 are valid 0.9.0 documents after changing only
 - Rewriting a document into a preferred style, for example merging variants
   that were split only because 0.8.0 required it. Such changes are optional
   author edits, not conversion.
-- Conversion from 0.7.0 to 0.8.0 in this proposal. The chaining model admits
-  it later (open question 3).
+- Conversion from 0.7.0 to 0.8.0. The chaining model admits it later, but
+  0.8.0 changed the document structure (root `protocolVersions`, scoped
+  capabilities, named security schemes) in ways that need author input.
 - Any change to the 0.9.0 schema or to document validity.
 
 ## Background and primary references
@@ -112,6 +113,15 @@ Conversion `C(D, S, T)` takes a document `D`, its source version `S`, and a
 target version `T`, where `T` is the version that directly follows `S`. It
 produces a result with a `status`, a list of diagnostics, and, when the status
 is `converted`, the converted document and a patch.
+
+`S` and `T` are validator selectors, not bare versions. The source selector
+is the current validator revision of `S`; for 0.8.0 it is
+`0.8.0-rev.20261021`, which corrects defects of `0.8.0`. The target selector
+is pinned: during a working draft it names the draft snapshot, for example
+`0.9.0-draft.2`, because conversion rules may change between snapshots; after
+the stable release it is the stable version. The converted document records
+the target version in `mcpdesc` and, when present, the target schema
+identifier in `$schema`.
 
 A conforming implementation MUST:
 
@@ -357,22 +367,10 @@ hint that the author relied on.
 
 ## Open questions
 
-1. Which 0.8.0 validator selector does the precondition use: `0.8.0` or the
-   current revision `0.8.0-rev.20261021`? The revision corrects defects, so
-   documents valid only under `0.8.0` are rare but possible.
-2. Is the target the version (`0.9.0`) or the pinned selector
-   (`0.9.0-draft.1`)? During the draft, conversion rules change between
-   snapshots.
-3. Should 0.7.0 to 0.8.0 conversion be defined? 0.8.0 had larger structural
-   changes (root `protocolVersions`, scoped capabilities, named security
-   schemes), some of which need author input.
-4. Should native projection of an earlier-version document (Section 8) be
+1. Should native projection of an earlier-version document (Section 8) be
    implicit in core, or require two explicit calls?
-5. Are conversion rules normative text in the target version, or a
+2. Are conversion rules normative text in the target version, or a
    non-normative tooling profile with fixtures?
-6. Resource `size` is `number` in MCP Description 0.9.0 and MCP `schema.ts`,
-   but `integer` in the pinned MCP `schema.json`. That affects projection, not
-   conversion, and is tracked separately.
 
 ## Implementation and validation plan
 
@@ -389,4 +387,19 @@ hint that the author relied on.
 
 ## Decision record
 
-Pending.
+Decided by the maintainer on 2026-10-27, before acceptance:
+
+- The source selector is the current validator revision of the source
+  version (`0.8.0-rev.20261021`); see Section 1.
+- The target selector is pinned per draft snapshot, and becomes the stable
+  version at release; see Section 1.
+- Conversion from 0.7.0 to 0.8.0 is out of scope; see Non-goals.
+- MCP Description 0.9.0-draft.1 accepts fractions for Resource `size`,
+  resource link `size`, and Resource example `ttlMs`, which MCP's generated
+  schema types as integers. This affects projection and examples, not
+  conversion, and is arbitrated in
+  [issue #84](https://github.com/mcpdesc/mcpdesc-specification/issues/84). If
+  the outcome tightens the 0.9.0 schema, it adds a conversion rule without an
+  automatic fix.
+
+Acceptance pending.
