@@ -22,12 +22,14 @@ prevents it. It never changes meaning on its own. Changes that alter meaning
 are fixes the author requests explicitly.
 
 Conversion lets native MCP projection (Proposal 0025) stay defined for one
-version. A document of an earlier version is converted first, then projected.
-The same operation gives the mcpcontract CLI and the mcpdesc live editor a
-migration command that reports exact blockers instead of pointing at a guide.
+version. A document of an earlier version is converted first, then projected,
+in two explicit steps. The same operation gives the mcpcontract CLI and the
+mcpdesc live editor a migration command that reports exact blockers instead of
+pointing at a guide.
 
+Conversion is a tooling profile, not part of MCP Description conformance.
 This repository owns the conversion rules and conversion fixtures.
-`@mcpdesc/core` contains the single implementation.
+`@mcpdesc/core` contains the reference implementation.
 
 ## Problem
 
@@ -63,8 +65,8 @@ documents in this repository, 43 are valid 0.9.0 documents after changing only
   diagnostic that caused it.
 - Offer named, opt-in fixes for blockers that have an unambiguous remedy.
 - Return a minimal edit set so editors keep YAML comments and key order.
-- Define native projection of earlier-version documents as conversion followed
-  by projection.
+- Define native projection of earlier-version documents as an explicit
+  conversion followed by an explicit projection.
 - Detect, through fixtures, any incompatibility between two versions that no
   conversion rule declares.
 
@@ -105,7 +107,24 @@ changelog):
 | Result `_meta` accepted in all revisions; root `_meta` from MCP 2025-06-18 | None (more permissive) |
 | Diagnostics gain `rule`; numeric array indices in paths | None (validator output, not documents) |
 
-## Proposed normative behavior
+## Proposed behavior
+
+### 0. Status of conversion
+
+Conversion is a tooling profile published with the target version. It is not
+part of MCP Description conformance: document validity, validator
+conformance, and native projection do not depend on it, and a converted
+document is judged only by validating it against the target version.
+
+The requirements of this section use MUST and SHOULD for implementations that
+claim the conversion profile for a version pair, such as "MCP Description
+conversion 0.8.0 to 0.9.0". A tool that does not claim the profile is not
+bound by them and remains responsible for its output. The profile guarantees,
+for any implementation that claims it, that:
+
+- an automatic rewrite never changes meaning;
+- an incompatibility is reported as a blocker, never resolved silently;
+- a fix is applied only when the author requests it.
 
 ### 1. Definition
 
@@ -123,7 +142,7 @@ the stable release it is the stable version. The converted document records
 the target version in `mcpdesc` and, when present, the target schema
 identifier in `$schema`.
 
-A conforming implementation MUST:
+An implementation of the profile MUST:
 
 1. validate `D` against `S`, and stop with status `invalid-source` and the
    diagnostic `conversion-source-invalid` if validation reports an error;
@@ -164,9 +183,12 @@ The 0.8.0 to 0.9.0 rules:
 | `mcpdesc.conversion.0-8-to-0-9.client-requirements-closed` | `mcp.client-capabilities.members` | `remove-property`, `move-to-experimental` |
 | `mcpdesc.conversion.0-8-to-0-9.completion-result-closed` | `mcp.completion.result-closed` | `remove-property` |
 | `mcpdesc.conversion.0-8-to-0-9.uri-template-checked` | `mcp.resource-template.uri-template` | none |
+| `mcpdesc.conversion.0-8-to-0-9.integer-numbers` | `mcp.resource.size`, `mcp.cacheable-result.ttl-ms` ([Proposal 0029](0029-integer-mcp-numbers.md)) | none; rounding would change the value |
 
-The rule identifiers in the second column are those of the 0.9.0-draft.1 rule
-registry and are revised with it.
+The rule identifiers in the second column are those of the target rule
+registry and are revised with it. Conversion rules are not validation rules:
+they are recorded as data with the conversion fixtures, not in the validation
+rule registry, and they cite no requirement anchors.
 
 ### 4. Blockers
 
@@ -211,13 +233,15 @@ step.
 
 ### 8. Native projection of earlier versions
 
-For a document `D` of an earlier version, native projection to MCP revision
-`V` is `N_V(C*(D))`, where `C*` chains conversions to the version that defines
-native projection. A projection is possible only if every conversion returns
-`converted` without fixes. An implementation that offers this MUST report the
-conversion (source version, target version, converter version) with the
-projected value, and MUST report conversion blockers rather than projection
-errors when conversion fails.
+Native projection is always explicit and applies only to documents of a
+version that defines it. To project a document of an earlier version, a caller
+converts it (Section 1), then projects the converted document. A projection
+implementation MUST NOT convert implicitly: given a document of a version
+without native projection, it reports that the version is not supported.
+
+Tools such as the CLI or the live editor MAY offer both steps in one user
+action, provided they show the conversion result, including its patch and
+warnings, and project only a `converted` result.
 
 ### 9. Diagnostics
 
@@ -286,13 +310,13 @@ this patch:
 
 ## Conversion fixtures
 
-Conversion fixtures live in `spec/<version>/conversion-fixtures/`, in the
+Conversion fixtures live in `spec/<version>/conversion/fixtures/`, in the
 target version, one JSON file per case:
 
 ```json
 {
   "description": "Unknown Tool Annotation property blocks conversion.",
-  "document": "../../0.8.0/fixtures/expected-valid/distinct-tool-and-resource-annotations.json",
+  "document": "../../../0.8.0/fixtures/expected-valid/distinct-tool-and-resource-annotations.json",
   "from": "0.8.0",
   "to": "0.9.0",
   "expectedBlockers": [
@@ -367,23 +391,21 @@ hint that the author relied on.
 
 ## Open questions
 
-1. Should native projection of an earlier-version document (Section 8) be
-   implicit in core, or require two explicit calls?
-2. Are conversion rules normative text in the target version, or a
-   non-normative tooling profile with fixtures?
+None at this time.
 
 ## Implementation and validation plan
 
 1. Proposal pull request (this document); iterate with the implementation.
-2. `spec/draft/conversion-fixtures/` with the case schema, seeded from the 45
-   valid 0.8.0 documents (43 expected conversions, 2 expected blocker sets)
-   and per-rule cases.
-3. Conversion rule records in the validation rule registry, and a test script
-   in `npm test`.
-4. Normative section in the 0.9.0 draft, changelog entry, and migration guide
-   update.
-5. Implementation in `@mcpdesc/core` that passes the fixtures; then CLI and
-   live-editor integration.
+2. `spec/draft/conversion/` with a README describing the profile, the
+   0.8.0 to 0.9.0 conversion rules as data, and `fixtures/` with
+   the case schema, seeded from the 45 valid 0.8.0 documents and per-rule
+   cases.
+3. A test script in `npm test`, and the exporter bundling the conversion
+   directory for core intake.
+4. Changelog entry and a migration guide section that maps each step to a
+   conversion rule or fix. No change to the normative sections.
+5. Reference implementation in `@mcpdesc/core` that passes the fixtures; then
+   CLI and live-editor integration.
 
 ## Decision record
 
@@ -396,10 +418,14 @@ Decided by the maintainer on 2026-10-27, before acceptance:
 - Conversion from 0.7.0 to 0.8.0 is out of scope; see Non-goals.
 - MCP Description 0.9.0-draft.1 accepts fractions for Resource `size`,
   resource link `size`, and Resource example `ttlMs`, which MCP's generated
-  schema types as integers. This affects projection and examples, not
-  conversion, and is arbitrated in
-  [issue #84](https://github.com/mcpdesc/mcpdesc-specification/issues/84). If
-  the outcome tightens the 0.9.0 schema, it adds a conversion rule without an
-  automatic fix.
+  schema types as integers. Arbitrated in
+  [issue #84](https://github.com/mcpdesc/mcpdesc-specification/issues/84) and
+  proposed in [Proposal 0029](0029-integer-mcp-numbers.md) for the same draft;
+  conversion rule `integer-numbers` covers it, without an automatic fix.
+- Native projection is always explicit; a projection implementation never
+  converts implicitly (Section 8).
+- Conversion is a non-normative tooling profile. Its guarantees bind tools
+  that claim the profile; document and validator conformance do not depend on
+  it (Section 0).
 
 Acceptance pending.
