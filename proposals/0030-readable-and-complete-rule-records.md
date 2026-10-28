@@ -1,6 +1,6 @@
 # Proposal 0030: Readable and Complete Rule Records
 
-- Status: Draft
+- Status: Review
 - Author(s): @ObjectIsAdvantag
 - Created: 2026-10-28
 - Target version: 0.9.0 (Community Working Draft 3)
@@ -118,6 +118,14 @@ every supported MCP revision maps to a value.
 A rule that performs the same check in every revision records `applies` for
 every revision. A delegated rule records the revisions for which its
 implementation must perform the check.
+
+An `applies` entry describes a conditional check, not an assertion that the
+same internal branches or failures occur in every protocol version. Existing
+cross-reference, form-consistency, completion-target, and interaction checks
+run wherever the relevant data occurs; other rules check whether that data is
+available in the protocol version. The 19 formerly omitted maps therefore use
+`applies` throughout, except the limited-validation warning, which applies
+only to MCP 2024-11-05 and 2025-03-26. No new `independent` value is added.
 
 ### 3. Rulesets
 
@@ -255,6 +263,13 @@ resolves to that commit; an untagged preparation bundle is not a publication.
 Generation must not require embedding its own future commit hash in tracked
 source files.
 
+`npm run rules:export -- <snapshot> <new-output> --prepare` allows a clean
+untagged commit for review and schema deployment; the default export requires
+an annotated tag at HEAD. `npm run rules:check-publication -- <snapshot>
+<bundle> --schema-only` verifies only the format schema before tagging, not
+catalog publication. Full publication verification requires the annotated tag
+to resolve to the manifest's source commit.
+
 Before a new format's schema is used, publish its exact bytes and verify its
 `$id`, digest, JSON media type, CORS, and immutable caching. After the approved
 specification tag exists, publish the corresponding catalog and manifest,
@@ -264,7 +279,11 @@ is not fixed by silently replacing a previously published catalog.
 
 Publication checks cover direct HTTP responses rather than an HTML fallback.
 Mutable index caching must allow consumers to discover updates, unlike the
-immutable artifact policy. Catalog publication is distinct from validator
+immutable artifact policy: the index must revalidate or have a cache lifetime
+of at most 300 seconds. `--index-out <new-file>` prepares an index update only
+after immutable publication and any existing index targets are verified;
+`--check-index` verifies the deployed index. These commands do not deploy
+anything. Catalog publication is distinct from validator
 snapshot intake: runtime bundles need not include the catalog unless a
 downstream consumer explicitly adopts that contract.
 
@@ -404,14 +423,11 @@ relative-path traversal outside their authorized source tree.
 
 ## Open questions
 
-1. Is 60 characters the right maximum for `title`, and 800 for `description`?
-2. Should a rule whose check does not depend on the revision be marked
-   explicitly, rather than by `applies` for every revision?
-3. Should the per-revision rulesets be renamed now that they include rules of
-   every owner, for example `mcpdesc.revision.<revision>`?
-4. Which deployment workflow publishes the generated bundle to mcpdesc.org,
-  and which maintainers approve the discovery-index update? The contract
-  above is independent of the hosting mechanism.
+Website deployment and importer integration remain downstream handoff work.
+The specification tooling prepares and verifies the artifacts; maintainers
+authorize deployment and the discovery-index update using the website's
+existing review process. This proposal does not introduce automatic hosting
+or publication authority.
 
 ## Implementation and validation plan
 
@@ -436,5 +452,13 @@ relative-path traversal outside their authorized source tree.
 
 On 2026-10-28, the maintainer requested this publication contract as part of
 Proposal 0030 and deferred Draft 3 publication until the expanded work is
-addressed. The prepared release branch remains unpublished. Acceptance and
-the remaining design questions are pending.
+addressed, then authorized implementation in Draft 3.
+
+Implementation choices for review: 60-character unique titles,
+800-character explanations, complete applicability without a separate
+independence marker, and the existing per-revision ruleset names with every
+owner included. Schema and catalogs use format 1.0.0, with manual verified
+deployment and explicit discovery updates. No live endpoint is implied by
+the implementation. The prepared release branch remains unpublished.
+
+Acceptance pending.
