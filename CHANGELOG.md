@@ -14,7 +14,11 @@ This changelog records repository governance, release-process, and project-tooli
 
 ## 2026-10-21
 
-- Corrected candidate validator semantics so MCP-specific JSON Schema annotations apply only to protocol revisions that define them, while unknown Tool-schema keywords remain preserved and governed by their JSON Schema dialect.
+- Published validator revision `v0.8.0-rev.20261021` (selector `0.8.0-rev.20261021`), correcting one semantic validation defect of the stable 0.8.0 release. The `v0.8.0` tag, canonical schema bytes, `$id`, and normative text are unchanged, and selector `0.8.0` keeps its original behavior.
+  - Correction: `x-mcp-header` in a Tool `inputSchema` is checked only when the Tool's effective protocol scope includes MCP 2026-07-28. Selector `0.8.0` reported `field-not-supported-by-version` whenever the scope also included an earlier revision, and applied the MCP 2026-07-28 header-value rules to Tools scoped only to earlier revisions. In those revisions `x-mcp-header` is an unknown JSON Schema keyword and is preserved. MCP-specific annotations now apply only to protocol revisions that define them; unknown Tool-schema keywords remain preserved and governed by their JSON Schema dialect.
+  - Normative source: MCP Description 0.8.0, [Section 9.2](spec/0.8.0/sections/09-tools.md#92-input-and-output-schemas). `x-mcp-header` is defined for MCP 2026-07-28 `inputSchema` properties only; MCP 2025-11-25 schemas must be valid under their declared or default dialect, JSON Schema 2020-12, which permits unknown keywords; for earlier revisions, other keywords "MUST be preserved and MUST NOT be rejected".
+  - Regression fixtures: `spec/0.8.0/fixtures/expected-invalid/revision-inapplicable-mcp-header.json` moved to `expected-valid/` and extended with header values that are invalid only under MCP 2026-07-28 rules; new `spec/0.8.0/fixtures/expected-valid/custom-tool-schema-keywords.json` combines `x-mcp-header` and custom keywords in a Tool scoped to MCP 2025-11-25 and 2026-07-28. Both are invalid under selector `0.8.0` and valid under the revision. `scripts/test-views.mjs` checks that MCP 2026-07-28 header rules still reject invalid values and that custom keywords survive projection, merge, and reference resolution.
+  - The revision was prepared on `main`, before the maintenance-branch policy of 2026-10-24; later revisions are prepared on `release/0.8.x`.
 - Added dated stable-revision validator snapshot selectors and manifest-verified export regression coverage.
 
 ## 2026-10-20
