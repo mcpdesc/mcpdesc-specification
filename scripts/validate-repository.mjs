@@ -258,7 +258,9 @@ const draftProposalSnapshots = [
   ['0024-validation-rule-identity-and-provenance.md', '62f1f8e726c69398f8bc3edc1c0bb737c9f5b53c', 'proposals/0024-validation-rule-identity-and-provenance.md', 'fc25d6b6a0fb47e1bc6aba31cb4b6e08cc31bc029319e3c66b2c8776eb732374'],
   ['0025-native-mcp-projection.md', 'a44be2a02c16230ac6aa1613c28c72eb0544eb35', 'proposals/0025-native-mcp-projection.md', '1e841a9c460d10fefb39b1ed9890c5819be7f89b446deebb63516e3fae1e07ec'],
   ['0026-open-mcp-results-in-examples.md', '3d4e5ce773f5f61ecb67177aa34cbfbb302d06e0', 'proposals/0026-open-mcp-results-in-examples.md', '3a50753bf217c0ceb5fb60f28766c05b06f073524eafc3c899661b6810d6cd3b'],
-  ['0027-closed-mcp-types.md', '609700bac005e182a0e65970b59f0a5c1f3dfc25', 'proposals/0027-closed-mcp-types.md', '8e83c57fc4c243bd8cde0e2d15c8f93e148311e54399445eecba171cb95a8f79']
+  ['0027-closed-mcp-types.md', '609700bac005e182a0e65970b59f0a5c1f3dfc25', 'proposals/0027-closed-mcp-types.md', '8e83c57fc4c243bd8cde0e2d15c8f93e148311e54399445eecba171cb95a8f79'],
+  ['0028-version-conversion.md', '192e5580270d94607f9d90ad1f97236b70c318a8', 'proposals/0028-version-conversion.md', '4ca5c8876ec115ba814f81456de88d32cc27cb4f0e48df1fa771e0958d108c4a'],
+  ['0029-integer-mcp-numbers.md', 'f6ce500cdbe3e051abbf219d1005fca212c87f96', 'proposals/0029-integer-mcp-numbers.md', 'be901a5ad909e9c30ff373928f61aa31bdb4954e23307161e34631ba4bea1127']
 ];
 
 function checkProposalSnapshots(specificationPath, snapshots) {

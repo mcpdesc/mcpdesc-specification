@@ -65,7 +65,7 @@ Metadata in a named example describes only that example. It does not define a re
 
 ### 3.6 Carried MCP Values
 
-Named examples carry MCP values: Tool Example and Tool Interaction Example `result`, Tool Interaction step `response` values for sampling, elicitation, and roots, Resource and Resource Template Example `result`, Prompt Example `result`, and completion example `result`, including values reached through component references. A carried value is validated for every MCP revision in the containing declaration's effective protocol scope, using the type that revision defines for it. A type accepts fields it does not list only if its definition in the revision's TypeScript schema declares or inherits an index signature; such a type is open, and every other type is closed.
+Named examples carry MCP values: Tool Example and Tool Interaction Example `result`, Tool Interaction step `response` values for sampling, elicitation, and roots, Resource and Resource Template Example `result`, Prompt Example `result`, and completion example `result`, including values reached through component references. A carried value is validated for every MCP revision in the containing declaration's effective protocol scope, using the type that revision defines for it. A type accepts fields it does not list only if its definition in the revision's TypeScript schema declares or inherits an index signature; such a type is open, and every other type is closed. <a id="req-mcp-integer-numbers"></a>A field that the revision's TypeScript schema declares as `number` is an integer unless the schema annotates it `@TJS-type number`, as in the JSON Schema that MCP generates from it.
 
 For each applicable revision and each field of a carried value:
 
@@ -77,7 +77,7 @@ JSON-RPC envelope fields and non-completed workflow fields are governed by the e
 
 Every result type carried by examples extends the open MCP `Result` in every supported revision. Sampling, elicitation, and roots responses extend `Result` through MCP 2025-11-25; in MCP 2026-07-28 they are closed input responses, and only the sampling response defines `_meta`. <a id="req-carried-nested-closed"></a>Nested objects such as content blocks, resource contents, roots, and the `completion` object of a completion result are closed.
 
-Example `result` values are completed results. When present, in every revision, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative number, and `cacheScope` MUST be `"public"` or `"private"`.
+Example `result` values are completed results. When present, in every revision, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative integer, and `cacheScope` MUST be `"public"` or `"private"`.
 
 A declaration covering several revisions MAY use one example map even when a field is defined by only some of them; authors MAY instead split the declaration into protocol-scoped variants to avoid the warnings. Because each warning is attributed to one revision, the warnings defined here for a document equal the union of those for its per-revision Effective Protocol Views.
 

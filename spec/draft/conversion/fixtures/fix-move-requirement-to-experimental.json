@@ -1,0 +1,35 @@
+{
+  "description": "Moving an unknown client requirement into the existing experimental map converts the document.",
+  "document": "../../../0.8.0/fixtures/expected-valid/client-capability-requirements.json",
+  "expectedPatch": [
+    {
+      "op": "replace",
+      "path": "/mcpdesc",
+      "value": "0.9.0"
+    },
+    {
+      "op": "replace",
+      "path": "/$schema",
+      "value": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json"
+    },
+    {
+      "from": "/prompts/0/clientRequirements/futureCapability",
+      "op": "move",
+      "path": "/prompts/0/clientRequirements/experimental/futureCapability"
+    }
+  ],
+  "expectedStatus": "converted",
+  "fixes": [
+    {
+      "fix": "move-to-experimental",
+      "path": [
+        "prompts",
+        0,
+        "clientRequirements",
+        "futureCapability"
+      ]
+    }
+  ],
+  "from": "0.8.0",
+  "to": "0.9.0"
+}

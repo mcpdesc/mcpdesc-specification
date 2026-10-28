@@ -50,6 +50,13 @@ applicable MCP revisions define (Section 8.5). Move custom requirements into
 
 Server capabilities were already closed in 0.8.0.
 
+## Integer numbers
+
+Resource `size`, the `size` of resource link content blocks, and Resource
+example result `ttlMs` are integers (Sections 3.6, 10.1.1, and 10.4.4), as in
+the JSON Schema MCP generates. Replace a fractional value with the intended
+integer; `1024.0` is already an integer.
+
 ## Tool schema dialects
 
 For MCP 2025-11-25 and later, a Tool `inputSchema` or `outputSchema` that
@@ -124,10 +131,28 @@ Other output changes:
    `_meta` only where the revision defines it.
 4. Move unknown client capability requirements into `experimental` or
    `extensions`.
-5. Move extra fields out of completion `completion` objects and out of MCP
-   2026-07-28 step responses.
-6. Validate against the 0.9.0 JSON Schema and semantic rules, and review the
+5. Move extra fields out of completion `completion` objects.
+6. Fix malformed `uriTemplate` values and fractional `size` or `ttlMs`
+   values.
+7. Validate against the 0.9.0 JSON Schema and semantic rules, and review the
    new warnings.
 
 A migration tool MUST report unresolved ambiguity instead of guessing, and
 MUST NOT move a value into `_meta` or `x-*` without author review.
+
+## Conversion
+
+The [conversion profile](../conversion/README.md) implements this algorithm
+for tools such as the mcpcontract CLI and the mcpdesc live editor. Steps 1, 2,
+and 7 are automatic. Steps 3 to 6 are blockers, each reported with a
+conversion rule and a path:
+
+| Step | Conversion rule | Fixes offered |
+| --- | --- | --- |
+| 3 | `mcpdesc.conversion.0-8-to-0-9.tool-annotations-closed`, `annotations-closed` | `remove-property` |
+| 4 | `mcpdesc.conversion.0-8-to-0-9.client-requirements-closed` | `remove-property`, `move-to-experimental` |
+| 5 | `mcpdesc.conversion.0-8-to-0-9.completion-result-closed` | `remove-property` |
+| 6 | `mcpdesc.conversion.0-8-to-0-9.uri-template-checked`, `integer-numbers` | none |
+
+A fix is applied only when the author requests it. Moving a value into
+`_meta` or `x-*` is never offered as a fix.

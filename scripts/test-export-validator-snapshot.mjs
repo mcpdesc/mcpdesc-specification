@@ -55,6 +55,15 @@ try {
   const projectionFixtures = `${candidate.specificationRoot}/projection-fixtures`;
   const hasProjectionFixtures = fs.existsSync(path.join(root, projectionFixtures));
   if (hasProjectionFixtures) copy(projectionFixtures);
+  const conversion = `${candidate.specificationRoot}/conversion`;
+  const hasConversion = fs.existsSync(path.join(root, conversion));
+  if (hasConversion) {
+    copy(conversion);
+    for (const name of fs.readdirSync(path.join(root, conversion, 'fixtures')).filter((entry) => entry.endsWith('.json'))) {
+      const { document } = JSON.parse(fs.readFileSync(path.join(root, conversion, 'fixtures', name), 'utf8'));
+      if (typeof document === 'string' && document.startsWith('../../../')) copy(`spec/${document.slice('../../../'.length)}`);
+    }
+  }
 
   git('init', '--quiet');
   git('config', 'user.email', 'test@example.com');
@@ -109,6 +118,19 @@ try {
       const { document } = JSON.parse(fs.readFileSync(path.join(output, 'projection-fixtures', name), 'utf8'));
       if (typeof document === 'string') {
         assert.ok(fs.existsSync(path.join(output, 'projection-fixtures', document)), `${name}: ${document} resolves in the bundle`);
+      }
+    }
+  }
+  if (hasConversion) {
+    const caseDirectory = path.join(output, 'conversion', 'fixtures');
+    const cases = fs.readdirSync(caseDirectory).filter((name) => name.endsWith('.json'));
+    assert.ok(cases.length > 0, 'conversion fixtures are exported');
+    assert.ok(fs.existsSync(path.join(output, 'conversion', 'schema', 'conversion-case.schema.json')), 'conversion case schema is exported');
+    for (const name of cases) {
+      const { document } = JSON.parse(fs.readFileSync(path.join(caseDirectory, name), 'utf8'));
+      if (typeof document === 'string') {
+        assert.ok(!document.startsWith('../'), `${name}: ${document} stays inside the bundle`);
+        assert.ok(fs.existsSync(path.join(caseDirectory, document)), `${name}: ${document} resolves in the bundle`);
       }
     }
   }

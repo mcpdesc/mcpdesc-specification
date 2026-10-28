@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MCP Description conversion case",
+  "description": "One conversion fixture (Proposal 0028). A converted case pins the exact patch; any other case pins the error diagnostics.",
+  "type": "object",
+  "required": [
+    "description",
+    "document",
+    "from",
+    "to",
+    "expectedStatus"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "document": {
+      "description": "Source document: a path relative to the case file, or an inline document.",
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^(documents/[a-z0-9-]+\\.(json|ya?ml)|(\\.\\./\\.\\./\\.\\./|released/)[0-9]+\\.[0-9]+\\.[0-9]+/(examples|fixtures/expected-(valid|warning))/[a-z0-9-]+\\.(json|ya?ml))$"
+        },
+        {
+          "type": "object"
+        }
+      ]
+    },
+    "from": {
+      "$ref": "#/$defs/version"
+    },
+    "to": {
+      "$ref": "#/$defs/version"
+    },
+    "fixes": {
+      "description": "Fixes the author requests, in order.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "fix",
+          "path"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "fix": {
+            "type": "string",
+            "pattern": "^[a-z]+(-[a-z]+)*$"
+          },
+          "path": {
+            "$ref": "#/$defs/path"
+          }
+        }
+      }
+    },
+    "expectedStatus": {
+      "enum": [
+        "converted",
+        "blocked",
+        "invalid-source",
+        "unsupported"
+      ]
+    },
+    "expectedPatch": {
+      "description": "The exact RFC 6902 patch from the source to the converted document.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "op",
+          "path"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "op": {
+            "enum": [
+              "add",
+              "remove",
+              "replace",
+              "move"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^(/([^~/]|~[01])*)*$"
+          },
+          "from": {
+            "type": "string",
+            "pattern": "^(/([^~/]|~[01])*)*$"
+          },
+          "value": true
+        }
+      }
+    },
+    "expectedDiagnostics": {
+      "description": "The exact set of error diagnostics, compared without order.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "code",
+          "rule",
+          "path"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "conversion-source-invalid",
+              "conversion-path-undefined",
+              "conversion-blocked",
+              "conversion-fix-not-applicable"
+            ]
+          },
+          "rule": {
+            "type": "string",
+            "pattern": "^mcpdesc\\.conversion\\.[a-z0-9-]+(\\.[a-z0-9-]+)?$"
+          },
+          "path": {
+            "$ref": "#/$defs/path"
+          }
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "expectedStatus": {
+        "const": "converted"
+      }
+    }
+  },
+  "then": {
+    "required": [
+      "expectedPatch"
+    ],
+    "not": {
+      "required": [
+        "expectedDiagnostics"
+      ]
+    }
+  },
+  "else": {
+    "required": [
+      "expectedDiagnostics"
+    ],
+    "not": {
+      "required": [
+        "expectedPatch"
+      ]
+    }
+  },
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "path": {
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "description": "Released 0.8.0 valid fixture distinct-tool-and-resource-annotations.json. Blocked by closed MCP types.",
+  "document": "../../../0.8.0/fixtures/expected-valid/distinct-tool-and-resource-annotations.json",
+  "expectedDiagnostics": [
+    {
+      "code": "conversion-blocked",
+      "path": [
+        "tools",
+        0,
+        "annotations",
+        "futureToolHint"
+      ],
+      "rule": "mcpdesc.conversion.0-8-to-0-9.tool-annotations-closed"
+    },
+    {
+      "code": "conversion-blocked",
+      "path": [
+        "resources",
+        0,
+        "annotations",
+        "futureResourceHint"
+      ],
+      "rule": "mcpdesc.conversion.0-8-to-0-9.annotations-closed"
+    }
+  ],
+  "expectedStatus": "blocked",
+  "from": "0.8.0",
+  "to": "0.9.0"
+}

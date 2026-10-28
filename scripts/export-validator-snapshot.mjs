@@ -63,6 +63,8 @@ const schemaSource = path.join(
 const fixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'fixtures');
 const projectionFixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'projection-fixtures');
 const projectionFixtureTarget = path.join(output, 'projection-fixtures');
+const conversionSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'conversion');
+const conversionTarget = path.join(output, 'conversion');
 const baseSource = path.join(root, 'scripts', 'validator-base.mjs');
 for (const [source, label] of [
   [schemaSource, `schema for ${version}`],
@@ -111,6 +113,23 @@ fs.mkdirSync(runtimeTarget, { recursive: true });
 fs.cpSync(fixtureSource, fixtureTarget, { recursive: true });
 // Projection cases reference ../fixtures/, so both folders keep their relative layout.
 if (fs.existsSync(projectionFixtureSource)) fs.cpSync(projectionFixtureSource, projectionFixtureTarget, { recursive: true });
+if (fs.existsSync(conversionSource)) {
+  fs.cpSync(conversionSource, conversionTarget, { recursive: true });
+  // Cases that convert released documents point outside the draft; bundle those sources under fixtures/released/.
+  const caseDirectory = path.join(conversionTarget, 'fixtures');
+  for (const name of fs.existsSync(caseDirectory) ? fs.readdirSync(caseDirectory).filter((entry) => entry.endsWith('.json')) : []) {
+    const casePath = path.join(caseDirectory, name);
+    const testCase = JSON.parse(fs.readFileSync(casePath, 'utf8'));
+    if (typeof testCase.document !== 'string' || !testCase.document.startsWith('../../../')) continue;
+    const released = testCase.document.slice('../../../'.length);
+    const releasedSource = path.join(root, 'spec', released);
+    if (!fs.existsSync(releasedSource)) die(`missing released conversion source: spec/${released}`);
+    fs.mkdirSync(path.dirname(path.join(caseDirectory, 'released', released)), { recursive: true });
+    fs.copyFileSync(releasedSource, path.join(caseDirectory, 'released', released));
+    testCase.document = `released/${released}`;
+    fs.writeFileSync(casePath, `${JSON.stringify(testCase, null, 2)}\n`);
+  }
+}
 fs.copyFileSync(schemaSource, path.join(runtimeTarget, 'schema.json'));
 fs.copyFileSync(baseSource, path.join(runtimeTarget, 'base.js'));
 fs.writeFileSync(path.join(runtimeTarget, 'semantic.js'), semantic);
@@ -136,6 +155,7 @@ const files = [
   ...filesUnder(runtimeTarget, 'runtime'),
   ...filesUnder(fixtureTarget, 'fixtures'),
   ...(fs.existsSync(projectionFixtureTarget) ? filesUnder(projectionFixtureTarget, 'projection-fixtures') : []),
+  ...(fs.existsSync(conversionTarget) ? filesUnder(conversionTarget, 'conversion') : []),
 ]
   .sort()
   .map((relativePath) => ({

@@ -213,6 +213,9 @@ function structuralRule({ keyword, instancePath, schemaPath, params }) {
   if (schemaPath.startsWith('#/$defs/toolAnnotations/')) return 'mcp.tool-annotations.members';
   if (schemaPath.startsWith('#/$defs/resourceAnnotations/')) return 'mcp.annotations.members';
   if (schemaPath === '#/$defs/completionResult/additionalProperties') return 'mcp.completion.result-closed';
+  // Ajv inlines these definitions, so match the property; the schema has no other size or ttlMs.
+  if (schemaPath.endsWith('/properties/size/type')) return 'mcp.resource.size';
+  if (/\/properties\/ttlMs\/(?:type|minimum)$/.test(schemaPath)) return 'mcp.cacheable-result.ttl-ms';
   if (keyword === 'additionalProperties' && /^\/capabilities\/\d+$/.test(instancePath)) return 'mcp.server-capabilities.members';
   if (keyword === 'additionalProperties' && /^\/(?:tools|resources|resourceTemplates|prompts)\/\d+\/clientRequirements$/.test(instancePath)) return 'mcp.client-capabilities.members';
   if ((keyword === 'const' && /^\/tools\/\d+\/inputSchema\/type$/.test(instancePath))

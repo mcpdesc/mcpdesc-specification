@@ -1,0 +1,89 @@
+{
+  "description": "Conversion from MCP Description 0.8.0 to 0.9.0 (Proposal 0028). Every incompatibility that can make a valid 0.8.0 document invalid under 0.9.0 is a rule.",
+  "from": "0.8.0",
+  "to": "0.9.0",
+  "sourceSelector": "0.8.0-rev.20261021",
+  "rewrites": [
+    {
+      "path": "/mcpdesc",
+      "value": "0.9.0",
+      "summary": "Set the specification version."
+    },
+    {
+      "path": "/$schema",
+      "valueFrom": "target-schema-id",
+      "ifPresent": true,
+      "summary": "Point $schema at the target schema when the source declares one."
+    }
+  ],
+  "rules": [
+    {
+      "id": "mcpdesc.conversion.0-8-to-0-9.tool-annotations-closed",
+      "summary": "Tool Annotations are closed in 0.9.0 (Proposal 0027); properties MCP does not define are not allowed.",
+      "targetRules": [
+        "mcp.tool-annotations.members"
+      ],
+      "fixes": [
+        "remove-property"
+      ]
+    },
+    {
+      "id": "mcpdesc.conversion.0-8-to-0-9.annotations-closed",
+      "summary": "Resource Annotations, including those on content blocks, are closed in 0.9.0 (Proposal 0027).",
+      "targetRules": [
+        "mcp.annotations.members"
+      ],
+      "fixes": [
+        "remove-property"
+      ]
+    },
+    {
+      "id": "mcpdesc.conversion.0-8-to-0-9.client-requirements-closed",
+      "summary": "Client capability requirements accept only capabilities MCP defines in 0.9.0 (Proposal 0027).",
+      "targetRules": [
+        "mcp.client-capabilities.members"
+      ],
+      "fixes": [
+        "remove-property",
+        "move-to-experimental"
+      ]
+    },
+    {
+      "id": "mcpdesc.conversion.0-8-to-0-9.completion-result-closed",
+      "summary": "The completion object of a completion example result is closed in 0.9.0 (Proposal 0026).",
+      "targetRules": [
+        "mcp.completion.result-closed"
+      ],
+      "fixes": [
+        "remove-property"
+      ]
+    },
+    {
+      "id": "mcpdesc.conversion.0-8-to-0-9.uri-template-checked",
+      "summary": "Every Resource Template uriTemplate is checked against RFC 6570 in 0.9.0, also without examples.",
+      "targetRules": [
+        "mcp.resource-template.uri-template"
+      ],
+      "fixes": []
+    },
+    {
+      "id": "mcpdesc.conversion.0-8-to-0-9.integer-numbers",
+      "summary": "Resource size and example ttlMs are integers in 0.9.0 (Proposal 0029); rounding would change the value, so no fix is offered.",
+      "targetRules": [
+        "mcp.resource.size",
+        "mcp.cacheable-result.ttl-ms"
+      ],
+      "fixes": []
+    }
+  ],
+  "fixes": [
+    {
+      "id": "remove-property",
+      "summary": "Remove the member at the blocker path."
+    },
+    {
+      "id": "move-to-experimental",
+      "summary": "Move client requirement <name> to experimental.<name>, adding experimental when absent; not applicable when experimental.<name> exists."
+    }
+  ]
+}

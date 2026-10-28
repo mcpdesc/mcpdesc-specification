@@ -24,6 +24,24 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### Community Working Draft 2 — Unreleased (`v0.9.0-draft.2`)
+
+Second 0.9.0 snapshot, implementing review-stage Proposals 0028 and 0029 recorded in [`PROPOSALS.md`](PROPOSALS.md), from [issue #82](https://github.com/mcpdesc/mcpdesc-specification/issues/82) and [issue #84](https://github.com/mcpdesc/mcpdesc-specification/issues/84). It contains a breaking change; see the [0.8.0 to 0.9.0 migration guide](guides/migration-0.8-to-0.9.md).
+
+#### Integer MCP numbers (review-stage Proposal 0029; subject to review and possible incompatible change or removal)
+
+- **Breaking:** Resource `size`, the `size` of resource link content blocks, and Resource example result `ttlMs` are integers (Sections 3.6, 10.1.1, and 10.4.4). MCP declares them as `number` in `schema.ts` and generates `schema.json` with `--defaultNumberType integer`, so they are integers in the schema MCP tooling validates against; 0.9.0-draft.1 accepted fractions, which made native projection fail its postcondition for valid documents. No minimum is added to `size`, as MCP defines none.
+- Section 3.6 states how MCP numbers are read: an unannotated `number` in `schema.ts` is an integer, and `@TJS-type number` marks a number. The sources-of-truth table in [`validation/README.md`](validation/README.md) records this as an arbitration rather than a generator defect.
+- Added rule records `mcp.resource.size` and `mcp.cacheable-result.ttl-ms` with active arbitrations, and fixtures `expected-invalid/fractional-resource-size.json`, `fractional-resource-link-size.json`, and `fractional-ttl-ms.json`.
+- Migration: replace a fractional value with the intended integer.
+
+#### Version conversion (review-stage Proposal 0028; subject to review and possible incompatible change or removal)
+
+- Added [`conversion/`](conversion/README.md), a non-normative tooling profile for converting 0.8.0 documents to 0.9.0: automatic rewrites that preserve meaning (`mcpdesc`, and `$schema` when present), six conversion rules that explain every 0.8.0 to 0.9.0 incompatibility (closed Tool and Resource Annotations, closed client capability requirements, closed completion results, `uriTemplate` checking, and integer numbers), opt-in fixes (`remove-property`, `move-to-experimental`), and an RFC 6902 patch for editors.
+- Added 55 conversion cases covering every released 0.8.0 example and valid or warning fixture (43 converted by the version rewrite alone, 2 blocked), every conversion rule, fix, and diagnostic code, and a YAML source. `scripts/test-conversion-fixtures.mjs` recomputes each case and fails on any 0.9.0 error that no conversion rule explains. Validator snapshots bundle the directory, including the released source documents.
+- Native projection stays explicit: it never converts implicitly. Documents of 0.8.0 are converted, then projected.
+- Implementation: conversion belongs in `@mcpdesc/core`. No document changes validity.
+
 ### Community Working Draft 1 — 2026-10-26 (`v0.9.0-draft.1`)
 
 First 0.9.0 snapshot: MCP-native alignment from [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72), implementing review-stage Proposals 0024, 0025, 0026, and 0027 recorded in [`PROPOSALS.md`](PROPOSALS.md). It is a prerelease, not an accepted specification, and contains breaking changes; see the [0.8.0 to 0.9.0 migration guide](guides/migration-0.8-to-0.9.md). The changes since initialization from 0.8.0 are listed in the sections below.

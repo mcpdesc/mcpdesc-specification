@@ -1,0 +1,23 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "malformed-uri-template",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "malformed-uri-template"
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "repo://issues/{issue",
+      "name": "repository_issue"
+    }
+  ]
+}

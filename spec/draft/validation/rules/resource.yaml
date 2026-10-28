@@ -143,3 +143,75 @@ rules:
         pointer: /components/resourceTemplateExamples/bad-uri
       - path: expected-valid/named-resource-examples.json
         pointer: /resourceTemplates/0
+
+  - id: mcp.resource.size
+    owner: mcp
+    summary: >-
+      Resource size, in a declaration and in resource link content, is an
+      integer when present.
+    surface: Resource
+    path: size
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.6 and 10.1.1
+        locations:
+          - sections/10-resources.md#req-resource-size-integer
+          - sections/03-document-structure.md#req-mcp-integer-numbers
+      - reference: Proposal 0029, Integer MCP Numbers
+        locations:
+          - proposal-snapshots/0029-integer-mcp-numbers.md
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface Resource, size (unannotated number); ResourceLink extends Resource from 2025-06-18
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L449
+          - validation/mcp-schemas/2025-03-26/schema.ts#L482
+          - validation/mcp-schemas/2025-06-18/schema.ts#L556
+          - validation/mcp-schemas/2025-11-25/schema.ts#L832
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1471
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1719-L1721
+      - tier: 3
+        reference: MCP generated schema.json, Resource and ResourceLink size typed integer
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.json#L1508-L1511
+          - validation/mcp-schemas/2026-07-28/schema.json#L2760-L2763
+          - validation/mcp-schemas/2026-07-28/schema.json#L2830-L2833
+      - tier: 3
+        reference: "MCP scripts/generate-schemas.ts: typescript-json-schema --defaultNumberType integer"
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/scripts/generate-schemas.ts#L95
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - path: expected-invalid/fractional-resource-size.json
+        pointer: /resources/0/size
+      - path: expected-invalid/fractional-resource-link-size.json
+        pointer: /tools/0/examples/listing/result/content/0/size
+      - path: expected-valid/named-resource-examples.json
+        pointer: /resources/0
+    arbitrations:
+      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
+        conflict: >-
+          schema.ts declares size as number, which TypeScript cannot restrict
+          to integers; the generated schema.json types it as integer.
+        authority: >-
+          MCP's schema generation configuration (--defaultNumberType integer),
+          under which an unannotated number denotes an integer and fields that
+          accept fractions carry @TJS-type number, such as Annotations.priority.
+        behavior: Reject a non-integer size with schema-validation. No minimum is applied, as MCP defines none.
+        rationale: >-
+          The integer output is MCP's deliberate convention, not a generator
+          defect. Following it keeps native projection valid against the
+          generated schema and matches what MCP tooling validates.
+        reviewTrigger: MCP changes its generator configuration or annotates size with @TJS-type number.
+        status: active

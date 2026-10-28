@@ -1,0 +1,25 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "fractional-resource-size",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-06-18"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "fractional-resource-size"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "file:///reports/q3.pdf",
+      "name": "q3_report",
+      "mimeType": "application/pdf",
+      "size": 1048576.5
+    }
+  ]
+}
