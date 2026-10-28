@@ -46,6 +46,7 @@ Second 0.9.0 snapshot, implementing review-stage Proposals 0028 and 0029 recorde
 
 - Rewrote the introduction of [`validation/README.md`](validation/README.md) for readers: what validation rules cover (MCP, JSON Schema, and MCP Description owners), why rules are explicit, how to act on a diagnostic, a worked example based on an existing fixture, and the status of the pilot registry. The technical reference follows under "Reference". The introduction is delimited by `mcpdesc:validation-overview` comment markers so mcpdesc.org can import it unchanged. Editorial; no rule, behavior, schema, or fixture changes.
 - Implementation state since Draft 1: the prereleases `@mcpdesc/validator@0.14.0-rc.1` (rule identifiers in diagnostics) and `@mcpdesc/core@0.13.0-rc.1` (native MCP projection, tested against the projection fixtures) support the explicit `0.9.0-draft.1` selector. The Draft 1 entries below describe the state when Draft 1 was published.
+- Added [`validation/rule-history-0.8.md`](validation/rule-history-0.8.md), an informative investigation of how rules relate to MCP Description versions and MCP protocol revisions, with a matrix comparing each registered rule with the 0.8.0 requirements (45 unchanged, 13 changed, 3 new, 2 uncertain). The validation README now states that an omitted `applicability` means behavior per revision is not recorded. Editorial; no rule, behavior, schema, or fixture changes.
 
 ### Community Working Draft 1 — 2026-10-26 (`v0.9.0-draft.1`)
 

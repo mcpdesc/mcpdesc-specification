@@ -140,6 +140,7 @@ tracked in [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/7
 | Path | Content | Status |
 | --- | --- | --- |
 | [`mcp-revisions.md`](mcp-revisions.md) | Introductory guide to how MCP structures used by MCP Description differ across supported protocol revisions | Initial version |
+| [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
 | [`rule.schema.json`](rule.schema.json) | JSON Schema for rule registry files | Pilot |
 | [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records declare every candidate diagnostic code; `scripts/test-validation-rules.mjs` checks them and reports the counts |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported revision (`<revision>/schema.ts`, `<revision>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
@@ -297,7 +298,7 @@ Each validation rule has a permanent identifier and a record:
 | `surface`, `path` | Native type and field the rule applies to |
 | `kind` | structural, semantic, preservation, embedded-standard, mcpdesc-semantic, completeness, or interoperability |
 | `requirement` | Requirement level of the source: must, should, or may |
-| `applicability` | Behavior per supported MCP revision |
+| `applicability` | Behavior per supported MCP revision: `applies` (the rule is checked), `opaque`, `not-applicable`, or a rule-specific value. Required for `mcp` and `json-schema` rules. Some `mcpdesc` rules omit it; an omitted value means that behavior per revision is not recorded, not that the rule applies to every revision (see [`rule-history-0.8.md`](rule-history-0.8.md#applicability-today)) |
 | `specification` | MCP Description requirements the rule checks and the decisions behind it, each with precise `locations` (see below) |
 | `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `diagnostics` | Diagnostic codes emitted |
