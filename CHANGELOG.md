@@ -4,6 +4,7 @@ This changelog records repository governance, release-process, and project-tooli
 
 ## Unreleased
 
+- Detailed the validator revision policy in `GOVERNANCE.md`: when a revision is allowed, when a correction must go into a draft snapshot or new version instead, how a revision is prepared (public issue, maintenance branch, complete changelog record in the tagged commit), and its downstream impact on normative tooling, including a required release announcement listing changed fixtures. Prompted by `v0.8.0-rev.20261021`, whose changelog record was completed only after tagging and is therefore not part of that tag or its validator snapshot.
 - Codified dated validator revisions as the correction path for stable-release semantic validation defects, and `release/<major>.<minor>.x` maintenance branches for stable-release corrections while a later version is in development.
 - Made repository tooling version-neutral: the candidate validator is `scripts/validate-document.mjs` (exporting `validateDocument`), and tests and repository validation derive the candidate version and paths from `specification-status.json`. Diagnostics for 0.8.0 documents are unchanged.
 - Initialized the MCP Description 0.9.0 community working draft in `spec/draft/` from the stable 0.8.0 release, with `schemas/mcp-description/0.9.0.json` and `schemas/draft.json` targeting the upcoming `v0.9.0-draft.1` snapshot. The candidate validator now validates 0.9.0 documents; frozen 0.7.0 and 0.8.0 artifacts are unchanged.
