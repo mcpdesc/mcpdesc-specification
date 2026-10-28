@@ -21,10 +21,13 @@ MCP protocol revisions:
 - the existing `summary`, which states the precise requirement;
 - a `description` that explains why the rule exists, what it means for
   authors, the usual mistake, and its fix;
-- an `applicability` entry for every rule, with documented values.
+- an `applicability` entry for every rule, with documented values;
+- a publicly discoverable, immutable JSON catalog and rule-record schema.
 
 Specification-version membership stays at the snapshot level. No per-rule
-version field is added.
+version field is added. A separate rule-format version identifies the schema
+for records; the catalog snapshot identifies the exact MCP Description
+requirements and documentation published together.
 
 ## Problem
 
@@ -44,6 +47,12 @@ they do not depend on the revision. The meaning of `applies` is also
 undocumented: it means that a rule is checked for a revision, not that a field
 is allowed there.
 
+**Publication.** The rule schema and YAML records are public in GitHub, but
+the schema has no `$id` and there is no machine-readable discovery endpoint
+for catalogs. Third parties must traverse repository files, while the website
+maintains its own import logic. A human-facing catalog alone is not a stable
+interface for validators, editors, or other catalogs.
+
 ## Goals
 
 - Give every rule a short title and a reader-oriented explanation from the
@@ -51,6 +60,9 @@ is allowed there.
 - Record the behavior of every rule for every supported MCP revision.
 - Keep the precise requirement statement unchanged.
 - Check the new fields in `scripts/test-validation-rules.mjs`.
+- Publish a versioned schema and a complete catalog for each authorized
+  specification snapshot, with provenance, digests, and explicit link bases.
+- Let third parties discover available catalogs without scraping the website.
 
 ## Non-goals
 
@@ -58,6 +70,8 @@ is allowed there.
 - Per-rule specification-version ranges, lifecycle, or historical provenance
   (see `spec/draft/validation/rule-history-0.8.md`).
 - Website presentation, such as navigation or grouping by surface.
+- Publishing a retrospective 0.8.0 registry, rewriting existing snapshot tags,
+  or silently adding publication artifacts to Draft 1 or Draft 2.
 
 ## Background and primary references
 
@@ -113,6 +127,147 @@ revision is not `not-applicable`, whatever its owner. The ruleset
 `mcpdesc.core` is removed, because ownership does not determine protocol
 dependence.
 
+### 4. Rule-format version and catalog snapshot
+
+Two identities are published independently:
+
+| Identity | Example | Meaning |
+| --- | --- | --- |
+| Rule-format version | `1.0.0` | The machine-readable structure of rule records and the publication envelopes defined here |
+| Catalog snapshot | `0.9.0-draft.3` | The exact registry belonging to an immutable MCP Description specification tag |
+
+The catalog also records `mcpdescVersion`, for example `0.9.0`. A catalog
+snapshot is not a validator implementation release. Its existence neither
+selects a validator package version nor proves implementation coverage.
+
+The first published rule-format version is `1.0.0`, incorporating this
+proposal's fields. Earlier unversioned schemas are not retroactively called
+`1.0.0`. A later catalog can reuse the same format version when only rule
+content changes. A different format version does not itself change document
+validity or rule meanings.
+
+Rule-format versions use SemVer. Removing or renaming fields, adding required
+fields, or adding fields rejected by a previous schema's
+`additionalProperties: false` requires a major version. An additive field is
+minor only when the previous format explicitly permits it. Editorial schema
+documentation corrections are patch versions, published at a new URL; no
+versioned schema URL is overwritten. Permanent rule identifiers keep their
+meaning across catalogs as required by Proposal 0024.
+
+### 5. Immutable publication artifacts
+
+Publish these HTTPS resources on mcpdesc.org:
+
+```text
+/schema/validation-rule/1.0.0.json
+/validation/catalogs/0.9.0-draft.3/manifest.json
+/validation/catalogs/0.9.0-draft.3/rules.json
+```
+
+The schema has the first URL as its absolute `$id`. Its root validates the
+existing `{ "rules": [...] }` shape of registry files and the aggregate
+`rules.json`. Its `$defs/catalog-manifest` and `$defs/catalog-index` validate
+the publication manifest and discovery index respectively. Those envelopes
+declare `$schema` using the corresponding fragment URI. They use the same
+rule-format version, avoiding a separate envelope version counter.
+
+The manifest has these required fields and no unspecified defaults:
+
+| Field | Meaning |
+| --- | --- |
+| `$schema` | Absolute rule-schema URL ending in `#/$defs/catalog-manifest` |
+| `ruleFormatVersion` | The exact rule-format version, such as `1.0.0` |
+| `mcpdescVersion` | The specification's `mcpdesc` value, such as `0.9.0` |
+| `snapshot` | Exact catalog selector, such as `0.9.0-draft.3` |
+| `status` | `draft`, `release-candidate`, or `stable`; never inferred from format version |
+| `source` | Repository URL, immutable tag, full commit ID, and specification-folder path at that commit |
+| `ruleSchema` | Absolute schema URL and lowercase hexadecimal SHA-256 digest of its exact bytes |
+| `catalog` | Absolute `rules.json` URL and lowercase hexadecimal SHA-256 digest of its exact bytes |
+| `specificationBaseUrl` | Absolute immutable URL of the specification folder, with trailing slash |
+| `ruleCount` | Number of records in `rules.json` |
+
+The aggregate contains every rule record of the snapshot, including
+preservation, delegated, and retired records if present; owner and protocol
+filters are consumer views, not separate authored catalogs. YAML remains the
+authoritative authoring format. The exporter parses it using the repository's
+YAML parser, retains every record field, sorts records by permanent `id`, and
+serializes deterministic JSON using the repository's canonical JSON utility.
+Duplicate identifiers or invalid records fail generation.
+
+Relative links are resolved against `specificationBaseUrl`, not the website
+page or individual YAML file:
+
+- `specification[].locations` and relative `sources[].locations` resolve from
+  that base; absolute source URLs are unchanged;
+- ordinary `fixtures[].path` values resolve under `fixtures/` at that base;
+  paths starting with `projection-fixtures/` resolve directly from the base;
+- relative Markdown links in `description` resolve from that base;
+- fixture pointers select fragments within the referenced JSON document;
+  they are not browser heading anchors. A renderer must interpret them or
+  link to the source rather than invent a fragment URL.
+
+For a draft snapshot the immutable base includes the tag and `spec/draft/`,
+even though that folder moves on `main`. Consumers MUST NOT resolve evidence
+against `main` or reinterpret an earlier snapshot using newer records.
+
+Every versioned schema, manifest, and catalog URL MUST retain its exact
+published bytes. Even an informative wording correction requires a new
+authorized catalog identity; it cannot overwrite an existing snapshot URL.
+This proposal adds no independently numbered documentation edition. If such
+an edition is needed, its identity requires a separate explicit decision.
+
+### 6. Catalog discovery
+
+Publish a mutable index at:
+
+```text
+/validation/catalogs/index.json
+```
+
+It declares `$schema` with `#/$defs/catalog-index` and contains `catalogs`,
+`currentStable`, and `currentDraft`. Each catalog entry contains its
+`mcpdescVersion`, `snapshot`, `status`, and immutable manifest URL. The two
+current pointers are manifest URLs or explicit `null`; neither is inferred
+from ordering, npm dist-tags, or a redirect named `latest`.
+
+The index lists only catalogs actually published, and the pointers refer to
+entries in that list. Before publication succeeds, a pending catalog is not
+discoverable there. Since 0.8.0 has no registry, `currentStable` is `null`
+until a stable specification with a catalog is published. A draft catalog
+MUST NOT be assigned to 0.8.0 or described as the stable catalog.
+
+Consumers use the index for discovery, then pin an immutable manifest for
+reproducibility. `currentDraft` identifies the maintained published draft,
+not an unreleased working tree. A new draft leaves earlier catalogs available.
+
+### 7. Generation, hosting, and publication checks
+
+This repository owns deterministic generation and schemas. mcpdesc.org hosts
+those artifacts unchanged and renders its human-facing catalog from the same
+records. The site may add navigation, generated indexes/counts, and rendering;
+it must not maintain a second authored set of rule descriptions or summaries.
+
+An exporter generates a self-contained publication bundle from an exact clean
+commit, an explicit snapshot identity, and a rule-format version. It verifies
+the specification metadata, record schema, supported protocol versions, and
+all relative locations. Final publication verifies that the annotated tag
+resolves to that commit; an untagged preparation bundle is not a publication.
+Generation must not require embedding its own future commit hash in tracked
+source files.
+
+Before a new format's schema is used, publish its exact bytes and verify its
+`$id`, digest, JSON media type, CORS, and immutable caching. After the approved
+specification tag exists, publish the corresponding catalog and manifest,
+verify their identities, schema validity, record count, source commit, and
+digests, then update the discovery index last. A failed immutable deployment
+is not fixed by silently replacing a previously published catalog.
+
+Publication checks cover direct HTTP responses rather than an HTML fallback.
+Mutable index caching must allow consumers to discover updates, unlike the
+immutable artifact policy. Catalog publication is distinct from validator
+snapshot intake: runtime bundles need not include the catalog unless a
+downstream consumer explicitly adopts that contract.
+
 ## Schema impact
 
 In `spec/draft/validation/rule.schema.json`:
@@ -121,10 +276,17 @@ In `spec/draft/validation/rule.schema.json`:
   `description` (string, 1 to 800 characters), both required;
 - make `applicability` required for every rule;
 - describe the meaning of `applies`, `opaque`, and `not-applicable`.
+- add the absolute versioned `$id`, plus schemas for the publication manifest
+  and discovery index under `$defs`;
+- keep the root `{ "rules": [...] }` shape so authored YAML files and the
+  generated aggregate validate against the same schema.
 
 `scripts/test-validation-rules.mjs` checks title uniqueness and that every
 rule lists every supported revision; the condition that exempts `mcpdesc` rules
-is removed.
+is removed. Dedicated generation and publication tests cover deterministic
+aggregation, manifest/index validity, digests, link bases, complete membership,
+and the stable/draft separation. The MCP Description document schema is not
+changed by this proposal.
 
 ## Examples
 
@@ -189,10 +351,15 @@ is removed.
 ## Compatibility
 
 No document changes validity, and no diagnostic changes. The rule schema gains
-required fields, so registry consumers that reject unknown fields must accept
-`title` and `description`. `@mcpdesc/core` and `@mcpdesc/validator` do not
-read the registry. mcpdesc.org can show the new fields once a snapshot that
-contains them is published.
+required fields, so registry consumers must select the published rule-format
+schema and accept `title` and `description`. There is no previously published
+numbered rule format to upgrade retroactively. Future incompatible formats
+require a major rule-format version; old catalogs remain unchanged.
+
+`@mcpdesc/core` and `@mcpdesc/validator` do not currently read the registry.
+Their releases and diagnostic coverage remain independent. mcpdesc.org can
+show the new fields once a snapshot containing them and its catalog are
+published. Existing draft tags are not rewritten.
 
 ## Migration
 
@@ -202,11 +369,20 @@ Registry consumers:
 - treat `applicability` as present for every rule, and drop the "not recorded
   per revision" label;
 - replace `mcpdesc.core` with the per-revision rulesets.
+- discover snapshots through the index and pin the selected manifest;
+- resolve evidence and description links using the manifest's immutable base;
+- use the catalog's specification snapshot and rule-format version, not a
+  validator package version, to identify its contents.
 
 ## Security and privacy considerations
 
-None. Descriptions are documentation and are rendered as Markdown by catalogs,
-which must render them safely, as for other specification text.
+Descriptions are documentation and are rendered as Markdown by catalogs,
+which must render them safely, as for other specification text. Consumers
+validate downloaded data against the pinned format schema and verify exact
+digests. Digests provide integrity relative to a trusted manifest; they do not
+authenticate its publisher. Fetching linked evidence or fixtures is separate
+from document validation and must not happen implicitly. Importers must prevent
+relative-path traversal outside their authorized source tree.
 
 ## Alternatives considered
 
@@ -219,6 +395,12 @@ which must render them safely, as for other specification text.
   thing without a new value. Open question 2.
 - **Per-rule specification-version fields.** Rejected: snapshot membership
   already establishes them (`rule-history-0.8.md`, Options).
+- **A website-only catalog.** Rejected: third parties need machine-readable
+  discovery and exact provenance, not HTML scraping.
+- **A single catalog URL that changes in place.** Rejected: consumers cannot
+  reproduce historical behavior; only the discovery index is mutable.
+- **Separate authored JSON and YAML catalogs.** Rejected: JSON is generated
+  from the YAML source, avoiding divergence.
 
 ## Open questions
 
@@ -227,6 +409,9 @@ which must render them safely, as for other specification text.
    explicitly, rather than by `applies` for every revision?
 3. Should the per-revision rulesets be renamed now that they include rules of
    every owner, for example `mcpdesc.revision.<revision>`?
+4. Which deployment workflow publishes the generated bundle to mcpdesc.org,
+  and which maintainers approve the discovery-index update? The contract
+  above is independent of the hosting mechanism.
 
 ## Implementation and validation plan
 
@@ -236,8 +421,20 @@ which must render them safely, as for other specification text.
    records, starting from the preliminary classification in
    `rule-history-0.8.md`; README update; changelog entry; snapshot of this
    proposal.
-3. mcpdesc.org imports the fields from the Draft 3 snapshot.
+3. Implement the schema identity and publication-envelope schemas, deterministic
+  catalog exporter, and focused tests. Add the publication checks to release
+  guidance, preserving the existing validator snapshot export contract.
+4. Coordinate mcpdesc.org hosting, index discovery, link rewriting, and catalog
+  rendering. Coordinate any adoption by core or the validator separately;
+  those consumers are not implemented in this repository.
+5. After review and implementation, prepare Draft 3, publish the format schema,
+  tag the authorized specification snapshot, publish and verify its immutable
+  catalog bundle, then update the index. Do not publish the currently prepared
+  documentation-only Draft 3 in the meantime.
 
 ## Decision record
 
-Pending.
+On 2026-10-28, the maintainer requested this publication contract as part of
+Proposal 0030 and deferred Draft 3 publication until the expanded work is
+addressed. The prepared release branch remains unpublished. Acceptance and
+the remaining design questions are pending.
