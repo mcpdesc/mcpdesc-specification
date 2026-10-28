@@ -1,23 +1,23 @@
 ---
 title: MCP Description Specification
 version: 0.9.0
-status: Community working draft 1
-draft-iteration: 1
-snapshot-tag: v0.9.0-draft.1
+status: Community working draft 2
+draft-iteration: 2
+snapshot-tag: v0.9.0-draft.2
 released: false
 baseline: 0.8.0
-date: 2026-10-26
+date: 2026-10-28
 ---
 
 # MCP Description Specification
 
-**Version**: 0.9.0 (community working draft 1; `v0.9.0-draft.1`)
+**Version**: 0.9.0 (community working draft 2; `v0.9.0-draft.2`)
 
-**Status**: Community working draft 1 — not released
+**Status**: Community working draft 2 — not released
 
 **Baseline**: v0.8.0
 
-**Date**: 2026-10-26
+**Date**: 2026-10-28
 
 ## Abstract
 
@@ -29,7 +29,7 @@ It enables offline discovery, documentation generation, description validation, 
 
 ## Status of This Document
 
-This document is Community Working Draft 1 of MCP Description v0.9.0, prepared for the prerelease tag `v0.9.0-draft.1`. It is not a stable release and may change incompatibly before release. The current stable release is MCP Description v0.8.0.
+This document is Community Working Draft 2 of MCP Description v0.9.0, prepared for the prerelease tag `v0.9.0-draft.2`. It is not a stable release and may change incompatibly before release. The current stable release is MCP Description v0.8.0.
 
 The proposal revisions represented in this draft are recorded in the [proposal revision manifest](PROPOSALS.md).
 
@@ -252,7 +252,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json",
   "mcpdesc": "0.9.0",
   "info": {
     "name": "chess-rating-server",
@@ -302,7 +302,7 @@ The schema document's root `$id` identifies that schema resource and establishes
 The `$schema` value does not change the MCP Description conformance version: community working draft documents remain `mcpdesc: 0.9.0`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json
 mcpdesc: 0.9.0
 ```
 
@@ -1905,10 +1905,10 @@ String values MUST be valid JSON strings after decoding. URI values MUST conform
 
 MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
+For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json
 mcpdesc: 0.9.0
 ```
 
@@ -2080,7 +2080,7 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.9.0.json](../../schemas/mcp-description/0.9.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json` for the current community working draft canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json` for the current community working draft canonical schema resource
 - `https://mcpdesc.org/schema/mcp-description/0.9.0.json` for the stable 0.9.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.

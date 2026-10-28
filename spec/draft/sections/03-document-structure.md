@@ -99,7 +99,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json",
   "mcpdesc": "0.9.0",
   "info": {
     "name": "chess-rating-server",

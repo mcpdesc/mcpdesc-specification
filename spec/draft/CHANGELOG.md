@@ -24,7 +24,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
-### Community Working Draft 2 — Unreleased (`v0.9.0-draft.2`)
+### Community Working Draft 2 — 2026-10-28 (`v0.9.0-draft.2`)
 
 Second 0.9.0 snapshot, implementing review-stage Proposals 0028 and 0029 recorded in [`PROPOSALS.md`](PROPOSALS.md), from [issue #82](https://github.com/mcpdesc/mcpdesc-specification/issues/82) and [issue #84](https://github.com/mcpdesc/mcpdesc-specification/issues/84). It contains a breaking change; see the [0.8.0 to 0.9.0 migration guide](guides/migration-0.8-to-0.9.md).
 
