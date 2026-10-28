@@ -1,32 +1,155 @@
 # Validation
 
-This folder collects the material MCP Description uses to validate documents
-against the MCP protocol revisions they describe. It exists because MCP
-Description 0.9.0 makes protocol alignment explicit: every MCP-related
-validation behavior should state who owns it, which MCP revisions it applies to,
-where it comes from, and how it is tested.
+<!-- mcpdesc:validation-overview:start -->
 
-Status: 0.9.0 working draft, implementing review-stage
-[Proposal 0024](../proposal-snapshots/0024-validation-rule-identity-and-provenance.md)
-([PR #76](https://github.com/mcpdesc/mcpdesc-specification/pull/76)).
-The content is non-normative until that proposal is accepted. The candidate
-validator does not consume the registry yet. Design background is tracked in
-[issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72).
+Validation rules explain the checks used to determine whether an MCP
+Description document is valid and identify issues that need attention.
 
-## Layout
+## What validation rules cover
+
+A document can have problems in three areas:
+
+- **MCP:** the described tools, resources, prompts, capabilities, or carried
+  MCP values do not meet the requirements of the applicable MCP protocol
+  revision.
+- **JSON Schema:** an embedded Tool input or output schema is not valid under
+  its applicable JSON Schema dialect.
+- **MCP Description:** complementary description fields, protocol scoping,
+  references, or examples do not meet MCP Description requirements.
+
+The catalog groups rules by these three owners, recorded in each rule as
+`mcp`, `json-schema`, and `mcpdesc`. A single Tool declaration can involve
+rules from all three groups: its MCP fields and annotations follow MCP rules,
+its `inputSchema` must be valid JSON Schema, and its protocol scope follows MCP
+Description rules. Its examples are checked against MCP's result types and
+against MCP Description's example rules.
+
+## Why explicit validation rules?
+
+MCP Description provides static descriptions of MCP servers across the MCP
+protocol revisions that a specification version supports; for 0.9.0, MCP
+2024-11-05 through 2026-07-28. The same field can be required in one revision,
+undefined in another, and governed by a JSON Schema dialect rather than by MCP.
+A validation failure without that context does not tell an author what to fix.
+
+Each rule records which specification owns the requirement, which protocol
+revisions it applies to, and where the requirement comes from. The catalog
+helps users and tools identify whether a problem concerns MCP structures,
+embedded JSON Schema, or MCP Description semantics.
+
+Each rule has a permanent identifier, such as `mcp.tool-annotations.members`.
+Tools can use it to refer to the same rule and trace its provenance. An
+identifier does not guarantee that different tools implement the same coverage,
+use the same diagnostic wording, or behave identically.
+
+A diagnostic carries both a `rule` and a `code`. The `rule` identifies the
+requirement. The `code` names the kind of failure and can be shared by several
+rules: every JSON Schema failure of the document, for example, has the code
+`schema-validation`, whichever rule it belongs to.
+
+## How to use the catalog
+
+To act on a diagnostic:
+
+1. Find the diagnostic's `rule` identifier in the catalog.
+2. Check the diagnostic's severity and the rule's protocol-revision
+   applicability.
+3. Read the requirement, its source references, and the rule's examples.
+4. Correct the document and validate it again.
+
+Errors make a document invalid; warnings do not. Some rule records need not
+emit a diagnostic themselves: a preservation rule, such as
+`mcp.tool.schema-keywords.preserve`, documents values that validators keep
+without interpreting them, and delegated rules, such as the native projection
+rules, are checked by other tools rather than by the validator.
+
+### Worked example
+
+The fixture
+[`expected-invalid/tool-annotations-unknown-property.json`](../fixtures/expected-invalid/tool-annotations-unknown-property.json)
+is a complete document declaring a Tool for MCP 2025-11-25. Its Tool
+annotations are:
+
+```json
+{ "readOnlyHint": true, "audience": ["user"] }
+```
+
+The candidate validator reports:
+
+```json
+{
+  "code": "schema-validation",
+  "severity": "error",
+  "message": "does not validate against 0.9.0: /tools/0/annotations must NOT have additional properties",
+  "path": ["tools", 0, "annotations", "audience"],
+  "rule": "mcp.tool-annotations.members"
+}
+```
+
+1. The rule is recorded in [`rules/annotations.yaml`](rules/annotations.yaml):
+   a Tool annotations object contains only `title`, `readOnlyHint`,
+   `destructiveHint`, `idempotentHint`, and `openWorldHint`.
+2. The severity is `error`, so the document is invalid. The rule applies from
+   MCP 2025-03-26, the first revision with Tool annotations, so it applies to
+   this Tool.
+3. The requirement is in [Section 9.6](../sections/09-tools.md#req-tool-annotations-closed),
+   and the source is MCP's `ToolAnnotations` type, which is closed in every
+   revision. `audience` belongs to Resource Annotations (Section 10.3); the
+   fixture
+   [`expected-valid/distinct-tool-and-resource-annotations.json`](../fixtures/expected-valid/distinct-tool-and-resource-annotations.json)
+   shows both kinds side by side.
+4. Removing `audience` from the Tool annotations makes the document valid;
+   validating it again reports no diagnostics.
+
+## Status and scope
+
+The normative requirements are those of the specification sections. The rule
+catalog is a pilot registry implementing review-stage
+[Proposal 0024](../proposal-snapshots/0024-validation-rule-identity-and-provenance.md),
+which has not been accepted. The registry is non-normative: it documents and
+tests the requirements, and is not a separate conformance specification.
+
+Every diagnostic of this repository's candidate validator identifies a
+registered rule. Published prereleases implement the registry and native MCP
+projection for Community Working Draft 1 (`0.9.0-draft.1`), when that selector
+is passed explicitly:
+
+- [`@mcpdesc/validator@0.14.0-rc.1`](https://www.npmjs.com/package/@mcpdesc/validator/v/0.14.0-rc.1)
+  reports the `rule` of each diagnostic.
+- [`@mcpdesc/core@0.13.0-rc.1`](https://www.npmjs.com/package/@mcpdesc/core/v/0.13.0-rc.1)
+  implements native MCP projection, tested against the specification's
+  projection fixtures.
+
+Both are prereleases, not stable releases. Install them by exact version: the
+npm `next` dist-tag moves to later prereleases. Support for later drafts
+follows in later releases.
+
+<!-- mcpdesc:validation-overview:end -->
+
+## Reference
+
+The rest of this document is the technical reference for rule authors and tool
+implementers. This folder collects the material MCP Description uses to
+validate documents against the MCP protocol revisions they describe: every
+MCP-related validation behavior states who owns it, which MCP revisions it
+applies to, where it comes from, and how it is tested. Design background is
+tracked in [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72).
+
+### Layout
 
 | Path | Content | Status |
 | --- | --- | --- |
 | [`mcp-revisions.md`](mcp-revisions.md) | Introductory guide to how MCP structures used by MCP Description differ across supported protocol revisions | Initial version |
+| [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
 | [`rule.schema.json`](rule.schema.json) | JSON Schema for rule registry files | Pilot |
-| [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: 58 rules declaring every candidate diagnostic code; checked by `scripts/test-validation-rules.mjs` |
+| [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records declare every candidate diagnostic code; `scripts/test-validation-rules.mjs` checks them and reports the counts |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported revision (`<revision>/schema.ts`, `<revision>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
 
 The folder is part of the versioned specification: it is frozen with each
 release, so the rules and pinned MCP schemas used by a release never change
 after publication.
 
-## MCP sources of truth
+### MCP sources of truth
 
 MCP defines each protocol revision with two normative artifacts:
 
@@ -63,7 +186,7 @@ When sources disagree:
 The requirement level of the source matters: a `SHOULD` in MCP is a
 recommendation, so an MCP rule at that level produces warnings, not errors.
 
-### Source tiers
+#### Source tiers
 
 A rule record separates the requirement from the evidence. Its
 `specification` field cites the MCP Description requirements the rule checks
@@ -87,15 +210,16 @@ it cannot decide what MCP means: it adopts or arbitrates what tiers 1 to 3
 say, and the rule must cite one of them. A lower tier can reveal ambiguity or
 a defect in a higher one but does not override it without an arbitration.
 
-## Ownership model
+### Ownership model
 
-Every validated structure has exactly one owner:
+Every requirement has exactly one owner, recorded as the rule's `owner`. A
+structure can involve requirements of several owners:
 
 | Owner | Examples | Authority | Unknown fields |
 | --- | --- | --- | --- |
-| MCP Description | `info`, transports, security, tags, examples, protocol scoping, components | This specification | As defined by MCP Description |
-| MCP | Tool, Resource, ResourceTemplate, Prompt, capabilities, results, annotations, `_meta` | The applicable MCP revision | As permitted by that revision |
-| Embedded standard | Tool `inputSchema` and `outputSchema` (JSON Schema) | The declared or default dialect, plus semantics the MCP revision adds | As defined by the dialect |
+| MCP Description (`mcpdesc`) | `info`, transports, security, tags, examples, protocol scoping, components | This specification | As defined by MCP Description |
+| MCP (`mcp`) | Tool, Resource, ResourceTemplate, Prompt, capabilities, results, annotations, `_meta` | The applicable MCP revision | As permitted by that revision |
+| Embedded standard (`json-schema`) | Tool `inputSchema` and `outputSchema` (JSON Schema) | The declared or default dialect, plus semantics the MCP revision adds | As defined by the dialect |
 
 A Tool therefore involves two schema layers, validated separately:
 
@@ -124,7 +248,7 @@ preserved and are not interpreted beyond their presence. The generated MCP JSON
 Schema accepts unlisted properties for every type and is not evidence of
 openness.
 
-## Examples fail fast
+### Examples fail fast
 
 Examples are validated as part of conformance. An example that does not match
 the declaration it illustrates, or the completed result of every applicable MCP
@@ -163,18 +287,18 @@ replacing a short-lived direction that would have moved example consistency to
 a linter. Implemented in the draft by Proposal 0026 for every supported
 revision; see Section 3.6 of the specification.
 
-## Rule records
+### Rule records
 
 Each validation rule has a permanent identifier and a record:
 
 | Field | Meaning |
 | --- | --- |
 | `id` | Permanent, owner-namespaced identifier, for example `mcp.tool.output-schema.object-root`. Never reused; retired identifiers stay reserved. Protocol revisions are not part of the identifier. |
-| `owner` | `mcp`, `mcpdesc`, or the embedded standard |
+| `owner` | `mcp`, `mcpdesc`, or `json-schema` |
 | `surface`, `path` | Native type and field the rule applies to |
 | `kind` | structural, semantic, preservation, embedded-standard, mcpdesc-semantic, completeness, or interoperability |
 | `requirement` | Requirement level of the source: must, should, or may |
-| `applicability` | Behavior per supported MCP revision |
+| `applicability` | Behavior per supported MCP revision: `applies` (the rule is checked), `opaque`, `not-applicable`, or a rule-specific value. Required for `mcp` and `json-schema` rules. Some `mcpdesc` rules omit it; an omitted value means that behavior per revision is not recorded, not that the rule applies to every revision (see [`rule-history-0.8.md`](rule-history-0.8.md#applicability-today)) |
 | `specification` | MCP Description requirements the rule checks and the decisions behind it, each with precise `locations` (see below) |
 | `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `diagnostics` | Diagnostic codes emitted |
@@ -221,7 +345,7 @@ An arbitration is `active` when decided, `proposed` while it awaits a
 maintainer decision (validator behavior is then unchanged, and any difference
 is recorded as a gap), or `retired`.
 
-## Rules in diagnostics
+### Rules in diagnostics
 
 A diagnostic for a registered rule carries the rule identifier in a `rule`
 property next to `code`, `severity`, `message`, and `path`:
