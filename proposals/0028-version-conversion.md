@@ -1,6 +1,6 @@
 # Proposal 0028: Version Conversion
 
-- Status: Draft
+- Status: Review
 - Author(s): @ObjectIsAdvantag
 - Created: 2026-10-27
 - Target version: 0.9.0
@@ -144,17 +144,22 @@ identifier in `$schema`.
 
 An implementation of the profile MUST:
 
-1. validate `D` against `S`, and stop with status `invalid-source` and the
+1. stop with status `unsupported` and the diagnostic
+   `conversion-path-undefined` if no conversion is defined from `S` to `T`;
+2. validate `D` against `S`, and stop with status `invalid-source` and the
    diagnostic `conversion-source-invalid` if validation reports an error;
-2. apply the automatic rewrites of the `S` to `T` conversion table;
-3. apply the fixes the caller requested, and no others;
-4. validate the rewritten document against `T`;
-5. report each error of step 4 as a blocker (Section 4) or, if no conversion
-   rule matches it, as `conversion-incompatibility-undeclared`;
-6. return status `converted` with the document and patch only if step 4
+3. apply the automatic rewrites of the `S` to `T` conversion table;
+4. apply the fixes the caller requested, and no others;
+5. validate the rewritten document against `T`;
+6. report each error of step 5 as a blocker (Section 4) or, if no conversion
+   rule explains it, as `conversion-incompatibility-undeclared`;
+7. return status `converted` with the document and patch only if step 5
    reports no error; otherwise return status `blocked` with no document.
 
-Warnings of step 4 are returned unchanged, with their own codes and rules.
+Warnings of step 5 are returned unchanged, with their own codes and rules.
+Semantic validation runs only when a document is structurally valid, so
+semantic blockers, such as a malformed `uriTemplate`, appear once the
+structural blockers are fixed.
 
 ### 2. Automatic rewrites
 
@@ -192,14 +197,24 @@ rule registry, and they cite no requirement anchors.
 
 ### 4. Blockers
 
-A blocker is an error diagnostic in the form of Proposal 0024, with:
+A target error is explained by a conversion rule when the rule lists the
+error's validation rule. A generic schema error (rule
+`mcpdesc.document.schema`) reported at or next to the location of an
+explained error is a consequence of it, for example the other alternatives of
+a `oneOf`, and is not reported separately: its path without the last segment
+is a prefix of the explained error's path.
+
+A blocker is an error diagnostic in the form of Proposal 0024, one per
+conversion rule and path, with:
 
 - `code`: `conversion-blocked`;
 - `rule`: the conversion rule;
-- `path`: the path of the target diagnostic;
+- `path`: the path of the explained target diagnostic;
 - `cause`: the target diagnostic (`code`, `rule`, `message`, `path`);
 - `fixes`: the identifiers of the fixes available for this blocker, possibly
   empty.
+
+Conversion fixtures pin `code`, `rule`, and `path`.
 
 ### 5. Fixes
 
@@ -211,7 +226,7 @@ the author's decision.
 | Fix | Edit |
 | --- | --- |
 | `remove-property` | Removes the member at the blocker path |
-| `move-to-experimental` | Moves client requirement `<name>` to `experimental.<name>`; blocked if `experimental.<name>` exists |
+| `move-to-experimental` | Moves client requirement `<name>` to `experimental.<name>`, adding an empty `experimental` first when absent; not applicable if `experimental.<name>` exists |
 
 A fix MUST NOT move a value into `_meta` or into an `x-*` property. Such
 moves give a value a new meaning, and only the author can choose one.
@@ -290,7 +305,7 @@ Without fixes, the result is blocked:
       "cause": {
         "code": "schema-validation",
         "rule": "mcp.tool-annotations.members",
-        "path": ["tools", 0, "annotations"]
+        "path": ["tools", 0, "annotations", "futureToolHint"]
       },
       "fixes": ["remove-property"]
     }
@@ -310,21 +325,27 @@ this patch:
 
 ## Conversion fixtures
 
-Conversion fixtures live in `spec/<version>/conversion/fixtures/`, in the
-target version, one JSON file per case:
+The profile lives in `spec/<version>/conversion/` of the target version: the
+conversion rules of each version pair as data (`<from>-to-<to>.json`), their
+format and the case format as JSON Schemas under `schema/`, and one JSON file
+per case under `fixtures/`, with source documents written for the cases under
+`fixtures/documents/`:
 
 ```json
 {
-  "description": "Unknown Tool Annotation property blocks conversion.",
+  "description": "Unknown annotation properties block conversion.",
   "document": "../../../0.8.0/fixtures/expected-valid/distinct-tool-and-resource-annotations.json",
   "from": "0.8.0",
   "to": "0.9.0",
-  "expectedBlockers": [
+  "expectedStatus": "blocked",
+  "expectedDiagnostics": [
     {
+      "code": "conversion-blocked",
       "rule": "mcpdesc.conversion.0-8-to-0-9.tool-annotations-closed",
       "path": ["tools", 0, "annotations", "futureToolHint"]
     },
     {
+      "code": "conversion-blocked",
       "rule": "mcpdesc.conversion.0-8-to-0-9.annotations-closed",
       "path": ["resources", 0, "annotations", "futureResourceHint"]
     }
@@ -332,31 +353,36 @@ target version, one JSON file per case:
 }
 ```
 
-A case has either `expected`, the exact converted document, or
-`expectedBlockers`; it may list `fixes` to request and then gives `expected`
-and `expectedPatch`. Comparison is by canonical JSON.
+`document` is a path relative to the case file or an inline document. A case
+may list `fixes` to request, each with `fix` and `path`. A case with
+`expectedStatus` `converted` pins the exact `expectedPatch`, which determines
+the converted document; any other case pins the exact set of error
+`expectedDiagnostics`. Comparison is by canonical JSON. Validator snapshots
+bundle the directory and copy released source documents under
+`fixtures/released/<version>/`, rewriting the case paths.
 
-The fixtures cover at least: every valid 0.8.0 example and fixture of this
-repository; each conversion rule; each fix, including a blocked
-`move-to-experimental`; each diagnostic code except
+The fixtures cover at least: every example and valid or warning fixture of the
+released source version; each conversion rule; each fix, including a
+`move-to-experimental` that is not applicable; each diagnostic code except
 `conversion-incompatibility-undeclared`; and a YAML source.
 
 ## Validation of the fixtures in this repository
 
-This repository contains no conversion code. A test script checks that:
+This repository contains no conversion implementation for users. A test
+script recomputes every case from the conversion rules and checks that:
 
-- every case is valid against the case schema;
-- every source document is valid for its version;
-- every `expected` document is valid for its version and equals the source
-  after the automatic rewrites and requested fixes, which the test computes
-  from the tables above;
-- for every `expectedBlockers` case, the target validator reports, on the
-  source after the automatic rewrites, exactly the errors that the listed
-  conversion rules explain.
+- every rules file and case is valid against its schema, and every target
+  rule a conversion rule lists is registered;
+- every source document is valid against the source version's JSON Schema
+  (semantic validity of sources is checked in core with the source selector);
+- the computed status, patch, and diagnostics equal the expected ones;
+- every target error is explained by a conversion rule or is a consequence of
+  an explained error.
 
-The third check uses the target validator from this repository. A target
-error that matches no conversion rule fails the test, so an undeclared
-incompatibility cannot be released.
+A target error that no conversion rule explains fails the test, so an
+undeclared incompatibility cannot be released.
+
+## Compatibility
 
 ## Compatibility
 
