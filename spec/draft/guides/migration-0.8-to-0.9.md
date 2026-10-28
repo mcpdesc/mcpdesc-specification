@@ -11,7 +11,7 @@ extra properties on closed MCP types must move them.
 ## Version and schema identity
 
 Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
-`https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json`; the stable
+`https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json`; the stable
 identifier is assigned at release.
 
 ## Annotations
