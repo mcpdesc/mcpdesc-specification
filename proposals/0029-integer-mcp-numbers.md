@@ -1,6 +1,6 @@
 # Proposal 0029: Integer MCP Numbers
 
-- Status: Draft
+- Status: Review
 - Author(s): @ObjectIsAdvantag
 - Created: 2026-10-27
 - Target version: 0.9.0
@@ -55,9 +55,8 @@ difference is a probable generator defect. Applied literally, the fields stay
 
 ## Non-goals
 
-- Changes to MCP. A clarification of the convention in MCP's schema
-  documentation may be suggested upstream separately.
-- A minimum for `size` (open question 1).
+- Changes to MCP, including a documentation clarification of the convention.
+- A minimum for `size`. MCP defines none, and MCP Description follows MCP.
 - A correction of 0.8.0. This change makes valid documents invalid, so it
   cannot be a validator revision of a stable release.
 
@@ -105,7 +104,8 @@ Add to the sources-of-truth rules (`validation/README.md`, conflict table):
 | `number` in `schema.ts` versus `integer` in `schema.json` | Integer. MCP generates `schema.json` with `--defaultNumberType integer`, so an unannotated `number` denotes an integer and `@TJS-type number` denotes a number. Not a generator defect. |
 
 The existing row "`schema.json` versus `schema.ts` → `schema.ts`" continues to
-apply to every other difference.
+apply to every other difference. Section 3.6 states the same reading
+normatively for the MCP values MCP Description carries.
 
 ### 2. Field types
 
@@ -196,11 +196,7 @@ unchanged.
 
 ## Open questions
 
-1. Should `size` gain `minimum: 0`? MCP defines no minimum; "size … in bytes"
-   implies a non-negative value. Adding it would make MCP Description stricter
-   than MCP.
-2. Should the convention be raised upstream as a documentation clarification
-   for MCP schema contributors?
+None at this time.
 
 ## Implementation and validation plan
 
@@ -219,5 +215,7 @@ unchanged.
 
 Option A of issue #84 (adopt MCP's generator convention) chosen by the
 maintainer on 2026-10-27, for inclusion in 0.9.0 draft.2 with Proposal 0028.
+Also decided: `size` gets no minimum, following MCP; no upstream request is
+made.
 
 Acceptance pending.
