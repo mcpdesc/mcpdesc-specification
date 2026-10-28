@@ -25,6 +25,7 @@ Use repository scripts as the source of deterministic release behavior. Do not r
    - `npm run release:check -- stable <x.y.z>`
    - `npm run release:check -- stable-publication <x.y.z>` after stable schema deployment
 6. Run `npm test` and `git diff --check`. Stable releases must pass `stable-publication` before tagging. For a validator snapshot export, review its manifest, schema digest, semantic source, and fixture corpus before intake in `mcpdesc/core`.
+   For a validator revision (`x.y.z-rev.YYYYMMDD`), before tagging confirm against GOVERNANCE.md "Validator revision selectors" that the defect qualifies (otherwise use the next draft), that the work is on `release/<major>.<minor>.x`, and that the repository changelog in the commit to be tagged records each correction, its normative source, the behavior before and after, and every changed or moved fixture. After tagging, publish a GitHub release that announces the behavior change and the affected fixtures.
 7. Open a pull request with compatibility classification, validation results, and AI-assistance disclosure. Wait for CI and maintainer approval.
 8. Treat annotated specification tags as exact snapshot identities, not authorization to publish tooling packages. Validator package release authority belongs to `mcpdesc/core`.
 9. After specification publication, verify GitHub release state and schema provenance. Verify validator intake and publication in `mcpdesc/core` separately.

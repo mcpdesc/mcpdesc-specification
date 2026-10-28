@@ -4,6 +4,7 @@ This changelog records repository governance, release-process, and project-tooli
 
 ## Unreleased
 
+- Detailed the validator revision policy in `GOVERNANCE.md`: when a revision is allowed, when a correction must go into a draft snapshot or new version instead, how a revision is prepared (public issue, maintenance branch, complete changelog record in the tagged commit), and its downstream impact on normative tooling, including a required release announcement listing changed fixtures. Prompted by `v0.8.0-rev.20261021`, whose changelog record was completed only after tagging and is therefore not part of that tag or its validator snapshot.
 - Codified dated validator revisions as the correction path for stable-release semantic validation defects, and `release/<major>.<minor>.x` maintenance branches for stable-release corrections while a later version is in development.
 - Made repository tooling version-neutral: the candidate validator is `scripts/validate-document.mjs` (exporting `validateDocument`), and tests and repository validation derive the candidate version and paths from `specification-status.json`. Diagnostics for 0.8.0 documents are unchanged.
 - Initialized the MCP Description 0.9.0 community working draft in `spec/draft/` from the stable 0.8.0 release, with `schemas/mcp-description/0.9.0.json` and `schemas/draft.json` targeting the upcoming `v0.9.0-draft.1` snapshot. The candidate validator now validates 0.9.0 documents; frozen 0.7.0 and 0.8.0 artifacts are unchanged.
@@ -14,7 +15,11 @@ This changelog records repository governance, release-process, and project-tooli
 
 ## 2026-10-21
 
-- Corrected candidate validator semantics so MCP-specific JSON Schema annotations apply only to protocol revisions that define them, while unknown Tool-schema keywords remain preserved and governed by their JSON Schema dialect.
+- Published validator revision `v0.8.0-rev.20261021` (selector `0.8.0-rev.20261021`), correcting one semantic validation defect of the stable 0.8.0 release. The `v0.8.0` tag, canonical schema bytes, `$id`, and normative text are unchanged, and selector `0.8.0` keeps its original behavior.
+  - Correction: `x-mcp-header` in a Tool `inputSchema` is checked only when the Tool's effective protocol scope includes MCP 2026-07-28. Selector `0.8.0` reported `field-not-supported-by-version` whenever the scope also included an earlier revision, and applied the MCP 2026-07-28 header-value rules to Tools scoped only to earlier revisions. In those revisions `x-mcp-header` is an unknown JSON Schema keyword and is preserved. MCP-specific annotations now apply only to protocol revisions that define them; unknown Tool-schema keywords remain preserved and governed by their JSON Schema dialect.
+  - Normative source: MCP Description 0.8.0, [Section 9.2](spec/0.8.0/sections/09-tools.md#92-input-and-output-schemas). `x-mcp-header` is defined for MCP 2026-07-28 `inputSchema` properties only; MCP 2025-11-25 schemas must be valid under their declared or default dialect, JSON Schema 2020-12, which permits unknown keywords; for earlier revisions, other keywords "MUST be preserved and MUST NOT be rejected".
+  - Regression fixtures: `spec/0.8.0/fixtures/expected-invalid/revision-inapplicable-mcp-header.json` moved to `expected-valid/` and extended with header values that are invalid only under MCP 2026-07-28 rules; new `spec/0.8.0/fixtures/expected-valid/custom-tool-schema-keywords.json` combines `x-mcp-header` and custom keywords in a Tool scoped to MCP 2025-11-25 and 2026-07-28. Both are invalid under selector `0.8.0` and valid under the revision. `scripts/test-views.mjs` checks that MCP 2026-07-28 header rules still reject invalid values and that custom keywords survive projection, merge, and reference resolution.
+  - The revision was prepared on `main`, before the maintenance-branch policy of 2026-10-24; later revisions are prepared on `release/0.8.x`.
 - Added dated stable-revision validator snapshot selectors and manifest-verified export regression coverage.
 
 ## 2026-10-20

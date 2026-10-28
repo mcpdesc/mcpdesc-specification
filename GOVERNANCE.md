@@ -138,17 +138,45 @@ SemVer build metadata distinguishes immutable editorial editions but does not es
 
 ### Validator revision selectors
 
-A correctness defect in the semantic validation of a stable release MAY be corrected by a dated **validator revision** instead of a new specification version. A defect qualifies only when the validator contradicts the stable release's normative text, or a normative MCP source for a protocol revision that the release supports. Changes to MCP Description policy, normative text, or schema acceptance do not qualify and require a new specification version.
+After a stable release, a correctness defect in its semantic validation MAY be corrected by a dated **validator revision** instead of a new specification version. A validator revision is an exception to the immutability of published conformance artifacts and MUST be considered carefully (see [Downstream impact](#downstream-impact-of-a-validator-revision)).
+
+#### When a revision is allowed
+
+A defect qualifies only when the validator contradicts the stable release's normative text, or a normative MCP source for a protocol revision that the release supports, and reviewers can cite the sentence or definition the validator violates. The corrected behavior MUST follow from that text without a new interpretation.
+
+#### When a new snapshot is required instead
+
+The correction MUST instead go into the next draft snapshot, release candidate, or specification version when it:
+
+- changes normative text, canonical schema bytes, `$id`, or the `mcpdesc` value;
+- resolves text that is ambiguous, silent, or contradicted by another source, which requires an interpretation or an arbitration;
+- changes MCP Description policy, adds a rule or diagnostic, or changes more than the identified defects; or
+- makes documents that the stable selector accepts invalid, unless review records why the normative text requires the stricter behavior and why the downstream impact is acceptable.
+
+When in doubt, use the draft. While a later version is in development, a correction that also applies there is made in the draft as well.
+
+#### How a revision is made
 
 A validator revision:
 
-- MUST use an annotated tag `v<version>-rev.<YYYYMMDD>` on an exact clean commit, and the corresponding validator selector `<version>-rev.<YYYYMMDD>`;
+- MUST be tracked by a public issue that states the defect, its normative source, the behavior before and after, and whether the correction accepts more documents, fewer, or both;
+- MUST be prepared on a `release/<major>.<minor>.x` maintenance branch created from the latest tag of that release line while a later specification version is in development on `main`;
 - MUST retain the stable release's canonical schema bytes, `$id`, `mcpdesc` value, and normative text;
 - MAY change semantic validation behavior and conformance fixtures only as needed to correct the identified defects;
-- MUST record each correction, its normative source, and its regression fixtures in the repository changelog; and
+- MUST record, in the repository changelog of the commit that is tagged, each correction, its normative source, the behavior before and after, and every conformance fixture added, removed, moved between expected outcomes, or changed. A record added after tagging cannot become part of the tag and does not replace this requirement;
+- MUST use an annotated tag `v<version>-rev.<YYYYMMDD>` on an exact clean commit, with the corresponding validator selector `<version>-rev.<YYYYMMDD>`, after the validator release checks pass; and
 - MUST NOT replace the stable release or earlier revisions, which remain immutable selectors that consumers may continue to use.
 
-While a later specification version is in development on `main`, validator revisions and editorial editions of the stable release are prepared on a `release/<major>.<minor>.x` maintenance branch created from the latest tag of that release line. Corrections that also apply to the active draft are applied there separately.
+Editorial editions of a stable release are prepared on the same `release/<major>.<minor>.x` maintenance branch while a later version is in development.
+
+#### Downstream impact of a validator revision
+
+Conformance fixtures and validator behavior are consumed by normative tooling: validators, `@mcpdesc/core`, CLIs, editors, and conformance suites that pin expected outcomes. A fixture that moves from `expected-invalid` to `expected-valid`, or whose content changes, silently changes what that tooling treats as conforming unless its maintainers know about it. Therefore:
+
+- a revision MUST NOT change a fixture without listing the change in its changelog record;
+- the fixtures at the stable tag remain unchanged, so tooling that pins the stable selector keeps the original behavior;
+- maintainers MUST announce the revision: a GitHub release for the revision tag that links the issue and changelog record, and states the behavior change and the affected fixtures; and
+- downstream packages that change their default selector to the revision SHOULD announce it as a behavior change in their own release notes.
 
 ### Specification artifact export
 
