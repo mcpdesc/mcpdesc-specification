@@ -310,7 +310,7 @@
         },
         "ttlMs": {
           "minimum": 0,
-          "type": "number"
+          "type": "integer"
         }
       },
       "required": [
@@ -1543,7 +1543,7 @@
           "$ref": "#/$defs/securityRequirementArray"
         },
         "size": {
-          "type": "number"
+          "type": "integer"
         },
         "tags": {
           "items": {
@@ -2708,7 +2708,7 @@
               "type": "string"
             },
             "size": {
-              "type": "number"
+              "type": "integer"
             },
             "title": {
               "type": "string"

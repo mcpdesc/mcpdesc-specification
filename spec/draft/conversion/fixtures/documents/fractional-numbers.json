@@ -1,0 +1,41 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "fractional-numbers",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "fractional-numbers"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "example:///status",
+      "name": "status",
+      "mimeType": "text/plain",
+      "size": 2.5,
+      "examples": {
+        "cached": {
+          "result": {
+            "resultType": "complete",
+            "ttlMs": 60000.5,
+            "cacheScope": "public",
+            "contents": [
+              {
+                "uri": "example:///status",
+                "mimeType": "text/plain",
+                "text": "ok"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

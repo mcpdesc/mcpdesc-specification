@@ -14,7 +14,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable resource description. |
 | `mimeType` | string | No | MIME type of the resource content. |
-| `size` | number | No | Size of the raw resource content in bytes. |
+| `size` | integer | No | Size of the raw resource content in bytes. |
 | `annotations` | [Resource Annotations Object](#103-resource-annotations) | No | Audience, priority, and modification-time hints. |
 | `examples` | map\<string, [Resource Example Object](#1042-static-resource-example-object)\> | No | Named completed Resource read examples. |
 | `icons` | non-empty array\<Icon\> | No | Icons for UI display. Since MCP 2025-11-25. |
@@ -24,6 +24,8 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | `_meta` | object | No | Literal MCP metadata on the Resource declaration, subject to [Section 3.5](#35-mcp-_meta). Since MCP 2025-06-18. |
 | `security` | Security Requirement Array | No | Primitive security override. |
 | `clientRequirements` | [Client Capability Requirements Object](#85-primitive-client-capability-requirements) | No | Unconditional minimum client capabilities required for `resources/read`; does not apply to resource listing. |
+
+<a id="req-resource-size-integer"></a>`size`, when present, MUST be an integer, in a Resource declaration and in resource link content blocks alike: MCP declares it as an unannotated `number`, which denotes an integer (see [Section 3.6](#36-carried-mcp-values)). MCP defines no minimum.
 
 #### 10.1.2 Resource URI
 
@@ -101,7 +103,7 @@ The object MAY carry `x-*` specification extensions; no other additional propert
 
 #### 10.4.4 Completed Resource Read Result
 
-The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. <a id="req-resource-example-result-shape"></a>For MCP 2026-07-28 it MUST contain `resultType: "complete"`, non-negative numeric `ttlMs`, and `cacheScope` equal to `"public"` or `"private"`; these are required fields of the MCP `CacheableResult` extended by `ReadResourceResult`. Earlier supported revisions do not define these fields; when present for those revisions they follow [Section 3.6](#36-carried-mcp-values), so a declaration whose examples span MCP 2026-07-28 and an earlier revision MAY share one example map. <a id="req-resource-contents-meta"></a>Result `_meta` is available in every supported revision, and Resource Contents `_meta` is available from MCP 2025-06-18; both are literal illustrative values governed by [Section 3.5](#35-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. <a id="req-resource-example-completed-form"></a>JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
+The `result` value represents the value inside a successful JSON-RPC response's `result` member. It MUST contain a non-empty `contents` array. <a id="req-resource-example-result-shape"></a>For MCP 2026-07-28 it MUST contain `resultType: "complete"`, non-negative integer `ttlMs`, and `cacheScope` equal to `"public"` or `"private"`; these are required fields of the MCP `CacheableResult` extended by `ReadResourceResult`. Earlier supported revisions do not define these fields; when present for those revisions they follow [Section 3.6](#36-carried-mcp-values), so a declaration whose examples span MCP 2026-07-28 and an earlier revision MAY share one example map. <a id="req-resource-contents-meta"></a>Result `_meta` is available in every supported revision, and Resource Contents `_meta` is available from MCP 2025-06-18; both are literal illustrative values governed by [Section 3.5](#35-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. <a id="req-resource-example-completed-form"></a>JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
 
 Every `contents` entry MUST contain `uri` and exactly one of `text` or `blob`. <a id="req-resource-example-blob-base64"></a>A `blob` value MUST be valid base64. An example MAY contain multiple entries; consumers MUST preserve their order and MUST NOT assume every returned URI equals the requested URI.
 

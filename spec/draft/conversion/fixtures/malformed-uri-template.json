@@ -1,0 +1,18 @@
+{
+  "description": "A malformed uriTemplate without examples, accepted by 0.8.0, blocks conversion; no fix is offered.",
+  "document": "documents/malformed-uri-template.json",
+  "expectedDiagnostics": [
+    {
+      "code": "conversion-blocked",
+      "path": [
+        "resourceTemplates",
+        0,
+        "uriTemplate"
+      ],
+      "rule": "mcpdesc.conversion.0-8-to-0-9.uri-template-checked"
+    }
+  ],
+  "expectedStatus": "blocked",
+  "from": "0.8.0",
+  "to": "0.9.0"
+}

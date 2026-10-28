@@ -255,3 +255,71 @@ rules:
         pointer: /resourceTemplates/0/completionExamples/issue-prefix/result/completion
       - path: expected-valid/named-completion-examples.json
         pointer: /resourceTemplates/0/completionExamples
+
+  - id: mcp.cacheable-result.ttl-ms
+    owner: mcp
+    summary: >-
+      ttlMs in a Resource example result is a non-negative integer when
+      present.
+    surface: CacheableResult
+    path: ttlMs
+    kind: structural
+    requirement: must
+    applicability:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": applies
+      "2025-11-25": applies
+      "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.6 and 10.4.4
+        locations:
+          - sections/03-document-structure.md#req-mcp-integer-numbers
+          - sections/10-resources.md#req-resource-example-result-shape
+      - reference: Proposal 0029, Integer MCP Numbers
+        locations:
+          - proposal-snapshots/0029-integer-mcp-numbers.md
+    sources:
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, interface CacheableResult, ttlMs (unannotated number, @minimum 0)
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1081-L1094
+      - tier: 3
+        reference: MCP 2026-07-28 generated schema.json, ReadResourceResult.ttlMs typed integer
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.json#L2625-L2629
+      - tier: 3
+        reference: "MCP scripts/generate-schemas.ts: typescript-json-schema --defaultNumberType integer"
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/scripts/generate-schemas.ts#L95
+    diagnostics:
+      - code: schema-validation
+        severity: error
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - path: expected-invalid/fractional-ttl-ms.json
+        pointer: /resources/0/examples/cached/result/ttlMs
+      - path: expected-invalid/resource-example-cache-fields.json
+        pointer: /resources/1/examples/invalid/result/ttlMs
+      - path: expected-valid/named-resource-examples.json
+        pointer: /resources/0
+    notes: >-
+      MCP defines ttlMs from 2026-07-28 only. In earlier revisions it is a
+      field not defined by the revision (mcp.result.additional-properties.preserve),
+      and Section 3.6 keeps the same value constraint so that one example can
+      serve several revisions.
+    arbitrations:
+      - revisions: ["2026-07-28"]
+        conflict: >-
+          schema.ts declares ttlMs as number, which TypeScript cannot restrict
+          to integers; the generated schema.json types it as integer.
+        authority: >-
+          MCP's schema generation configuration (--defaultNumberType integer),
+          under which an unannotated number denotes an integer.
+        behavior: Reject a non-integer or negative ttlMs with schema-validation.
+        rationale: >-
+          A millisecond duration is an integer in MCP's generated schema;
+          accepting fractions would let examples disagree with MCP's types.
+        reviewTrigger: MCP changes its generator configuration or annotates ttlMs with @TJS-type number.
+        status: active

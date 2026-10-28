@@ -1,0 +1,37 @@
+{
+  "description": "Removing the extra completion field on request converts the document.",
+  "document": "documents/completion-result-extra-field.json",
+  "expectedPatch": [
+    {
+      "op": "replace",
+      "path": "/mcpdesc",
+      "value": "0.9.0"
+    },
+    {
+      "op": "replace",
+      "path": "/$schema",
+      "value": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json"
+    },
+    {
+      "op": "remove",
+      "path": "/resourceTemplates/0/completionExamples/issue-prefix/result/completion/nextCursor"
+    }
+  ],
+  "expectedStatus": "converted",
+  "fixes": [
+    {
+      "fix": "remove-property",
+      "path": [
+        "resourceTemplates",
+        0,
+        "completionExamples",
+        "issue-prefix",
+        "result",
+        "completion",
+        "nextCursor"
+      ]
+    }
+  ],
+  "from": "0.8.0",
+  "to": "0.9.0"
+}

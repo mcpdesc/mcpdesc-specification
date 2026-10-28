@@ -1,0 +1,41 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "fractional-resource-link-size",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-06-18"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "fractional-resource-link-size"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list_reports",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "examples": {
+        "listing": {
+          "input": {},
+          "result": {
+            "content": [
+              {
+                "type": "resource_link",
+                "uri": "file:///reports/q3.pdf",
+                "name": "q3_report",
+                "size": 2048.5
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

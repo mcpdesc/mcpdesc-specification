@@ -1,0 +1,40 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.1.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "fractional-ttl-ms",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "fractional-ttl-ms"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "example:///status",
+      "name": "status",
+      "mimeType": "text/plain",
+      "examples": {
+        "cached": {
+          "result": {
+            "resultType": "complete",
+            "ttlMs": 60000.5,
+            "cacheScope": "public",
+            "contents": [
+              {
+                "uri": "example:///status",
+                "mimeType": "text/plain",
+                "text": "ok"
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

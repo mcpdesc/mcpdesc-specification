@@ -54,6 +54,7 @@ When sources disagree:
 | --- | --- |
 | Prose example versus `schema.ts` structure | `schema.ts` |
 | `schema.json` versus `schema.ts` | `schema.ts`; probable generator defect, reported upstream |
+| `number` in `schema.ts` versus `integer` in `schema.json` | Integer: MCP generates `schema.json` with `--defaultNumberType integer`, so an unannotated `number` denotes an integer and `@TJS-type number` a number (Proposal 0029); not a generator defect |
 | Prose requirement that `schema.ts` cannot express | Prose |
 | Prose and `schema.ts` genuinely contradict | Recorded as an arbitration with the upstream issue; never resolved from SDK behavior alone |
 | SEP versus current specification | Current specification |

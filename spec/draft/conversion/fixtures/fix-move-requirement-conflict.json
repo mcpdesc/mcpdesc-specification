@@ -1,0 +1,40 @@
+{
+  "description": "move-to-experimental is not applicable when experimental already has the name; the blocker remains.",
+  "document": "documents/experimental-requirement-conflict.json",
+  "expectedDiagnostics": [
+    {
+      "code": "conversion-fix-not-applicable",
+      "path": [
+        "prompts",
+        0,
+        "clientRequirements",
+        "futureCapability"
+      ],
+      "rule": "mcpdesc.conversion.fix-applicable"
+    },
+    {
+      "code": "conversion-blocked",
+      "path": [
+        "prompts",
+        0,
+        "clientRequirements",
+        "futureCapability"
+      ],
+      "rule": "mcpdesc.conversion.0-8-to-0-9.client-requirements-closed"
+    }
+  ],
+  "expectedStatus": "blocked",
+  "fixes": [
+    {
+      "fix": "move-to-experimental",
+      "path": [
+        "prompts",
+        0,
+        "clientRequirements",
+        "futureCapability"
+      ]
+    }
+  ],
+  "from": "0.8.0",
+  "to": "0.9.0"
+}

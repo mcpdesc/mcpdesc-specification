@@ -1,0 +1,22 @@
+{
+  "description": "An extra field in a completion object blocks conversion.",
+  "document": "documents/completion-result-extra-field.json",
+  "expectedDiagnostics": [
+    {
+      "code": "conversion-blocked",
+      "path": [
+        "resourceTemplates",
+        0,
+        "completionExamples",
+        "issue-prefix",
+        "result",
+        "completion",
+        "nextCursor"
+      ],
+      "rule": "mcpdesc.conversion.0-8-to-0-9.completion-result-closed"
+    }
+  ],
+  "expectedStatus": "blocked",
+  "from": "0.8.0",
+  "to": "0.9.0"
+}
