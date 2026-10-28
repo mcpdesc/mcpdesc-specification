@@ -42,6 +42,11 @@ Second 0.9.0 snapshot, implementing review-stage Proposals 0028 and 0029 recorde
 - Native projection stays explicit: it never converts implicitly. Documents of 0.8.0 are converted, then projected.
 - Implementation: conversion belongs in `@mcpdesc/core`. No document changes validity.
 
+#### Documentation
+
+- Rewrote the introduction of [`validation/README.md`](validation/README.md) for readers: what validation rules cover (MCP, JSON Schema, and MCP Description owners), why rules are explicit, how to act on a diagnostic, a worked example based on an existing fixture, and the status of the pilot registry. The technical reference follows under "Reference". The introduction is delimited by `mcpdesc:validation-overview` comment markers so mcpdesc.org can import it unchanged. Editorial; no rule, behavior, schema, or fixture changes.
+- Implementation state since Draft 1: the prereleases `@mcpdesc/validator@0.14.0-rc.1` (rule identifiers in diagnostics) and `@mcpdesc/core@0.13.0-rc.1` (native MCP projection, tested against the projection fixtures) support the explicit `0.9.0-draft.1` selector. The Draft 1 entries below describe the state when Draft 1 was published.
+
 ### Community Working Draft 1 — 2026-10-26 (`v0.9.0-draft.1`)
 
 First 0.9.0 snapshot: MCP-native alignment from [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72), implementing review-stage Proposals 0024, 0025, 0026, and 0027 recorded in [`PROPOSALS.md`](PROPOSALS.md). It is a prerelease, not an accepted specification, and contains breaking changes; see the [0.8.0 to 0.9.0 migration guide](guides/migration-0.8-to-0.9.md). The changes since initialization from 0.8.0 are listed in the sections below.
