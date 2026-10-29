@@ -222,7 +222,7 @@ file per case:
 under `projection-fixtures/documents/` or to a conformance fixture under
 `../fixtures/`, or an inline document. `kind` is `tool`, `resource`,
 `resourceTemplate`, or `prompt`. A case has either `expected`, the exact MCP
-value, or `expectedError`, a failure identifier of Section 3. A list case omits
+value, or `expectedError`, a failure identifier of Section 1. A list case omits
 `identifier` and has an `expected` array. Comparison is by canonical JSON
 (`scripts/canonical-json.mjs`), so key order does not matter. The case format
 is published as `projection-fixtures/schema/projection-case.schema.json`;
@@ -395,7 +395,7 @@ Scope: Tools, Resources, Resource Templates, and Prompts; maintainer decision
 on issue #72, 2026-10-26.
 Core version passing the fixtures: recorded in release notes only; maintainer
 decision on issue #72, 2026-10-26.
-Postcondition coverage: on 2026-10-29 the maintainer chose to keep Section 3's
+Postcondition coverage: on 2026-10-29 the maintainer chose to keep Section 1's
 postcondition and test it with cases from a recorded defect, implemented in
 core at Draft 3 intake. A valid document whose Tool schema property is a
 boolean subschema fails the pinned MCP 2025-11-25 `Tool` type but projects for
