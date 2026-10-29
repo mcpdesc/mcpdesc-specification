@@ -14,14 +14,16 @@
 
 ## Summary
 
-Make every validation rule record readable at three levels, and complete across
-MCP protocol revisions:
+Make every validation rule record readable at three levels, with explicit
+applicability and catalog-local lifecycle:
 
 - a short `title` that names the rule;
 - the existing `summary`, which states the precise requirement;
 - a `description` that explains why the rule exists, what it means for
   authors, the usual mistake, and its fix;
-- an `applicability` entry for every rule, with documented values;
+- rule-specific protocol applicability, including explicit protocol independence,
+  and separate JSON Schema dialect information where relevant;
+- retirement recorded within each catalog, without changing older snapshots;
 - a publicly discoverable, immutable JSON catalog and rule-record schema.
 
 Specification-version membership stays at the snapshot level. No per-rule
@@ -57,7 +59,8 @@ interface for validators, editors, or other catalogs.
 
 - Give every rule a short title and a reader-oriented explanation from the
   specification itself, so catalogs and tools do not make up their own.
-- Record the behavior of every rule for every supported MCP revision.
+- Distinguish specification membership, lifecycle, protocol applicability, and
+  JSON Schema dialect information without overloading ownership.
 - Keep the precise requirement statement unchanged.
 - Check the new fields in `scripts/test-validation-rules.mjs`.
 - Publish a versioned schema and a complete catalog for each authorized
@@ -67,7 +70,7 @@ interface for validators, editors, or other catalogs.
 ## Non-goals
 
 - Changing rule identifiers, summaries, diagnostics, or validator behavior.
-- Per-rule specification-version ranges, lifecycle, or historical provenance
+- Per-rule specification-version ranges or a global lifecycle timeline
   (see `spec/draft/validation/rule-history-0.8.md`).
 - Website presentation, such as navigation or grouping by surface.
 - Publishing a retrospective 0.8.0 registry, rewriting existing snapshot tags,
@@ -103,10 +106,29 @@ with the specification text, the specification prevails and the record is
 corrected. Under `GOVERNANCE.md`, corrections to informative fields are
 supporting material and do not require a proposal.
 
-### 2. Complete applicability
+### 2. Rule-specific applicability
 
-`applicability` becomes required for every rule, with the same form as today:
-every supported MCP revision maps to a value.
+Ownership identifies the authority behind a requirement, not the dimensions
+that make its check applicable. An MCP Description-owned check can depend on
+the MCP protocol version; a JSON Schema-owned check can depend on both the
+protocol version and the embedded dialect. Applicability therefore MUST NOT
+change meaning solely according to `owner`.
+
+Three questions are kept separate:
+
+| Question | Representation principle |
+| --- | --- |
+| Which MCP Description specification snapshot defines this record? | Catalog membership and the manifest, not a repeated selector in each rule |
+| Does the check depend on MCP protocol versions? | Explicit protocol applicability, or an explicit statement of protocol independence |
+| Which embedded JSON Schema dialects are relevant? | Separate dialect information where needed, not a substitution for protocol applicability |
+
+Protocol independence MUST NOT be inferred from an omitted field or from the
+rule's owner. Repeating `applies` for every protocol version is not a substitute
+for distinguishing a genuinely independent check from a version-sensitive one.
+A dialect support list must not cause an unsupported dialect to escape the
+check that reports it as unsupported.
+
+For version-dependent checks, the existing behavior meanings remain:
 
 | Value | Meaning |
 | --- | --- |
@@ -115,25 +137,38 @@ every supported MCP revision maps to a value.
 | `not-applicable` | The rule is not checked for that revision. |
 | other value | Rule-specific behavior, which the rule's `description` MUST explain. |
 
-A rule that performs the same check in every revision records `applies` for
-every revision. A delegated rule records the revisions for which its
-implementation must perform the check.
-
 An `applies` entry describes a conditional check, not an assertion that the
-same internal branches or failures occur in every protocol version. Existing
-cross-reference, form-consistency, completion-target, and interaction checks
-run wherever the relevant data occurs; other rules check whether that data is
-available in the protocol version. The 19 formerly omitted maps therefore use
-`applies` throughout, except the limited-validation warning, which applies
-only to MCP 2024-11-05 and 2025-03-26. No new `independent` value is added.
+same internal branches or failures occur in every protocol version. Delegated
+checks follow the same distinction; delegation describes who performs a check,
+not whether it is protocol-independent.
 
-### 3. Rulesets
+The representation is an `applicability` object, required for active rules:
 
-Proposal 0024, Section 4, is amended. The ruleset for a revision,
-`mcpdesc.mcp.<revision>`, contains every rule whose applicability for that
-revision is not `not-applicable`, whatever its owner. The ruleset
-`mcpdesc.core` is removed, because ownership does not determine protocol
-dependence.
+| Field | Meaning |
+| --- | --- |
+| `protocolVersions` | Required: either the literal `independent` or a map listing every supported MCP protocol version with the behaviors above |
+| `schemaDialects` | Optional non-empty list of canonical dialect URIs relevant to the check; support information, not an execution filter |
+
+An independent check still runs only where its input occurs; its containing
+MCP type need not be available in every protocol version. The embedded-schema
+rule records both its protocol map and JSON Schema 2020-12/draft-07 dialects.
+It still rejects unsupported declared dialects rather than filtering them out.
+The first implementation classifies 23 checks as independent and 40 as
+protocol-dependent. Existing IDs and requirement meanings are preserved.
+
+### 3. Catalog views, not named rulesets
+
+Named rulesets from Proposal 0024, Section 4, are removed: neither
+`mcpdesc.core` nor `mcpdesc.mcp.<version>` is defined by this proposal.
+The catalog is the complete set of records published with a snapshot.
+Consumers may filter it by owner, protocol applicability, dialect, surface, or
+lifecycle for browsing and analysis, without separately authored group lists.
+
+A filtered view is not a validation profile. It MUST NOT be presented as
+permission to skip other required checks or as evidence that a tool provides
+complete document validation. Retired records remain discoverable but are
+excluded from active applicability filtering. A standardized validation profile
+would require its own explicit membership and conformance contract.
 
 ### 4. Rule-format version and catalog snapshot
 
@@ -162,7 +197,40 @@ documentation corrections are patch versions, published at a new URL; no
 versioned schema URL is overwritten. Permanent rule identifiers keep their
 meaning across catalogs as required by Proposal 0024.
 
-### 5. Immutable publication artifacts
+### 5. Catalog membership and retirement
+
+Each specification snapshot explicitly publishes its own catalog. A catalog
+for 0.10.0 or a later version does not automatically inherit every record from
+0.9.0, and a rule's presence in one catalog promises nothing about future
+membership.
+
+| Change in a later specification | Treatment |
+| --- | --- |
+| Requirement retained with the same meaning | Retain its permanent ID |
+| Informative explanation corrected without changing meaning | Retain its ID and publish the revised wording only under a new authorized catalog identity |
+| Requirement materially changed | Introduce a new ID and retain the old record as retired |
+| Requirement removed | Retain a retired record as a historical marker |
+| Implementation coverage improved | Retain its ID and update enforcement information; this is not requirement retirement |
+
+Use the existing `status: retired` representation initially. Retirement is
+local to that catalog: it does not change older catalogs or their validation
+requirements. It MUST follow an explicit specification decision, never be
+inferred from a validator no longer emitting a diagnostic.
+
+A retired record retains its permanent ID and an explanation of retirement,
+is discoverable in the full catalog, and is excluded from active checks and
+applicability filtering. Its ID MUST NOT be reused for a different requirement.
+Replacement links may be added when a concrete retirement requires them; no
+`replacedBy` field is introduced by this decision alone. Reader fields and
+historical references remain useful on a retired record, but active-rule
+applicability requirements must not force invented execution conditions onto it.
+
+A catalog renderer may derive a timeline by comparing immutable catalogs.
+It MUST distinguish first publication of a rule record from first existence of
+the underlying requirement. No speculative `since`/`until` specification range
+or independently maintained global history database is required.
+
+### 6. Immutable publication artifacts
 
 Publish these HTTPS resources on mcpdesc.org:
 
@@ -224,7 +292,7 @@ authorized catalog identity; it cannot overwrite an existing snapshot URL.
 This proposal adds no independently numbered documentation edition. If such
 an edition is needed, its identity requires a separate explicit decision.
 
-### 6. Catalog discovery
+### 7. Catalog discovery
 
 Publish a mutable index at:
 
@@ -248,7 +316,7 @@ Consumers use the index for discovery, then pin an immutable manifest for
 reproducibility. `currentDraft` identifies the maintained published draft,
 not an unreleased working tree. A new draft leaves earlier catalogs available.
 
-### 7. Generation, hosting, and publication checks
+### 8. Generation, hosting, and publication checks
 
 This repository owns deterministic generation and schemas. mcpdesc.org hosts
 those artifacts unchanged and renders its human-facing catalog from the same
@@ -293,16 +361,19 @@ In `spec/draft/validation/rule.schema.json`:
 
 - add `title` (string, 1 to 60 characters, no trailing period) and
   `description` (string, 1 to 800 characters), both required;
-- make `applicability` required for every rule;
+- require `applicability.protocolVersions` as `independent` or a full protocol
+  map for active rules, with optional URI-array `schemaDialects` metadata;
+- distinguish active applicability checks from retained retirement records;
 - describe the meaning of `applies`, `opaque`, and `not-applicable`.
 - add the absolute versioned `$id`, plus schemas for the publication manifest
   and discovery index under `$defs`;
 - keep the root `{ "rules": [...] }` shape so authored YAML files and the
   generated aggregate validate against the same schema.
 
-`scripts/test-validation-rules.mjs` checks title uniqueness and that every
-rule lists every supported revision; the condition that exempts `mcpdesc` rules
-is removed. Dedicated generation and publication tests cover deterministic
+`scripts/test-validation-rules.mjs` checks title uniqueness, explicit protocol
+applicability or independence, applicable dialect metadata, and the exclusion
+of retired records from active checks, without owner-based defaults.
+Dedicated generation and publication tests cover deterministic
 aggregation, manifest/index validity, digests, link bases, complete membership,
 and the stable/draft separation. The MCP Description document schema is not
 changed by this proposal.
@@ -325,11 +396,12 @@ changed by this proposal.
     property under the root `properties` instead. In earlier revisions the
     annotation is preserved but not checked.
   applicability:
-    "2024-11-05": opaque
-    "2025-03-26": opaque
-    "2025-06-18": opaque
-    "2025-11-25": opaque
-    "2026-07-28": applies
+    protocolVersions:
+      "2024-11-05": opaque
+      "2025-03-26": opaque
+      "2025-06-18": opaque
+      "2025-11-25": opaque
+      "2026-07-28": applies
 ```
 
 ```yaml
@@ -360,11 +432,12 @@ changed by this proposal.
     tells you that a valid result is not a claim of complete MCP conformance
     for those revisions. Nothing needs fixing.
   applicability:
-    "2024-11-05": applies
-    "2025-03-26": applies
-    "2025-06-18": not-applicable
-    "2025-11-25": not-applicable
-    "2026-07-28": not-applicable
+    protocolVersions:
+      "2024-11-05": applies
+      "2025-03-26": applies
+      "2025-06-18": not-applicable
+      "2025-11-25": not-applicable
+      "2026-07-28": not-applicable
 ```
 
 ## Compatibility
@@ -385,9 +458,11 @@ published. Existing draft tags are not rewritten.
 Registry consumers:
 
 - show `title` where they show a rule name, and `description` with the rule;
-- treat `applicability` as present for every rule, and drop the "not recorded
-  per revision" label;
-- replace `mcpdesc.core` with the per-revision rulesets.
+- adopt the finalized applicability representation without inferring protocol
+  independence from owner or omission;
+- retain retired records for lookup but exclude them from active checking;
+- replace named rulesets with catalog filters used for browsing, not for
+  disabling required checks;
 - discover snapshots through the index and pin the selected manifest;
 - resolve evidence and description links using the manifest's immutable base;
 - use the catalog's specification snapshot and rule-format version, not a
@@ -409,9 +484,14 @@ relative-path traversal outside their authorized source tree.
   shortening it loses conditions that readers and implementers need.
 - **Titles defined by the website only.** Rejected: every catalog and tool
   would invent different names, and they would drift from the records.
-- **A new value for rules that do not depend on the revision**, such as
-  `independent`. Not proposed: `applies` for every revision states the same
-  thing without a new value. Open question 2.
+- **An applicability dimension chosen solely by owner.** Rejected: some
+  MCP Description-owned checks depend on protocol versions, and embedded
+  JSON Schema checks can depend on both a dialect and a protocol version.
+- **Universal five-version maps.** Superseded: explicit protocol independence
+  conveys information that repeated `applies` entries do not.
+- **Named rulesets.** Removed: catalog metadata already supports filtered
+  views. Names and stored memberships add no information and can be mistaken
+  for independently selectable validation profiles.
 - **Per-rule specification-version fields.** Rejected: snapshot membership
   already establishes them (`rule-history-0.8.md`, Options).
 - **A website-only catalog.** Rejected: third parties need machine-readable
@@ -422,6 +502,8 @@ relative-path traversal outside their authorized source tree.
   from the YAML source, avoiding divergence.
 
 ## Open questions
+
+None for the source contract. Acceptance remains pending review.
 
 Website deployment and importer integration remain downstream handoff work.
 The specification tooling prepares and verifies the artifacts; maintainers
@@ -454,11 +536,20 @@ On 2026-10-28, the maintainer requested this publication contract as part of
 Proposal 0030 and deferred Draft 3 publication until the expanded work is
 addressed, then authorized implementation in Draft 3.
 
-Implementation choices for review: 60-character unique titles,
-800-character explanations, complete applicability without a separate
-independence marker, and the existing per-revision ruleset names with every
-owner included. Schema and catalogs use format 1.0.0, with manual verified
-deployment and explicit discovery updates. No live endpoint is implied by
-the implementation. The prepared release branch remains unpublished.
+Reader and publication choices for review: 60-character unique titles,
+800-character explanations, and schema/catalog format 1.0.0, with manual
+verified deployment and explicit discovery updates. No live endpoint is
+implied by the implementation. The prepared release branch remains unpublished.
+
+On 2026-10-29, the maintainer agreed to rule-specific applicability rather
+than an axis selected by owner: snapshot membership supplies the MCP
+Description context, protocol dependence or independence is explicit, and
+dialect information is separate where needed. Catalog-local retirement and
+permanent-ID evolution follow Section 5, initially using `status: retired`.
+The original universal-map implementation and ruleset recommendation are
+superseded design inputs. The maintainer then approved removal of named
+rulesets and completion of the catalog, tests, and implementation commit.
+The finalized applicability representation is specified in Section 2; catalog
+views and retirement handling follow Sections 3 and 5.
 
 Acceptance pending.
