@@ -43,6 +43,74 @@ The validation scripts report failures but do not modify specification artifacts
 
 Application consumers should use the independently versioned `@mcpdesc/validator` package rather than importing repository scripts. Repository-integrity checks, filesystem traversal, YAML parsing, projection, and merge behavior remain under `scripts/`.
 
+## Validation catalog publication
+
+Proposal 0030 adds these scripts and npm entry points:
+
+| Script | Invocation and scope |
+| --- | --- |
+| [`validation-catalog.mjs`](validation-catalog.mjs) | Shared deterministic generation, record and envelope validation, safe source resolution, discovery updates, and publication checks |
+| [`test-validation-catalog.mjs`](test-validation-catalog.mjs) | `npm test`; offline tests with temporary Git repositories and mocked HTTP responses |
+| [`export-rule-catalog.mjs`](export-rule-catalog.mjs) | `npm run rules:export -- <snapshot> <new-output> [--prepare]`; requires a clean commit, and by default an annotated tag at HEAD |
+| [`check-rule-catalog-publication.mjs`](check-rule-catalog-publication.mjs) | `npm run rules:check-publication -- <snapshot> <bundle> [--schema-only \| --check-index \| --index-out <new-file>]`; opt-in networked checks, never deployment |
+
+The bundle contains deployment-relative paths for the versioned rule schema,
+catalog aggregate, and manifest. The schema validates the existing YAML
+registry-file shape and the aggregate; its manifest and index schemas are
+under `$defs`. The generator does not alter source records or publish anything.
+It checks complete membership, source references, fixture pointers, full
+protocol applicability, and unique reader titles.
+
+For a new rule format, prepare a bundle from the exact clean reviewed commit:
+
+```bash
+npm run rules:export -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-preview --prepare
+```
+
+`--prepare` permits an untagged commit for schema deployment and review. It is
+explicitly not a catalog publication. Deploy only the rule-format schema bytes
+and check them before tagging:
+
+```bash
+npm run rules:check-publication -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-preview --schema-only
+```
+
+After the MCP Description schema-publication gate passes and the approved
+specification tag is published, export again at that annotated tag to a new
+directory. A merge commit can differ from the preview commit; the final
+manifest must record the tagged commit:
+
+```bash
+npm run rules:export -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-final
+```
+
+Deploy `rules.json` and `manifest.json` to their versioned paths, without
+changing any previously published bytes. Verify all immutable artifacts, then
+prepare the index update:
+
+```bash
+npm run rules:check-publication -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-final
+npm run rules:check-publication -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-final --index-out /tmp/mcpdesc-catalog-index.json
+```
+
+Index preparation fetches and verifies the existing index and its referenced
+catalogs, or starts with empty pointers if the endpoint returns 404. It adds
+the verified catalog and updates only the appropriate current pointer; the
+stable pointer remains null when only drafts exist. It refuses to overwrite a
+local output file or redefine an existing catalog entry. Publish that reviewed
+index at `/validation/catalogs/index.json` last, then verify it:
+
+```bash
+npm run rules:check-publication -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-final --check-index
+```
+
+Immutable artifacts require direct JSON-compatible responses, matching bytes,
+CORS, a strong ETag, and `public, max-age=31536000, immutable` caching. The
+mutable index must not be immutable: use a cache lifetime at most 300 seconds
+or require revalidation. Verification does not upload files, create tags,
+publish packages, or modify the website repository. Deployment and approval
+remain maintainer actions.
+
 ## Draft snapshot publication
 
 Public draft snapshots use annotated tags named `v<version>-draft.<iteration>`, such as `v0.8.0-draft.1`. They identify an immutable review and interoperability baseline but do not create a new `mcpdesc` conformance version or a stable release.

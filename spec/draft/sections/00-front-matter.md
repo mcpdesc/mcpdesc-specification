@@ -1,23 +1,23 @@
 ---
 title: MCP Description Specification
 version: 0.9.0
-status: Community working draft 2
-draft-iteration: 2
-snapshot-tag: v0.9.0-draft.2
+status: Community working draft 3
+draft-iteration: 3
+snapshot-tag: v0.9.0-draft.3
 released: false
 baseline: 0.8.0
-date: 2026-10-28
+date: 2026-10-29
 ---
 
 # MCP Description Specification
 
-**Version**: 0.9.0 (community working draft 2; `v0.9.0-draft.2`)
+**Version**: 0.9.0 (community working draft 3; `v0.9.0-draft.3`)
 
-**Status**: Community working draft 2 — not released
+**Status**: Community working draft 3 — not released
 
 **Baseline**: v0.8.0
 
-**Date**: 2026-10-28
+**Date**: 2026-10-29
 
 ## Abstract
 
@@ -29,6 +29,6 @@ It enables offline discovery, documentation generation, description validation, 
 
 ## Status of This Document
 
-This document is Community Working Draft 2 of MCP Description v0.9.0, prepared for the prerelease tag `v0.9.0-draft.2`. It is not a stable release and may change incompatibly before release. The current stable release is MCP Description v0.8.0.
+This document is Community Working Draft 3 of MCP Description v0.9.0, prepared for the prerelease tag `v0.9.0-draft.3`. It is not a stable release and may change incompatibly before release. The current stable release is MCP Description v0.8.0.
 
 The proposal revisions represented in this draft are recorded in the [proposal revision manifest](../PROPOSALS.md).

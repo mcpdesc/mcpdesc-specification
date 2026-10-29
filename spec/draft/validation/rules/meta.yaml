@@ -1,5 +1,11 @@
 rules:
   - id: mcp.meta.key-format
+    title: "Use valid metadata key names"
+    description: >-
+      MCP metadata keys follow a grammar for an optional dotted prefix and a
+      local name. Check separators and permitted characters when a key is
+      rejected. Reserved-name context and value checks are separate from this
+      key-format check.
     owner: mcp
     summary: >-
       A _meta key has an optional prefix of dot-separated labels followed by a
@@ -8,11 +14,7 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions: independent
     specification:
       - reference: MCP Description 0.9.0, Section 3.5 (the same grammar applies in every revision)
         locations:
@@ -39,6 +41,12 @@ rules:
       applies to callers of the semantic validator alone.
 
   - id: mcp.meta.reserved-prefix
+    title: "Preserve unknown reserved metadata with a warning"
+    description: >-
+      An unrecognized key in an MCP-reserved namespace may belong to a newer
+      protocol definition. It is retained with a warning rather than assigned
+      invented semantics. Verify the key and protocol version before treating
+      it as a recognized MCP feature.
     owner: mcp
     summary: >-
       A _meta key under an MCP-reserved prefix that the revision does not
@@ -47,11 +55,12 @@ rules:
     kind: semantic
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 3.5
         locations:

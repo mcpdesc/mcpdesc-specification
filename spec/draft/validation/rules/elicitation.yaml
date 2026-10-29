@@ -1,5 +1,11 @@
 rules:
   - id: mcp.elicitation.revision-availability
+    title: "Use elicitation only where the version supports it"
+    description: >-
+      Elicitation forms and URL flows are not available in every MCP protocol
+      version. Scope declarations and interaction examples to the versions
+      that define the chosen mode. Describing an interaction does not make
+      that interaction available in an older protocol version.
     owner: mcp
     summary: >-
       Elicitation is used only from MCP 2025-06-18, and URL mode only from MCP
@@ -9,11 +15,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 9.4 and 12.5
         locations:
@@ -44,6 +51,12 @@ rules:
       complete semantic checks (Section 16.2).
 
   - id: mcp.elicitation.form-schema.revision-shape
+    title: "Use the applicable elicitation form vocabulary"
+    description: >-
+      The allowed form-schema vocabulary depends on the MCP protocol version.
+      Check the fields of requestedSchema against that vocabulary rather than
+      assuming a general Tool JSON Schema can be copied into an elicitation
+      form unchanged.
     owner: mcp
     summary: >-
       In MCP 2025-06-18, a form requestedSchema has no $schema, no array or
@@ -53,11 +66,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": applies
-      "2025-11-25": not-applicable
-      "2026-07-28": not-applicable
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": applies
+        "2025-11-25": not-applicable
+        "2026-07-28": not-applicable
     specification:
       - reference: MCP Description 0.9.0, Section 12.3
         locations:
@@ -86,6 +100,14 @@ rules:
         pointer: /prompts/0/elicitations/0/requestedSchema
 
   - id: mcpdesc.elicitation.form-schema.consistency
+    title: "Keep elicitation form constraints consistent"
+    description: >-
+      Form properties, required names, enum labels, defaults, and bounds must
+      agree with one another. Correct references to absent properties and
+      contradictory constraints. Passing JSON Schema's outer shape checks does
+      not prove that the declared form is internally consistent.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       A form requestedSchema is internally consistent: required names declared
@@ -132,6 +154,14 @@ rules:
         pointer: /tools/0/elicitations
 
   - id: mcpdesc.elicitation.name-unique
+    title: "Give each elicitation declaration a unique name"
+    description: >-
+      Elicitation declaration names identify interactions within their
+      primitive. Duplicate names make a Tool interaction's declaration
+      reference ambiguous. Rename one declaration and update the references
+      that are intended to select it.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: Elicitation Declaration names are unique within their primitive.
     surface: Elicitation Declaration

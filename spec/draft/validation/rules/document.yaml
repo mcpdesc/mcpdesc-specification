@@ -1,5 +1,13 @@
 rules:
   - id: mcpdesc.document.schema
+    title: "Match the MCP Description document schema"
+    description: >-
+      The structural schema checks required fields, types, allowed members,
+      and collection shapes. Use the diagnostic path to locate the invalid
+      value. Passing this check is necessary but does not replace semantic
+      checks such as reference resolution or protocol scoping.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       A document validates against the JSON Schema for its declared mcpdesc
@@ -25,6 +33,12 @@ rules:
         pointer: /tools/0
 
   - id: mcp.declaration.field.revision-availability
+    title: "Keep fields within their supported protocol scope"
+    description: >-
+      A declaration must be valid in every protocol version in its effective
+      scope. A field introduced later cannot be shared with earlier versions
+      merely because the document also declares the later version. Omit the
+      field or describe disjoint scoped variants.
     owner: mcp
     summary: >-
       A declaration field is used only in revisions whose MCP type defines it:
@@ -35,11 +49,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
         locations:
@@ -99,6 +114,14 @@ rules:
       own rules; the rule property identifies which applies.
 
   - id: mcpdesc.protocol-scope.consistency
+    title: "Keep protocol scopes consistent and disjoint"
+    description: >-
+      An omitted scope inherits its parent's full scope; an explicit child
+      scope must stay within it. Declarations with the same identity cannot
+      overlap where the specification requires uniqueness. Narrow the scopes
+      rather than expecting the validator to choose one variant.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       Nested protocol scopes stay within their parent scope, and same-named
@@ -134,6 +157,14 @@ rules:
         pointer: /capabilities/0
 
   - id: mcpdesc.tags.references
+    title: "Reference unique declared tags"
+    description: >-
+      When the document declares a tag catalogue, primitive tag references
+      must name entries in it. Root tag names and repeated primitive
+      references are checked for duplicates. Fix the name or catalogue entry
+      instead of relying on an undeclared alias.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: Root tag names are unique, and primitives reference only declared tags.
     surface: Tag
@@ -158,6 +189,14 @@ rules:
         pointer: /tools/0/tags
 
   - id: mcpdesc.security.requirements
+    title: "Reference security schemes and scopes correctly"
+    description: >-
+      Security requirements refer to named schemes, and scopes have meaning
+      only for OAuth 2.0 or OpenID Connect schemes. Correct missing references
+      or repeated scopes. An uncatalogued scope can produce a warning where
+      the scheme declares a static scope catalogue.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       Security requirements name declared schemes, list scopes only for OAuth
@@ -203,6 +242,14 @@ rules:
       alone.
 
   - id: mcpdesc.components.references
+    title: "Resolve component references in the right namespace"
+    description: >-
+      A component reference must identify an existing value in the namespace
+      required by its use site, without a reference cycle. Check both the
+      target name and the namespace. Reuse does not exempt the resolved value
+      from validation in its containing declaration.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       A Reference Object targets an existing component in the namespace its
@@ -231,6 +278,19 @@ rules:
         pointer: /components/schemas
 
   - id: mcpdesc.legacy-revisions.validation-scope
+    title: "Limited validation for early MCP protocol versions"
+    description: >-
+      MCP 2024-11-05 and 2025-03-26 receive structural and selected checks,
+      not a claim of complete MCP semantic conformance. The warning describes
+      a validation limitation rather than an invalid document. Adding a later
+      protocol version does not make checks for the earlier versions complete.
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": not-applicable
+        "2025-11-25": not-applicable
+        "2026-07-28": not-applicable
     owner: mcpdesc
     summary: >-
       A document applying to MCP 2024-11-05 or 2025-03-26 is reported as

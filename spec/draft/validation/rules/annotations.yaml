@@ -1,5 +1,12 @@
 rules:
   - id: mcp.tool-annotations.members
+    title: "Tool annotations contain only MCP hints"
+    description: >-
+      Tool annotations are a closed set of behavior hints. Resource annotation
+      fields such as audience and priority do not belong here, and custom keys
+      are not allowed. Remove those properties; author-reviewed server
+      metadata can instead use the Tool's _meta where the protocol version
+      defines it.
     owner: mcp
     summary: >-
       A Tool annotations object contains only title, readOnlyHint,
@@ -8,11 +15,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 9.6
         locations:
@@ -40,6 +48,12 @@ rules:
       checked separately.
 
   - id: mcp.annotations.members
+    title: "Resource annotations contain only MCP hints"
+    description: >-
+      Resource annotations describe audience, priority, and modification time,
+      not Tool behavior. Unknown properties are invalid even when their names
+      start with x-. Remove those properties and keep Tool-specific hints on
+      Tool annotations instead.
     owner: mcp
     summary: >-
       Resource Annotations on resources, resource templates, and content
@@ -48,11 +62,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 10.3
         locations:
@@ -83,6 +98,12 @@ rules:
       separately.
 
   - id: mcp.annotations.last-modified.revision-availability
+    title: "Use lastModified only where MCP defines it"
+    description: >-
+      Resource annotations exist in early MCP protocol versions, but
+      lastModified was added in 2025-06-18. If a declaration covers an earlier
+      version, omit lastModified or describe separate variants with disjoint
+      scopes.
     owner: mcp
     summary: >-
       Resource Annotations carry lastModified only from MCP 2025-06-18, on
@@ -92,11 +113,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 10.3
         locations:

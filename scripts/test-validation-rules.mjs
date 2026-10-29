@@ -15,6 +15,7 @@ import addFormats from 'ajv-formats';
 import { candidateSpecification } from './candidate-specification.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { supportedProtocolVersions, validateDocument } from './validate-document.mjs';
+import { checkRuleApplicability } from './validation-catalog.mjs';
 
 // Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
 const historicalRevisions = new Set(['2024-11-05', '2025-03-26']);
@@ -114,6 +115,7 @@ function resolvePointer(document, pointer) {
 const pointerOf = (segments) => segments.map((segment) => `/${String(segment).replaceAll('~', '~0').replaceAll('/', '~1')}`).join('');
 
 const ruleIds = new Set();
+const ruleTitles = new Set();
 const coveredCodes = new Set();
 const files = fs.readdirSync(rulesDirectory).filter((name) => /\.ya?ml$/.test(name)).sort();
 if (!files.length) fail(`${specificationRoot}/validation/rules: no registry files`);
@@ -137,13 +139,17 @@ for (const filename of files) {
     if (ruleIds.has(rule.id)) fail(`${where}: duplicate rule identifier`);
     ruleIds.add(rule.id);
     registeredRules.set(rule.id, rule);
+    const title = rule.title.trim().toLowerCase();
+    if (ruleTitles.has(title)) fail(`${where}: duplicate reader title ${rule.title}`);
+    ruleTitles.add(title);
+    if (rule.title !== rule.title.trim() || !/^[A-Z]/.test(rule.title)) fail(`${where}: title must be trimmed and start with a capital letter`);
+    if (rule.description.trim().split(/\n\s*\n/).length > 3) fail(`${where}: description must contain at most three paragraphs`);
     if (rule.id.split('.')[0] !== rule.owner) fail(`${where}: owner ${rule.owner} does not match the identifier namespace`);
 
-    if (rule.applicability || rule.owner !== 'mcpdesc') {
-      const revisions = Object.keys(rule.applicability ?? {}).sort();
-      if (JSON.stringify(revisions) !== JSON.stringify([...supportedProtocolVersions].sort())) {
-        fail(`${where}: applicability must list exactly ${supportedProtocolVersions.join(', ')}`);
-      }
+    try {
+      checkRuleApplicability(rule, supportedProtocolVersions);
+    } catch (error) {
+      fail(`${where}: ${error.message}`);
     }
     if (rule.owner === 'mcp' && !(rule.sources ?? []).some((source) => source.tier <= 3)) {
       fail(`${where}: an mcp rule must cite a tier 1 to 3 source`);
@@ -161,6 +167,8 @@ for (const filename of files) {
     if (rule.owner === 'mcp' && ['should', 'may'].includes(rule.requirement) && rule.diagnostics.some((diagnostic) => diagnostic.severity === 'error')) {
       fail(`${where}: a ${rule.requirement}-level mcp rule must not emit error diagnostics`);
     }
+
+    if (rule.status === 'retired') continue;
 
     for (const gap of rule.gaps ?? []) {
       for (const revision of gap.revisions ?? []) {
@@ -228,6 +236,8 @@ for (const category of fs.readdirSync(fixtureRoot).filter((name) => name.startsW
       const rule = registeredRules.get(diagnostic.rule);
       if (!rule) {
         fail(`${fixture}: diagnostic ${diagnostic.code} identifies unregistered rule ${diagnostic.rule}`);
+      } else if (rule.status === 'retired') {
+        fail(`${fixture}: diagnostic ${diagnostic.code} identifies retired rule ${diagnostic.rule}`);
       } else if (!rule.diagnostics.some(({ code, severity }) => code === diagnostic.code && severity === diagnostic.severity)) {
         fail(`${fixture}: rule ${diagnostic.rule} does not declare ${diagnostic.severity} ${diagnostic.code}`);
       }

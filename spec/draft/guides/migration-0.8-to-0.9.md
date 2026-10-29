@@ -11,7 +11,7 @@ extra properties on closed MCP types must move them.
 ## Version and schema identity
 
 Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
-`https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json`; the stable
+`https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json`; the stable
 identifier is assigned at release.
 
 ## Annotations
@@ -90,6 +90,26 @@ applicable revision's MCP type (Section 3.6):
 MCP Description does not support completion examples for MCP 2024-11-05.
 
 ## Validator output
+
+### Rule catalog consumers
+
+Draft 3 introduces rule-format `1.0.0`, separate from the `mcpdesc` version
+and the validator package release. Catalog consumers must accept required
+`title` and `description`, plus `applicability` for active rules, use the exact
+format schema, and select catalogs by specification snapshot. Within
+applicability, `protocolVersions` is `independent` or a protocol map, and
+`schemaDialects` is optional separate metadata. `summary` and permanent rule
+IDs keep their existing meanings. Named rulesets are removed; filters are
+catalog views, not validation profiles. Retired records remain discoverable
+but do not participate in active applicability checks.
+
+Discover catalogs through the publication index, then pin an immutable
+manifest. Resolve evidence and description links from its
+`specificationBaseUrl`, not a moving branch. See the
+[catalog publication contract](../validation/README.md#catalog-publication-and-discovery).
+Existing 0.8.0 validators do not gain retroactive rule diagnostics or a catalog.
+
+### Document diagnostics
 
 Every diagnostic carries a `rule` property naming the validation rule it
 reports, next to `code`, `severity`, `message`, and `path`:

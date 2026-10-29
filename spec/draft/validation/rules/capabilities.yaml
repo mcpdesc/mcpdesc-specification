@@ -1,5 +1,11 @@
 rules:
   - id: mcp.server-capabilities.members
+    title: "Advertise only recognized server capabilities"
+    description: >-
+      Server capabilities have defined members rather than arbitrary top-level
+      names. Remove unknown members or use the experimental or extensions maps
+      where the applicable protocol version allows them. MCP Description
+      specification extensions follow their own x- rules.
     owner: mcp
     summary: >-
       A server Capabilities Object contains only the capabilities the
@@ -9,11 +15,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 8.2 and 8.4
         locations:
@@ -69,6 +76,13 @@ rules:
         status: active
 
   - id: mcp.client-capabilities.members
+    title: "Use recognized client capability requirements"
+    description: >-
+      A primitive's clientRequirements lists minimum client capabilities, not
+      custom top-level names. Put custom requirements in experimental or in
+      extensions where defined, after reviewing their meaning. Server
+      capability advertisement and client requirements are different
+      declarations.
     owner: mcp
     summary: >-
       A Client Capability Requirements Object names only client capabilities
@@ -79,11 +93,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 8.5
         locations:
@@ -135,6 +150,12 @@ rules:
         status: active
 
   - id: mcp.client-capabilities.revision-shape
+    title: "Match client requirements to the protocol version"
+    description: >-
+      Client capabilities and their settings change across MCP protocol
+      versions. Check each declared requirement against every version in the
+      primitive's effective scope. Split variants when a requirement cannot be
+      represented consistently across that scope.
     owner: mcp
     summary: >-
       Each client capability requirement and nested member exists in every
@@ -145,11 +166,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 8.5
         locations:
@@ -180,6 +202,12 @@ rules:
         pointer: /tools/0/clientRequirements
 
   - id: mcp.client-capabilities.deprecated
+    title: "Review deprecated client requirements"
+    description: >-
+      Some client capability forms remain recognized but are deprecated in
+      later MCP protocol versions. The warning does not invalidate the
+      document. Review the requirement against the selected protocol version
+      rather than assuming an older advertisement model still applies.
     owner: mcp
     summary: >-
       A client capability requirement that the applicable revision deprecates
@@ -189,11 +217,12 @@ rules:
     kind: semantic
     requirement: should
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": not-applicable
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": not-applicable
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 8.5
         locations:
@@ -218,6 +247,13 @@ rules:
         pointer: /prompts/0/clientRequirements
 
   - id: mcp.capabilities.extensions.revision-availability
+    title: "Recognize pre-standard extension advertisements"
+    description: >-
+      MCP Description accepts server extension advertisements before their
+      standardization, with a warning for the affected protocol versions. The
+      values are preserved rather than rewritten. This exception does not make
+      primitive clientRequirements.extensions available in those earlier
+      versions.
     owner: mcp
     summary: >-
       Server capabilities.extensions is defined from MCP 2026-07-28; for
@@ -227,11 +263,12 @@ rules:
     path: extensions
     kind: structural
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 8.4; Proposal 0021 (pre-standard extension capabilities)
         locations:
@@ -271,6 +308,14 @@ rules:
         status: active
 
   - id: mcpdesc.extensions.catalogue-maturity
+    title: "Review reserved extension identifiers"
+    description: >-
+      Extension identifiers in an MCP-reserved namespace are checked against
+      the pinned catalogue. Unknown or experimental identifiers are preserved
+      with a warning. Verify the identifier and its maturity; an unrecognized
+      identifier is not silently assigned known extension semantics.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       An extension identifier under an MCP-reserved prefix that the pinned
@@ -307,6 +352,12 @@ rules:
       currently produces experimental-reserved-extension-identifier.
 
   - id: mcp.capabilities.tasks.revision-availability
+    title: "Keep task capabilities in their protocol version"
+    description: >-
+      Task capabilities from MCP 2025-11-25 and extension advertisements in
+      MCP 2026-07-28 are not interchangeable fields. Limit each capability
+      declaration to the versions that define it. The validator does not
+      automatically translate a tasks object into an extension advertisement.
     owner: mcp
     summary: >-
       The core tasks server capability exists only in MCP 2025-11-25; MCP
@@ -316,11 +367,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 8.3
         locations:
@@ -345,6 +397,12 @@ rules:
         pointer: /capabilities/0
 
   - id: mcp.capabilities.logging.deprecated
+    title: "Review the deprecated logging capability"
+    description: >-
+      MCP 2026-07-28 uses per-request log-level selection rather than
+      logging/setLevel. MCP Description warns about the logging server
+      capability for that version. Review the advertisement; the warning alone
+      does not make the description invalid.
     owner: mcp
     summary: The logging server capability is reported as deprecated in MCP 2026-07-28.
     surface: ServerCapabilities
@@ -352,11 +410,12 @@ rules:
     kind: semantic
     requirement: should
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": not-applicable
-      "2025-11-25": not-applicable
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": not-applicable
+        "2025-11-25": not-applicable
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 8.2
         locations:
