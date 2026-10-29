@@ -36,7 +36,7 @@ The schema document's root `$id` identifies that schema resource and establishes
 The `$schema` value does not change the MCP Description conformance version: community working draft documents remain `mcpdesc: 0.9.0`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.2.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json
 mcpdesc: 0.9.0
 ```
 

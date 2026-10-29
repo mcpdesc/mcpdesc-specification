@@ -1,5 +1,11 @@
 rules:
   - id: mcpdesc.example.result.revision-fidelity
+    title: "Match example results to every applicable version"
+    description: >-
+      A completed example result must contain the fields each applicable MCP
+      protocol version requires, with valid values. Check the result's full
+      effective scope, not only the newest version. Fields permitted but
+      undefined on open result types are handled separately as warnings.
     owner: mcpdesc
     summary: >-
       An example result contains every field that each applicable MCP revision
@@ -7,11 +13,12 @@ rules:
     surface: Example result
     kind: mcpdesc-semantic
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
         locations:
@@ -61,6 +68,12 @@ rules:
       cacheScope "public" or "private" in every revision (document schema).
 
   - id: mcpdesc.example.completed-result-form
+    title: "Show completed results without message envelopes"
+    description: >-
+      An example result is the completed payload, not a JSON-RPC response or a
+      pending workflow. Remove envelope fields such as jsonrpc and id and do
+      not include task or input-required state. Multi-step interactions belong
+      in the explicit interaction example structure.
     owner: mcpdesc
     summary: >-
       An example result is a completed result payload: it contains no JSON-RPC
@@ -69,11 +82,7 @@ rules:
     kind: mcpdesc-semantic
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions: independent
     specification:
       - reference: MCP Description 0.9.0, Sections 3.6, 9.3, 10.4.4, 10.4.6, 11.3, and 11.4
         locations:
@@ -124,6 +133,12 @@ rules:
       the field classification of mcp.result.additional-properties.preserve.
 
   - id: mcp.completion.context.revision-availability
+    title: "Use completion context only where supported"
+    description: >-
+      Completion context was added in MCP 2025-06-18. A completion example
+      spanning an earlier supported version cannot carry that context
+      unchanged. Split the declaration's scopes when context is needed for
+      only the newer versions.
     owner: mcp
     summary: >-
       A completion example carries context only from MCP 2025-06-18, where
@@ -133,11 +148,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
         locations:
@@ -162,6 +178,14 @@ rules:
     notes: MCP Description does not support completion examples for MCP 2024-11-05 (mcp.completion.revision-availability).
 
   - id: mcpdesc.completion-example.target
+    title: "Complete a declared argument or template variable"
+    description: >-
+      A completion example must target a Prompt argument or Resource Template
+      variable that exists. Context entries must name other declared targets,
+      not repeat the argument being completed. Correct the example names or
+      the declaration they describe.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       A completion example completes a declared Prompt argument or URI template

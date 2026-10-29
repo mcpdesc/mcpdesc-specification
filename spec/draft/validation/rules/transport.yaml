@@ -1,16 +1,23 @@
 rules:
   - id: mcp.transport.streamable-http.revision-availability
+    title: "Use Streamable HTTP only where supported"
+    description: >-
+      Streamable HTTP is not defined by the earliest supported MCP protocol
+      version. Scope the transport to versions that define it and keep root
+      protocol coverage consistent. A URL alone does not make a transport
+      applicable to every protocol version.
     owner: mcp
     summary: Streamable HTTP is used only from MCP 2025-03-26.
     surface: Transport
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 6.2
         locations:
@@ -30,6 +37,12 @@ rules:
         pointer: /transports/0
 
   - id: mcp.transport.legacy-sse.deprecated
+    title: "Review deprecated legacy SSE transports"
+    description: >-
+      Legacy HTTP plus SSE remains representable but is deprecated for later
+      MCP protocol versions. The warning does not by itself invalidate the
+      document. Review whether the server still offers that transport or
+      whether the description should advertise Streamable HTTP instead.
     owner: mcp
     summary: >-
       Legacy HTTP+SSE associated with MCP 2025-03-26 or later is reported,
@@ -38,11 +51,12 @@ rules:
     kind: semantic
     requirement: should
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 6.2
         locations:
@@ -62,6 +76,15 @@ rules:
         pointer: /transports/0
 
   - id: mcpdesc.transports.coverage
+    title: "Cover each declared protocol version with a transport"
+    description: >-
+      When transports are declared, every root protocol version must be
+      covered by at least one transport's effective scope. An omitted
+      transport scope inherits all root versions. Add appropriate coverage or
+      narrow the documented protocol versions rather than leaving an
+      unreachable view. Descriptions may omit transports entirely.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       Every protocol version at the root is covered by at least one transport

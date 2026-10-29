@@ -24,6 +24,41 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### Community Working Draft 3 — 2026-10-29 (`v0.9.0-draft.3`)
+
+Third 0.9.0 snapshot, implementing review-stage Proposal 0030 and editorial
+documentation changes since `v0.9.0-draft.2`. Document validation behavior is
+unchanged. The document schema has a new snapshot `$id` but unchanged
+validation constraints. The separate rule-record format gains required reader
+fields, complete applicability, and publication artifacts. Earlier drafts'
+breaking changes relative to 0.8.0 remain; see the
+[migration guide](guides/migration-0.8-to-0.9.md).
+
+#### Readable and published rule catalogs — 2026-10-28
+
+- Implemented review-stage [Proposal 0030](proposal-snapshots/0030-readable-and-complete-rule-records.md), captured in [the proposal manifest](PROPOSALS.md). All 63 rules now have a unique short `title` and an informative author-oriented `description`, keeping their requirement summaries, sources, diagnostics, and identifiers unchanged.
+- Required explicit applicability for active rules, independent of owner. `applicability.protocolVersions` is `independent` for 23 checks or a complete protocol map for 40 checks; the embedded JSON Schema rule also lists its canonical `schemaDialects`. `applies` means checked, not field allowed. The former universal-map approach was superseded during review on 2026-10-29.
+- Assigned the first rule-format schema identity, `https://mcpdesc.org/schema/validation-rule/1.0.0.json`. Its root validates registry files and the aggregate catalog; `$defs/catalog-manifest` and `$defs/catalog-index` define publication and discovery. This does not retroactively version earlier draft schemas.
+- Added deterministic catalog generation and a clean-commit, annotated-tag export command (`npm run rules:export`), including all records and preserving every field. The manifest pins the specification tag/commit, rule-format version, rule count, content digests, and an immutable evidence-link base.
+- Added `npm run rules:check-publication` for pre-tag schema-only checks, immutable catalog verification, and verified discovery-index updates. Catalogs live under `/validation/catalogs/<snapshot>/`; the mutable `index.json` has separate stable and draft pointers. The stable pointer remains null while no stable specification has a registry. These are deployment contracts and tools, not a claim that the endpoints are live.
+- Added `scripts/test-validation-catalog.mjs` to `npm test`, covering format failures, deterministic complete exports, digests and provenance, applicability and title controls, discovery separation, HTTP/header failures, source containment, and tag/clean-tree boundaries. Website hosting and renderer integration remain downstream work; the validator snapshot export format is unchanged.
+- Registry consumers must adopt the new required fields and pinned format schema; no MCP Description document, diagnostic, projection, or conversion behavior changes.
+
+#### Catalog applicability and lifecycle review — 2026-10-29
+
+- Removed named rulesets, including the proposed per-version groups and `mcpdesc.core`. Consumer filters are views of a complete catalog, not independently selectable validation profiles or permission to skip required checks.
+- Made protocol independence explicit rather than inferring it from owner or omitted metadata. Separate dialect metadata does not suppress errors for unsupported declared dialects. Reclassified each current rule without changing requirements, permanent IDs, summaries, sources, or diagnostics.
+- Defined catalog-local retirement using existing `status: retired`: historical records stay discoverable, may omit active applicability, and cannot be identified by current validation diagnostics. A later catalog does not automatically inherit earlier rules; materially changed requirements receive new IDs, and earlier snapshots remain unchanged.
+- Added positive and negative tests for independent and protocol-sensitive records, dialect metadata, incomplete applicability, and retained retirement records. Schema and catalogs are still unpublished pending review and deployment.
+- Added a separate [validation rule-format changelog](validation/CHANGELOG.md), starting with `1.0.0 — Unreleased`, for record structure, publication contracts, compatibility, and consumer migration. Individual rule-content changes remain in this per-draft specification changelog.
+
+#### Documentation — 2026-10-28
+
+- Simplified the validation catalog overview with linked error and warning examples, a separate explanation of preservation guarantees and their conformance tests, and a distinction between document validation and delegated projection checks. Editorial; no validation behavior, rule records, schemas, or fixtures changed.
+- Moved the MCP protocol version comparison from `validation/mcp-revisions.md` to [How MCP protocol versions are managed](guides/understanding-mcp-protocol-versions.md). Added an introduction explaining inherited and disjoint protocol scopes, structural and semantic validation, Effective Protocol Views, and explicit native projection. The complete Tool example compares object and array output schemas for MCP 2025-11-25 and 2026-07-28, with its native value; the validation section uses example-result `resultType` to explain errors versus warnings. Condensed the format-versus-protocol-version distinction and adopted "protocol version" terminology. Retained the per-surface comparison tables and documented limitations, and updated the live documentation links. Captured proposal snapshots retain their historical paths and exact bytes.
+- Grouped the original Draft 1 implementation entries beneath its dated heading. Draft 1 and Draft 2 entries remain detailed historical records; subsequent editorial changes are recorded under Draft 3.
+- Clarified the distinction between the server implementation version (`info.version`), described MCP protocol versions (`protocolVersions`), and the description format (`mcpdesc`). Documented the corresponding initialization, discovery metadata, and optional Server Card fields, checking the card mapping against the schema snapshot referenced by SEP-2127. Static Info metadata does not imply a live-server origin.
+
 ### Community Working Draft 2 — 2026-10-28 (`v0.9.0-draft.2`)
 
 Second 0.9.0 snapshot, implementing review-stage Proposals 0028 and 0029 recorded in [`PROPOSALS.md`](PROPOSALS.md), from [issue #82](https://github.com/mcpdesc/mcpdesc-specification/issues/82) and [issue #84](https://github.com/mcpdesc/mcpdesc-specification/issues/84). It contains a breaking change; see the [0.8.0 to 0.9.0 migration guide](guides/migration-0.8-to-0.9.md).
@@ -59,7 +94,7 @@ Initialization from the stable 0.8.0 release:
 - Updated version-identity statements to 0.9.0; historical references to earlier versions are unchanged.
 - Removed the 0.7.0 to 0.8.0 migration guide from the draft; it belongs to the 0.8.0 release and remains in [`spec/0.8.0/guides/`](../0.8.0/guides/migration-0.7-to-0.8.md). Added the [0.8.0 to 0.9.0 migration guide](guides/migration-0.8-to-0.9.md).
 
-### Validation rules (review-stage Proposal 0024; subject to review and possible incompatible change or removal)
+#### Validation rules (review-stage Proposal 0024; subject to review and possible incompatible change or removal)
 
 - Added a pilot validation rule registry: [`validation/rule.schema.json`](validation/rule.schema.json) and rule records under [`validation/rules/`](validation/rules/), initially covering Tool `outputSchema` availability and object root, Tool `inputSchema` object root, Tool schema keyword preservation, `x-mcp-header`, open Result properties, example result revision fidelity, completion example availability, and document schema validation. The registry is non-normative until the proposal is accepted and does not change document conformance.
 - Documented MCP's sources of truth in [`validation/README.md`](validation/README.md): the revision's `schema.ts` for structures, its specification text for semantics, and generated JSON Schema, SEPs, and SDKs as evidence only. Rule records gain an optional `requirement` level; MCP rules at `should` or `may` level do not emit errors.
@@ -76,7 +111,7 @@ Initialization from the stable 0.8.0 release:
 - **Breaking for other validators:** Section 9.2 fixes the declared Tool-schema dialects to JSON Schema 2020-12 and draft-07 for MCP 2025-11-25 and later; any other declared dialect is an error (`unsupported-tool-schema-dialect`). In 0.8.0 the accepted set depended on the validator. The reference validator's results are unchanged. An unsupported dialect stays an error rather than a warning: MCP guarantees only 2020-12 support and requires peers to return an error for unsupported dialects, and Tool examples cannot be checked against such a schema.
 - Inventory findings recorded in the registry: the pre-standard server `extensions` map for revisions before MCP 2026-07-28 is an explicit exception to closed server capabilities (arbitration on `mcp.capabilities.extensions.revision-availability`, Proposal 0021); no document currently produces `experimental-reserved-extension-identifier`, because the pinned extension catalogue lists no experimental identifiers.
 
-### Open MCP results in examples (review-stage Proposal 0026; subject to review and possible incompatible change or removal)
+#### Open MCP results in examples (review-stage Proposal 0026; subject to review and possible incompatible change or removal)
 
 - Added [Section 3.6](sections/03-document-structure.md), Carried MCP Values. Example results and Tool Interaction step responses are validated for each applicable MCP revision against the type that revision's TypeScript schema defines. Former Sections 3.6 to 3.9 are renumbered 3.7 to 3.10.
 - A field that an open MCP type allows but the revision does not define is now accepted, preserved without meaning, and reported with the warning `result-field-not-defined-by-version`. This replaces errors for `resultType` before MCP 2026-07-28 (Tool, Resource, Prompt, and completion examples), `ttlMs` and `cacheScope` before MCP 2026-07-28 (Resource examples), and `structuredContent` before MCP 2025-06-18 (Tool examples). Unknown field names that previously passed silently now produce the same warning.
@@ -87,14 +122,14 @@ Initialization from the stable 0.8.0 release:
 - Fixtures: added `expected-warning/open-results-shared-across-revisions.json`, `expected-warning/open-step-responses-before-2026.json`, `expected-invalid/closed-step-responses-2026.json`, and `expected-invalid/completion-result-extra-field.json`; moved `open-result-unknown-properties.json` and `component-protocol-scope.json` to `expected-warning`.
 - Migration: no change is required for documents that remain valid. Variants split only because of `resultType`, `ttlMs`, or `cacheScope` MAY be merged. Extra fields inside `completion` objects must be removed or moved, for example to result `_meta`.
 
-### Closed MCP types (review-stage Proposal 0027; subject to review and possible incompatible change or removal)
+#### Closed MCP types (review-stage Proposal 0027; subject to review and possible incompatible change or removal)
 
 - **Breaking:** Tool Annotations (Section 9.6) and Resource Annotations (Section 10.3), including annotations on content blocks, accept only the properties MCP defines. MCP's `ToolAnnotations` and `Annotations` types are closed in every revision; MCP Description 0.8.0 allowed additional properties, so projected values could fail MCP's schema. Unknown properties, including `x-*` keys, are now rejected with `schema-validation`.
 - **Breaking:** client capability requirements (Section 8.5) accept only the client capabilities the applicable MCP revisions define, `experimental`, and from MCP 2026-07-28 `extensions`, plus `x-*` specification extensions. Unknown top-level members are rejected with `schema-validation`. MCP's `ClientCapabilities` and `ServerCapabilities` types are closed, while their doc comments say the set is "not a closed set"; the arbitration follows the types for both, with [MCP issue 1898](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1898) as the upstream reference. Server capabilities were already closed (Section 8.4). Rule records gain the arbitration status `proposed` for arbitrations awaiting a decision.
 - Fixtures: added `expected-invalid/tool-annotations-unknown-property.json`, `expected-invalid/resource-annotations-unknown-property.json`, `expected-invalid/content-annotations-unknown-property.json`, `expected-invalid/unknown-server-capability.json`, and `expected-invalid/unknown-client-capability-requirement.json`; removed unknown properties from `expected-valid/distinct-tool-and-resource-annotations.json` and `expected-valid/client-capability-requirements.json`.
 - Migration: remove unknown annotation properties. Server-defined metadata belongs in the declaration's `_meta` where the revision defines it, and MCP Description metadata in `x-*` properties on the declaration. Move unknown client capability requirements into `experimental` or, for MCP 2026-07-28, into `extensions`.
 
-### Native MCP projection (review-stage Proposal 0025; subject to review and possible incompatible change or removal)
+#### Native MCP projection (review-stage Proposal 0025; subject to review and possible incompatible change or removal)
 
 - Added [Section 4.14](sections/04-versioning.md), Native MCP Projection: how a Tool, Resource, Resource Template, or Prompt declaration becomes the MCP value of `tools/list`, `resources/list`, `resources/templates/list`, or `prompts/list` for one revision. Projection keeps the fields the MCP type defines, unchanged after reference resolution, omits MCP Description metadata including `x-*` extensions on the declaration, its Prompt arguments, and its icons, never adds or rewrites a value, and checks the result against the pinned MCP schema. Sections 14.5 and 16.2 note that native projection omits specification extensions, unlike the Effective Protocol View.
 - Added `projection-fixtures/`: 49 cases giving the exact expected value or failure for every kind, supported revision, and projection error, plus a list per kind, with source documents under `projection-fixtures/documents/` and the case format in `projection-fixtures/schema/projection-case.schema.json`. `scripts/test-projection-fixtures.mjs` checks them in `npm test` without implementing projection. The validator snapshot bundle now includes them.
@@ -102,13 +137,13 @@ Initialization from the stable 0.8.0 release:
 - Implementation: native projection belongs in `@mcpdesc/core`. No released version of `@mcpdesc/core` passes the projection fixtures yet.
 - No document changes validity.
 
-### Validator corrections
+#### Validator corrections
 
 - Every Resource Template `uriTemplate` is checked against RFC 6570, as Section 10.2.1 now states explicitly. Previously a malformed template was reported only when the template had examples or completion examples, once per example kind. The new error code `invalid-resource-template-uri-template` replaces `resource-template-example-invalid-template` and `resource-template-completion-example-invalid-template` and is reported once per template. Added fixture `expected-invalid/malformed-uri-template-without-examples.json`.
 - Roots in Tool Interaction roots responses accept `_meta` from MCP 2025-06-18, where MCP `Root` defines it; earlier revisions reject it with `interaction-example-version-mismatch`. Previously `_meta` was rejected on roots in every revision. Added fixture `expected-invalid/root-meta-before-2025-06-18.json`.
 - Reserved `_meta` key checks (Section 3.5) now also apply to Prompt example results and their message content, completion example results, Tool Interaction step responses, and roots. In MCP 2026-07-28, step responses are checked as client responses rather than results, so result-only keys such as `io.modelcontextprotocol/serverInfo` are rejected there. Added fixture `expected-invalid/meta-reserved-keys-in-carried-values.json`.
 - Result `_meta` in Resource, Prompt, and completion examples is accepted for MCP 2024-11-05 and 2025-03-26, as it already was in Tool examples. MCP's `Result` defines `_meta` in every supported revision, and Section 3.5 already permitted it; Section 10.4.4 and the validator wrongly limited it to MCP 2025-06-18 and later. Resource Contents `_meta` remains limited to MCP 2025-06-18 and later. Added fixture `expected-warning/legacy-result-meta.json`.
-- Sections 10.4.6 and 11.4 now state that MCP Description does not support completion examples for MCP 2024-11-05, matching existing validator behavior. MCP 2024-11-05 defines `completion/complete`, so the `completion-example-version-mismatch` message now says "not supported by MCP Description" instead of "not defined for MCP". The limitation is recorded as a known defect in [`validation/mcp-revisions.md`](validation/mcp-revisions.md).
+- Sections 10.4.6 and 11.4 now state that MCP Description does not support completion examples for MCP 2024-11-05, matching existing validator behavior. MCP 2024-11-05 defines `completion/complete`, so the `completion-example-version-mismatch` message now says "not supported by MCP Description" instead of "not defined for MCP". The limitation was recorded in `validation/mcp-revisions.md`, now available in [How MCP protocol versions are managed](guides/understanding-mcp-protocol-versions.md#known-defects-not-fixed).
 - Structural (`schema-validation`) diagnostic paths report array indices as numbers, consistent with semantic diagnostic paths. Previously, indices below the document root were reported as strings, for example `["tools", "0", "inputSchema"]`.
 
 ## [0.8.0+editorial.1] — 2026-10-19

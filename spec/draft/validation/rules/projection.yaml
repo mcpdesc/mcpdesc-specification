@@ -1,5 +1,18 @@
 rules:
   - id: mcpdesc.projection.source-valid
+    title: "Project a valid source and declared protocol version"
+    description: >-
+      Native projection first validates the source and checks that the
+      requested MCP protocol version appears at the root. Fix source errors or
+      select a declared version. These failures come from the projection
+      operation, not a new document-validation phase.
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     owner: mcpdesc
     summary: >-
       Native projection starts from a document without validation errors and
@@ -31,6 +44,19 @@ rules:
       scripts/test-projection-fixtures.mjs.
 
   - id: mcpdesc.projection.declaration-applicable
+    title: "Select an applicable declaration for projection"
+    description: >-
+      Native projection selects a Tool, Resource, Resource Template, or Prompt
+      by its identifier in one protocol view. A declaration outside that view
+      cannot be projected for that version. Check the identifier and the
+      declaration's inherited or explicit scope.
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     owner: mcpdesc
     summary: >-
       Native projection selects one declaration of the requested kind and
@@ -57,6 +83,20 @@ rules:
       scripts/test-projection-fixtures.mjs.
 
   - id: mcpdesc.projection.native-schema
+    title: "Preserve MCP values when projecting declarations"
+    description: >-
+      Native projection resolves Tool schema components, removes
+      description-only fields, and checks the value against the selected MCP
+      schema. It does not repair values or invent defaults. A postcondition
+      failure is an implementation or specification defect and returns no
+      projected value.
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     owner: mcpdesc
     summary: >-
       A native projection keeps exactly the declaration fields that the MCP

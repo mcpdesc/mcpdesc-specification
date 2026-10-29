@@ -1,5 +1,12 @@
 rules:
   - id: mcp.completion.revision-availability
+    title: "Check completion example protocol support"
+    description: >-
+      MCP Description does not support completion examples for MCP 2024-11-05,
+      despite the underlying protocol defining completion. The registry
+      records that deliberate historical limitation. Scope completion examples
+      to supported versions instead of treating this as a missing capability
+      advertisement.
     owner: mcp
     summary: >-
       Completion examples are available in every revision that defines
@@ -7,11 +14,12 @@ rules:
     surface: CompleteResult
     kind: structural
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4 (no completion examples for MCP 2024-11-05)
         locations:
@@ -44,6 +52,12 @@ rules:
         resolution: not-fixed
         reference: "Maintainer decision on issue #72, 2026-10-25"
   - id: mcp.result.additional-properties.preserve
+    title: "Preserve fields on open results with a warning"
+    description: >-
+      An open MCP result can carry fields that its protocol version does not
+      define. Those values are preserved without assigning them later-version
+      meaning, and a warning identifies the affected version. Review the field
+      or split protocol variants if the warning is not intended.
     owner: mcp
     summary: >-
       A field that an open MCP result type allows but the revision does not
@@ -53,11 +67,12 @@ rules:
     kind: preservation
     requirement: may
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 3.6 (Carried MCP Values)
         locations:
@@ -102,6 +117,12 @@ rules:
       The warnings of this rule for a document equal the union of its warnings
       for each per-revision Effective Protocol View (scripts/test-views.mjs).
   - id: mcp.input-response.closed
+    title: "Keep newer client input responses closed"
+    description: >-
+      In MCP 2026-07-28, sampling, elicitation, and roots responses are closed
+      input responses rather than open results. Remove undefined fields; _meta
+      is defined only for the sampling response. Earlier versions' open-result
+      behavior does not carry forward to these types.
     owner: mcp
     summary: >-
       In MCP 2026-07-28, sampling, elicitation, and roots responses are input
@@ -110,11 +131,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": not-applicable
-      "2025-11-25": not-applicable
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": not-applicable
+        "2025-11-25": not-applicable
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 3.6 and 9.4
         locations:
@@ -137,6 +159,11 @@ rules:
       - path: expected-invalid/closed-step-responses-2026.json
         pointer: /tools/0/interactionExamples/approved/steps/0/response
   - id: mcp.root.meta.revision-availability
+    title: "Use root metadata only where supported"
+    description: >-
+      Root entries acquire _meta from MCP 2025-06-18. This is different from
+      metadata on the surrounding roots result. Remove misplaced metadata or
+      scope the containing example to protocol versions that define it.
     owner: mcp
     summary: >-
       A root in a roots response may carry _meta from MCP 2025-06-18.
@@ -145,11 +172,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 3.5, 3.6, and 9.4
         locations:
@@ -175,6 +203,12 @@ rules:
       - path: expected-warning/open-step-responses-before-2026.json
         pointer: /tools/0/interactionExamples/approved/steps/0/response/roots/0
   - id: mcp.meta.reserved-key-context
+    title: "Place reserved metadata in its defined context"
+    description: >-
+      A recognized reserved metadata key has a specific context and value
+      shape. A key valid on one message or object may be invalid on another.
+      Check the containing object and protocol version rather than moving the
+      same key unchanged into every _meta object.
     owner: mcp
     summary: >-
       A reserved _meta key appears only in the message context, and with the
@@ -183,11 +217,12 @@ rules:
     kind: semantic
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 3.5
         locations:
@@ -217,6 +252,12 @@ rules:
       2025-03-26 do not define reserved keys; Section 16.2 limits validation
       for those revisions.
   - id: mcp.completion.result-closed
+    title: "Keep completion result members within MCP fields"
+    description: >-
+      The nested completion object is closed even when its surrounding result
+      is open. It accepts values, total, and hasMore, not arbitrary pagination
+      or vendor fields. Remove additional members or explicitly review a
+      different metadata destination.
     owner: mcp
     summary: >-
       The completion object of a completion result contains only values,
@@ -226,11 +267,7 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions: independent
     specification:
       - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
         locations:
@@ -257,6 +294,13 @@ rules:
         pointer: /resourceTemplates/0/completionExamples
 
   - id: mcp.cacheable-result.ttl-ms
+    title: "Express cache lifetimes as non-negative integers"
+    description: >-
+      Resource example ttlMs values are non-negative integer milliseconds.
+      This value constraint also applies when an older protocol version
+      permits the field without defining it. Replace fractions or negative
+      values with the intended duration rather than relying on automatic
+      rounding.
     owner: mcp
     summary: >-
       ttlMs in a Resource example result is a non-negative integer when
@@ -266,11 +310,7 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions: independent
     specification:
       - reference: MCP Description 0.9.0, Sections 3.6 and 10.4.4
         locations:

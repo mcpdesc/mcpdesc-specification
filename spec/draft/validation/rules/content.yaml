@@ -1,5 +1,11 @@
 rules:
   - id: mcp.content-block.revision-availability
+    title: "Use content blocks supported by each protocol version"
+    description: >-
+      Tool and Prompt examples carry native MCP content, whose types and
+      fields vary by protocol version. Check each block against the containing
+      declaration's full effective scope. A block valid in a newer version is
+      not automatically valid in an older one.
     owner: mcp
     summary: >-
       Content blocks in example results use only content types and fields the
@@ -10,11 +16,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 9.3 and 11.3
         locations:
@@ -60,6 +67,12 @@ rules:
       property identifies which.
 
   - id: mcp.resource-contents.meta.revision-availability
+    title: "Use Resource Contents metadata where supported"
+    description: >-
+      Resource Contents entries acquire _meta from MCP 2025-06-18. This is
+      separate from result-level _meta, which is available in every supported
+      version. Move or remove a misplaced value only after deciding which
+      object it describes.
     owner: mcp
     summary: >-
       Resource contents carry _meta only from MCP 2025-06-18, in Resource
@@ -69,11 +82,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 10.4.4
         locations:

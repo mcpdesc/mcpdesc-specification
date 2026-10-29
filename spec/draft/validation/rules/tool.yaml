@@ -1,16 +1,22 @@
 rules:
   - id: mcp.tool.output-schema.revision-availability
+    title: "Declare output schemas only where MCP defines them"
+    description: >-
+      Tool outputSchema is available from MCP 2025-06-18. A Tool whose
+      effective scope includes an earlier protocol version cannot carry it
+      unchanged. Omit it for the earlier version or provide disjoint variants.
     owner: mcp
     summary: A Tool declares outputSchema only for MCP revisions whose Tool type defines it.
     surface: Tool
     path: outputSchema
     kind: structural
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": not-applicable
-      "2025-11-25": not-applicable
-      "2026-07-28": not-applicable
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": not-applicable
+        "2025-11-25": not-applicable
+        "2026-07-28": not-applicable
     specification:
       - reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table)
         locations:
@@ -34,17 +40,24 @@ rules:
         pointer: /tools/0
 
   - id: mcp.tool.output-schema.object-root
+    title: "Use object output schemas before MCP 2026"
+    description: >-
+      MCP 2025-06-18 and 2025-11-25 require an object-rooted outputSchema. MCP
+      2026-07-28 permits other roots. An array schema therefore needs a scope
+      that excludes the object-only versions; projection must not wrap it in
+      an object as a repair.
     owner: mcp
     summary: A Tool outputSchema has an object-typed root.
     surface: Tool
     path: outputSchema
     kind: structural
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": not-applicable
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": not-applicable
     specification:
       - reference: MCP Description 0.9.0, Section 9.2
         locations:
@@ -78,6 +91,13 @@ rules:
         resolution: not-fixed
 
   - id: mcp.tool.schema-keywords.preserve
+    title: "Retain embedded JSON Schema keywords"
+    description: >-
+      Embedded Tool schemas can contain keywords beyond the fields MCP lists.
+      A tool must preserve them through the operations covered by the
+      specification instead of discarding unrecognized keywords. This is a
+      tooling guarantee, so a valid custom keyword does not itself produce a
+      document diagnostic.
     owner: mcp
     summary: >-
       Tool inputSchema and outputSchema are JSON Schema objects; keywords beyond
@@ -87,11 +107,12 @@ rules:
     path: inputSchema, outputSchema
     kind: preservation
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 9.2
         locations:
@@ -137,6 +158,12 @@ rules:
         status: active
 
   - id: mcp.tool.input-schema.object-root
+    title: "Give Tool input schemas an object root"
+    description: >-
+      A Tool inputSchema must declare the literal type object after component
+      resolution. An array schema or a schema that only implies an object
+      through composition does not satisfy this root requirement. Keep object
+      arguments under properties and validate their values separately.
     owner: mcp
     summary: >-
       Tool inputSchema is a JSON Schema object whose root declares
@@ -146,11 +173,7 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions: independent
     specification:
       - reference: MCP Description 0.9.0, Section 9.2
         locations:
@@ -201,6 +224,13 @@ rules:
         status: active
 
   - id: mcp.tool.input-schema.x-mcp-header
+    title: "Use valid HTTP header mappings in Tool input"
+    description: >-
+      MCP 2026-07-28 gives x-mcp-header meaning on string, integer, or boolean
+      input properties reachable through properties chains. Check header
+      tokens, placement, and case-insensitive uniqueness. Earlier protocol
+      versions preserve the keyword without applying those MCP header
+      semantics.
     owner: mcp
     summary: >-
       An x-mcp-header annotation is a non-empty HTTP field-name token on a
@@ -210,11 +240,12 @@ rules:
     path: inputSchema properties x-mcp-header
     kind: semantic
     applicability:
-      "2024-11-05": opaque
-      "2025-03-26": opaque
-      "2025-06-18": opaque
-      "2025-11-25": opaque
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": opaque
+        "2025-03-26": opaque
+        "2025-06-18": opaque
+        "2025-11-25": opaque
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 9.2
         locations:
@@ -248,6 +279,13 @@ rules:
         pointer: /tools/0/inputSchema/properties/fallbackRegion
 
   - id: json-schema.tool-schema.valid
+    title: "Validate embedded Tool schemas in their dialect"
+    description: >-
+      Tool input and output schemas must be valid under their applicable JSON
+      Schema dialect. Unsupported declared dialects are errors; unresolved
+      external references warn when complete offline checking is unavailable.
+      External schemas are not fetched automatically, and a partial check is
+      not reported as complete.
     owner: json-schema
     summary: >-
       An embedded Tool inputSchema or outputSchema is valid under its declared
@@ -258,11 +296,15 @@ rules:
     kind: embedded-standard
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": not-applicable
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": not-applicable
+        "2025-11-25": applies
+        "2026-07-28": applies
+      schemaDialects:
+        - https://json-schema.org/draft/2020-12/schema
+        - http://json-schema.org/draft-07/schema#
     specification:
       - reference: MCP Description 0.9.0, Section 9.2 (declared dialects limited to 2020-12 and draft-07; never fetch external $ref targets; warn when validation is incomplete)
         locations:
@@ -321,6 +363,12 @@ rules:
       dialect; mcp.tool.schema.legacy-shape applies there instead.
 
   - id: mcp.tool.schema.legacy-shape
+    title: "Check early Tool schemas without inferring a dialect"
+    description: >-
+      Early MCP protocol versions define a limited Tool-schema shape without a
+      default embedded dialect. Check the known properties and required-name
+      list without rejecting other keywords using an inferred meta-schema.
+      Incomplete example validation is reported separately.
     owner: mcp
     summary: >-
       Before MCP 2025-11-25, Tool schema properties is an object of objects
@@ -330,11 +378,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": not-applicable
-      "2026-07-28": not-applicable
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": not-applicable
+        "2026-07-28": not-applicable
     specification:
       - reference: MCP Description 0.9.0, Section 9.2
         locations:
@@ -360,6 +409,12 @@ rules:
       (json-schema.tool-schema.valid).
 
   - id: mcp.tool.structured-content.output-schema
+    title: "Supply structured content when an output schema needs it"
+    description: >-
+      A successful Tool example for a Tool with outputSchema must carry the
+      required structuredContent. The schema describes that structured value,
+      not the unstructured content array. Check success and error examples
+      separately before deciding which payload is missing.
     owner: mcp
     summary: >-
       When a Tool declares outputSchema, a successful result contains
@@ -369,11 +424,12 @@ rules:
     kind: semantic
     requirement: must
     applicability:
-      "2024-11-05": not-applicable
-      "2025-03-26": not-applicable
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 9.3
         locations:
@@ -401,6 +457,13 @@ rules:
       mcpdesc.tool.example.error-result.
 
   - id: mcpdesc.tool.example.schema-conformance
+    title: "Check Tool examples against their schemas"
+    description: >-
+      Example input must satisfy the resolved inputSchema, and successful
+      structured output must satisfy outputSchema when supplied. Correct the
+      example or the declaration's schema. Where resolution or dialect support
+      prevents complete checking, the diagnostic must make that limitation
+      visible.
     owner: mcpdesc
     summary: >-
       A Tool example input validates against inputSchema, and its
@@ -411,11 +474,12 @@ rules:
     kind: mcpdesc-semantic
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Sections 9.2, 9.3, and 9.4
         locations:
@@ -449,6 +513,12 @@ rules:
       legacy shape is checked and the warning reports the gap.
 
   - id: mcpdesc.tool.example.error-result
+    title: "Represent Tool execution errors as error results"
+    description: >-
+      Tool execution errors are completed MCP Tool results with isError true,
+      not a separate description-only error catalogue. Check the error
+      result's content and avoid presenting successful structured output as
+      the error payload.
     owner: mcpdesc
     summary: >-
       A Tool execution-error example result sets isError to true and does not
@@ -458,11 +528,7 @@ rules:
     kind: mcpdesc-semantic
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions: independent
     specification:
       - reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
         locations:

@@ -260,7 +260,8 @@ const draftProposalSnapshots = [
   ['0026-open-mcp-results-in-examples.md', '3d4e5ce773f5f61ecb67177aa34cbfbb302d06e0', 'proposals/0026-open-mcp-results-in-examples.md', '3a50753bf217c0ceb5fb60f28766c05b06f073524eafc3c899661b6810d6cd3b'],
   ['0027-closed-mcp-types.md', '609700bac005e182a0e65970b59f0a5c1f3dfc25', 'proposals/0027-closed-mcp-types.md', '8e83c57fc4c243bd8cde0e2d15c8f93e148311e54399445eecba171cb95a8f79'],
   ['0028-version-conversion.md', '192e5580270d94607f9d90ad1f97236b70c318a8', 'proposals/0028-version-conversion.md', '4ca5c8876ec115ba814f81456de88d32cc27cb4f0e48df1fa771e0958d108c4a'],
-  ['0029-integer-mcp-numbers.md', 'f6ce500cdbe3e051abbf219d1005fca212c87f96', 'proposals/0029-integer-mcp-numbers.md', 'be901a5ad909e9c30ff373928f61aa31bdb4954e23307161e34631ba4bea1127']
+  ['0029-integer-mcp-numbers.md', 'f6ce500cdbe3e051abbf219d1005fca212c87f96', 'proposals/0029-integer-mcp-numbers.md', 'be901a5ad909e9c30ff373928f61aa31bdb4954e23307161e34631ba4bea1127'],
+  ['0030-readable-and-complete-rule-records.md', 'd60da1d9b45e387987f5747f52053f1b4cbbfdec', 'proposals/0030-readable-and-complete-rule-records.md', 'b963dad392e7d4e39875dac4655bd4035d2056cc949c424a68ab003b1e47e98b']
 ];
 
 function checkProposalSnapshots(specificationPath, snapshots) {

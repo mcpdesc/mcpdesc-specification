@@ -1,5 +1,18 @@
 rules:
   - id: mcpdesc.tool.interaction.elicitation-consistency
+    title: "Match elicitation steps to their declaration"
+    description: >-
+      A Tool's elicitation step must agree with the named elicitation
+      declaration and its requested form. Accepted form content must satisfy
+      that schema, while declined or cancelled responses have different
+      content rules. Check the reference, request, and response together.
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     owner: mcpdesc
     summary: >-
       An elicitation step matches the Tool's named Elicitation Declaration, and
@@ -39,6 +52,19 @@ rules:
         pointer: /tools/0/interactionExamples
 
   - id: mcpdesc.tool.interaction.client-requirements-consistency
+    title: "Keep interactions consistent with client requirements"
+    description: >-
+      A Tool interaction example can contradict its explicit minimum client
+      requirements. Review the warning against the scenario and the declared
+      requirements. The example does not automatically create or strengthen a
+      client requirement.
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     owner: mcpdesc
     summary: >-
       Interaction steps do not contradict the Tool's explicit client capability
@@ -62,6 +88,12 @@ rules:
     notes: Steps never create requirements; the warning reports a contradiction only.
 
   - id: mcp.sampling.tools.revision-availability
+    title: "Use sampling tools only where supported"
+    description: >-
+      Sampling tools and toolChoice are available from MCP 2025-11-25.
+      Earlier-version interaction examples cannot use those fields. Remove
+      them or narrow the containing Tool's protocol scope to versions that
+      support them.
     owner: mcp
     summary: >-
       A sampling request uses tools and toolChoice only from MCP 2025-11-25.
@@ -70,11 +102,12 @@ rules:
     kind: structural
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 9.4
         locations:
@@ -96,6 +129,12 @@ rules:
         pointer: /tools/0/interactionExamples/broken/steps/2/request
 
   - id: mcp.root.uri.file-scheme
+    title: "Use file URIs for roots"
+    description: >-
+      Root entries in interaction responses use file:// URIs. An arbitrary
+      resource URI is not a valid root merely because the resource is
+      accessible to the server. Correct the root URI without fetching or
+      probing the referenced filesystem location.
     owner: mcp
     summary: A root URI in a roots response starts with file://.
     surface: Root
@@ -103,11 +142,7 @@ rules:
     kind: semantic
     requirement: must
     applicability:
-      "2024-11-05": applies
-      "2025-03-26": applies
-      "2025-06-18": applies
-      "2025-11-25": applies
-      "2026-07-28": applies
+      protocolVersions: independent
     specification:
       - reference: MCP Description 0.9.0, Section 9.4
         locations:

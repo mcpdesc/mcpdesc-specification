@@ -1,5 +1,13 @@
 rules:
   - id: mcpdesc.prompt.example.arguments
+    title: "Supply the Prompt arguments the example requires"
+    description: >-
+      A Prompt example supplies every required argument and no undeclared
+      argument. Check names against the containing Prompt, including when the
+      example comes from a reusable component. Omitted optional arguments do
+      not need placeholder values.
+    applicability:
+      protocolVersions: independent
     owner: mcpdesc
     summary: >-
       A Prompt example supplies every required Prompt argument and no
