@@ -7,50 +7,52 @@ Description document is valid and identify issues that need attention.
 
 ## What validation rules cover
 
-A document is checked as valid in three areas:
+A document is checked in three areas:
 
 - **MCP:** the described tools, resources, prompts, capabilities, or carried
-  MCP values do meet the requirements of the applicable protocol
+  MCP values meet the requirements of the applicable protocol
   version.
 - **JSON Schema:** an embedded Tool input or output schema is valid under
-  its applicable JSON Schema structure.
+  its applicable JSON Schema dialect.
 - **MCP Description:** complementary description fields, protocol scoping,
-  references, or examples do meet the requirements of the the MCP Description specifications.
+  references, and examples meet MCP Description's requirements.
 
 The catalog groups rules by these three owners, recorded as
 `mcp`, `json-schema`, and `mcpdesc`.
 
-A single Tool declaration may involve
-rules from all three groups:
-- its MCP fields and annotations follow MCP rules,
-- its `inputSchema` must be valid JSON Schema,
-- and its documentation follows the MCP
-Description rules for each protocol version scope.
-- also, its examples are checked against MCP's result types and
-against MCP Description's example rules.
+A single Tool declaration may involve rules from all three groups:
+
+- Its MCP fields and annotations follow MCP rules.
+- Its `inputSchema` and `outputSchema` must be valid JSON Schemas.
+- Its scopes and examples follow MCP Description rules; its example results
+  also follow MCP's result types for every applicable protocol version.
 
 ## Why explicit validation rules?
 
-MCP Description provides static descriptions of MCP servers across the MCP protocol revisions that a specification version supports: for mcpdesc 0.9.0, MCP protocol versions
-2024-11-05 through 2026-07-28 are supported.
+MCP Description provides static descriptions of MCP servers across the MCP
+protocol versions a specification version supports. MCP Description 0.9.0
+supports MCP protocol versions 2024-11-05 through 2026-07-28.
 
 The same field can be required in one protocol version,
 undefined in another, and governed by a JSON Schema dialect rather than by MCP.
 
 A validation failure without that context does not tell an author what to fix.
 
-For more information on MCP protocol versions, variations across versions and how MCP Description has organized with this complexity, we recommend to check the guide: [How MCP protocol versions are managed](../guides/understanding-mcp-protocol-versions.md).
+For structural checks, semantic checks, and protocol scopes, read
+[How validation works](../guides/understanding-mcp-protocol-versions.md).
+This overview explains how to use the catalog to understand and act on the
+resulting diagnostics.
 
 ## How to use the catalog
 
 Each rule records which specification owns the requirement, which protocol
-revisions it applies to, and where the requirement comes from.
+versions it applies to, and where the requirement comes from.
 
 The catalog
 helps users and tools identify whether a problem concerns MCP structures,
 embedded JSON Schema, or MCP Description semantics.
 
-Each rule has a permanent identifier, such as `mcp.tool-annotations.members`.
+Each rule has a permanent identifier, such as `mcp.tool.output-schema.object-root`.
 Utility tools can use this identifier to refer to a particular rule and trace provenance in a diagnostic.
 
 Each record also has a short `title`, a precise requirement `summary`, and a
@@ -66,96 +68,70 @@ rules: every JSON Schema failure of the document, for example, has the code
 To act on a diagnostic:
 
 1. Find the diagnostic's `rule` identifier in the catalog.
-2. Check the diagnostic's severity and the rule's protocol-revision
+2. Check the diagnostic's severity and the rule's protocol-version
    applicability.
 3. Read the requirement, its source references, and the rule's examples.
 4. Correct the document and validate it again.
 
 Errors make a document invalid; warnings do not:
 
-- **Error:** a Tool annotation contains `audience`, which Tool Annotations do
-  not define. See the [worked example](#worked-example) below.
-- **Warning:** an example result contains `vendorTrace`, which its MCP
-  revision does not define but the open result type permits. The document
-  remains valid, and the field is preserved without assigning it protocol
-  meaning. See the complete
-  [warning fixture](../fixtures/expected-warning/open-result-unknown-properties.json)
-  and rule `mcp.result.additional-properties.preserve` in
+- **Error:** a Tool has an array-rooted `outputSchema` but applies to MCP
+  2025-11-25, which requires an object root. See the
+  [worked example](#worked-example) below.
+- **Warning:** an example result contains `resultType: "complete"` for MCP
+  2025-11-25. The open result type permits the field without defining its
+  meaning. The document remains valid, and the field is preserved. The
+  [guide explains the contrast with MCP 2026-07-28](../guides/understanding-mcp-protocol-versions.md#what-validation-checks),
+  where the field is required. See rule
+  `mcp.result.additional-properties.preserve` in
   [`rules/result.yaml`](rules/result.yaml).
-
-### Guarantees that tools must uphold
-
-Not every rule reports a problem with your document. Some describe guarantees
-that tools must uphold, such as retaining custom keywords in embedded schemas.
-These are checked by conformance tests rather than reported as document errors
-or warnings.
-
-For example, `mcp.tool.schema-keywords.preserve` in
-[`rules/tool.yaml`](rules/tool.yaml) requires tools to retain custom keywords
-such as `x-example-field-id` in an embedded Tool schema:
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "account": { "type": "string", "x-example-field-id": 123 }
-  }
-}
-```
-
-This is a schema fragment, not a complete MCP Description document. The custom
-keyword does not itself cause an error or warning. If a tool silently discards
-it, that is an implementation defect, not a mistake by the document author.
-Recognized JSON Schema keywords such as `type` still have their normal meaning.
-The complete
-[custom-keywords fixture](../fixtures/expected-valid/custom-tool-schema-keywords.json)
-illustrates this guarantee.
-
-### Checks performed by other operations
-
-Some rules are checked outside document validation. For example, native MCP
-projection checks that the projected value validates against the MCP schema for
-the requested revision. A failure is reported by the projection operation,
-not by the document validator. The catalog calls these checks *delegated*;
-see [`rules/projection.yaml`](rules/projection.yaml).
 
 ### Worked example
 
-The fixture
-[`expected-invalid/tool-annotations-unknown-property.json`](../fixtures/expected-invalid/tool-annotations-unknown-property.json)
-is a complete document declaring a Tool for MCP 2025-11-25. Its Tool
-annotations are:
-
-```json
-{ "readOnlyHint": true, "audience": ["user"] }
-```
-
-The candidate validator reports:
+The [guide's complete server description](../guides/understanding-mcp-protocol-versions.md#use-protocolversions-scopes-to-describe-variations)
+declares two `lookup` variants with different output schemas. To isolate one
+error, consider a document with the same root protocol versions,
+`["2025-11-25", "2026-07-28"]`, but only this Tool:
 
 ```json
 {
-  "code": "schema-validation",
-  "severity": "error",
-  "message": "does not validate against 0.9.0: /tools/0/annotations must NOT have additional properties",
-  "path": ["tools", 0, "annotations", "audience"],
-  "rule": "mcp.tool-annotations.members"
+  "name": "lookup",
+  "inputSchema": { "type": "object" },
+  "outputSchema": { "type": "array", "items": { "type": "string" } }
 }
 ```
 
-1. The rule is recorded in [`rules/annotations.yaml`](rules/annotations.yaml):
-   a Tool annotations object contains only `title`, `readOnlyHint`,
-   `destructiveHint`, `idempotentHint`, and `openWorldHint`.
-2. The severity is `error`, so the document is invalid. The rule applies from
-   MCP 2025-03-26, the first revision with Tool annotations, so it applies to
-   this Tool.
-3. The requirement is in [Section 9.6](../sections/09-tools.md#req-tool-annotations-closed),
-   and the source is MCP's `ToolAnnotations` type, which is closed in every
-   revision. `audience` belongs to Resource Annotations (Section 10.3); the
-   fixture
-   [`expected-valid/distinct-tool-and-resource-annotations.json`](../fixtures/expected-valid/distinct-tool-and-resource-annotations.json)
-   shows both kinds side by side.
-4. Removing `audience` from the Tool annotations makes the document valid;
-   validating it again reports no diagnostics.
+This is a Tool fragment, not a complete document. Without its own
+`protocolVersions`, it inherits both root versions. The candidate validator
+reports:
+
+```json
+{
+  "code": "field-not-supported-by-version",
+  "severity": "error",
+  "message": "tools[0].outputSchema must have type \"object\" when it applies to MCP 2025-11-25",
+  "path": ["tools", 0, "outputSchema", "type"],
+  "rule": "mcp.tool.output-schema.object-root"
+}
+```
+
+1. Find `mcp.tool.output-schema.object-root` in
+   [`rules/tool.yaml`](rules/tool.yaml). Its title is "Use object output schemas
+   before MCP 2026"; its description explains the version boundary.
+2. The severity is `error`, so the document is invalid. The rule applies to
+   MCP 2025-06-18 and 2025-11-25, but not 2026-07-28. This Tool inherits
+   2025-11-25, so the check applies.
+3. Read the requirement in
+   [Section 9.2](../sections/09-tools.md#req-tool-output-schema-object-root)
+   and the rule's pinned MCP sources. The
+   [invalid fixture](../fixtures/expected-invalid/non-object-output-schema-before-2026.json)
+   isolates the same error for MCP 2025-11-25.
+4. Correct the description to match the server. If only MCP 2026-07-28 returns
+   an array, scope that variant to `["2026-07-28"]` and retain the object-output
+   variant for 2025-11-25, as in the guide. If both versions return an object,
+   describe that actual object shape instead. Do not change declared protocol
+   support merely to silence an error. Validate again; the guide's complete
+   two-variant document produces no diagnostics.
 
 ## Status and scope
 
@@ -201,11 +177,19 @@ MCP-related validation behavior states who owns it, which MCP revisions it
 applies to, where it comes from, and how it is tested. Design background is
 tracked in [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/72).
 
+### Checks performed by other operations
+
+Some rules are checked outside document validation. For example, native MCP
+projection checks that the projected value validates against the MCP schema for
+the requested protocol version. A failure is reported by the projection
+operation, not by the document validator. The catalog calls these checks
+*delegated*; see [`rules/projection.yaml`](rules/projection.yaml).
+
 ### Layout
 
 | Path | Content | Status |
 | --- | --- | --- |
-| [How MCP protocol versions are managed](../guides/understanding-mcp-protocol-versions.md) | Protocol scopes, validation across protocol versions, Effective Protocol Views, native projection, and field comparisons | Informative guide |
+| [How validation works](../guides/understanding-mcp-protocol-versions.md) | Structural and semantic checks, protocol scopes, Effective Protocol Views, native projection, and field comparisons | Informative guide |
 | [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
 | [`rule.schema.json`](rule.schema.json) | Rule-format `1.0.0`: registry files, aggregate catalog, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
 | [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.0.0` unreleased; catalog content history stays in the specification changelog |
@@ -237,7 +221,7 @@ Other artifacts are evidence, not authority:
 Rules always name a specific released revision, never "MCP in general": a Tool
 in MCP 2025-11-25 and a Tool in MCP 2026-07-28 are different types. Sources are
 pinned to an upstream commit (see
-[How MCP protocol versions are managed](../guides/understanding-mcp-protocol-versions.md#reference-baseline)).
+[How validation works](../guides/understanding-mcp-protocol-versions.md#reference-baseline)).
 
 When sources disagree:
 
