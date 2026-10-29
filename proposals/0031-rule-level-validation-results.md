@@ -5,7 +5,8 @@
 - Created: 2026-10-29
 - Target version: 0.9.0 (Community Working Draft 4)
 - Related issues: https://github.com/mcpdesc/mcpdesc-specification/issues/93,
-  https://github.com/mcpdesc/mcpdesc-specification/issues/95
+  https://github.com/mcpdesc/mcpdesc-specification/issues/95,
+  https://github.com/mcpdesc/mcpdesc-specification/issues/96
 - Depends on: [Proposal 0024](0024-validation-rule-identity-and-provenance.md)
   (rule identity; amends its Section 5) and
   [Proposal 0030](0030-readable-and-complete-rule-records.md) (fixture
@@ -173,6 +174,12 @@ registry adds specific rules for the recurring requirements listed in the
 appendix, and the specification's tests report attribution coverage: the
 share of errors attributed to a specific rule.
 
+Precise attribution depends on a complete catalog. Most of the requirements
+behind catch-all failures are already enforced by the MCP Description and MCP
+JSON Schemas but have no rule. Identifying them, classifying every normative
+statement, and reporting catalog coverage is tracked separately in
+[issue #96](https://github.com/mcpdesc/mcpdesc-specification/issues/96).
+
 ### 5. Producer code mappings
 
 A producer that keeps diagnostic codes MAY publish a mapping from its codes to
@@ -226,7 +233,7 @@ introduce no network access or execution.
 2. Should `not-evaluated` carry a reason, such as `earlier-stage-failed` or
    `not-implemented`?
 3. Which specific rules replace the catch-all's current uses (see the
-   appendix), and in which draft?
+   appendix and issue #96), and in which draft?
 4. Should attribution coverage have a threshold, or be reported only?
 5. How should a delegated operation, such as native projection, report its own
    rule results?
@@ -238,7 +245,8 @@ introduce no network access or execution.
    candidate validator by recording each check it executes; extend the
    registry test so every fixture citation checks rule results.
 3. Register specific rules for the recurring catch-all areas and narrow
-   `mcpdesc.document.schema`; report attribution coverage.
+   `mcpdesc.document.schema`, following the catalog completeness inventory of
+   issue #96; report attribution coverage.
 4. Coordinate adoption in `@mcpdesc/validator` and `@mcpdesc/core`, including
    the projection postcondition required by Draft 3's fixtures.
 
