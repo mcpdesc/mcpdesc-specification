@@ -55,10 +55,12 @@
       }
     },
     "expectedError": {
+      "description": "Failure identifier of Section 4.14 that the projection reports instead of returning a value.",
       "enum": [
         "projection-source-invalid",
         "projection-revision-not-declared",
-        "projection-declaration-not-applicable"
+        "projection-declaration-not-applicable",
+        "projection-postcondition-failed"
       ]
     }
   },

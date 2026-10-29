@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/validation-rule/1.0.0.json",
+  "$id": "https://mcpdesc.org/schema/validation-rule/1.1.0.json",
   "title": "MCP Description validation rule registry file",
   "description": "Structure of each YAML file under validation/rules/. See Proposal 0024 and validation/README.md.",
   "type": "object",
@@ -71,7 +71,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.0.0.json#/$defs/catalog-index"
+          "const": "https://mcpdesc.org/schema/validation-rule/1.1.0.json#/$defs/catalog-index"
         },
         "catalogs": {
           "items": {
@@ -109,7 +109,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.0.0.json#/$defs/catalog-manifest"
+          "const": "https://mcpdesc.org/schema/validation-rule/1.1.0.json#/$defs/catalog-manifest"
         },
         "catalog": {
           "$ref": "#/$defs/artifact"
@@ -122,7 +122,7 @@
           "type": "integer"
         },
         "ruleFormatVersion": {
-          "const": "1.0.0"
+          "const": "1.1.0"
         },
         "ruleSchema": {
           "$ref": "#/$defs/artifact"
@@ -316,29 +316,6 @@
           "pattern": "\\S",
           "type": "string"
         },
-        "diagnostics": {
-          "items": {
-            "additionalProperties": false,
-            "properties": {
-              "code": {
-                "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
-                "type": "string"
-              },
-              "severity": {
-                "enum": [
-                  "error",
-                  "warning"
-                ]
-              }
-            },
-            "required": [
-              "code",
-              "severity"
-            ],
-            "type": "object"
-          },
-          "type": "array"
-        },
         "enforcement": {
           "enum": [
             "internal",
@@ -350,6 +327,14 @@
           "items": {
             "additionalProperties": false,
             "properties": {
+              "outcome": {
+                "description": "What the cited fragment demonstrates for this rule, as checked by the specification's tests: passes when the rule reports nothing there, error or warning for the severity of what the rule reports. For a native projection case, passes when a value is expected and error when the operation fails.",
+                "enum": [
+                  "passes",
+                  "error",
+                  "warning"
+                ]
+              },
               "path": {
                 "description": "A validation fixture relative to fixtures/, or a native projection case under projection-fixtures/.",
                 "pattern": "^(expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)|projection-fixtures/[a-z0-9-]+\\.json)$",
@@ -363,7 +348,8 @@
             },
             "required": [
               "path",
-              "pointer"
+              "pointer",
+              "outcome"
             ],
             "type": "object"
           },
@@ -542,7 +528,6 @@
         "surface",
         "kind",
         "specification",
-        "diagnostics",
         "enforcement",
         "status",
         "fixtures"

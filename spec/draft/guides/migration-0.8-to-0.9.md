@@ -93,7 +93,7 @@ MCP Description does not support completion examples for MCP 2024-11-05.
 
 ### Rule catalog consumers
 
-Draft 3 introduces rule-format `1.0.0`, separate from the `mcpdesc` version
+Draft 3 introduces rule-format `1.1.0`, separate from the `mcpdesc` version
 and the validator package release. Catalog consumers must accept required
 `title` and `description`, plus `applicability` for active rules, use the exact
 format schema, and select catalogs by specification snapshot. Within
@@ -101,7 +101,10 @@ applicability, `protocolVersions` is `independent` or a protocol map, and
 `schemaDialects` is optional separate metadata. `summary` and permanent rule
 IDs keep their existing meanings. Named rulesets are removed; filters are
 catalog views, not validation profiles. Retired records remain discoverable
-but do not participate in active applicability checks.
+but do not participate in active applicability checks. Records no longer list
+`diagnostics`: each fixture citation has a checked `outcome` (`passes`,
+`error`, or `warning`), and diagnostic codes come from the producer that
+emits them.
 
 Discover catalogs through the publication index, then pin an immutable
 manifest. Resolve evidence and description links from its

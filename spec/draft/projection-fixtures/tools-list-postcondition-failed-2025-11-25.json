@@ -1,0 +1,7 @@
+{
+  "description": "One Tool fails the postcondition for MCP 2025-11-25, so the whole list fails, including the valid search Tool.",
+  "document": "documents/boolean-property-schema.json",
+  "revision": "2025-11-25",
+  "kind": "tool",
+  "expectedError": "projection-postcondition-failed"
+}

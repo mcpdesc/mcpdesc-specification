@@ -26,19 +26,15 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L134-L147
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L201-L215
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L330-L446
-    diagnostics:
-      - code: schema-validation
-        severity: error
-      - code: meta-key-invalid
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/meta-key-invalid.json
         pointer: /tools/0
+        outcome: error
     notes: >-
-      The document schema rejects malformed keys first; meta-key-invalid
-      applies to callers of the semantic validator alone.
+      The document schema rejects malformed keys first; the semantic key check
+      applies only to direct callers of the semantic validator.
 
   - id: mcp.meta.reserved-prefix
     title: "Preserve unknown reserved metadata with a warning"
@@ -72,12 +68,10 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L140-L142
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L208-L210
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L337-L339
-    diagnostics:
-      - code: meta-unknown-reserved-key
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/unknown-reserved-meta-key.json
         pointer: /prompts/0/_meta
+        outcome: warning
     notes: A later MCP revision may define the key, so it is preserved rather than rejected.

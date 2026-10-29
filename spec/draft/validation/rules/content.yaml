@@ -47,18 +47,15 @@ rules:
         reference: MCP 2025-11-25 schema.ts, Resource extends Icons (inherited by ResourceLink)
         locations:
           - validation/mcp-schemas/2025-11-25/schema.ts#L797-L838
-    diagnostics:
-      - code: tool-example-content-version-mismatch
-        severity: error
-      - code: prompt-example-content-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/revision-incompatible-tool-example.json
         pointer: /tools/0/examples/future-result/result/content/0
+        outcome: error
       - path: expected-invalid/invalid-prompt-example-semantics.json
         pointer: /prompts/4/examples/resource-link-too-new/result/messages/0/content
+        outcome: error
     notes: >-
       The same diagnostic codes also report embedded resource _meta
       (mcp.resource-contents.meta.revision-availability) and
@@ -101,15 +98,9 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L600-L621
           - validation/mcp-schemas/2025-11-25/schema.ts#L876-L897
           - validation/mcp-schemas/2026-07-28/schema.ts#L1509-L1527
-    diagnostics:
-      - code: resource-example-content-version-mismatch
-        severity: error
-      - code: tool-example-content-version-mismatch
-        severity: error
-      - code: prompt-example-content-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/resource-example-result-semantics.json
         pointer: /resources/1/examples/unsupported-metadata/result/contents/0
+        outcome: error

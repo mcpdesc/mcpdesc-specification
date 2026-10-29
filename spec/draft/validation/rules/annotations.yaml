@@ -33,16 +33,15 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L869-L923
           - validation/mcp-schemas/2025-11-25/schema.ts#L1168-L1222
           - validation/mcp-schemas/2026-07-28/schema.ts#L1900-L1954
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/tool-annotations-unknown-property.json
         pointer: /tools/0/annotations
+        outcome: error
       - path: expected-valid/distinct-tool-and-resource-annotations.json
         pointer: /tools/0/annotations
+        outcome: passes
     notes: >-
       Tool annotations are not available in MCP 2024-11-05; that boundary is
       checked separately.
@@ -81,18 +80,18 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1093-L1128
           - validation/mcp-schemas/2025-11-25/schema.ts#L1700-L1735
           - validation/mcp-schemas/2026-07-28/schema.ts#L2265-L2300
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/resource-annotations-unknown-property.json
         pointer: /resources/0/annotations
+        outcome: error
       - path: expected-invalid/content-annotations-unknown-property.json
         pointer: /tools/0/examples/basic/result/content/0/annotations
+        outcome: error
       - path: expected-valid/distinct-tool-and-resource-annotations.json
         pointer: /resources/0/annotations
+        outcome: passes
     notes: >-
       lastModified is defined from MCP 2025-06-18; that boundary is checked
       separately.
@@ -132,15 +131,9 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1093-L1128
           - validation/mcp-schemas/2025-11-25/schema.ts#L1700-L1735
           - validation/mcp-schemas/2026-07-28/schema.ts#L2265-L2300
-    diagnostics:
-      - code: resource-annotation-not-supported-by-version
-        severity: error
-      - code: tool-example-content-version-mismatch
-        severity: error
-      - code: prompt-example-content-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/annotations-last-modified-before-2025-06-18.json
         pointer: /resources/0/annotations
+        outcome: error

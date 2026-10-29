@@ -7,7 +7,8 @@
 // every expected MCP value validates against its pinned MCP type and equals
 // its declaration without MCP Description fields. Validation already rejects
 // fields a revision does not define, so every other declaration field must be
-// present and unchanged.
+// present and unchanged. A postcondition case must select a declaration whose
+// value, built the same way, fails its pinned MCP type.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,6 +45,7 @@ const identifierField = { tool: 'name', resource: 'uri', resourceTemplate: 'uriT
 // Section 4.14: declaration fields that never reach an MCP value.
 const descriptionOnlyFields = new Set(['protocolVersions', 'examples', 'interactionExamples', 'completionExamples', 'tags', 'elicitations', 'deprecated', 'security', 'clientRequirements']);
 const projectionErrors = ['projection-source-invalid', 'projection-revision-not-declared', 'projection-declaration-not-applicable'];
+const postconditionError = 'projection-postcondition-failed';
 
 const mcpValidators = new Map();
 function mcpTypeValidator(revision, type) {
@@ -61,6 +63,13 @@ function mcpTypeValidator(revision, type) {
 
 const same = (left, right) => formatCanonicalJson(left) === formatCanonicalJson(right);
 const isDescriptionOnly = (key) => descriptionOnlyFields.has(key) || key.startsWith('x-');
+const withoutExtensions = (entry) => Object.fromEntries(Object.entries(entry).filter(([field]) => !field.startsWith('x-')));
+
+function nativeValue(declaration) {
+  return Object.fromEntries(Object.entries(declaration)
+    .filter(([key]) => !isDescriptionOnly(key))
+    .map(([key, child]) => [key, (key === 'arguments' || key === 'icons') && Array.isArray(child) ? child.map(withoutExtensions) : child]));
+}
 
 function checkValue(where, declaration, value, kind, revision) {
   const validate = mcpTypeValidator(revision, mcpType[kind]);
@@ -105,6 +114,7 @@ function loadDocument(caseFile, document) {
 
 const coverage = new Map(Object.keys(mcpType).map((kind) => [kind, { revisions: new Set(), codes: new Set(), list: false }]));
 const referencedDocuments = new Set();
+let postconditionCases = 0;
 const caseFiles = fs.readdirSync(fixtureDirectory).filter((name) => name.endsWith('.json')).sort();
 
 for (const name of caseFiles) {
@@ -160,6 +170,15 @@ for (const name of caseFiles) {
     if (select(identifier)) fail(`${where}: expects projection-declaration-not-applicable, but ${identifier} is in the MCP ${revision} view`);
     continue;
   }
+  if (expectedError === postconditionError) {
+    postconditionCases += 1;
+    const selected = identifier === undefined ? declarations : [select(identifier)].filter(Boolean);
+    if (!selected.length) fail(`${where}: expects ${postconditionError}, but selects no declaration in the MCP ${revision} view`);
+    else if (selected.every((declaration) => mcpTypeValidator(revision, mcpType[kind])(nativeValue(declaration)))) {
+      fail(`${where}: expects ${postconditionError}, but every selected value validates against the pinned MCP ${revision} ${mcpType[kind]}`);
+    }
+    continue;
+  }
   if (identifier !== undefined) {
     const declaration = select(identifier);
     if (!declaration) fail(`${where}: ${identifier} is not in the MCP ${revision} view`);
@@ -190,6 +209,7 @@ for (const [kind, { revisions, codes, list }] of coverage) {
   }
   if (!list) fail(`${fixtureRel}: no ${kind} list case`);
 }
+if (!postconditionCases) fail(`${fixtureRel}: no case expects ${postconditionError}`);
 
 if (errors.length) {
   console.error(`Projection fixture check failed with ${errors.length} error(s):`);
@@ -197,4 +217,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Projection fixtures passed: ${caseFiles.length} case(s) cover ${Object.keys(mcpType).length} kinds, every supported revision, every projection error, and a list per kind.`);
+console.log(`Projection fixtures passed: ${caseFiles.length} case(s) cover ${Object.keys(mcpType).length} kinds, every supported revision, every projection error, a list per kind, and ${postconditionCases} postcondition failure case(s).`);
