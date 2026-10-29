@@ -193,18 +193,18 @@ Two identities are published independently:
 
 | Identity | Example | Meaning |
 | --- | --- | --- |
-| Rule-format version | `1.0.0` | The machine-readable structure of rule records and the publication envelopes defined here |
+| Rule-format version | `1.1.0` | The machine-readable structure of rule records and the publication envelopes defined here |
 | Catalog snapshot | `0.9.0-draft.3` | The exact registry belonging to an immutable MCP Description specification tag |
 
 The catalog also records `mcpdescVersion`, for example `0.9.0`. A catalog
 snapshot is not a validator implementation release. Its existence neither
 selects a validator package version nor proves implementation coverage.
 
-The first published rule-format version is `1.0.0`, incorporating this
-proposal's fields. Earlier unversioned schemas are not retroactively called
-`1.0.0`. A later catalog can reuse the same format version when only rule
-content changes. A different format version does not itself change document
-validity or rule meanings.
+The first catalogs use rule-format version `1.1.0`, incorporating this
+proposal's fields. Earlier unversioned schemas are not retroactively given a
+numbered format. A later catalog can reuse the same format version when only
+rule content changes. A different format version does not itself change
+document validity or rule meanings.
 
 Rule-format versions use SemVer. Removing or renaming fields, adding required
 fields, or adding fields rejected by a previous schema's
@@ -214,11 +214,17 @@ documentation corrections are patch versions, published at a new URL; no
 versioned schema URL is overwritten. Permanent rule identifiers keep their
 meaning across catalogs as required by Proposal 0024.
 
-One exception was decided before any catalog used the format: the `1.0.0`
-schema URL was deployed on 2026-10-29 with a candidate that still required
-`diagnostics`, and the maintainer approved replacing those bytes once with the
-format of Section 9. No manifest or catalog referenced the earlier bytes. The
-exception is recorded in the format changelog and is not a precedent.
+Two exceptions were decided before any catalog used a numbered format, and
+neither is a precedent:
+
+- `1.0.0` was published first, with the required `diagnostics` that Section 9
+  removes. It stays unchanged at its URL and is used by no catalog. The
+  incompatible change is numbered `1.1.0` rather than `2.0.0`.
+- The `1.1.0` URL was first deployed with envelope constants that still named
+  `1.0.0`. Before any manifest or index used it, the maintainer approved
+  replacing those bytes once with corrected constants.
+
+Both are recorded in the format changelog.
 
 ### 5. Catalog membership and retirement
 
@@ -258,7 +264,7 @@ or independently maintained global history database is required.
 Publish these HTTPS resources on mcpdesc.org:
 
 ```text
-/schema/validation-rule/1.0.0.json
+/schema/validation-rule/1.1.0.json
 /validation/catalogs/0.9.0-draft.3/manifest.json
 /validation/catalogs/0.9.0-draft.3/rules.json
 ```
@@ -275,7 +281,7 @@ The manifest has these required fields and no unspecified defaults:
 | Field | Meaning |
 | --- | --- |
 | `$schema` | Absolute rule-schema URL ending in `#/$defs/catalog-manifest` |
-| `ruleFormatVersion` | The exact rule-format version, such as `1.0.0` |
+| `ruleFormatVersion` | The exact rule-format version, such as `1.1.0` |
 | `mcpdescVersion` | The specification's `mcpdesc` value, such as `0.9.0` |
 | `snapshot` | Exact catalog selector, such as `0.9.0-draft.3` |
 | `status` | `draft`, `release-candidate`, or `stable`; never inferred from format version |
@@ -603,8 +609,8 @@ or publication authority.
   rendering. Coordinate any adoption by core or the validator separately;
   those consumers are not implemented in this repository.
 5. Replace `diagnostics` with checked fixture outcomes (Section 9), with
-  negative controls for each new check, and redeploy the `1.0.0` schema bytes
-  under the recorded exception before any catalog is published.
+  negative controls for each new check, and publish the result as rule format
+  `1.1.0` before any catalog is published.
 6. After review and implementation, prepare Draft 3, publish the format schema,
   tag the authorized specification snapshot, publish and verify its immutable
   catalog bundle, then update the index. Do not publish the currently prepared
@@ -636,7 +642,10 @@ Later on 2026-10-29, the maintainer decided to remove diagnostic codes from
 rule records in Draft 3 and to make fixtures, with checked outcomes, the
 navigable evidence (Section 9); producer code mappings are deferred to
 Proposal 0031 and issue #93. Because the `1.0.0` schema bytes had already been
-deployed, without any catalog using them, the maintainer chose to replace them
-once rather than publish a `2.0.0` format (Section 4).
+deployed, without any catalog using them, the maintainer first chose to replace
+them once rather than publish a `2.0.0` format, then decided instead to
+publish the change as `1.1.0` and leave `1.0.0` unchanged. The first `1.1.0`
+deployment still named `1.0.0` in its envelope constants; the maintainer
+approved replacing those bytes once (Section 4).
 
 Acceptance pending.
