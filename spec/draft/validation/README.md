@@ -208,6 +208,7 @@ tracked in [issue #72](https://github.com/mcpdesc/mcpdesc-specification/issues/7
 | [How MCP protocol versions are managed](../guides/understanding-mcp-protocol-versions.md) | Protocol scopes, validation across protocol versions, Effective Protocol Views, native projection, and field comparisons | Informative guide |
 | [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
 | [`rule.schema.json`](rule.schema.json) | Rule-format `1.0.0`: registry files, aggregate catalog, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
+| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.0.0` unreleased; catalog content history stays in the specification changelog |
 | [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records declare every candidate diagnostic code; `scripts/test-validation-rules.mjs` checks them and reports the counts |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported revision (`<revision>/schema.ts`, `<revision>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
 
@@ -468,6 +469,9 @@ identifies a registered rule declaring that code and severity, and that each
 
 The rule-format version describes the data structure; the catalog snapshot
 identifies the specification requirements and documentation published together.
+The [rule-format changelog](CHANGELOG.md) records format and publication-contract
+changes; the [specification changelog](../CHANGELOG.md) records rule-content
+changes by draft.
 Format `1.0.0` is the first numbered format, not a retroactive name for the
 schemas in earlier drafts. No 0.8.0 catalog is published by this work.
 

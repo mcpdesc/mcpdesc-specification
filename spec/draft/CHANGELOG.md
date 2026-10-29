@@ -50,6 +50,7 @@ breaking changes relative to 0.8.0 remain; see the
 - Made protocol independence explicit rather than inferring it from owner or omitted metadata. Separate dialect metadata does not suppress errors for unsupported declared dialects. Reclassified each current rule without changing requirements, permanent IDs, summaries, sources, or diagnostics.
 - Defined catalog-local retirement using existing `status: retired`: historical records stay discoverable, may omit active applicability, and cannot be identified by current validation diagnostics. A later catalog does not automatically inherit earlier rules; materially changed requirements receive new IDs, and earlier snapshots remain unchanged.
 - Added positive and negative tests for independent and protocol-sensitive records, dialect metadata, incomplete applicability, and retained retirement records. Schema and catalogs are still unpublished pending review and deployment.
+- Added a separate [validation rule-format changelog](validation/CHANGELOG.md), starting with `1.0.0 — Unreleased`, for record structure, publication contracts, compatibility, and consumer migration. Individual rule-content changes remain in this per-draft specification changelog.
 
 #### Documentation — 2026-10-28
 
