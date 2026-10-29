@@ -222,8 +222,8 @@ file per case:
 under `projection-fixtures/documents/` or to a conformance fixture under
 `../fixtures/`, or an inline document. `kind` is `tool`, `resource`,
 `resourceTemplate`, or `prompt`. A case has either `expected`, the exact MCP
-value, or `expectedError`, a diagnostic code. A list case omits `identifier`
-and has an `expected` array. Comparison is by canonical JSON
+value, or `expectedError`, a failure identifier of Section 3. A list case omits
+`identifier` and has an `expected` array. Comparison is by canonical JSON
 (`scripts/canonical-json.mjs`), so key order does not matter. The case format
 is published as `projection-fixtures/schema/projection-case.schema.json`;
 cases are the JSON files directly under `projection-fixtures/`.
@@ -231,8 +231,11 @@ cases are the JSON files directly under `projection-fixtures/`.
 The fixtures cover at least, for each kind: a projected declaration for every
 supported revision, which includes each revision boundary in the Background
 table; every omitted MCP Description field; absent defaults staying absent;
-one list case; and each error code except `projection-postcondition-failed`,
-which only a defect can produce. They also cover Tool component references in
+one list case; and each error code except `projection-postcondition-failed`.
+That code only a defect can produce, so it is covered by at least one case
+from a recorded defect rather than for every kind: a single value and a list
+whose value fails the pinned MCP schema although the source document is
+valid. They also cover Tool component references in
 both schemas, `execution` kept for MCP 2025-11-25 only, an array
 `outputSchema` for MCP 2026-07-28, and `x-*` extensions on icons and Prompt
 arguments.
@@ -255,6 +258,8 @@ it already has:
   resolution, without the MCP Description fields of Section 2. Validation
   already rejects fields that the revision does not define, so this pins every
   field without a second field table;
+- every case expecting `projection-postcondition-failed` selects a declaration
+  whose value, built the same way, fails its pinned MCP type;
 - the coverage above is complete.
 
 The fixtures are exported with the validator snapshot bundle.
@@ -390,3 +395,9 @@ Scope: Tools, Resources, Resource Templates, and Prompts; maintainer decision
 on issue #72, 2026-10-26.
 Core version passing the fixtures: recorded in release notes only; maintainer
 decision on issue #72, 2026-10-26.
+Postcondition coverage: on 2026-10-29 the maintainer chose to keep Section 3's
+postcondition and test it with cases from a recorded defect, implemented in
+core at Draft 3 intake. A valid document whose Tool schema property is a
+boolean subschema fails the pinned MCP 2025-11-25 `Tool` type but projects for
+MCP 2026-07-28. `@mcpdesc/core@0.13.0-rc.2` returned that value without the
+check.
