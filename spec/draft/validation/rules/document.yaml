@@ -21,16 +21,15 @@ rules:
           - sections/16-conformance.md#req-document-schema
           - sections/03-document-structure.md#req-closed-objects
           - sections/09-tools.md#req-tool-input-schema-required
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/missing-tool-input-schema.json
         pointer: /tools/0
+        outcome: error
       - path: expected-invalid/object-level-unknown-property.json
         pointer: /tools/0
+        outcome: error
 
   - id: mcp.declaration.field.revision-availability
     title: "Keep fields within their supported protocol scope"
@@ -99,16 +98,15 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
           - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
           - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
-    diagnostics:
-      - code: field-not-supported-by-version
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/revision-inapplicable-execution.json
         pointer: /tools/0
+        outcome: error
       - path: expected-invalid/revision-inapplicable-tool-schema-dialect.json
         pointer: /tools/0/inputSchema
+        outcome: error
     notes: >-
       outputSchema, the outputSchema root, and the tasks capability have their
       own rules; the rule property identifies which applies.
@@ -137,24 +135,21 @@ rules:
           - sections/08-capabilities.md#req-capability-scopes-disjoint
           - sections/09-tools.md#req-tool-names-disjoint
           - sections/12-elicitation.md#req-elicitation-scope
-    diagnostics:
-      - code: protocol-scope-outside-parent
-        severity: error
-      - code: primitive-scope-overlap
-        severity: error
-      - code: capability-scope-overlap
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/elicitation-scope-outside-parent.json
         pointer: /resourceTemplates/0/elicitations/0
+        outcome: error
       - path: expected-invalid/scoped-version-not-in-root.json
         pointer: /transports/0
+        outcome: error
       - path: expected-invalid/overlapping-tool-scope.json
         pointer: /tools/1
+        outcome: error
       - path: expected-invalid/overlapping-capabilities.json
         pointer: /capabilities/0
+        outcome: error
 
   - id: mcpdesc.tags.references
     title: "Reference unique declared tags"
@@ -175,18 +170,15 @@ rules:
         locations:
           - sections/13-tags.md#req-tags-unique
           - sections/13-tags.md#req-tags-references
-    diagnostics:
-      - code: duplicate-root-tag
-        severity: error
-      - code: unknown-tag-reference
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/duplicate-root-tag.json
         pointer: /tags/1
+        outcome: error
       - path: expected-invalid/duplicate-tag-reference.json
         pointer: /tools/0/tags
+        outcome: error
 
   - id: mcpdesc.security.requirements
     title: "Reference security schemes and scopes correctly"
@@ -212,34 +204,28 @@ rules:
           - sections/07-security.md#req-security-scopes-unique
           - sections/07-security.md#req-security-scopes-oauth-only
           - sections/07-security.md#req-security-uncatalogued-scope
-    diagnostics:
-      - code: unknown-security-scheme
-        severity: error
-      - code: non-oauth-scope-misuse
-        severity: error
-      - code: duplicate-security-scope
-        severity: error
-      - code: schema-validation
-        severity: error
-      - code: uncatalogued-oauth-scope
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/unknown-security-reference.json
         pointer: /security/0
+        outcome: error
       - path: expected-invalid/non-oauth-scopes.json
         pointer: /security/0
+        outcome: error
       - path: expected-invalid/duplicate-security-scope.json
         pointer: /security/0
+        outcome: error
       - path: expected-warning/uncatalogued-oauth-scope.json
         pointer: /tools/0/security/0/oauth
+        outcome: warning
       - path: expected-warning/uncatalogued-openid-scope.json
         pointer: /security/0/oidc
+        outcome: warning
     notes: >-
-      The document schema rejects duplicate scopes first (schema-validation);
-      duplicate-security-scope applies to callers of the semantic validator
-      alone.
+      The document schema rejects duplicate scopes first; the semantic
+      duplicate-scope check applies only to direct callers of the semantic
+      validator.
 
   - id: mcpdesc.components.references
     title: "Resolve component references in the right namespace"
@@ -264,18 +250,12 @@ rules:
           - sections/17-components.md#req-component-reference-form
           - sections/17-components.md#req-component-reference-resolution
           - sections/09-tools.md#req-tool-schema-references-resolved
-    diagnostics:
-      - code: missing-component-reference-target
-        severity: error
-      - code: wrong-component-reference-namespace
-        severity: error
-      - code: component-reference-cycle
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/component-reference-resolution.json
         pointer: /components/schemas
+        outcome: error
 
   - id: mcpdesc.legacy-revisions.validation-scope
     title: "Limited validation for early MCP protocol versions"
@@ -305,11 +285,9 @@ rules:
         locations:
           - sections/16-conformance.md#req-legacy-validation-scope
           - proposal-snapshots/0024-validation-rule-identity-and-provenance.md
-    diagnostics:
-      - code: legacy-protocol-validation-incomplete
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/legacy-result-meta.json
         pointer: /protocolVersions
+        outcome: warning

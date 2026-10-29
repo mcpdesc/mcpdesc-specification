@@ -27,14 +27,12 @@ rules:
         reference: MCP 2025-03-26 specification, Basic, Transports, Streamable HTTP (replaces HTTP+SSE from 2024-11-05)
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L50-L277
-    diagnostics:
-      - code: transport-not-supported-by-version
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/revision-inapplicable-streamable-http.json
         pointer: /transports/0
+        outcome: error
 
   - id: mcp.transport.legacy-sse.deprecated
     title: "Review deprecated legacy SSE transports"
@@ -66,14 +64,12 @@ rules:
         reference: MCP 2025-03-26 specification, Basic, Transports, Backwards Compatibility (deprecated HTTP+SSE transport)
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-03-26/basic/transports.mdx#L250-L277
-    diagnostics:
-      - code: legacy-sse-for-modern-version
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/legacy-sse-modern-revision.json
         pointer: /transports/0
+        outcome: warning
 
   - id: mcpdesc.transports.coverage
     title: "Cover each declared protocol version with a transport"
@@ -97,13 +93,12 @@ rules:
       - reference: MCP Description 0.9.0, Section 6.5
         locations:
           - sections/06-transports.md#req-transport-coverage
-    diagnostics:
-      - code: transport-coverage-gap
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/root-version-without-transport.json
         pointer: /protocolVersions
+        outcome: error
       - path: expected-invalid/scoped-version-not-in-root.json
         pointer: /protocolVersions
+        outcome: error

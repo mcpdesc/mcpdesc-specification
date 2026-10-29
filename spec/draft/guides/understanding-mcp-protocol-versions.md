@@ -1,14 +1,56 @@
-# How MCP protocol versions are managed
+# How validation works
+
+Validation checks whether an MCP Description document meets the requirements
+of MCP Description, the MCP protocol versions it describes, and embedded JSON
+Schemas. It catches issues before a description is used to generate
+documentation, select declarations, or produce native MCP values.
 
 An MCP server can support several MCP protocol versions. Their requirements
 differ: a field may be available in one protocol version but absent or
-constrained differently in another.
+constrained differently in another. MCP Description records these differences
+so validators can check each declaration against its applicable versions.
 
-MCP Description records these differences so validators can check each
-declaration against the protocol versions it applies to.
+This guide explains the validation model through a Tool with version-dependent
+output schemas, then describes views and projection. The comparison tables
+that follow provide reference material for the supported 2024, 2025, and 2026
+protocol versions.
 
-This guide explains that model, then compares the MCP surfaces across the
-supported 2024, 2025, and 2026 protocol versions.
+## What validation checks
+
+Validation has two layers:
+
+1. **Structural checks** validate the document against the MCP Description
+  JSON Schema: required properties, value types, allowed members, and shapes.
+  The optional root `$schema` identifies that structural schema, including
+  the particular draft snapshot when one is declared.
+2. **Semantic checks** validate relationships and protocol-version-dependent
+  meaning: scopes, declaration uniqueness, transport coverage, component
+  references, field availability, and examples under every applicable
+  protocol version. Embedded Tool schemas also follow their applicable JSON
+  Schema rules.
+
+The validator does not simply use the newest MCP schema for the whole document.
+It checks each declaration against its effective scope. A declaration shared
+by several protocol versions has to meet the requirements of all of them.
+Component references do not bypass these checks: referenced values are checked
+in their use-site context.
+
+Errors make a document invalid; warnings do not. For example, a completed Tool
+result in an example needs `resultType: "complete"` for MCP 2026-07-28;
+omitting it is an error. For MCP 2025-11-25, the open result type permits that
+field without defining its meaning: including it produces a warning, not an
+error. These checks concern example results, not the native Tool declaration
+returned by `tools/list`.
+
+Validity is a statement about the static description, not a live-server test.
+Validation also has documented limits: MCP 2024-11-05 and 2025-03-26 receive
+structural and selected checks, not a claim of complete MCP semantic
+conformance. See [Section 16](../sections/16-conformance.md).
+
+To interpret a reported rule and find its requirements and examples, use the
+[validation catalog](../validation/README.md#how-to-use-the-catalog). Its
+[worked example](../validation/README.md#worked-example) traces an output-schema
+error from the scenario below to its rule and correction.
 
 ## Use protocolVersions scopes to describe variations
 
@@ -70,40 +112,6 @@ protocol version it inherits.
 See [Section 4.10](../sections/04-versioning.md#410-protocol-scopes-and-inheritance)
 for scope inheritance and [Section 9.5](../sections/09-tools.md#95-protocol-variants-and-security)
 for Tool variants.
-
-## What validation checks
-
-Validation has two layers:
-
-1. **Structural checks** validate the document against the MCP Description
-   JSON Schema: required properties, value types, allowed members, and shapes.
-  The optional root `$schema` identifies that structural schema, including
-  the particular draft snapshot when one is declared.
-2. **Semantic checks** validate relationships and protocol-version-dependent
-  meaning:
-   scopes, declaration uniqueness, transport coverage, component references,
-  field availability, and examples under every applicable protocol version.
-  Embedded Tool schemas also follow their applicable JSON Schema rules.
-
-The validator does not simply use the newest MCP schema for the whole document.
-It checks each declaration against its effective scope. A declaration shared
-by several protocol versions has to meet the requirements of all of them. Component
-references do not bypass these checks: referenced values are checked in their
-use-site context.
-
-Errors make a document invalid; warnings do not. For example, a completed Tool
-result in an example needs `resultType: "complete"` for MCP 2026-07-28;
-omitting it is an error. For MCP 2025-11-25, the open result type permits that
-field without defining its meaning: including it produces a warning, not an
-error. These checks concern example results, not the native Tool declaration
-returned by `tools/list`.
-
-Validity is a statement about the static description, not a live-server test.
-Validation also has documented limits: MCP 2024-11-05 and 2025-03-26 receive
-structural and selected checks,
-not a claim of complete MCP semantic conformance. See
-[Section 16](../sections/16-conformance.md) and the
-[validation catalog overview](../validation/README.md).
 
 ## Select one protocol version with an Effective Protocol View
 

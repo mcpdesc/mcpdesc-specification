@@ -34,18 +34,15 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1453-L1477
           - validation/mcp-schemas/2025-11-25/schema.ts#L2180-L2208
           - validation/mcp-schemas/2026-07-28/schema.ts#L2813-L2838
-    diagnostics:
-      - code: elicitation-mode-not-supported-by-version
-        severity: error
-      - code: interaction-example-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/elicitation-version-mismatch.json
         pointer: /tools/0/elicitations/0
+        outcome: error
       - path: expected-invalid/invalid-tool-interaction-example-semantics.json
         pointer: /tools/0/interactionExamples/broken/steps/0/request
+        outcome: error
     notes: >-
       Elicitation Declarations scoped before MCP 2025-06-18 are outside the
       complete semantic checks (Section 16.2).
@@ -90,14 +87,12 @@ rules:
           - validation/mcp-schemas/2025-11-25/schema.ts#L2150-L2178
           - validation/mcp-schemas/2025-11-25/schema.ts#L2228-L2235
           - validation/mcp-schemas/2025-11-25/schema.ts#L2463-L2464
-    diagnostics:
-      - code: elicitation-form-schema-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/elicitation-form-schema-2025-06-18.json
         pointer: /prompts/0/elicitations/0/requestedSchema
+        outcome: error
 
   - id: mcpdesc.elicitation.form-schema.consistency
     title: "Keep elicitation form constraints consistent"
@@ -134,24 +129,18 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1527-L1536
           - validation/mcp-schemas/2025-11-25/schema.ts#L2463-L2464
           - validation/mcp-schemas/2026-07-28/schema.ts#L3117-L3118
-    diagnostics:
-      - code: elicitation-form-required-property-unknown
-        severity: error
-      - code: elicitation-form-enum-names-mismatch
-        severity: error
-      - code: elicitation-form-default-outside-enum
-        severity: error
-      - code: elicitation-form-invalid-range
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/elicitation-form-semantics.json
         pointer: /prompts/0/elicitations/0/requestedSchema/required
+        outcome: error
       - path: expected-invalid/elicitation-form-invalid-range.json
         pointer: /prompts/0/elicitations/0/requestedSchema/properties/count
+        outcome: error
       - path: expected-valid/elicitation-declarations.json
         pointer: /tools/0/elicitations
+        outcome: passes
 
   - id: mcpdesc.elicitation.name-unique
     title: "Give each elicitation declaration a unique name"
@@ -172,11 +161,9 @@ rules:
       - reference: MCP Description 0.9.0, Section 12.2
         locations:
           - sections/12-elicitation.md#req-elicitation-name-unique
-    diagnostics:
-      - code: duplicate-elicitation-name
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/elicitation-form-semantics.json
         pointer: /prompts/0/elicitations/1
+        outcome: error

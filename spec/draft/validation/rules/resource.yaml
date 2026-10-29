@@ -31,18 +31,18 @@ rules:
         reference: RFC 6570, URI Template
         locations:
           - https://www.rfc-editor.org/rfc/rfc6570#section-3
-    diagnostics:
-      - code: invalid-resource-template-uri-template
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/malformed-uri-template-without-examples.json
         pointer: /resourceTemplates/0
+        outcome: error
       - path: expected-invalid/malformed-resource-template-example.json
         pointer: /resourceTemplates/0
+        outcome: error
       - path: expected-invalid/invalid-completion-example-semantics.json
         pointer: /resourceTemplates/0
+        outcome: error
     notes: >-
       Reported once per Resource Template, whether or not it has examples;
       example checks that need the parsed template are skipped.
@@ -79,14 +79,12 @@ rules:
         reference: RFC 4648, Section 4
         locations:
           - https://www.rfc-editor.org/rfc/rfc4648#section-4
-    diagnostics:
-      - code: invalid-resource-example-base64
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/resource-example-result-semantics.json
         pointer: /resources/0/examples/invalid-result/result/contents/0
+        outcome: error
 
   - id: mcpdesc.resource.example.consistency
     title: "Keep Resource examples consistent with declarations"
@@ -111,18 +109,12 @@ rules:
           - sections/10-resources.md#req-resource-example-requested-uri
           - sections/10-resources.md#req-resource-example-mime-type
           - sections/10-resources.md#req-resource-example-size
-    diagnostics:
-      - code: resource-example-requested-uri-not-returned
-        severity: warning
-      - code: resource-example-mime-type-mismatch
-        severity: warning
-      - code: resource-example-size-mismatch
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/resource-example-consistency.json
         pointer: /resources/0/examples/collection-snapshot/result
+        outcome: warning
     notes: Collections and indirect reads may legitimately differ, so these are warnings.
 
   - id: mcpdesc.resource-template.example.expansion
@@ -151,18 +143,18 @@ rules:
         reference: RFC 6570, URI Template
         locations:
           - https://www.rfc-editor.org/rfc/rfc6570#section-3
-    diagnostics:
-      - code: resource-template-example-invalid-expansion
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/resource-example-result-semantics.json
         pointer: /resourceTemplates/0/examples/not-an-expansion
+        outcome: error
       - path: expected-invalid/component-contextual-examples.json
         pointer: /components/resourceTemplateExamples/bad-uri
+        outcome: error
       - path: expected-valid/named-resource-examples.json
         pointer: /resourceTemplates/0
+        outcome: passes
 
   - id: mcp.resource.size
     title: "Express resource sizes as integers"
@@ -209,18 +201,18 @@ rules:
         reference: "MCP scripts/generate-schemas.ts: typescript-json-schema --defaultNumberType integer"
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/scripts/generate-schemas.ts#L95
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
       - path: expected-invalid/fractional-resource-size.json
         pointer: /resources/0/size
+        outcome: error
       - path: expected-invalid/fractional-resource-link-size.json
         pointer: /tools/0/examples/listing/result/content/0/size
+        outcome: error
       - path: expected-valid/named-resource-examples.json
         pointer: /resources/0
+        outcome: passes
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
         conflict: >-

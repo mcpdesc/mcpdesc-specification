@@ -4,7 +4,8 @@
 - Author(s): @ObjectIsAdvantag
 - Created: 2026-10-28
 - Target version: 0.9.0 (Community Working Draft 3)
-- Related issues: https://github.com/mcpdesc/mcpdesc-specification/issues/89
+- Related issues: https://github.com/mcpdesc/mcpdesc-specification/issues/89,
+  https://github.com/mcpdesc/mcpdesc-specification/issues/93
 - Depends on: [Proposal 0024](0024-validation-rule-identity-and-provenance.md)
   (rule records)
 - AI assistance disclosure: Drafted with GitHub Copilot (Claude Opus 5.5) from
@@ -24,6 +25,8 @@ applicability and catalog-local lifecycle:
 - rule-specific protocol applicability, including explicit protocol independence,
   and separate JSON Schema dialect information where relevant;
 - retirement recorded within each catalog, without changing older snapshots;
+- fixture citations whose checked `outcome` replaces the producer diagnostic
+  codes previously listed in records;
 - a publicly discoverable, immutable JSON catalog and rule-record schema.
 
 Specification-version membership stays at the snapshot level. No per-rule
@@ -49,6 +52,14 @@ they do not depend on the revision. The meaning of `applies` is also
 undocumented: it means that a rule is checked for a revision, not that a field
 is allowed there.
 
+**Traceability.** Records listed `diagnostics`: the codes of one producer,
+this repository's candidate validator, presented as if every validator and
+`@mcpdesc/core` emitted them. One declared code,
+`projection-postcondition-failed`, was expected by no fixture and emitted by no
+producer, and five candidate-validator codes were exercised by no fixture.
+Fixtures were cited without saying what they demonstrate, so readers could not
+follow a rule to an example of passing or failing input.
+
 **Publication.** The rule schema and YAML records are public in GitHub, but
 the schema has no `$id` and there is no machine-readable discovery endpoint
 for catalogs. Third parties must traverse repository files, while the website
@@ -62,6 +73,8 @@ interface for validators, editors, or other catalogs.
 - Distinguish specification membership, lifecycle, protocol applicability, and
   JSON Schema dialect information without overloading ownership.
 - Keep the precise requirement statement unchanged.
+- Make fixtures the navigable evidence of each rule, with outcomes checked by
+  tests, rather than producer diagnostic codes.
 - Check the new fields in `scripts/test-validation-rules.mjs`.
 - Publish a versioned schema and a complete catalog for each authorized
   specification snapshot, with provenance, digests, and explicit link bases.
@@ -69,7 +82,11 @@ interface for validators, editors, or other catalogs.
 
 ## Non-goals
 
-- Changing rule identifiers, summaries, diagnostics, or validator behavior.
+- Changing rule identifiers, summaries, or validator behavior; validators keep
+  their diagnostic output, including the `rule` property.
+- Defining how producers map their diagnostic codes to rules, deferred to
+  [Proposal 0031](https://github.com/mcpdesc/mcpdesc-specification/pull/94)
+  ([issue #93](https://github.com/mcpdesc/mcpdesc-specification/issues/93)).
 - Per-rule specification-version ranges or a global lifecycle timeline
   (see `spec/draft/validation/rule-history-0.8.md`).
 - Website presentation, such as navigation or grouping by surface.
@@ -176,18 +193,18 @@ Two identities are published independently:
 
 | Identity | Example | Meaning |
 | --- | --- | --- |
-| Rule-format version | `1.0.0` | The machine-readable structure of rule records and the publication envelopes defined here |
+| Rule-format version | `1.1.0` | The machine-readable structure of rule records and the publication envelopes defined here |
 | Catalog snapshot | `0.9.0-draft.3` | The exact registry belonging to an immutable MCP Description specification tag |
 
 The catalog also records `mcpdescVersion`, for example `0.9.0`. A catalog
 snapshot is not a validator implementation release. Its existence neither
 selects a validator package version nor proves implementation coverage.
 
-The first published rule-format version is `1.0.0`, incorporating this
-proposal's fields. Earlier unversioned schemas are not retroactively called
-`1.0.0`. A later catalog can reuse the same format version when only rule
-content changes. A different format version does not itself change document
-validity or rule meanings.
+The first catalogs use rule-format version `1.1.0`, incorporating this
+proposal's fields. Earlier unversioned schemas are not retroactively given a
+numbered format. A later catalog can reuse the same format version when only
+rule content changes. A different format version does not itself change
+document validity or rule meanings.
 
 Rule-format versions use SemVer. Removing or renaming fields, adding required
 fields, or adding fields rejected by a previous schema's
@@ -196,6 +213,18 @@ minor only when the previous format explicitly permits it. Editorial schema
 documentation corrections are patch versions, published at a new URL; no
 versioned schema URL is overwritten. Permanent rule identifiers keep their
 meaning across catalogs as required by Proposal 0024.
+
+Two exceptions were decided before any catalog used a numbered format, and
+neither is a precedent:
+
+- `1.0.0` was published first, with the required `diagnostics` that Section 9
+  removes. It stays unchanged at its URL and is used by no catalog. The
+  incompatible change is numbered `1.1.0` rather than `2.0.0`.
+- The `1.1.0` URL was first deployed with envelope constants that still named
+  `1.0.0`. Before any manifest or index used it, the maintainer approved
+  replacing those bytes once with corrected constants.
+
+Both are recorded in the format changelog.
 
 ### 5. Catalog membership and retirement
 
@@ -235,7 +264,7 @@ or independently maintained global history database is required.
 Publish these HTTPS resources on mcpdesc.org:
 
 ```text
-/schema/validation-rule/1.0.0.json
+/schema/validation-rule/1.1.0.json
 /validation/catalogs/0.9.0-draft.3/manifest.json
 /validation/catalogs/0.9.0-draft.3/rules.json
 ```
@@ -252,7 +281,7 @@ The manifest has these required fields and no unspecified defaults:
 | Field | Meaning |
 | --- | --- |
 | `$schema` | Absolute rule-schema URL ending in `#/$defs/catalog-manifest` |
-| `ruleFormatVersion` | The exact rule-format version, such as `1.0.0` |
+| `ruleFormatVersion` | The exact rule-format version, such as `1.1.0` |
 | `mcpdescVersion` | The specification's `mcpdesc` value, such as `0.9.0` |
 | `snapshot` | Exact catalog selector, such as `0.9.0-draft.3` |
 | `status` | `draft`, `release-candidate`, or `stable`; never inferred from format version |
@@ -355,6 +384,42 @@ anything. Catalog publication is distinct from validator
 snapshot intake: runtime bundles need not include the catalog unless a
 downstream consumer explicitly adopts that contract.
 
+### 9. Fixture evidence instead of diagnostic codes
+
+Rule records no longer list `diagnostics`. A diagnostic code is part of a
+producer's output, such as the candidate validator, `@mcpdesc/validator`, or
+`@mcpdesc/core`; a specification record cannot guarantee it, and the
+mapping had drifted (see Problem). Producer mappings from codes to rules are
+left to their producers, as framed by
+[Proposal 0031](https://github.com/mcpdesc/mcpdesc-specification/pull/94).
+
+The navigable evidence of a rule is its fixtures. Each `fixtures[]` entry has
+a required `outcome`:
+
+| Outcome | Validation fixture | Native projection case |
+| --- | --- | --- |
+| `passes` | The rule reports nothing within the pointed fragment | The case expects a value |
+| `error` | The rule reports an error there | The case expects a failure |
+| `warning` | The rule reports a warning there | Not used |
+
+The registry test checks every outcome against the candidate validator or
+the projection case. A fragment showing both severities must be cited as
+narrower fragments. Every severity a rule reports anywhere in the fixtures
+must be backed by at least one citation with that outcome, so a reader can
+always reach an example. A cited `expected-invalid` fixture must show what
+the rule reports. A projection case expecting a failure must be cited by a
+rule whose cited requirement defines that failure identifier, as Section 4.14
+does. A `should`- or `may`-level MCP rule cites no `error` outcome. Every rule
+identifier that the candidate validator references must be registered and
+active.
+
+Candidate-validator diagnostics keep their `rule` property (Proposal 0024).
+Section 4.14's projection failure identifiers remain normative operation
+outcomes, not producer diagnostic codes. `enforcement: external` describes a
+check performed by another operation, such as native projection; the
+candidate validator neither performs nor reports it, and this repository
+checks only the consistency of its fixtures.
+
 ## Schema impact
 
 In `spec/draft/validation/rule.schema.json`:
@@ -367,12 +432,15 @@ In `spec/draft/validation/rule.schema.json`:
 - describe the meaning of `applies`, `opaque`, and `not-applicable`.
 - add the absolute versioned `$id`, plus schemas for the publication manifest
   and discovery index under `$defs`;
+- remove the required `diagnostics` field and add a required `outcome`
+  (`passes`, `error`, or `warning`) to each `fixtures[]` entry;
 - keep the root `{ "rules": [...] }` shape so authored YAML files and the
   generated aggregate validate against the same schema.
 
 `scripts/test-validation-rules.mjs` checks title uniqueness, explicit protocol
-applicability or independence, applicable dialect metadata, and the exclusion
-of retired records from active checks, without owner-based defaults.
+applicability or independence, applicable dialect metadata, the exclusion
+of retired records from active checks, and the fixture outcomes and evidence
+coverage of Section 9, without owner-based defaults.
 Dedicated generation and publication tests cover deterministic
 aggregation, manifest/index validity, digests, link bases, complete membership,
 and the stable/draft separation. The MCP Description document schema is not
@@ -402,6 +470,13 @@ changed by this proposal.
       "2025-06-18": opaque
       "2025-11-25": opaque
       "2026-07-28": applies
+  fixtures:
+    - path: expected-valid/revision-inapplicable-mcp-header.json
+      pointer: /tools/0/inputSchema
+      outcome: passes
+    - path: expected-invalid/invalid-mcp-header-placement.json
+      pointer: /tools/0/inputSchema/allOf/0/properties/region
+      outcome: error
 ```
 
 ```yaml
@@ -442,11 +517,13 @@ changed by this proposal.
 
 ## Compatibility
 
-No document changes validity, and no diagnostic changes. The rule schema gains
-required fields, so registry consumers must select the published rule-format
-schema and accept `title` and `description`. There is no previously published
-numbered rule format to upgrade retroactively. Future incompatible formats
-require a major rule-format version; old catalogs remain unchanged.
+No document changes validity, and validator output is unchanged. The rule
+schema gains required fields and drops `diagnostics`, so registry consumers
+must select the published rule-format schema, accept `title`, `description`,
+and fixture `outcome`, and obtain diagnostic codes from producers. There is no
+previously published numbered rule format to upgrade retroactively. Future
+incompatible formats require a major rule-format version; old catalogs remain
+unchanged.
 
 `@mcpdesc/core` and `@mcpdesc/validator` do not currently read the registry.
 Their releases and diagnostic coverage remain independent. mcpdesc.org can
@@ -458,6 +535,8 @@ published. Existing draft tags are not rewritten.
 Registry consumers:
 
 - show `title` where they show a rule name, and `description` with the rule;
+- stop reading `diagnostics`; show each fixture citation with its `outcome`,
+  and take diagnostic codes from the producer that emits them;
 - adopt the finalized applicability representation without inferring protocol
   independence from owner or omission;
 - retain retired records for lookup but exclude them from active checking;
@@ -500,6 +579,10 @@ relative-path traversal outside their authorized source tree.
   reproduce historical behavior; only the discovery index is mutable.
 - **Separate authored JSON and YAML catalogs.** Rejected: JSON is generated
   from the YAML source, avoiding divergence.
+- **Producer-scoped diagnostic codes in records.** Deferred to
+  [Proposal 0031](https://github.com/mcpdesc/mcpdesc-specification/pull/94):
+  the specification would version another project's API, and code lists had
+  already drifted from what producers emit.
 
 ## Open questions
 
@@ -525,7 +608,10 @@ or publication authority.
 4. Coordinate mcpdesc.org hosting, index discovery, link rewriting, and catalog
   rendering. Coordinate any adoption by core or the validator separately;
   those consumers are not implemented in this repository.
-5. After review and implementation, prepare Draft 3, publish the format schema,
+5. Replace `diagnostics` with checked fixture outcomes (Section 9), with
+  negative controls for each new check, and publish the result as rule format
+  `1.1.0` before any catalog is published.
+6. After review and implementation, prepare Draft 3, publish the format schema,
   tag the authorized specification snapshot, publish and verify its immutable
   catalog bundle, then update the index. Do not publish the currently prepared
   documentation-only Draft 3 in the meantime.
@@ -551,5 +637,15 @@ superseded design inputs. The maintainer then approved removal of named
 rulesets and completion of the catalog, tests, and implementation commit.
 The finalized applicability representation is specified in Section 2; catalog
 views and retirement handling follow Sections 3 and 5.
+
+Later on 2026-10-29, the maintainer decided to remove diagnostic codes from
+rule records in Draft 3 and to make fixtures, with checked outcomes, the
+navigable evidence (Section 9); producer code mappings are deferred to
+Proposal 0031 and issue #93. Because the `1.0.0` schema bytes had already been
+deployed, without any catalog using them, the maintainer first chose to replace
+them once rather than publish a `2.0.0` format, then decided instead to
+publish the change as `1.1.0` and leave `1.0.0` unchanged. The first `1.1.0`
+deployment still named `1.0.0` in its envelope constants; the maintainer
+approved replacing those bytes once (Section 4).
 
 Acceptance pending.

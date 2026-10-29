@@ -35,32 +35,27 @@ rules:
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L218-L236
           - validation/mcp-schemas/2026-07-28/schema.ts#L1076-L1110
-    diagnostics:
-      - code: tool-example-result-version-mismatch
-        severity: error
-      - code: resource-example-result-version-mismatch
-        severity: error
-      - code: resource-example-cache-fields-version-mismatch
-        severity: error
-      - code: prompt-example-result-version-mismatch
-        severity: error
-      - code: completion-example-result-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/invalid-prompt-example-semantics.json
         pointer: /prompts/0/examples/unknown-and-missing/result
+        outcome: error
       - path: expected-invalid/invalid-completion-example-semantics.json
         pointer: /prompts/3/completionExamples/missing-result-type/result
+        outcome: error
       - path: expected-valid/named-tool-examples.json
         pointer: /tools/0/examples
+        outcome: passes
       - path: expected-valid/named-resource-examples.json
         pointer: /resources/0/examples
+        outcome: passes
       - path: expected-warning/legacy-result-meta.json
         pointer: /resources/0/examples/with-result-meta/result
+        outcome: passes
       - path: expected-warning/open-results-shared-across-revisions.json
         pointer: /tools/0/examples/paris/result
+        outcome: passes
     notes: >-
       Fields a revision does not define are governed by
       mcp.result.additional-properties.preserve (accepted with a warning).
@@ -99,34 +94,21 @@ rules:
         reference: MCP 2025-11-25 schema.ts, CreateTaskResult (task)
         locations:
           - validation/mcp-schemas/2025-11-25/schema.ts#L1386-L1393
-    diagnostics:
-      - code: tool-example-json-rpc-envelope
-        severity: error
-      - code: prompt-example-json-rpc-envelope
-        severity: error
-      - code: resource-example-json-rpc-envelope
-        severity: error
-      - code: completion-example-json-rpc-envelope
-        severity: error
-      - code: incomplete-tool-example-result
-        severity: error
-      - code: incomplete-prompt-example-result
-        severity: error
-      - code: incomplete-resource-example-result
-        severity: error
-      - code: incomplete-completion-example-result
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/invalid-tool-example-result-semantics.json
         pointer: /tools/3/examples/task-result/result
+        outcome: error
       - path: expected-invalid/invalid-prompt-example-semantics.json
         pointer: /prompts/3/examples/task-state/result
+        outcome: error
       - path: expected-invalid/resource-example-result-semantics.json
         pointer: /resources/0/examples/invalid-result/result
+        outcome: error
       - path: expected-invalid/invalid-completion-example-semantics.json
         pointer: /prompts/2/completionExamples/bad-membership/result
+        outcome: error
     notes: >-
       Envelope fields are jsonrpc, id, and error. Non-completed workflow
       fields are task, inputRequests, and requestState. They are excluded from
@@ -167,14 +149,12 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1307-L1340
           - validation/mcp-schemas/2025-11-25/schema.ts#L1995-L2025
           - validation/mcp-schemas/2026-07-28/schema.ts#L2582-L2618
-    diagnostics:
-      - code: completion-example-context-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/invalid-completion-example-semantics.json
         pointer: /prompts/1/completionExamples/context-too-early
+        outcome: error
     notes: MCP Description does not support completion examples for MCP 2024-11-05 (mcp.completion.revision-availability).
 
   - id: mcpdesc.completion-example.target
@@ -207,21 +187,12 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1307-L1340
           - validation/mcp-schemas/2025-11-25/schema.ts#L1995-L2025
           - validation/mcp-schemas/2026-07-28/schema.ts#L2582-L2618
-    diagnostics:
-      - code: prompt-completion-example-unknown-argument
-        severity: error
-      - code: prompt-completion-example-context-unknown-argument
-        severity: error
-      - code: resource-template-completion-example-unknown-variable
-        severity: error
-      - code: resource-template-completion-example-context-unknown-variable
-        severity: error
-      - code: completion-example-duplicate-target-context
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/invalid-completion-example-semantics.json
         pointer: /prompts/2/completionExamples/bad-membership/argument
+        outcome: error
       - path: expected-valid/named-completion-examples.json
         pointer: /prompts/0/completionExamples
+        outcome: passes

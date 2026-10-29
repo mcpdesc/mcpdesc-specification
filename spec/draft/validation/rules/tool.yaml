@@ -30,14 +30,12 @@ rules:
         reference: MCP 2025-06-18 schema.ts, interface Tool, outputSchema
         locations:
           - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
-    diagnostics:
-      - code: field-not-supported-by-version
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/output-schema-before-2025-06-18.json
         pointer: /tools/0
+        outcome: error
 
   - id: mcp.tool.output-schema.object-root
     title: "Use object output schemas before MCP 2026"
@@ -72,16 +70,15 @@ rules:
         reference: MCP 2026-07-28 schema.ts, interface Tool, outputSchema (no root type)
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
-    diagnostics:
-      - code: field-not-supported-by-version
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/non-object-output-schema-before-2026.json
         pointer: /tools/0/outputSchema
+        outcome: error
       - path: expected-valid/protocol-coverage-and-tool-schemas.json
         pointer: /tools/3/outputSchema
+        outcome: passes
     gaps:
       - revisions: ["2024-11-05", "2025-03-26"]
         behavior: >-
@@ -133,14 +130,15 @@ rules:
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
           - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
-    diagnostics: []
     enforcement: internal
     status: arbitrated
     fixtures:
       - path: expected-valid/custom-tool-schema-keywords.json
         pointer: /tools/0/inputSchema
+        outcome: passes
       - path: expected-valid/revision-inapplicable-mcp-header.json
         pointer: /tools/0/inputSchema
+        outcome: passes
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
         conflict: >-
@@ -195,16 +193,15 @@ rules:
         reference: MCP SEP-2106 (Final), which keeps type "object" deliberately
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/seps/2106-json-schema-2020-12.md
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
       - path: expected-invalid/non-object-input-schema.json
         pointer: /tools/0/inputSchema
+        outcome: error
       - path: expected-valid/custom-tool-schema-keywords.json
         pointer: /tools/0/inputSchema
+        outcome: passes
     arbitrations:
       - revisions: ["2025-11-25", "2026-07-28"]
         conflict: >-
@@ -259,24 +256,24 @@ rules:
         reference: MCP 2026-07-28 schema.ts, interface Tool, inputSchema doc comment
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
-    diagnostics:
-      - code: invalid-x-mcp-header
-        severity: error
-      - code: duplicate-x-mcp-header
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-valid/revision-inapplicable-mcp-header.json
         pointer: /tools/0/inputSchema
+        outcome: passes
       - path: expected-valid/custom-tool-schema-keywords.json
         pointer: /tools/0/inputSchema/properties/region
+        outcome: passes
       - path: expected-invalid/invalid-mcp-header-value.json
         pointer: /tools/0/inputSchema/properties/region
+        outcome: error
       - path: expected-invalid/invalid-mcp-header-placement.json
         pointer: /tools/0/inputSchema/allOf/0/properties/region
+        outcome: error
       - path: expected-invalid/duplicate-mcp-header.json
         pointer: /tools/0/inputSchema/properties/fallbackRegion
+        outcome: error
 
   - id: json-schema.tool-schema.valid
     title: "Validate embedded Tool schemas in their dialect"
@@ -332,26 +329,24 @@ rules:
           - https://json-schema.org/draft/2020-12/json-schema-validation
           - https://json-schema.org/draft-07/json-schema-core
           - https://json-schema.org/draft-07/json-schema-validation
-    diagnostics:
-      - code: invalid-tool-schema
-        severity: error
-      - code: unsupported-tool-schema-dialect
-        severity: error
-      - code: unresolved-external-tool-schema-reference
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/malformed-tool-schema.json
         pointer: /tools/0
+        outcome: error
       - path: expected-invalid/unresolved-local-tool-ref.json
         pointer: /tools/0
+        outcome: error
       - path: expected-invalid/unsupported-tool-schema-dialect.json
         pointer: /tools/0/inputSchema
+        outcome: error
       - path: expected-warning/unresolved-external-tool-ref.json
         pointer: /tools/0
+        outcome: warning
       - path: expected-warning/unresolved-external-tool-example-ref.json
         pointer: /tools/0
+        outcome: warning
     notes: >-
       The declared dialect set is fixed by the specification, not by the
       validator: an unsupported dialect is an error, not a warning, because
@@ -396,14 +391,12 @@ rules:
           - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
           - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
           - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
-    diagnostics:
-      - code: invalid-legacy-tool-schema-shape
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/malformed-pre-dialect-tool-schema-shape.json
         pointer: /tools/0/inputSchema
+        outcome: error
     notes: >-
       From MCP 2025-11-25 the embedded dialect governs these keywords
       (json-schema.tool-schema.valid).
@@ -441,16 +434,15 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
-    diagnostics:
-      - code: missing-tool-example-structured-content
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/invalid-tool-example-result-semantics.json
         pointer: /tools/0/examples/missing/result
+        outcome: error
       - path: expected-invalid/invalid-tool-interaction-example-semantics.json
         pointer: /tools/0/interactionExamples/broken/result
+        outcome: error
     notes: >-
       Conformance of structuredContent to outputSchema is checked by
       mcpdesc.tool.example.schema-conformance. Error results are governed by
@@ -492,22 +484,21 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
-    diagnostics:
-      - code: tool-example-schema-mismatch
-        severity: error
-      - code: incomplete-tool-example-validation
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/tool-example-schema-mismatches.json
         pointer: /tools/0/examples/wrong-types
+        outcome: error
       - path: expected-invalid/component-contextual-examples.json
         pointer: /components/toolExamples/bad-input
+        outcome: error
       - path: expected-warning/pre-dialect-tool-example.json
         pointer: /tools/0/examples/friendly
+        outcome: warning
       - path: expected-warning/unresolved-external-tool-example-ref.json
         pointer: /tools/0/examples/external-identifier
+        outcome: warning
     notes: >-
       Before MCP 2025-11-25 no embedded dialect is defined, so only the
       legacy shape is checked and the warning reports the gap.
@@ -533,14 +524,12 @@ rules:
       - reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
         locations:
           - sections/09-tools.md#req-tool-example-error-result
-    diagnostics:
-      - code: structured-tool-error-example
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/invalid-tool-example-result-semantics.json
         pointer: /tools/1/examples/business-error/result
+        outcome: error
     notes: >-
       MCP does not forbid structuredContent on error results; MCP Description
       requires its absence so that example structuredContent always conforms

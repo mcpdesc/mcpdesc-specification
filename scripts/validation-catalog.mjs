@@ -8,7 +8,7 @@ import { formatCanonicalJson } from './canonical-json.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { fetchSchemaPublication, verifySchemaPublication } from './schema-publication.mjs';
 
-export const ruleFormatVersion = '1.0.0';
+export const ruleFormatVersion = '1.1.0';
 export const ruleSchemaUrl = `https://mcpdesc.org/schema/validation-rule/${ruleFormatVersion}.json`;
 export const catalogIndexUrl = 'https://mcpdesc.org/validation/catalogs/index.json';
 const repository = 'https://github.com/mcpdesc/mcpdesc-specification';

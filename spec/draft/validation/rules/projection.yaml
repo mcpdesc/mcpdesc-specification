@@ -25,20 +25,18 @@ rules:
         locations:
           - sections/04-versioning.md#req-native-projection-source-valid
           - sections/04-versioning.md#req-native-projection-revision-declared
-    diagnostics:
-      - code: projection-source-invalid
-        severity: error
-      - code: projection-revision-not-declared
-        severity: error
     enforcement: external
     status: delegated
     fixtures:
       - path: projection-fixtures/tool-source-invalid.json
         pointer: /expectedError
+        outcome: error
       - path: projection-fixtures/tool-revision-not-declared.json
         pointer: /expectedError
+        outcome: error
       - path: projection-fixtures/prompt-revision-not-declared.json
         pointer: /expectedError
+        outcome: error
     notes: >-
       Implemented by @mcpdesc/core; this repository checks the fixtures with
       scripts/test-projection-fixtures.mjs.
@@ -68,16 +66,15 @@ rules:
       - reference: MCP Description 0.9.0, Section 4.14, step 3
         locations:
           - sections/04-versioning.md#req-native-projection-declaration-applicable
-    diagnostics:
-      - code: projection-declaration-not-applicable
-        severity: error
     enforcement: external
     status: delegated
     fixtures:
       - path: projection-fixtures/tool-not-applicable-2024-11-05.json
         pointer: /expectedError
+        outcome: error
       - path: projection-fixtures/resource-template-not-applicable-2025-03-26.json
         pointer: /expectedError
+        outcome: error
     notes: >-
       Implemented by @mcpdesc/core; this repository checks the fixtures with
       scripts/test-projection-fixtures.mjs.
@@ -113,22 +110,42 @@ rules:
           - sections/04-versioning.md#req-native-projection-postcondition
           - sections/04-versioning.md#req-native-projection-no-synthesis
           - sections/04-versioning.md#req-native-projection-lists
-    diagnostics:
-      - code: projection-postcondition-failed
-        severity: error
     enforcement: external
     status: delegated
     fixtures:
       - path: projection-fixtures/tool-icons-execution-component-2025-11-25.json
         pointer: /expected
+        outcome: passes
       - path: projection-fixtures/tool-component-input-array-output-2026-07-28.json
         pointer: /expected
+        outcome: passes
       - path: projection-fixtures/prompt-arguments-2024-11-05.json
         pointer: /expected/arguments
+        outcome: passes
       - path: projection-fixtures/tools-list-2025-11-25.json
         pointer: /expected
+        outcome: passes
+      - path: projection-fixtures/tool-boolean-property-schema-2026-07-28.json
+        pointer: /expected/inputSchema/properties
+        outcome: passes
+      - path: projection-fixtures/tool-postcondition-failed-2025-11-25.json
+        pointer: /expectedError
+        outcome: error
+      - path: projection-fixtures/tools-list-postcondition-failed-2025-11-25.json
+        pointer: /expectedError
+        outcome: error
+    gaps:
+      - revisions: ["2025-11-25"]
+        behavior: >-
+          A valid document can give a Tool schema property a boolean subschema,
+          which JSON Schema 2020-12 allows, while the pinned MCP 2025-11-25
+          schema.json requires an object there. Projecting that Tool for MCP
+          2025-11-25 fails the postcondition; MCP 2026-07-28 accepts it.
+        reference: https://github.com/mcpdesc/mcpdesc-specification/issues/95
+        resolution: planned
     notes: >-
-      No fixture expects projection-postcondition-failed: it can only result
-      from a defect in this specification, its validator, or an implementation.
-      Every expected value is checked against the pinned MCP schema of its
-      revision instead.
+      The postcondition cases come from the recorded gap, not from an injected
+      fault: the source is valid, yet the native value fails the pinned MCP
+      2025-11-25 schema. A list fails as a whole. scripts/test-projection-fixtures.mjs
+      checks that each failure case's value really fails that schema and that
+      every expected value passes it.

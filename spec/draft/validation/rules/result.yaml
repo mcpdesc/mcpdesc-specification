@@ -32,16 +32,15 @@ rules:
           - validation/mcp-schemas/2024-11-05/schema.ts#L951-L972
           - validation/mcp-schemas/2024-11-05/schema.ts#L974-L992
           - validation/mcp-schemas/2025-03-26/schema.ts#L237-L240
-    diagnostics:
-      - code: completion-example-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/invalid-completion-example-semantics.json
         pointer: /prompts/0/completionExamples
+        outcome: error
       - path: expected-warning/legacy-completion-examples.json
         pointer: /resourceTemplates/0/completionExamples/issue-prefix
+        outcome: passes
     gaps:
       - revisions: ["2024-11-05"]
         behavior: >-
@@ -99,20 +98,21 @@ rules:
           - validation/mcp-schemas/2025-03-26/schema.ts#L1173-L1180
           - validation/mcp-schemas/2025-06-18/schema.ts#L1404-L1413
           - validation/mcp-schemas/2025-11-25/schema.ts#L2100-L2109
-    diagnostics:
-      - code: result-field-not-defined-by-version
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/open-result-unknown-properties.json
         pointer: /tools/0/examples/traced/result
+        outcome: warning
       - path: expected-warning/open-results-shared-across-revisions.json
         pointer: /prompts/0/examples/default/result
+        outcome: warning
       - path: expected-warning/open-step-responses-before-2026.json
         pointer: /tools/0/interactionExamples/approved/steps/0/response
+        outcome: warning
       - path: expected-warning/component-protocol-scope.json
         pointer: /components/resourceExamples/current/result
+        outcome: warning
     notes: >-
       The warnings of this rule for a document equal the union of its warnings
       for each per-revision Effective Protocol View (scripts/test-views.mjs).
@@ -150,14 +150,12 @@ rules:
           - validation/mcp-schemas/2026-07-28/schema.ts#L2190-L2228
           - validation/mcp-schemas/2026-07-28/schema.ts#L3120-L3149
           - validation/mcp-schemas/2026-07-28/schema.ts#L2725-L2744
-    diagnostics:
-      - code: interaction-example-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/closed-step-responses-2026.json
         pointer: /tools/0/interactionExamples/approved/steps/0/response
+        outcome: error
   - id: mcp.root.meta.revision-availability
     title: "Use root metadata only where supported"
     description: >-
@@ -192,16 +190,15 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1415-L1440
           - validation/mcp-schemas/2025-11-25/schema.ts#L2111-L2136
           - validation/mcp-schemas/2026-07-28/schema.ts#L2746-L2775
-    diagnostics:
-      - code: interaction-example-version-mismatch
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/root-meta-before-2025-06-18.json
         pointer: /tools/0/interactionExamples/with-root-meta/steps/0/response/roots/0
+        outcome: error
       - path: expected-warning/open-step-responses-before-2026.json
         pointer: /tools/0/interactionExamples/approved/steps/0/response/roots/0
+        outcome: passes
   - id: mcp.meta.reserved-key-context
     title: "Place reserved metadata in its defined context"
     description: >-
@@ -234,18 +231,15 @@ rules:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/basic/index.mdx#L123-L147
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L190-L215
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L322-L446
-    diagnostics:
-      - code: meta-reserved-key-context
-        severity: error
-      - code: meta-reserved-key-value
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/meta-reserved-key-misuse.json
         pointer: /tools/0/_meta
+        outcome: error
       - path: expected-invalid/meta-reserved-keys-in-carried-values.json
         pointer: /prompts/0/completionExamples/request-key-in-result/result/_meta
+        outcome: error
     notes: >-
       Checked on declarations and on every carried value: example results,
       their content, interaction step responses, and roots. MCP 2024-11-05 and
@@ -282,16 +276,15 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L1342-L1362
           - validation/mcp-schemas/2025-11-25/schema.ts#L2037-L2057
           - validation/mcp-schemas/2026-07-28/schema.ts#L2633-L2661
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/completion-result-extra-field.json
         pointer: /resourceTemplates/0/completionExamples/issue-prefix/result/completion
+        outcome: error
       - path: expected-valid/named-completion-examples.json
         pointer: /resourceTemplates/0/completionExamples
+        outcome: passes
 
   - id: mcp.cacheable-result.ttl-ms
     title: "Express cache lifetimes as non-negative integers"
@@ -332,18 +325,18 @@ rules:
         reference: "MCP scripts/generate-schemas.ts: typescript-json-schema --defaultNumberType integer"
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/scripts/generate-schemas.ts#L95
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
       - path: expected-invalid/fractional-ttl-ms.json
         pointer: /resources/0/examples/cached/result/ttlMs
+        outcome: error
       - path: expected-invalid/resource-example-cache-fields.json
         pointer: /resources/1/examples/invalid/result/ttlMs
+        outcome: error
       - path: expected-valid/named-resource-examples.json
         pointer: /resources/0
+        outcome: passes
     notes: >-
       MCP defines ttlMs from 2026-07-28 only. In earlier revisions it is a
       field not defined by the revision (mcp.result.additional-properties.preserve),

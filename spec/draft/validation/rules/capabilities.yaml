@@ -42,16 +42,15 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L253-L257
           - validation/mcp-schemas/2025-11-25/schema.ts#L381-L385
           - validation/mcp-schemas/2026-07-28/schema.ts#L788-L792
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
       - path: expected-invalid/unknown-server-capability.json
         pointer: /capabilities/0
+        outcome: error
       - path: expected-valid/client-capability-requirements.json
         pointer: /capabilities/0
+        outcome: passes
     notes: >-
       x-* properties are MCP Description specification extensions, not
       capabilities; native projection removes them.
@@ -120,16 +119,15 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L224-L228
           - validation/mcp-schemas/2025-11-25/schema.ts#L305-L309
           - validation/mcp-schemas/2026-07-28/schema.ts#L711-L715
-    diagnostics:
-      - code: schema-validation
-        severity: error
     enforcement: internal
     status: arbitrated
     fixtures:
       - path: expected-invalid/unknown-client-capability-requirement.json
         pointer: /tools/0/clientRequirements
+        outcome: error
       - path: expected-valid/client-capability-requirements.json
         pointer: /prompts/0/clientRequirements
+        outcome: passes
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
         conflict: >-
@@ -186,20 +184,18 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L224-L251
           - validation/mcp-schemas/2025-11-25/schema.ts#L305-L379
           - validation/mcp-schemas/2026-07-28/schema.ts#L711-L786
-    diagnostics:
-      - code: client-requirement-version-mismatch
-        severity: error
-      - code: invalid-client-requirement-value
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/revision-incompatible-client-capability-requirements.json
         pointer: /tools/0/clientRequirements
+        outcome: error
       - path: expected-invalid/invalid-client-requirement-value.json
         pointer: /tools/0/clientRequirements/roots
+        outcome: error
       - path: expected-valid/client-capability-requirements.json
         pointer: /tools/0/clientRequirements
+        outcome: passes
 
   - id: mcp.client-capabilities.deprecated
     title: "Review deprecated client requirements"
@@ -237,14 +233,12 @@ rules:
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L732-L732
           - validation/mcp-schemas/2026-07-28/schema.ts#L733-L759
-    diagnostics:
-      - code: deprecated-client-requirement
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/deprecated-client-capability-requirements.json
         pointer: /prompts/0/clientRequirements
+        outcome: warning
 
   - id: mcp.capabilities.extensions.revision-availability
     title: "Recognize pre-standard extension advertisements"
@@ -283,14 +277,12 @@ rules:
           - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
           - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
           - validation/mcp-schemas/2026-07-28/schema.ts#L871-L882
-    diagnostics:
-      - code: extensions-not-supported-by-version
-        severity: warning
     enforcement: internal
     status: arbitrated
     fixtures:
       - path: expected-warning/pre-standard-extension-capabilities.json
         pointer: /capabilities/0
+        outcome: warning
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
         conflict: >-
@@ -335,21 +327,18 @@ rules:
         reference: MCP 2026-07-28 specification, Basic, General fields, _meta key name format (second label modelcontextprotocol or mcp is reserved)
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L337-L339
-    diagnostics:
-      - code: unknown-reserved-extension-identifier
-        severity: warning
-      - code: experimental-reserved-extension-identifier
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/unknown-reserved-extension-identifier.json
         pointer: /capabilities/0/extensions
+        outcome: warning
       - path: expected-warning/deprecated-client-capability-requirements.json
         pointer: /prompts/0/clientRequirements/extensions
+        outcome: warning
     notes: >-
       The pinned catalogue lists no experimental identifiers, so no document
-      currently produces experimental-reserved-extension-identifier.
+      currently produces the experimental-identifier warning.
 
   - id: mcp.capabilities.tasks.revision-availability
     title: "Keep task capabilities in their protocol version"
@@ -385,16 +374,12 @@ rules:
           - validation/mcp-schemas/2025-11-25/schema.ts#L430-L456
           - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
           - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
-    diagnostics:
-      - code: field-not-supported-by-version
-        severity: error
-      - code: tasks-core-not-valid-in-2026
-        severity: error
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-invalid/tasks-capability-2026.json
         pointer: /capabilities/0
+        outcome: error
 
   - id: mcp.capabilities.logging.deprecated
     title: "Review the deprecated logging capability"
@@ -426,11 +411,9 @@ rules:
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L798-L808
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/utilities/logging.mdx#L8-L18
-    diagnostics:
-      - code: logging-deprecated-in-2026
-        severity: warning
     enforcement: internal
     status: internal
     fixtures:
       - path: expected-warning/logging-deprecated-2026.json
         pointer: /capabilities/0
+        outcome: warning

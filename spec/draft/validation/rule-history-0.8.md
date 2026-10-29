@@ -3,7 +3,9 @@
 Historical investigation completed before Proposal 0030 was implemented. The
 omitted-applicability counts and preliminary classifications below describe
 Draft 2, not the current Draft 3 records. Draft 3 supplies explicit applicability and
-reader fields without changing the historical requirement comparisons.
+reader fields without changing the historical requirement comparisons. Draft 3
+also removes diagnostic codes from rule records; where this report compares
+codes, it uses the Draft 2 records at tag `v0.9.0-draft.2`.
 
 Informative investigation for MCP Description 0.9.0 (Community Working Draft 2).
 It explains how validation rules relate to MCP Description versions and to MCP
