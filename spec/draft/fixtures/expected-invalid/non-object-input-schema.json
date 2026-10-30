@@ -22,15 +22,29 @@
       }
     },
     {
-      "name": "ref_root",
+      "name": "array_root",
       "inputSchema": {
-        "$ref": "#/$defs/Arguments",
-        "$defs": {
-          "Arguments": {
-            "type": "object"
-          }
+        "type": [
+          "array",
+          "null"
+        ],
+        "items": {
+          "type": "string"
         }
       }
+    },
+    {
+      "name": "component_root",
+      "inputSchema": {
+        "$componentRef": "#/components/schemas/StringArguments"
+      }
     }
-  ]
+  ],
+  "components": {
+    "schemas": {
+      "StringArguments": {
+        "type": "string"
+      }
+    }
+  }
 }

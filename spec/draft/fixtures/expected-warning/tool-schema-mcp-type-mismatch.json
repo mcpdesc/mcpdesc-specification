@@ -1,0 +1,85 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "tool-schema-mcp-type-mismatch",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "tool-schema-mcp-type-mismatch"
+    }
+  ],
+  "tools": [
+    {
+      "name": "toggle",
+      "description": "Enables or disables the feature; any value is accepted for enabled, and debug must be absent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "enabled": true,
+          "debug": false
+        }
+      }
+    },
+    {
+      "name": "lookup",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "result": true
+        }
+      }
+    },
+    {
+      "name": "search",
+      "inputSchema": {
+        "$ref": "#/$defs/Arguments",
+        "$defs": {
+          "Arguments": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "query"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "summarize",
+      "protocolVersions": [
+        "2025-11-25"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

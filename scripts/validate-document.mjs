@@ -218,10 +218,6 @@ function structuralRule({ keyword, instancePath, schemaPath, params }) {
   if (/\/properties\/ttlMs\/(?:type|minimum)$/.test(schemaPath)) return 'mcp.cacheable-result.ttl-ms';
   if (keyword === 'additionalProperties' && /^\/capabilities\/\d+$/.test(instancePath)) return 'mcp.server-capabilities.members';
   if (keyword === 'additionalProperties' && /^\/(?:tools|resources|resourceTemplates|prompts)\/\d+\/clientRequirements$/.test(instancePath)) return 'mcp.client-capabilities.members';
-  if ((keyword === 'const' && /^\/tools\/\d+\/inputSchema\/type$/.test(instancePath))
-    || (keyword === 'required' && params.missingProperty === 'type' && /^\/tools\/\d+\/inputSchema$/.test(instancePath))) {
-    return 'mcp.tool.input-schema.object-root';
-  }
   if (schemaPath.startsWith('#/$defs/metaObject/propertyNames')) return 'mcp.meta.key-format';
   if (schemaPath === '#/$defs/securityRequirement/additionalProperties/uniqueItems') return 'mcpdesc.security.requirements';
   return 'mcpdesc.document.schema';
@@ -259,6 +255,8 @@ const ruleForCode = new Map([
   ['unsupported-tool-schema-dialect', 'json-schema.tool-schema.valid'],
   ['unresolved-external-tool-schema-reference', 'json-schema.tool-schema.valid'],
   ['invalid-legacy-tool-schema-shape', 'mcp.tool.schema.legacy-shape'],
+  ['tool-input-schema-not-object', 'mcp.tool.input-schema.object-root'],
+  ['tool-schema-mcp-type-mismatch', 'mcp.tool.schema.native-shape'],
   ['completion-example-context-version-mismatch', 'mcp.completion.context.revision-availability'],
   ['prompt-completion-example-unknown-argument', 'mcpdesc.completion-example.target'],
   ['prompt-completion-example-context-unknown-argument', 'mcpdesc.completion-example.target'],

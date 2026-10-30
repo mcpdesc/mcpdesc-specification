@@ -1,5 +1,5 @@
 {
-  "description": "A boolean subschema under properties is valid JSON Schema 2020-12, but the pinned MCP 2025-11-25 Tool type requires an object there, so the projected value fails the postcondition and is not returned. Recorded as a gap of mcpdesc.projection.native-schema.",
+  "description": "A boolean subschema under properties is valid JSON Schema 2020-12, so the document is valid with a warning, but the pinned MCP 2025-11-25 Tool type requires an object there, so the projected value fails the postcondition and is not returned.",
   "document": "documents/boolean-property-schema.json",
   "revision": "2025-11-25",
   "kind": "tool",

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "projection-ref-root-input-schema",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "inputSchema": {
+        "$ref": "#/$defs/Arguments",
+        "$defs": {
+          "Arguments": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "query"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

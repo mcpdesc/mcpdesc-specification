@@ -40,15 +40,22 @@ rules:
   - id: mcp.tool.output-schema.object-root
     title: "Use object output schemas before MCP 2026"
     description: >-
-      MCP 2025-06-18 and 2025-11-25 require an object-rooted outputSchema. MCP
-      2026-07-28 permits other roots. An array schema therefore needs a scope
+      MCP 2025-06-18 and 2025-11-25 require structured output to be an object.
+      For MCP 2025-06-18 the outputSchema root declares type object. For MCP
+      2025-11-25 a declared root type must include object; a root without a
+      literal type object stays valid and mcp.tool.schema.native-shape warns.
+      MCP 2026-07-28 permits other roots, so an array schema needs a scope
       that excludes the object-only versions; projection must not wrap it in
       an object as a repair.
     owner: mcp
-    summary: A Tool outputSchema has an object-typed root.
+    summary: >-
+      Before MCP 2026-07-28, a Tool outputSchema describes an object: a literal
+      type "object" for MCP 2025-06-18, and a declared root type that includes
+      "object" for MCP 2025-11-25.
     surface: Tool
     path: outputSchema
     kind: structural
+    requirement: must
     applicability:
       protocolVersions:
         "2024-11-05": not-applicable
@@ -70,8 +77,12 @@ rules:
         reference: MCP 2026-07-28 schema.ts, interface Tool, outputSchema (no root type)
         locations:
           - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
+      - tier: 1
+        reference: MCP 2025-11-25 specification, Basic, JSON Schema usage (schemas are validated under their declared or default dialect)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
     enforcement: internal
-    status: internal
+    status: arbitrated
     fixtures:
       - path: expected-invalid/non-object-output-schema-before-2026.json
         pointer: /tools/0/outputSchema
@@ -79,6 +90,29 @@ rules:
       - path: expected-valid/protocol-coverage-and-tool-schemas.json
         pointer: /tools/3/outputSchema
         outcome: passes
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/3/outputSchema
+        outcome: passes
+    arbitrations:
+      - revisions: ["2025-11-25"]
+        conflict: >-
+          The specification validates the outputSchema under its declared or
+          default dialect, while schema.ts requires the JSON Schema keyword and
+          value type "object" at the root. A root in allOf or $ref can describe
+          an object without matching the TypeScript type.
+        authority: MCP specification text on schema dialects, with the object requirement on structured output
+        behavior: >-
+          Reject a declared root type that excludes "object"; accept other
+          roots that are valid under the dialect, which
+          mcp.tool.schema.native-shape reports as warnings.
+        rationale: >-
+          One position for every conflict between MCP's dialect text and the
+          schema syntax of its TypeScript types (Proposal 0032): MCP
+          Description enforces what MCP requires of the data and reports, but
+          does not decide, the narrower TypeScript syntax.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
+        reviewTrigger: Resolution of MCP issue 3238 or an MCP erratum for 2025-11-25.
+        status: active
     gaps:
       - revisions: ["2024-11-05", "2025-03-26"]
         behavior: >-
@@ -158,20 +192,28 @@ rules:
   - id: mcp.tool.input-schema.object-root
     title: "Give Tool input schemas an object root"
     description: >-
-      A Tool inputSchema must declare the literal type object after component
-      resolution. An array schema or a schema that only implies an object
-      through composition does not satisfy this root requirement. Keep object
-      arguments under properties and validate their values separately.
+      Tool arguments are always a JSON object, so after component resolution
+      the inputSchema root must describe an object. Before MCP 2025-11-25 the
+      root declares the literal type object. From MCP 2025-11-25 a declared
+      root type must include object; a root in $ref or allOf stays valid, and
+      mcp.tool.schema.native-shape warns that the MCP Tool type expects a
+      literal type object.
     owner: mcp
     summary: >-
-      Tool inputSchema is a JSON Schema object whose root declares
-      type "object", because tool arguments are always JSON objects.
+      Tool inputSchema describes an object: a literal type "object" before MCP
+      2025-11-25, and from MCP 2025-11-25 a declared root type that includes
+      "object".
     surface: Tool
     path: inputSchema
     kind: structural
     requirement: must
     applicability:
-      protocolVersions: independent
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
     specification:
       - reference: MCP Description 0.9.0, Section 9.2
         locations:
@@ -189,6 +231,11 @@ rules:
         reference: MCP 2026-07-28 specification, Server Features, Tools, Data Types, Tool (inputSchema MUST be a valid JSON Schema object, not null)
         locations:
           - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L293-L293
+      - tier: 1
+        reference: MCP 2025-11-25 and 2026-07-28 specification, Basic, JSON Schema usage (schemas are validated under their declared or default dialect)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L251-L297
       - tier: 4
         reference: MCP SEP-2106 (Final), which keeps type "object" deliberately
         locations:
@@ -199,23 +246,36 @@ rules:
       - path: expected-invalid/non-object-input-schema.json
         pointer: /tools/0/inputSchema
         outcome: error
+      - path: expected-invalid/non-object-input-schema.json
+        pointer: /tools/2/inputSchema
+        outcome: error
+      - path: expected-invalid/non-literal-object-input-schema-before-2025-11-25.json
+        pointer: /tools/0/inputSchema
+        outcome: error
       - path: expected-valid/custom-tool-schema-keywords.json
         pointer: /tools/0/inputSchema
+        outcome: passes
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/2/inputSchema
         outcome: passes
     arbitrations:
       - revisions: ["2025-11-25", "2026-07-28"]
         conflict: >-
-          The specification lets embedded schemas declare another dialect with
-          $schema, while schema.ts requires the JSON Schema keyword and value
-          type "object" at the root. A schema rooted in $ref or allOf, or written
-          in a dialect without that keyword, can describe an object but does not
-          match the TypeScript type.
-        authority: MCP schema.ts, the source of truth for message structures
-        behavior: Require a literal type "object" at the inputSchema root in every revision.
+          The specification validates embedded schemas under their declared or
+          default dialect, while schema.ts requires the JSON Schema keyword and
+          value type "object" at the root. A schema rooted in $ref or allOf can
+          describe an object but does not match the TypeScript type.
+        authority: MCP specification text on schema dialects, with the requirement that tool arguments are objects
+        behavior: >-
+          Reject a declared root type that excludes "object"; accept other
+          roots that are valid under the dialect, which
+          mcp.tool.schema.native-shape reports as warnings.
         rationale: >-
-          The structural source of truth is explicit and SEP-2106 retained the
-          requirement on purpose; clients commonly pass inputSchema to model
-          APIs that expect an object root.
+          One position for every conflict between MCP's dialect text and the
+          schema syntax of its TypeScript types (Proposal 0032): MCP
+          Description enforces what MCP requires of the data and reports, but
+          does not decide, the narrower TypeScript syntax. Replaces the Draft 3
+          decision to require a literal type "object" in every revision.
         upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
         reviewTrigger: Resolution of MCP issue 3238 or a later MCP revision that changes the inputSchema type.
         status: active
@@ -399,7 +459,117 @@ rules:
         outcome: error
     notes: >-
       From MCP 2025-11-25 the embedded dialect governs these keywords
-      (json-schema.tool-schema.valid).
+      (json-schema.tool-schema.valid); mcp.tool.schema.native-shape warns where
+      the MCP 2025-11-25 Tool type is narrower.
+
+  - id: mcp.tool.schema.native-shape
+    title: "Report Tool schemas that MCP Tool types reject"
+    description: >-
+      From MCP 2025-11-25, an embedded Tool schema is judged by its JSON Schema
+      dialect, but the MCP Tool type still restricts some schema syntax: a
+      literal type object at the inputSchema root, and for MCP 2025-11-25 at
+      the outputSchema root and an object for each top-level properties value.
+      A schema that misses a restriction stays valid and receives a warning
+      naming the revisions concerned, because its native projection for them
+      fails. Use {} instead of true, {"not": {}} instead of false, add type
+      object beside $ref or allOf, or narrow the Tool's protocolVersions.
+    owner: mcp
+    summary: >-
+      A Tool schema that is valid under its dialect but misses a schema-syntax
+      restriction of the MCP Tool type of an applicable revision is accepted
+      with a warning.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: structural
+    requirement: should
+    applicability:
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": not-applicable
+        "2025-11-25": applies
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-native-shape
+      - reference: Proposal 0032, Dialect-governed Tool schemas
+        locations:
+          - proposal-snapshots/0032-dialect-governed-tool-schemas.md
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 schema.ts, interface Tool: inputSchema and outputSchema have type: \"object\" and properties?: { [key: string]: object }"
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1284
+      - tier: 1
+        reference: "MCP 2026-07-28 schema.ts, interface Tool: inputSchema has type: \"object\" and an open index signature; outputSchema has no root type"
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L2005
+      - tier: 1
+        reference: MCP 2025-11-25 and 2026-07-28 specification, Basic, JSON Schema usage (schemas are validated under their declared or default dialect)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L251-L297
+      - tier: 5
+        reference: "Official TypeScript SDK, Tool schema: any JSON value under properties, type: z.literal('object') at the inputSchema root"
+        locations:
+          - https://github.com/modelcontextprotocol/typescript-sdk/blob/39ae8e6192cf43273aaaf2de4169dfa9f7216e28/packages/core/src/schemas.ts#L1352-L1358
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/0/inputSchema/properties/enabled
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/0/inputSchema/properties/debug
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/1/outputSchema/properties/result
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/2/inputSchema
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/3/outputSchema
+        outcome: warning
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/0/inputSchema
+        outcome: passes
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/1/inputSchema
+        outcome: passes
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/2/inputSchema
+        outcome: passes
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/3/inputSchema
+        outcome: passes
+    arbitrations:
+      - revisions: ["2025-11-25", "2026-07-28"]
+        conflict: >-
+          MCP validates embedded schemas under their declared or default
+          dialect, JSON Schema 2020-12 by default, which allows boolean
+          subschemas and roots in $ref or allOf. The TypeScript Tool type
+          requires a literal type "object" at the inputSchema root, and in MCP
+          2025-11-25 also at the outputSchema root and an object for each
+          top-level properties value.
+        authority: MCP specification text on schema dialects
+        behavior: >-
+          Accept the schema, report a warning naming the revisions concerned,
+          and let native projection fail its postcondition for them.
+        rationale: >-
+          The conflict is internal to MCP, so MCP Description reports it
+          instead of deciding it (Proposal 0032). MCP 2026-07-28 removed the
+          properties restriction, the official SDKs accept boolean property
+          subschemas, and authors can always meet the restriction without
+          changing the meaning of the schema.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
+        reviewTrigger: Resolution of MCP issue 3238 or an MCP erratum for 2025-11-25.
+        status: active
+    notes: >-
+      Only a declared root type is examined; composition is not analyzed to
+      prove that a root admits objects. Nested schemas and keywords other than
+      top-level properties are not restricted by any MCP Tool type.
 
   - id: mcp.tool.structured-content.output-schema
     title: "Supply structured content when an output schema needs it"

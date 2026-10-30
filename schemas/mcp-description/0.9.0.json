@@ -2358,28 +2358,7 @@
           "$ref": "#/$defs/icons"
         },
         "inputSchema": {
-          "oneOf": [
-            {
-              "$ref": "#/$defs/referenceObject"
-            },
-            {
-              "allOf": [
-                {
-                  "$ref": "#/$defs/schemaComponentValue"
-                },
-                {
-                  "properties": {
-                    "type": {
-                      "const": "object"
-                    }
-                  },
-                  "required": [
-                    "type"
-                  ]
-                }
-              ]
-            }
-          ]
+          "$ref": "#/$defs/schemaComponentValue"
         },
         "interactionExamples": {
           "$ref": "#/$defs/toolInteractionExamples"

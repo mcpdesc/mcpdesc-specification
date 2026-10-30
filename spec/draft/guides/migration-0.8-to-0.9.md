@@ -66,6 +66,17 @@ already accepted only these two, so its results do not change. Replace any
 other declared dialect, preferably by removing `$schema` to use the 2020-12
 default.
 
+For MCP 2025-11-25 and later, the dialect also decides the schema's shape
+(Section 9.2). 0.8.0 required a literal `"type": "object"` at every
+`inputSchema` root; 0.9.0 requires it only before MCP 2025-11-25 and otherwise
+rejects only a declared root `type` that excludes `"object"`. No 0.8.0 document
+becomes invalid. A schema that the MCP `Tool` type of an applicable revision
+rejects, such as a root in `$ref` or a boolean `properties` value for MCP
+2025-11-25, stays valid with the new warning `tool-schema-mcp-type-mismatch`,
+because native projection fails for that revision. Write `{}` instead of
+`true`, `{ "not": {} }` instead of `false`, or `"type": "object"` beside
+`$ref` or `allOf`, or narrow the Tool's `protocolVersions`.
+
 ## Example results
 
 Example results and Tool Interaction step responses are checked against each
