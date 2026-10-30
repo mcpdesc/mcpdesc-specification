@@ -245,6 +245,7 @@ When sources disagree:
 | `schema.json` versus `schema.ts` | `schema.ts`; probable generator defect, reported upstream |
 | `number` in `schema.ts` versus `integer` in `schema.json` | Integer: MCP generates `schema.json` with `--defaultNumberType integer`, so an unannotated `number` denotes an integer and `@TJS-type number` a number (Proposal 0029); not a generator defect |
 | Prose requirement that `schema.ts` cannot express | Prose |
+| Embedded-schema dialect versus schema syntax that the `Tool` type in `schema.ts` restricts, from MCP 2025-11-25 | The dialect decides validity; the restriction is reported as a warning, and native projection fails for the revisions concerned (Proposal 0032) |
 | Prose and `schema.ts` genuinely contradict | Recorded as an arbitration with the upstream issue; never resolved from SDK behavior alone |
 | SEP versus current specification | Current specification |
 | SDK versus released specification | Released specification |

@@ -1,0 +1,8 @@
+{
+  "description": "An inputSchema rooted in $ref is valid under JSON Schema 2020-12 and describes an object, so the document is valid with a warning, but the pinned MCP 2025-11-25 Tool type requires a literal type \"object\" at the root, so the projected value fails the postcondition and is not returned.",
+  "document": "documents/ref-root-input-schema.json",
+  "revision": "2025-11-25",
+  "kind": "tool",
+  "identifier": "search",
+  "expectedError": "projection-postcondition-failed"
+}

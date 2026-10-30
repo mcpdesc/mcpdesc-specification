@@ -237,8 +237,13 @@ documentation, as `2026-07-28` does explicitly; see the arbitration in
 The `inputSchema` root requirement, `type: "object"`, is written in JSON Schema
 syntax even though `$schema` may select another dialect from `2025-11-25`. MCP
 issue [#3238](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238)
-discusses this tension. MCP Description follows `schema.ts` and requires a
-literal `type: "object"` root; see `mcp.tool.input-schema.object-root`.
+discusses this tension. From `2025-11-25`, MCP Description follows the
+dialect: it rejects a root whose declared `type` excludes `"object"`, and
+accepts a root in `$ref` or `allOf` with a warning, because native projection
+for those protocol versions fails. The same applies to a boolean `properties`
+value, which the `2025-11-25` TypeScript type rejects and `2026-07-28`
+accepts. See `mcp.tool.input-schema.object-root` and
+`mcp.tool.schema.native-shape`.
 
 ### Tool annotations
 
