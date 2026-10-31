@@ -11,7 +11,7 @@ extra properties on closed MCP types must move them.
 ## Version and schema identity
 
 Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
-`https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json`; the stable
+`https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json`; the stable
 identifier is assigned at release.
 
 ## Annotations
@@ -129,6 +129,8 @@ emits them.
 Draft 4 introduces rule-format `1.2.0`. Rule records may list the canonical
 schema locations they own in `documentSchema`, and the catalog lists the
 requirements no rule checks in `uncheckedRequirements`, each with a reason.
+Fixture citations may also have the outcome `not-applicable`, and manifests
+list the validation result schema as `resultSchema`.
 
 Discover catalogs through the publication index, then pin an immutable
 manifest. Resolve evidence and description links from its

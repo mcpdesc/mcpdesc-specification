@@ -10,7 +10,7 @@
     {
       "op": "replace",
       "path": "/$schema",
-      "value": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json"
+      "value": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json"
     },
     {
       "op": "remove",
