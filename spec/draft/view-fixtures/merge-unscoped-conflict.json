@@ -1,0 +1,9 @@
+{
+  "description": "Inputs with different Info metadata fail to merge.",
+  "operation": "merge",
+  "inputs": [
+    "inputs/extension-2025-11-25.json",
+    "inputs/info-other-2026-07-28.json"
+  ],
+  "expectedFailure": "req-merge-equivalence"
+}

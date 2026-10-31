@@ -64,6 +64,8 @@ const schemaSource = path.join(
 const fixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'fixtures');
 const projectionFixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'projection-fixtures');
 const projectionFixtureTarget = path.join(output, 'projection-fixtures');
+const viewFixtureSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'view-fixtures');
+const viewFixtureTarget = path.join(output, 'view-fixtures');
 const conversionSource = path.join(root, 'spec', usesStableArtifacts ? version : 'draft', 'conversion');
 const conversionTarget = path.join(output, 'conversion');
 const baseSource = path.join(root, 'scripts', 'validator-base.mjs');
@@ -120,6 +122,7 @@ fs.mkdirSync(runtimeTarget, { recursive: true });
 fs.cpSync(fixtureSource, fixtureTarget, { recursive: true });
 // Projection cases reference ../fixtures/, so both folders keep their relative layout.
 if (fs.existsSync(projectionFixtureSource)) fs.cpSync(projectionFixtureSource, projectionFixtureTarget, { recursive: true });
+if (fs.existsSync(viewFixtureSource)) fs.cpSync(viewFixtureSource, viewFixtureTarget, { recursive: true });
 if (fs.existsSync(conversionSource)) {
   fs.cpSync(conversionSource, conversionTarget, { recursive: true });
   // Cases that convert released documents point outside the draft; bundle those sources under fixtures/released/.
@@ -162,6 +165,7 @@ const files = [
   ...filesUnder(runtimeTarget, 'runtime'),
   ...filesUnder(fixtureTarget, 'fixtures'),
   ...(fs.existsSync(projectionFixtureTarget) ? filesUnder(projectionFixtureTarget, 'projection-fixtures') : []),
+  ...(fs.existsSync(viewFixtureTarget) ? filesUnder(viewFixtureTarget, 'view-fixtures') : []),
   ...(fs.existsSync(conversionTarget) ? filesUnder(conversionTarget, 'conversion') : []),
 ]
   .sort()

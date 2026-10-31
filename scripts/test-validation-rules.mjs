@@ -208,6 +208,21 @@ for (const filename of files) {
         if (outcome !== actual) fail(`${where}: ${fixture} is cited as ${outcome}, but decoding ${actual === 'error' ? 'rejects' : 'accepts'} it`);
         continue;
       }
+      if (fixture.startsWith('view-fixtures/')) {
+        const full = path.join(specificationDirectory, fixture);
+        if (!fs.existsSync(full)) {
+          fail(`${where}: missing fixture ${fixture}`);
+          continue;
+        }
+        const testCase = JSON.parse(fs.readFileSync(full, 'utf8'));
+        if (!resolvePointer(testCase, pointer).found) fail(`${where}: pointer ${JSON.stringify(pointer)} does not resolve in ${fixture}`);
+        const actual = testCase.expectedFailure ? 'error' : 'passes';
+        if (outcome !== actual) fail(`${where}: ${fixture} is cited as ${outcome}, but the case ${testCase.expectedFailure ? 'expects a failure' : 'expects a document'}`);
+        if (testCase.expectedFailure && !ruleAnchors.includes(testCase.expectedFailure)) {
+          fail(`${where}: ${fixture} fails under ${testCase.expectedFailure}, which this rule does not cite`);
+        }
+        continue;
+      }
       if (fixture.startsWith('projection-fixtures/')) {
         const full = path.join(specificationDirectory, fixture);
         if (!fs.existsSync(full)) {

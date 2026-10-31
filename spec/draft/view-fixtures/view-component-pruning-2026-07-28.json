@@ -1,0 +1,9 @@
+{
+  "description": "Projection prunes components that no retained declaration references, keeps every component a retained reference reaches transitively, and keeps the Components Object extensions.",
+  "operation": "view",
+  "inputs": [
+    "inputs/component-pruning.json"
+  ],
+  "revision": "2026-07-28",
+  "expected": "expected/view-component-pruning-2026-07-28.json"
+}

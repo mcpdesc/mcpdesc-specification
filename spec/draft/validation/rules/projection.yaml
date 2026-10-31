@@ -157,3 +157,151 @@ rules:
       A list fails as a whole. scripts/test-projection-fixtures.mjs checks that
       each failure case's value really fails that schema and that every
       expected value passes it.
+
+  - id: mcpdesc.view.projection
+    title: "Project a document to one protocol revision"
+    description: >-
+      A single-version projection validates the source, keeps the declarations
+      whose effective scope includes the revision, removes their scopes, and
+      keeps everything else unchanged: security forms, examples, client
+      requirements, tags, extensions, and the components still referenced.
+    applicability:
+      protocolVersions: independent
+    owner: mcpdesc
+    summary: >-
+      An Effective Protocol View is a valid document for one revision that keeps
+      the applicable declarations and preserves their content, security
+      semantics, and referenced components.
+    surface: Effective Protocol View
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Section 4.12, and the view requirements of Sections 3 to 17
+        locations:
+          - sections/04-versioning.md#req-view-projection
+          - sections/04-versioning.md#req-view-projection-transports
+          - sections/03-document-structure.md#req-security-empties-preserved
+          - sections/07-security.md#req-security-empty-distinction
+          - sections/07-security.md#req-security-projection
+          - sections/15-serialization.md#req-serialization-empty-values-preserved
+          - sections/09-tools.md#req-tool-example-views-preserved
+          - sections/09-tools.md#req-interaction-views-preserved
+          - sections/08-capabilities.md#req-client-requirements-views
+          - sections/10-resources.md#req-resource-example-views
+          - sections/10-resources.md#req-template-completion-views
+          - sections/11-prompts.md#req-prompt-example-views
+          - sections/11-prompts.md#req-prompt-completion-views
+          - sections/13-tags.md#req-tags-views
+          - sections/14-specification-extensions.md#req-extension-views
+          - sections/17-components.md#req-component-pruning
+    enforcement: external
+    status: delegated
+    fixtures:
+      - path: view-fixtures/view-client-requirements-2026-07-28.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-completion-examples-2026-07-28.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-component-pruning-2026-07-28.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-prompt-examples-2026-07-28.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-protocol-scoped-primitives-2025-11-25.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-protocol-scoped-primitives-2026-07-28.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-resource-examples-2026-07-28.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-revision-not-declared.json
+        pointer: /expectedFailure
+        outcome: error
+      - path: view-fixtures/view-security-forms-2025-11-25.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-security-forms-2026-07-28.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-source-invalid.json
+        pointer: /expectedFailure
+        outcome: error
+      - path: view-fixtures/view-specification-extensions-2025-11-25.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/view-tool-interaction-examples-2025-11-25.json
+        pointer: /expected
+        outcome: passes
+    notes: >-
+      Checked by the cases in view-fixtures/, which scripts/test-view-fixtures.mjs
+      recomputes with the reference operations of scripts/mcpdesc-views.mjs.
+      Implementations such as @mcpdesc/core must pass them.
+
+  - id: mcpdesc.view.merge
+    title: "Merge protocol views without guessing"
+    description: >-
+      A merge validates every input, requires equivalent views for a shared
+      revision and equal unscoped metadata, collapses equivalent declarations,
+      keeps differing ones as disjoint variants, renames colliding components,
+      and fails rather than guess when inputs conflict.
+    applicability:
+      protocolVersions: independent
+    owner: mcpdesc
+    summary: >-
+      A merge result is valid, preserves every input revision view, and fails
+      on any conflict it cannot represent faithfully.
+    surface: Effective Protocol View
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Section 4.13, and the merge requirements of Sections 13, 14, and 17
+        locations:
+          - sections/04-versioning.md#req-merge-inputs
+          - sections/04-versioning.md#req-merge-algorithm
+          - sections/04-versioning.md#req-merge-equivalence
+          - sections/04-versioning.md#req-merge-security
+          - sections/04-versioning.md#req-merge-collections
+          - sections/13-tags.md#req-tags-merge
+          - sections/14-specification-extensions.md#req-extension-merge
+          - sections/17-components.md#req-component-merge
+          - sections/17-components.md#req-component-merge-extensions
+    enforcement: external
+    status: delegated
+    fixtures:
+      - path: view-fixtures/merge-component-extension-conflict.json
+        pointer: /expectedFailure
+        outcome: error
+      - path: view-fixtures/merge-component-name-collision.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/merge-invalid-input.json
+        pointer: /expectedFailure
+        outcome: error
+      - path: view-fixtures/merge-object-extension-conflict.json
+        pointer: /expectedFailure
+        outcome: error
+      - path: view-fixtures/merge-object-extensions-variants.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/merge-protocol-scoped-primitives.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/merge-same-revision-conflict.json
+        pointer: /expectedFailure
+        outcome: error
+      - path: view-fixtures/merge-security-forms.json
+        pointer: /expected
+        outcome: passes
+      - path: view-fixtures/merge-tag-catalogue-conflict.json
+        pointer: /expectedFailure
+        outcome: error
+      - path: view-fixtures/merge-unscoped-conflict.json
+        pointer: /expectedFailure
+        outcome: error
+    notes: >-
+      Checked by the cases in view-fixtures/; scripts/test-view-fixtures.mjs also
+      checks the round-trip invariant of Section 4.13 for every merge result.

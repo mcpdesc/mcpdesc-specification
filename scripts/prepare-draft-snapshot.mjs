@@ -82,7 +82,7 @@ fs.writeFileSync(schemaPath, formatCanonicalJson(schema));
 fs.writeFileSync(sectionPath, section);
 
 if (previousSchemaId && previousSchemaId !== schemaId) {
-  const pending = ['examples', 'fixtures', 'projection-fixtures', 'conversion', 'serialization-fixtures', 'guides', 'sections']
+  const pending = ['examples', 'fixtures', 'projection-fixtures', 'view-fixtures', 'conversion', 'serialization-fixtures', 'guides', 'sections']
     .map((directory) => path.join(root, 'spec', 'draft', directory))
     .filter((directory) => fs.existsSync(directory));
   while (pending.length > 0) {

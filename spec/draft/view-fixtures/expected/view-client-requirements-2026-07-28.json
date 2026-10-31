@@ -1,0 +1,48 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "client-capability-requirements",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "capabilities": [
+    {
+      "extensions": {
+        "io.modelcontextprotocol/ui": {}
+      }
+    }
+  ],
+  "tools": [
+    {
+      "name": "rebuild",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "clientRequirements": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {},
+          "io.modelcontextprotocol/ui": {
+            "mimeTypes": [
+              "text/html;profile=mcp-app"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "resourceTemplates": [
+    {
+      "uriTemplate": "workspace://{path}",
+      "name": "workspace_file",
+      "clientRequirements": {
+        "elicitation": {
+          "form": {}
+        }
+      }
+    }
+  ]
+}

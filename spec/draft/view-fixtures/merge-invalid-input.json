@@ -1,0 +1,9 @@
+{
+  "description": "An invalid input fails the merge.",
+  "operation": "merge",
+  "inputs": [
+    "inputs/extension-2025-11-25.json",
+    "../fixtures/expected-invalid/missing-tool-input-schema.json"
+  ],
+  "expectedFailure": "req-merge-inputs"
+}
