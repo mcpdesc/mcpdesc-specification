@@ -645,6 +645,9 @@ The index contains `catalogs`, `currentStable`, and `currentDraft`. Pointers
 are manifest URLs or `null`, never npm dist-tags. Since 0.8.0 has no registry,
 the initial stable pointer is `null`; it must not point to a 0.9.0 draft.
 Consumers discover through the index, then pin an immutable manifest.
+The index declares the current rule format, but it can list catalogs
+published in earlier formats, such as the Draft 3 catalog in format `1.1.0`.
+Read each manifest with the rule schema its `ruleSchema` names.
 
 The source repository generates the artifacts; mcpdesc.org hosts those bytes
 unchanged and renders the same records. The website owns presentation, not a
