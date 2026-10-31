@@ -8,7 +8,7 @@ import { formatCanonicalJson } from './canonical-json.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { fetchSchemaPublication, verifySchemaPublication } from './schema-publication.mjs';
 
-export const ruleFormatVersion = '1.1.0';
+export const ruleFormatVersion = '1.2.0';
 export const ruleSchemaUrl = `https://mcpdesc.org/schema/validation-rule/${ruleFormatVersion}.json`;
 export const catalogIndexUrl = 'https://mcpdesc.org/validation/catalogs/index.json';
 const repository = 'https://github.com/mcpdesc/mcpdesc-specification';
@@ -34,7 +34,7 @@ function schemaValidators(schema) {
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addFormats(ajv);
   ajv.addSchema(schema);
-  return Object.fromEntries(['', '#/$defs/catalog-manifest', '#/$defs/catalog-index'].map((fragment) => {
+  return Object.fromEntries(['', '#/$defs/catalog-manifest', '#/$defs/catalog-index', '#/$defs/unchecked-requirements'].map((fragment) => {
     const validate = ajv.getSchema(`${ruleSchemaUrl}${fragment}`);
     return [fragment || 'rules', (value) => assert.ok(validate(value), ajv.errorsText(validate.errors))];
   }));
@@ -119,6 +119,13 @@ export function buildValidationCatalog(root, snapshot, commit) {
     return record.rules;
   }).sort((left, right) => left.id < right.id ? -1 : left.id > right.id ? 1 : 0);
   const catalog = { rules };
+  const uncheckedPath = `${identity.specificationPath}/validation/unchecked-requirements.yaml`;
+  if (fs.existsSync(path.join(root, uncheckedPath))) {
+    const unchecked = decodeDocumentSource(fs.readFileSync(resolveCatalogFile(root, uncheckedPath), 'utf8'), 'yaml', uncheckedPath);
+    validate['#/$defs/unchecked-requirements'](unchecked);
+    catalog.uncheckedRequirements = [...unchecked.uncheckedRequirements].sort((left, right) => left.location < right.location ? -1 : left.location > right.location ? 1 : 0);
+    for (const entry of catalog.uncheckedRequirements) checkReference(root, identity.specificationPath, entry.location);
+  }
   validate.rules(catalog);
   checkRecords(catalog, descriptionSchema.$defs.supportedProtocolVersion.enum);
   for (const rule of rules) {
@@ -127,8 +134,13 @@ export function buildValidationCatalog(root, snapshot, commit) {
     }
     for (const match of rule.description.matchAll(/\]\(([^)\s]+)\)/g)) checkReference(root, identity.specificationPath, match[1]);
     for (const fixture of rule.fixtures) {
-      const relative = `${fixture.path.startsWith('projection-fixtures/') ? '' : 'fixtures/'}${fixture.path}`;
+      const relative = `${/^(?:projection|serialization)-fixtures\//.test(fixture.path) ? '' : 'fixtures/'}${fixture.path}`;
       const file = resolveCatalogFile(root, `${identity.specificationPath}/${relative}`);
+      // A serialization fixture may be undecodable by design; it is cited as a whole.
+      if (fixture.path.startsWith('serialization-fixtures/')) {
+        assert.equal(fixture.pointer, '', `Serialization fixtures are cited whole: ${rule.id} ${fixture.path}`);
+        continue;
+      }
       let node = decodeDocumentSource(fs.readFileSync(file, 'utf8'), documentFormatForPath(file), fixture.path);
       for (const key of fixture.pointer.split('/').slice(1).map((token) => token.replaceAll('~1', '/').replaceAll('~0', '~'))) {
         assert.ok(node !== null && typeof node === 'object' && Object.hasOwn(node, key), `Missing fixture pointer: ${rule.id} ${fixture.pointer}`);

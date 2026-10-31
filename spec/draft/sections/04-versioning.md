@@ -2,7 +2,7 @@
 
 ### 4.1 The `mcpdesc` Field
 
-Every MCP Description document MUST include a `mcpdesc` property at the root level. This property declares which version of this specification the document conforms to.
+<a id="req-mcpdesc-required"></a>Every MCP Description document MUST include a `mcpdesc` property at the root level. This property declares which version of this specification the document conforms to.
 
 ```json
 {
@@ -12,7 +12,7 @@ Every MCP Description document MUST include a `mcpdesc` property at the root lev
 
 ### 4.2 Version Format
 
-The `mcpdesc` value MUST identify the specification version against which conformance is assessed. This community working draft uses `"0.9.0"` and is not a stable release.
+<a id="req-mcpdesc-version"></a>The `mcpdesc` value MUST identify the specification version against which conformance is assessed. This community working draft uses `"0.9.0"` and is not a stable release.
 
 The specification uses [Semantic Versioning](https://semver.org/) for its own version numbers. Before 1.0.0, a minor release MAY contain breaking changes; after 1.0.0, ordinary Semantic Versioning compatibility rules apply.
 
@@ -29,7 +29,7 @@ $schema: https://mcpdesc.org/schema/mcp-description/0.9.0.json
 mcpdesc: 0.9.0
 ```
 
-The root `$schema` property remains optional. When present, it SHOULD identify the exact stable version or public draft snapshot used to produce or validate the document. Omitting `$schema` does not make an otherwise conforming document invalid; a validator MAY select an applicable bundled schema through its API, surrounding metadata, or explicit user configuration.
+The root `$schema` property remains optional. <a id="req-schema-identifier-exact"></a>When present, it SHOULD identify the exact stable version or public draft snapshot used to produce or validate the document. Omitting `$schema` does not make an otherwise conforming document invalid; a validator MAY select an applicable bundled schema through its API, surrounding metadata, or explicit user configuration.
 
 The schema document's root `$id` identifies that schema resource and establishes its base URI for JSON Schema reference resolution.
 
@@ -56,42 +56,42 @@ Assigning a new format family requires an accepted specification decision. Simil
 
 ### 4.5 Unique and Immutable Schema Resources
 
-Every canonical schema URI MUST identify exactly one immutable sequence of schema bytes. A schema published at a canonical URI MUST declare that exact URI as its root `$id`.
+<a id="req-schema-uri-immutable"></a>Every canonical schema URI MUST identify exactly one immutable sequence of schema bytes. A schema published at a canonical URI MUST declare that exact URI as its root `$id`.
 
-Once publicly published, a canonical schema resource MUST NOT be replaced with different bytes, even to correct an error or non-normative description. Every byte change requires a new stable version, draft snapshot, or separately versioned errata resource according to the governing format's compatibility policy.
+<a id="req-schema-bytes-immutable"></a>Once publicly published, a canonical schema resource MUST NOT be replaced with different bytes, even to correct an error or non-normative description. Every byte change requires a new stable version, draft snapshot, or separately versioned errata resource according to the governing format's compatibility policy.
 
-Every public prerelease of this version MUST use a prerelease-specific root `$id`. The stable 0.9.0 schema MUST use `https://mcpdesc.org/schema/mcp-description/0.9.0.json` and MUST NOT reuse a prerelease URI.
+<a id="req-schema-prerelease-identity"></a>Every public prerelease of this version MUST use a prerelease-specific root `$id`. The stable 0.9.0 schema MUST use `https://mcpdesc.org/schema/mcp-description/0.9.0.json` and MUST NOT reuse a prerelease URI.
 
 ### 4.6 Live Publication and Aliases
 
-A canonical mcpdesc.org schema URI MUST use HTTPS, return HTTP 200 for `GET`, serve the exact immutable schema bytes directly without redirect, and return a syntactically valid JSON Schema document rather than an HTML fallback. The response MUST declare the request URI as the root `$id` and MUST be retrievable cross-origin for browser-hosted editors and tools.
+<a id="req-schema-publication-http"></a>A canonical mcpdesc.org schema URI MUST use HTTPS, return HTTP 200 for `GET`, serve the exact immutable schema bytes directly without redirect, and return a syntactically valid JSON Schema document rather than an HTML fallback. The response MUST declare the request URI as the root `$id` and MUST be retrievable cross-origin for browser-hosted editors and tools.
 
-Canonical responses MUST return a JSON-compatible media type and SHOULD use `application/schema+json`. They MUST return `Cache-Control` including `public`, `max-age=31536000`, and `immutable`, and SHOULD include a strong `ETag`.
+<a id="req-schema-publication-headers"></a>Canonical responses MUST return a JSON-compatible media type and SHOULD use `application/schema+json`. They MUST return `Cache-Control` including `public`, `max-age=31536000`, and `immutable`, and SHOULD include a strong `ETag`.
 
-The project MAY also publish mutable convenience aliases such as `https://mcpdesc.org/schema/mcp-description/latest.json` for the latest stable release and `https://mcpdesc.org/schema/mcp-description/draft.json` for the active community draft. An alias SHOULD redirect to its selected immutable canonical resource. An alias MUST NOT be declared as a schema `$id`, and normative examples SHOULD use immutable canonical URIs instead.
+The project MAY also publish mutable convenience aliases such as `https://mcpdesc.org/schema/mcp-description/latest.json` for the latest stable release and `https://mcpdesc.org/schema/mcp-description/draft.json` for the active community draft. <a id="req-schema-aliases"></a>An alias SHOULD redirect to its selected immutable canonical resource. An alias MUST NOT be declared as a schema `$id`, and normative examples SHOULD use immutable canonical URIs instead.
 
-The repository file `schemas/latest.json` and, when an active draft exists, `schemas/draft.json` are version-status manifests rather than MCP Description JSON Schemas. They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
+The repository file `schemas/latest.json` and, when an active draft exists, `schemas/draft.json` are version-status manifests rather than MCP Description JSON Schemas. <a id="req-schema-status-manifests"></a>They identify released or active-draft status for repository workflows and MUST NOT be treated as public schema identities.
 
 ### 4.7 Retrieval and Security Boundary
 
-MCP Description conformance MUST NOT require network retrieval. A validator MAY bundle known schema resources and resolve their canonical URIs locally.
+<a id="req-no-network-conformance"></a>MCP Description conformance MUST NOT require network retrieval. A validator MAY bundle known schema resources and resolve their canonical URIs locally.
 
-Consumers MUST NOT automatically retrieve an arbitrary `$schema` URI from an untrusted document without an explicit network policy. Implementations that permit retrieval SHOULD restrict schemes and destinations, bound redirects and response sizes, validate media type and schema structure, and mitigate SSRF and cache-poisoning risks.
+<a id="req-schema-retrieval-policy"></a>Consumers MUST NOT automatically retrieve an arbitrary `$schema` URI from an untrusted document without an explicit network policy. Implementations that permit retrieval SHOULD restrict schemes and destinations, bound redirects and response sizes, validate media type and schema structure, and mitigate SSRF and cache-poisoning risks.
 
 The `$schema` property assists structural schema selection and editor integration. It does not make a structurally valid document semantically conforming and does not supersede protocol-revision or cross-object validation.
 
 ### 4.8 Version Compatibility
 
-Implementations MAY support multiple MCP Description versions. An implementation claiming support for a version MUST process its `mcpdesc` discriminator according to that version's requirements.
+Implementations MAY support multiple MCP Description versions. <a id="req-version-support"></a>An implementation claiming support for a version MUST process its `mcpdesc` discriminator according to that version's requirements.
 
-When processing a document, implementations MUST check the `mcpdesc` value and:
+<a id="req-version-check"></a>When processing a document, implementations MUST check the `mcpdesc` value and:
 
 - Accept documents with a recognized `mcpdesc` version
 - Reject documents with an unrecognized `mcpdesc` version or provide a clear warning
 
 ### 4.9 MCP Protocol Coverage
 
-The root `protocolVersions` array identifies the MCP protocol revisions described by the document. It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
+The root `protocolVersions` array identifies the MCP protocol revisions described by the document. <a id="req-protocol-versions-values"></a>It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
 - `2024-11-05`
 - `2025-03-26`
@@ -107,9 +107,9 @@ Root coverage states which revisions the document describes. It does not prove t
 
 Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts MAY declare `protocolVersions`.
 
-The root Info Object is unscoped, document-wide MCP Description metadata. Its properties are valid independently of root `protocolVersions` and MUST NOT be treated as protocol-scoped declarations.
+The root Info Object is unscoped, document-wide MCP Description metadata. <a id="req-info-unscoped"></a>Its properties are valid independently of root `protocolVersions` and MUST NOT be treated as protocol-scoped declarations.
 
-For root version set `R`, a top-level declaration's effective scope is its explicit `protocolVersions` when present and `R` otherwise. An explicit scope MUST be a non-empty subset of `R`.
+For root version set `R`, a top-level declaration's effective scope is its explicit `protocolVersions` when present and `R` otherwise. <a id="req-scope-root-subset"></a>An explicit scope MUST be a non-empty subset of `R`.
 
 For a nested scoped declaration, the effective scope is its explicit `protocolVersions` when present and its parent's effective scope otherwise. <a id="req-scope-subset"></a>An explicit child scope MUST be a non-empty subset of its parent's effective scope.
 
@@ -125,7 +125,7 @@ The `mcpdesc` version identifies this description format. Root and declaration-l
 
 For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration. It preserves the complete Info Object unchanged.
 
-A conforming single-version projection tool MUST:
+<a id="req-view-projection"></a>A conforming single-version projection tool MUST:
 
 1. validate the source document;
 2. require `V` to occur in root `protocolVersions`;
@@ -136,15 +136,15 @@ A conforming single-version projection tool MUST:
 7. omit every ordinary declaration collection from which projection removes the last entry; and
 8. validate the projected document structurally and semantically for `V`.
 
-Projection produces an ordinary conforming MCP Description document, not a second format. It MUST NOT materialize transport-dependent inherited values onto a primitive unless the operation also selects a transport and defines that resolution.
+Projection produces an ordinary conforming MCP Description document, not a second format. <a id="req-view-projection-transports"></a>It MUST NOT materialize transport-dependent inherited values onto a primitive unless the operation also selects a transport and defines that resolution.
 
 ### 4.13 Merge
 
-A merge tool MAY construct an aggregate from single-version or multi-version descriptions. It MUST validate every input and MUST report a conflict rather than guess when inputs cannot be represented faithfully.
+A merge tool MAY construct an aggregate from single-version or multi-version descriptions. <a id="req-merge-inputs"></a>It MUST validate every input and MUST report a conflict rather than guess when inputs cannot be represented faithfully.
 
-A conforming merge algorithm SHOULD project inputs into individual protocol views, require compatible logical server identity and unscoped metadata, union root protocol sets, collapse equivalent declarations by unioning their scopes, retain differing declarations as disjoint scoped variants, and validate the aggregate result.
+<a id="req-merge-algorithm"></a>A conforming merge algorithm SHOULD project inputs into individual protocol views, require compatible logical server identity and unscoped metadata, union root protocol sets, collapse equivalent declarations by unioning their scopes, retain differing declarations as disjoint scoped variants, and validate the aggregate result.
 
-When inputs cover the same revision, their Effective Protocol Views MUST be semantically equivalent or merge MUST fail. Conflicting `info`, `instructions`, root extension values, security declarations, or other unscoped values also cause failure.
+<a id="req-merge-equivalence"></a>When inputs cover the same revision, their Effective Protocol Views MUST be semantically equivalent or merge MUST fail. Conflicting `info`, `instructions`, root extension values, security declarations, or other unscoped values also cause failure.
 
 For every merged source view `D_V`, this round-trip invariant applies:
 
@@ -152,15 +152,15 @@ For every merged source view `D_V`, this round-trip invariant applies:
 P_V(merge(D_1, ..., D_n)) is semantically equivalent to D_V
 ```
 
-Semantic equivalence need not preserve property order, redundant scopes, array order where semantically insignificant, or the original choice between an omitted scope and an explicit full-parent scope. Merge tools MUST preserve the distinction among omitted `security`, `security: []`, and `security: [{}]`.
+Semantic equivalence need not preserve property order, redundant scopes, array order where semantically insignificant, or the original choice between an omitted scope and an explicit full-parent scope. <a id="req-merge-security"></a>Merge tools MUST preserve the distinction among omitted `security`, `security: []`, and `security: [{}]`.
 
-Omission contributes no entries to an ordinary declaration collection during merge. A merge result MUST omit an ordinary declaration collection when it has no entries. Merge output MUST satisfy transport protocol coverage whenever it contains `transports`.
+Omission contributes no entries to an ordinary declaration collection during merge. <a id="req-merge-collections"></a>A merge result MUST omit an ordinary declaration collection when it has no entries. Merge output MUST satisfy transport protocol coverage whenever it contains `transports`.
 
 ### 4.14 Native MCP Projection
 
 Native projection produces the MCP values that a server returns from `tools/list`, `resources/list`, `resources/templates/list`, and `prompts/list` for one MCP revision. Unlike the Effective Protocol View (Section 4.12), its result is not an MCP Description document.
 
-Native projection `N_V(D, k, i)` takes a document `D`, an MCP revision `V`, a primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an identifier `i`: the Tool `name`, Resource `uri`, Resource Template `uriTemplate`, or Prompt `name`, which is unique within `P_V(D)` (Sections 9.5, 10.5, and 11.5). A conforming native projection implementation MUST:
+Native projection `N_V(D, k, i)` takes a document `D`, an MCP revision `V`, a primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an identifier `i`: the Tool `name`, Resource `uri`, Resource Template `uriTemplate`, or Prompt `name`, which is unique within `P_V(D)` (Sections 9.5, 10.5, and 11.5). <a id="req-native-projection-steps"></a>A conforming native projection implementation MUST:
 
 1. <a id="req-native-projection-source-valid"></a>validate `D` and fail with `projection-source-invalid` when validation reports an error;
 2. <a id="req-native-projection-revision-declared"></a>require `V` to occur in root `protocolVersions`, otherwise fail with `projection-revision-not-declared`;
@@ -175,7 +175,7 @@ Because validation already rejects fields that `V` does not define, step 5 remov
 
 <a id="req-native-projection-lists"></a>The list projection of kind `k` for `V` is the sequence of `N_V(D, k, i)` for every declaration of kind `k` in `P_V(D)`, in document order. A failure for any declaration fails the whole list.
 
-A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation, except for a Tool and revision for which validation reports the warning of [Section 9.2](#req-tool-schema-native-shape): there it reflects a restriction of the MCP `Tool` type that this specification reports but does not enforce. In both cases implementations MUST NOT repair the value.
+<a id="req-native-projection-no-repair"></a>A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation, except for a Tool and revision for which validation reports the warning of [Section 9.2](#req-tool-schema-native-shape): there it reflects a restriction of the MCP `Tool` type that this specification reports but does not enforce. In both cases implementations MUST NOT repair the value.
 
 The `projection-fixtures/` folder of this specification gives, for each kind and supported revision, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
 

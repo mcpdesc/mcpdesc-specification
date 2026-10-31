@@ -6,7 +6,7 @@ These declarations describe access requirements. They do not define token acquis
 
 ### 7.1 Named Security Schemes
 
-Root `securitySchemes` is a map from a local name to a Security Scheme Object. When present, it MUST contain at least one entry. Every local name MUST match `^[A-Za-z0-9._-]+$`. Omission makes no security-scheme declaration and MUST NOT be interpreted as proof that the runtime uses no authentication or authorization mechanism.
+Root `securitySchemes` is a map from a local name to a Security Scheme Object. <a id="req-security-schemes-map"></a>When present, it MUST contain at least one entry. Every local name MUST match `^[A-Za-z0-9._-]+$`. <a id="req-security-schemes-omission"></a>Omission makes no security-scheme declaration and MUST NOT be interpreted as proof that the runtime uses no authentication or authorization mechanism.
 
 ```json
 {
@@ -32,7 +32,7 @@ Root `securitySchemes` is a map from a local name to a Security Scheme Object. W
 
 ### 7.2 Security Scheme Object
 
-Each Security Scheme Object MUST include `type`.
+<a id="req-security-scheme-fields"></a>Each Security Scheme Object MUST include `type`.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -45,7 +45,7 @@ Each Security Scheme Object MUST include `type`.
 | `openIdConnectUrl` | string (URI) | For `openIdConnect` | OpenID Connect discovery URL |
 | `description` | string | No | Human-readable description |
 
-An OAuth Flows Object MAY contain `implicit`, `password`, `clientCredentials`, and `authorizationCode`. At least one flow MUST be present. Every flow MUST contain a `scopes` map and MAY contain `refreshUrl`. An implicit flow MUST contain `authorizationUrl`; password and client-credentials flows MUST contain `tokenUrl`; an authorization-code flow MUST contain both `authorizationUrl` and `tokenUrl`.
+An OAuth Flows Object MAY contain `implicit`, `password`, `clientCredentials`, and `authorizationCode`. <a id="req-oauth-flows-fields"></a>At least one flow MUST be present. Every flow MUST contain a `scopes` map and MAY contain `refreshUrl`. An implicit flow MUST contain `authorizationUrl`; password and client-credentials flows MUST contain `tokenUrl`; an authorization-code flow MUST contain both `authorizationUrl` and `tokenUrl`.
 
 ### 7.3 Security Requirement Array
 
@@ -75,7 +75,7 @@ The following forms are distinct:
 - `security: [{}]`: explicitly allow anonymous access as an alternative;
 - `security: [{}, {"oauth": ["games:read"]}]`: allow anonymous access or the named OAuth requirement.
 
-Implementations MUST preserve the distinction between `[]` and `[{}]` and MUST NOT normalize one into the other.
+<a id="req-security-empty-distinction"></a>Implementations MUST preserve the distinction between `[]` and `[{}]` and MUST NOT normalize one into the other.
 
 ### 7.5 Placement and Precedence
 
@@ -88,10 +88,10 @@ For a primitive used through a selected transport, the effective requirement is 
 3. root `security`;
 4. no mcpdesc-declared requirement.
 
-This is replacement, not merging. Protocol projection MUST preserve security declarations and MUST NOT copy one transport's inherited security onto a primitive unless a separate operation also selects that transport.
+This is replacement, not merging. <a id="req-security-projection"></a>Protocol projection MUST preserve security declarations and MUST NOT copy one transport's inherited security onto a primitive unless a separate operation also selects that transport.
 
 ### 7.6 Interpretation Limits
 
 Primitive requirements describe access conditions, not identities, roles, ownership, or exact discovery visibility. A requirement neither guarantees that a primitive is hidden before authorization nor guarantees that it is visible.
 
-A primitive-level override applies regardless of selected transport. If transport inheritance cannot faithfully represent materially different per-transport primitive requirements, authors SHOULD publish separate descriptions or use a specification extension. Tools MUST NOT invent a combined requirement.
+A primitive-level override applies regardless of selected transport. <a id="req-security-transport-variants"></a>If transport inheritance cannot faithfully represent materially different per-transport primitive requirements, authors SHOULD publish separate descriptions or use a specification extension. <a id="req-security-no-combined-requirement"></a>Tools MUST NOT invent a combined requirement.

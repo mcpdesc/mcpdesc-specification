@@ -93,6 +93,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 6.5
         locations:
           - sections/06-transports.md#req-transport-coverage
+          - sections/06-transports.md#req-transport-coverage-omitted
     enforcement: internal
     status: internal
     fixtures:
@@ -101,4 +102,37 @@ rules:
         outcome: error
       - path: expected-invalid/scoped-version-not-in-root.json
         pointer: /protocolVersions
+        outcome: error
+
+  - id: mcpdesc.transport.members
+    title: "Declare transports with their type-specific fields"
+    description: >-
+      A transport is Streamable HTTP, stdio, or legacy SSE, selected by type.
+      Each type requires its own fields, such as url or command, and accepts only
+      the properties in its Section 6.2 table.
+    owner: mcpdesc
+    summary: >-
+      A Transport Object matches exactly one transport type and contains its
+      required fields and only its defined properties.
+    surface: Transport
+    kind: structural
+    documentSchema:
+      - "#/$defs/transport"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 6.2
+        locations:
+          - sections/06-transports.md#req-transport-streamable-http-fields
+          - sections/06-transports.md#req-transport-stdio-fields
+          - sections/06-transports.md#req-transport-sse-fields
+          - sections/06-transports.md#req-transport-type
+          - sections/06-transports.md#req-transport-closed
+          - sections/15-serialization.md#req-serialization-value-formats
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-info-transport-tag-resource.json
+        pointer: "/transports/0"
         outcome: error

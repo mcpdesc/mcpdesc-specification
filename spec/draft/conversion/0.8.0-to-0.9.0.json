@@ -74,6 +74,14 @@
         "mcp.cacheable-result.ttl-ms"
       ],
       "fixes": []
+    },
+    {
+      "id": "mcpdesc.conversion.0-8-to-0-9.resource-uri-checked",
+      "summary": "Resource uri must be an RFC 3986 URI with a scheme in 0.9.0; only the author knows the intended URI, so no fix is offered.",
+      "targetRules": [
+        "mcp.resource.uri"
+      ],
+      "fixes": []
     }
   ],
   "fixes": [

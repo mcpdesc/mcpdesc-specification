@@ -443,6 +443,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 9.2
         locations:
           - sections/09-tools.md#req-tool-schema-legacy-shape
+          - sections/09-tools.md#req-tool-schema-legacy-no-dialect
     sources:
       - tier: 1
         reference: "MCP 2024-11-05 to 2025-06-18 schema.ts, interface Tool, inputSchema (and outputSchema from 2025-06-18): properties?: { [key: string]: object }, required?: string[]"
@@ -694,6 +695,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
         locations:
           - sections/09-tools.md#req-tool-example-error-result
+          - sections/09-tools.md#req-tool-example-success
     enforcement: internal
     status: internal
     fixtures:
@@ -704,3 +706,40 @@ rules:
       MCP does not forbid structuredContent on error results; MCP Description
       requires its absence so that example structuredContent always conforms
       to outputSchema.
+
+  - id: mcpdesc.tool.members
+    title: "Declare Tools with their defined fields"
+    description: >-
+      A Tool has a non-empty name and an inputSchema, and accepts only the
+      properties of the Section 9.1 table, each with its defined type. The
+      execution object accepts only taskSupport.
+    owner: mcpdesc
+    summary: >-
+      A Tool Object has its required fields, defined property types, and no
+      unknown properties; so does its Execution Object.
+    surface: Tool, Execution
+    kind: structural
+    documentSchema:
+      - "#/$defs/tool"
+      - "#/$defs/execution"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.1 and 9.7
+        locations:
+          - sections/09-tools.md#req-tool-fields
+          - sections/09-tools.md#req-tool-input-schema-required
+          - sections/09-tools.md#req-execution-fields
+          - sections/12-elicitation.md#req-elicitations-non-empty
+          - sections/13-tags.md#req-entity-tags-shape
+          - sections/13-tags.md#req-entity-tags-unique
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/empty-ordinary-nested-collections.json
+        pointer: "/tools/0/elicitations"
+        outcome: error
+      - path: expected-invalid/missing-tool-input-schema.json
+        pointer: "/tools/0"
+        outcome: error

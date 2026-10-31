@@ -1,0 +1,24 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.8.0.json",
+  "mcpdesc": "0.8.0",
+  "info": {
+    "name": "relative-resource-uri",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "relative-resource-uri"
+    }
+  ],
+  "resources": [
+    {
+      "uri": "docs/readme.md",
+      "name": "readme",
+      "mimeType": "text/markdown"
+    }
+  ]
+}

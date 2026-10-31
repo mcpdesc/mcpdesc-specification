@@ -49,6 +49,11 @@ try {
     'scripts/export-validator-snapshot.mjs',
     'scripts/validate-document.mjs',
     'scripts/validator-base.mjs',
+    'scripts/document-schema-owners.mjs',
+    'scripts/candidate-specification.mjs',
+    'scripts/decode-document.mjs',
+    'specification-status.json',
+    `${candidate.specificationRoot}/validation/rules`,
     candidate.schemaPath,
     `${candidate.specificationRoot}/fixtures`
   ]) copy(relativePath);

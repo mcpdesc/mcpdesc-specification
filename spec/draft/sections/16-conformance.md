@@ -2,7 +2,7 @@
 
 ### 16.1 Document Conformance
 
-A conforming MCP Description document MUST:
+<a id="req-conforming-document"></a>A conforming MCP Description document MUST:
 
 1. Decode from one conforming JSON or restricted YAML serialization to the JSON-compatible MCP Description data model (Sections 3.1 and 15).
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
@@ -16,7 +16,7 @@ A conforming MCP Description document MUST:
 
 ### 16.2 Implementation Conformance
 
-A conforming implementation (tool, validator, or platform) MUST:
+<a id="req-conforming-implementation"></a>A conforming implementation (tool, validator, or platform) MUST:
 
 1. Support at least one conforming serialization and declare JSON, YAML, or both for each applicable input or output capability.
 2. Accept and correctly parse conforming documents in every serialization for which it claims input support.
@@ -31,11 +31,11 @@ A conforming implementation (tool, validator, or platform) MUST:
 
 The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
-A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
+A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. <a id="req-stricter-profile"></a>An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
 Complete revision-specific `_meta` validation begins with MCP 2025-06-18. <a id="req-legacy-validation-scope"></a>For the recognized legacy compatibility revisions MCP 2024-11-05 and MCP 2025-03-26, validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
 
-A conforming implementation SHOULD:
+<a id="req-implementation-recommendations"></a>A conforming implementation SHOULD:
 
 1. Support at least the current specification version.
 2. Provide clear error messages when rejecting non-conforming documents.
@@ -43,8 +43,8 @@ A conforming implementation SHOULD:
 
 ### 16.3 Partial Conformance
 
-Implementations that support only a subset of the specification (e.g., only tools, or only a specific transport type) SHOULD document their limitations clearly.
+<a id="req-partial-support"></a>Implementations that support only a subset of the specification (e.g., only tools, or only a specific transport type) SHOULD document their limitations clearly.
 
 ### 16.4 Versioned Conformance
 
-Conformance is assessed against a specific specification version. An implementation claiming conformance MUST state which `mcpdesc` version(s) it supports.
+Conformance is assessed against a specific specification version. <a id="req-conformance-claim"></a>An implementation claiming conformance MUST state which `mcpdesc` version(s) it supports.

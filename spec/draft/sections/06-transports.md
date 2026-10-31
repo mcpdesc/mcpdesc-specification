@@ -1,6 +1,6 @@
 ## 6. Transports
 
-The optional `transports` property declares one or more communication mechanisms for the MCP server. When present, it MUST contain at least one Transport Object. Omission means that the document declares no connection mechanism; it MUST NOT be interpreted as proof that the server has no transport.
+The optional `transports` property declares one or more communication mechanisms for the MCP server. <a id="req-transports-non-empty"></a>When present, it MUST contain at least one Transport Object. <a id="req-transports-omission"></a>Omission means that the document declares no connection mechanism; it MUST NOT be interpreted as proof that the server has no transport.
 
 ### 6.1 Overview
 
@@ -8,11 +8,13 @@ MCP servers can be accessed through different transport mechanisms. The `transpo
 
 ### 6.2 Transport Types
 
-Each transport object MUST include a `type` property. The following transport types are defined:
+<a id="req-transport-type"></a>Each transport object MUST include a `type` property. The following transport types are defined:
 
 Every Transport Object MAY contain `protocolVersions` and `security`. `protocolVersions` follows Section 4.5. A transport's `security` value is a Security Requirement Array and follows Sections 6.4 and 7.
 
 #### 6.2.1 Streamable HTTP Transport
+
+<a id="req-transport-streamable-http-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -29,6 +31,8 @@ The streamable HTTP transport connects to an MCP server over HTTP with streaming
 ```
 
 #### 6.2.2 stdio Transport
+
+<a id="req-transport-stdio-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -52,6 +56,8 @@ The stdio transport launches the MCP server as a subprocess and communicates ove
 
 #### 6.2.3 SSE Transport (Legacy)
 
+<a id="req-transport-sse-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `type` | `"sse"` | **Yes** | Transport type identifier |
@@ -68,7 +74,7 @@ The Server-Sent Events transport is a legacy transport type retained for backwar
 
 ### 6.3 Multiple Transports
 
-A server MAY support multiple transports. Clients SHOULD select the most appropriate transport based on their environment and capabilities.
+A server MAY support multiple transports. <a id="req-transport-selection"></a>Clients SHOULD select the most appropriate transport based on their environment and capabilities.
 
 ```json
 {
@@ -112,15 +118,15 @@ This mechanism allows a single MCP Description document to declare different sec
 }
 ```
 
-The `bearer` name in this example MUST identify a root `securitySchemes` entry.
+<a id="req-transport-security-example"></a>The `bearer` name in this example MUST identify a root `securitySchemes` entry.
 
 ### 6.5 Protocol Coverage
 
 <a id="req-transport-coverage"></a>When `transports` is present, the union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one revision.
 
-A document with `transports` is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage. When `transports` is omitted, transport coverage validation does not apply: validators MUST NOT infer a transport or report uncovered root revisions.
+A document with `transports` is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage. <a id="req-transport-coverage-omitted"></a>When `transports` is omitted, transport coverage validation does not apply: validators MUST NOT infer a transport or report uncovered root revisions.
 
 ### 6.6 Extensibility
 
-Transport Objects MAY carry `x-*` specification extensions. They MUST NOT contain other additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties.
+Transport Objects MAY carry `x-*` specification extensions. <a id="req-transport-closed"></a>They MUST NOT contain other additional properties beyond those defined for their type plus the common optional `protocolVersions` and `security` properties.
 

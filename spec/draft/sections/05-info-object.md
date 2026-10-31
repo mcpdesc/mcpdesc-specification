@@ -1,19 +1,21 @@
 ## 5. Info Object
 
-The `info` object provides metadata about the MCP server. It is REQUIRED.
+The `info` object provides metadata about the MCP server. <a id="req-info-required"></a>It is REQUIRED.
 
 The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fields from the MCP `Implementation` type used for server identity. The MCP-sourced fields — `name`, `title`, `description`, `version`, `icons`, and `websiteUrl` — allow an MCP Description document to represent server identity metadata that may also be advertised at runtime.
 
-Info is unscoped, document-wide MCP Description metadata. Every property defined by this specification MAY appear regardless of the revisions listed in root `protocolVersions`. A mapping to MCP `Implementation` indicates that a producer MAY obtain or compare the value through runtime initialization when the negotiated revision defines that field. It MUST NOT be interpreted as requiring a runtime origin or restricting the property's presence to those revisions. Validators MUST NOT emit a revision-applicability diagnostic solely because an Info property is unavailable on `Implementation` in an applicable MCP revision.
+Info is unscoped, document-wide MCP Description metadata. Every property defined by this specification MAY appear regardless of the revisions listed in root `protocolVersions`. A mapping to MCP `Implementation` indicates that a producer MAY obtain or compare the value through runtime initialization when the negotiated revision defines that field. <a id="req-info-revision-independent"></a>It MUST NOT be interpreted as requiring a runtime origin or restricting the property's presence to those revisions. Validators MUST NOT emit a revision-applicability diagnostic solely because an Info property is unavailable on `Implementation` in an applicable MCP revision.
 
-A producer MAY obtain Info metadata from author input, configuration, package metadata, a registry, runtime discovery, or another source. This specification does not assign trust or precedence among those sources, and consumers MUST NOT infer that an Info value was asserted by a live server.
+A producer MAY obtain Info metadata from author input, configuration, package metadata, a registry, runtime discovery, or another source. <a id="req-info-trust"></a>This specification does not assign trust or precedence among those sources, and consumers MUST NOT infer that an Info value was asserted by a live server.
 
 ### 5.1 Properties
 
+<a id="req-info-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `name` | string | **Yes** | Programmatic server name (identifier). MUST be non-empty. Maps to `Implementation.name` (MCP `BaseMetadata`). |
-| `version` | string | **Yes** | Server version. Semver RECOMMENDED. MUST be non-empty. Maps to `Implementation.version`. |
+| `name` | string | **Yes** | Programmatic server name (identifier). <a id="req-info-name-non-empty"></a>MUST be non-empty. Maps to `Implementation.name` (MCP `BaseMetadata`). |
+| `version` | string | **Yes** | Server version. <a id="req-info-version-semver"></a>Semver RECOMMENDED. <a id="req-info-version-non-empty"></a>MUST be non-empty. Maps to `Implementation.version`. |
 | `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Runtime mapping: `Implementation.title` (MCP `BaseMetadata`, available since 2025-06-18). |
 | `description` | string | No | Brief description of what the server does. Runtime mapping: `Implementation.description` (available since MCP 2025-11-25). |
 | `id` | string | No | Unique server identifier (URI, DID, or URN). |
@@ -24,6 +26,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 
 ### 5.2 Contact Object
 
+<a id="req-contact-fields"></a>
+
 | Property | Type | Description |
 |----------|------|-------------|
 | `name` | string | Organization or maintainer name |
@@ -31,6 +35,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 | `email` | string (email) | Contact email address |
 
 ### 5.3 License Object
+
+<a id="req-license-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

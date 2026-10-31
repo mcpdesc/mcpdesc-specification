@@ -1,0 +1,316 @@
+# Normative requirements that no validation rule checks, with the reason (Proposal 0033).
+# runtime: behavior of MCP clients, servers, or consumers; processing: behavior of MCP Description
+# tools that document fixtures cannot show; guidance: an authoring choice the document cannot decide.
+uncheckedRequirements:
+  - location: sections/03-document-structure.md#req-serialization-order
+    reason: processing
+    note: "Concerns how tools read a serialization, not a document value."
+  - location: sections/03-document-structure.md#req-omission-not-absence
+    reason: runtime
+    note: "Constrains how consumers interpret an absent property."
+  - location: sections/03-document-structure.md#req-security-empties-preserved
+    reason: processing
+    note: "Preservation by tools is not shown by a document fixture."
+  - location: sections/03-document-structure.md#req-primitive-absence
+    reason: runtime
+    note: "Constrains how consumers interpret an absent collection."
+  - location: sections/03-document-structure.md#req-property-order
+    reason: processing
+    note: "Concerns how tools read a serialization, not a document value."
+  - location: sections/07-security.md#req-security-schemes-omission
+    reason: runtime
+    note: "Constrains how consumers interpret absent security schemes."
+  - location: sections/07-security.md#req-security-empty-distinction
+    reason: processing
+    note: "Preservation by tools is not shown by a document fixture."
+  - location: sections/07-security.md#req-security-projection
+    reason: processing
+    note: "Protocol-version projection is checked by repository tests, not by catalog fixtures."
+  - location: sections/07-security.md#req-security-transport-variants
+    reason: guidance
+    note: "An authoring choice that a document cannot show."
+  - location: sections/07-security.md#req-security-no-combined-requirement
+    reason: processing
+    note: "Concerns tool behavior when transports differ."
+  - location: sections/09-tools.md#req-tool-schema-closed-recommended
+    reason: guidance
+    note: "Recommends a schema style; both styles are valid."
+  - location: sections/09-tools.md#req-tool-schema-no-fetch
+    reason: processing
+    note: "Network access by a validator cannot be shown by a document fixture."
+  - location: sections/09-tools.md#req-tool-schema-consumer-certainty
+    reason: runtime
+    note: "Advice to consumers about unresolved references."
+  - location: sections/09-tools.md#req-tool-schema-self-contained
+    reason: guidance
+    note: "An authoring preference; external references remain valid."
+  - location: sections/09-tools.md#req-tool-example-not-inferred
+    reason: processing
+    note: "Concerns how producers create documents."
+  - location: sections/09-tools.md#req-tool-example-tooling
+    reason: processing
+    note: "Concerns documentation and mock tooling."
+  - location: sections/09-tools.md#req-tool-example-no-secrets
+    reason: guidance
+    note: "Whether a value is a secret cannot be decided from the document."
+  - location: sections/09-tools.md#req-tool-example-untrusted
+    reason: runtime
+    note: "Constrains how consumers use example content."
+  - location: sections/09-tools.md#req-tool-example-views-preserved
+    reason: processing
+    note: "Protocol-version projection is checked by repository tests, not by catalog fixtures."
+  - location: sections/09-tools.md#req-interaction-step-not-wire
+    reason: runtime
+    note: "Concerns MCP connections, not documents."
+  - location: sections/09-tools.md#req-interaction-views-preserved
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/09-tools.md#req-interaction-no-secrets
+    reason: guidance
+    note: "Whether a value is a secret cannot be decided from the document."
+  - location: sections/09-tools.md#req-interaction-untrusted
+    reason: runtime
+    note: "Constrains how consumers use scenario content."
+  - location: sections/09-tools.md#req-tool-annotations-untrusted
+    reason: runtime
+    note: "Constrains MCP clients."
+  - location: sections/12-elicitation.md#req-elicitation-not-capability
+    reason: runtime
+    note: "Constrains how consumers interpret a declaration."
+  - location: sections/12-elicitation.md#req-elicitation-runtime-wording
+    reason: runtime
+    note: "Concerns the message a server sends at run time."
+  - location: sections/12-elicitation.md#req-elicitation-url-no-fetch
+    reason: processing
+    note: "Network access by a validator cannot be shown by a document fixture."
+  - location: sections/04-versioning.md#req-schema-identifier-exact
+    reason: guidance
+    note: "An authoring choice; omitting or varying $schema does not change conformance."
+  - location: sections/04-versioning.md#req-schema-uri-immutable
+    reason: processing
+    note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
+  - location: sections/04-versioning.md#req-schema-bytes-immutable
+    reason: processing
+    note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
+  - location: sections/04-versioning.md#req-schema-prerelease-identity
+    reason: processing
+    note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
+  - location: sections/04-versioning.md#req-schema-publication-http
+    reason: processing
+    note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
+  - location: sections/04-versioning.md#req-schema-publication-headers
+    reason: processing
+    note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
+  - location: sections/04-versioning.md#req-schema-aliases
+    reason: processing
+    note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
+  - location: sections/04-versioning.md#req-schema-status-manifests
+    reason: processing
+    note: "Concerns repository files, not documents."
+  - location: sections/04-versioning.md#req-no-network-conformance
+    reason: processing
+    note: "Network access by a validator cannot be shown by a document fixture."
+  - location: sections/04-versioning.md#req-schema-retrieval-policy
+    reason: processing
+    note: "Network access by a consumer cannot be shown by a document fixture."
+  - location: sections/04-versioning.md#req-version-support
+    reason: processing
+    note: "Concerns implementation claims."
+  - location: sections/04-versioning.md#req-view-projection
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/04-versioning.md#req-view-projection-transports
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/04-versioning.md#req-merge-inputs
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/04-versioning.md#req-merge-algorithm
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/04-versioning.md#req-merge-equivalence
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/04-versioning.md#req-merge-security
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/04-versioning.md#req-merge-collections
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/05-info-object.md#req-info-trust
+    reason: runtime
+    note: "Constrains how consumers interpret Info values."
+  - location: sections/05-info-object.md#req-info-version-semver
+    reason: guidance
+    note: "A versioning convention; any non-empty version is valid."
+  - location: sections/06-transports.md#req-transports-omission
+    reason: runtime
+    note: "Constrains how consumers interpret absent transports."
+  - location: sections/06-transports.md#req-transport-selection
+    reason: runtime
+    note: "Concerns client connection behavior."
+  - location: sections/08-capabilities.md#req-extensions-not-reinterpreted
+    reason: processing
+    note: "Concerns tool transformations, not document values."
+  - location: sections/08-capabilities.md#req-extensions-catalogue-disclosure
+    reason: processing
+    note: "Concerns validator metadata and release practice."
+  - location: sections/08-capabilities.md#req-extensions-profiles
+    reason: processing
+    note: "Concerns optional validation profiles."
+  - location: sections/08-capabilities.md#req-client-requirements-unconditional
+    reason: guidance
+    note: "Whether a capability is used on every runtime path cannot be decided from the document."
+  - location: sections/08-capabilities.md#req-client-requirements-extension-compatibility
+    reason: processing
+    note: "Concerns compatibility tools, not documents."
+  - location: sections/08-capabilities.md#req-client-requirements-compatibility
+    reason: processing
+    note: "Concerns compatibility tools, not documents."
+  - location: sections/08-capabilities.md#req-capability-independence
+    reason: processing
+    note: "Concerns tool transformations, not document values."
+  - location: sections/08-capabilities.md#req-client-requirements-views
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/10-resources.md#req-resource-annotations-hints
+    reason: runtime
+    note: "Constrains how consumers use annotations."
+  - location: sections/10-resources.md#req-resource-example-order
+    reason: processing
+    note: "Concerns how consumers use example contents."
+  - location: sections/10-resources.md#req-resource-example-tooling
+    reason: processing
+    note: "Concerns documentation and mock tooling."
+  - location: sections/10-resources.md#req-resource-example-views
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/10-resources.md#req-resource-example-no-secrets
+    reason: guidance
+    note: "Whether a value is a secret cannot be decided from the document."
+  - location: sections/10-resources.md#req-resource-example-untrusted
+    reason: runtime
+    note: "Constrains how consumers use example content."
+  - location: sections/10-resources.md#req-template-completion-views
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/11-prompts.md#req-prompt-example-tooling
+    reason: processing
+    note: "Concerns documentation and mock tooling."
+  - location: sections/11-prompts.md#req-prompt-example-no-secrets
+    reason: guidance
+    note: "Whether a value is a secret cannot be decided from the document."
+  - location: sections/11-prompts.md#req-prompt-example-untrusted
+    reason: runtime
+    note: "Constrains how consumers use example content."
+  - location: sections/11-prompts.md#req-prompt-example-views
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/11-prompts.md#req-prompt-completion-views
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/13-tags.md#req-tags-display-order
+    reason: runtime
+    note: "Concerns how user interfaces present tags."
+  - location: sections/13-tags.md#req-tags-views
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/13-tags.md#req-tags-merge
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/16-conformance.md#req-conforming-implementation
+    reason: processing
+    note: "Concerns implementation behavior; its checkable parts are separate requirements."
+  - location: sections/16-conformance.md#req-stricter-profile
+    reason: processing
+    note: "Concerns implementation profiles."
+  - location: sections/16-conformance.md#req-implementation-recommendations
+    reason: processing
+    note: "Concerns implementation behavior."
+  - location: sections/16-conformance.md#req-partial-support
+    reason: processing
+    note: "Concerns implementation documentation."
+  - location: sections/16-conformance.md#req-conformance-claim
+    reason: processing
+    note: "Concerns implementation claims."
+  - location: sections/14-specification-extensions.md#req-extension-naming-convention
+    reason: guidance
+    note: "A naming convention; any name matching ^x- is valid."
+  - location: sections/14-specification-extensions.md#req-extension-lowercase-prefixes
+    reason: guidance
+    note: "A naming convention; any name matching ^x- is valid."
+  - location: sections/14-specification-extensions.md#req-extension-object-values
+    reason: guidance
+    note: "An authoring preference; any JSON value is valid."
+  - location: sections/14-specification-extensions.md#req-extension-no-core-override
+    reason: guidance
+    note: "Concerns extension design; validation applies core rules regardless of extensions."
+  - location: sections/14-specification-extensions.md#req-extension-schema-unavailable
+    reason: processing
+    note: "Concerns optional extension validation by tools."
+  - location: sections/14-specification-extensions.md#req-extension-views
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/14-specification-extensions.md#req-extension-merge
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/14-specification-extensions.md#req-extension-documentation
+    reason: guidance
+    note: "Concerns extension publication, outside the document."
+  - location: sections/14-specification-extensions.md#req-extension-mechanisms-separate
+    reason: processing
+    note: "Concerns tool transformations, not document values."
+  - location: sections/14-specification-extensions.md#req-extension-no-secrets
+    reason: guidance
+    note: "Whether a value is a secret cannot be decided from the document."
+  - location: sections/14-specification-extensions.md#req-extension-untrusted
+    reason: runtime
+    note: "Constrains how consumers use extension content."
+  - location: sections/15-serialization.md#req-serialization-support
+    reason: processing
+    note: "Concerns implementation capabilities."
+  - location: sections/15-serialization.md#req-serialization-json-claims
+    reason: processing
+    note: "Concerns implementation claims."
+  - location: sections/15-serialization.md#req-serialization-media-type
+    reason: processing
+    note: "Concerns media types used by tools."
+  - location: sections/15-serialization.md#req-serialization-yaml-quoted-dates
+    reason: guidance
+    note: "A style recommendation; unquoted dates decode identically."
+  - location: sections/15-serialization.md#req-serialization-explicit-reuse
+    reason: guidance
+    note: "An authoring recommendation."
+  - location: sections/15-serialization.md#req-serialization-conversion
+    reason: processing
+    note: "Checked for one document pair by scripts/test-serializations.mjs; concerns conversion tools."
+  - location: sections/15-serialization.md#req-serialization-numbers
+    reason: processing
+    note: "Concerns implementation number handling."
+  - location: sections/15-serialization.md#req-serialization-empty-values-preserved
+    reason: processing
+    note: "Preservation by tools is not shown by a document fixture."
+  - location: sections/15-serialization.md#req-serialization-schema-property
+    reason: guidance
+    note: "An authoring recommendation; $schema is optional."
+  - location: sections/15-serialization.md#req-serialization-negotiation
+    reason: processing
+    note: "Concerns tool exchanges, not documents."
+  - location: sections/15-serialization.md#req-serialization-untrusted
+    reason: processing
+    note: "Resource limits of tools cannot be shown by a document fixture."
+  - location: sections/17-components.md#req-component-pruning
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/17-components.md#req-component-merge
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/17-components.md#req-component-merge-extensions
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/17-components.md#req-component-limits
+    reason: processing
+    note: "Resource limits of tools cannot be shown by a document fixture."
+  - location: sections/99-appendices.md#req-icon-client-formats
+    reason: runtime
+    note: "Constrains MCP clients that display icons."

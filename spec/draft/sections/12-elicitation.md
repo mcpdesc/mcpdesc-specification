@@ -4,11 +4,13 @@
 
 An Elicitation Declaration documents that fulfillment of a Tool, Resource, Resource Template, or Prompt may require additional interaction with the user through the MCP client.
 
-Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. The array MUST contain at least one declaration when present. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
+Tool, Resource, Resource Template, and Prompt Objects MAY contain an `elicitations` array of Elicitation Declaration Objects. <a id="req-elicitations-non-empty"></a>The array MUST contain at least one declaration when present. A Resource Template declaration applies to `resources/read` operations on concrete Resource URIs produced from that template; it does not describe elicitation during template discovery.
 
-An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it. A conditional or optional Elicitation Declaration MUST NOT by itself be interpreted as an unconditional `clientRequirements.elicitation` capability requirement.
+An Elicitation Declaration describes durable server behavior rather than the protocol-specific wire exchange. It does not assert that every fulfillment triggers the interaction or that every client can fulfill it. <a id="req-elicitation-not-capability"></a>A conditional or optional Elicitation Declaration MUST NOT by itself be interpreted as an unconditional `clientRequirements.elicitation` capability requirement.
 
 ### 12.2 Elicitation Declaration Object
+
+<a id="req-elicitation-declaration-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -22,11 +24,11 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 | `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
 
-`name` MUST match `^[A-Za-z0-9._-]+$`. <a id="req-elicitation-name-unique"></a>Names are case-sensitive and MUST be unique within the containing primitive declaration.
+<a id="req-elicitation-name-format"></a>`name` MUST match `^[A-Za-z0-9._-]+$`. <a id="req-elicitation-name-unique"></a>Names are case-sensitive and MUST be unique within the containing primitive declaration.
 
-`message` MUST be non-empty. It documents the explanation a user should receive and MAY be representative or default wording when runtime context changes the exact text. Runtime wording SHOULD NOT materially contradict the documented purpose, but mcpdesc does not require byte-for-byte equality.
+<a id="req-elicitation-message"></a>`message` MUST be non-empty. It documents the explanation a user should receive and MAY be representative or default wording when runtime context changes the exact text. <a id="req-elicitation-runtime-wording"></a>Runtime wording SHOULD NOT materially contradict the documented purpose, but mcpdesc does not require byte-for-byte equality.
 
-`when`, `onDecline`, and `onCancel`, when present, MUST be non-empty descriptive contract documentation. They are not executable expressions, client instructions, or statically provable guarantees.
+<a id="req-elicitation-documentation-fields"></a>`when`, `onDecline`, and `onCancel`, when present, MUST be non-empty descriptive contract documentation. They are not executable expressions, client instructions, or statically provable guarantees.
 
 Although applicable MCP revisions permit omission of runtime `mode` for form elicitation, mcpdesc requires explicit `mode` to provide one canonical static representation.
 
@@ -34,11 +36,11 @@ Although applicable MCP revisions permit omission of runtime `mode` for form eli
 
 For `mode: "form"`:
 
-- `requestedSchema` is REQUIRED;
-- `url` MUST NOT appear; and
-- `requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+- <a id="req-elicitation-form-schema-required"></a>`requestedSchema` is REQUIRED;
+- <a id="req-elicitation-form-no-url"></a>`url` MUST NOT appear; and
+- <a id="req-elicitation-form-shape"></a>`requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
 
-`requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
+`requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. <a id="req-elicitation-schema-references-resolved"></a>The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 
 The schema is limited to a flat object whose properties use MCP elicitation primitive schemas. Nested objects and arrays other than MCP-supported multi-select enumeration forms are invalid. Unsupported keywords and unsupported string formats are invalid.
 
@@ -52,13 +54,13 @@ MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitiv
 
 For `mode: "url"`:
 
-- `requestedSchema` MUST NOT appear;
-- `url`, when present, MUST be a syntactically valid URI; and
+- <a id="req-elicitation-url-no-schema"></a>`requestedSchema` MUST NOT appear;
+- <a id="req-elicitation-url-syntax"></a>`url`, when present, MUST be a syntactically valid URI; and
 - omission of `url` means the concrete URL is generated or selected at runtime.
 
 A runtime URL-mode elicitation still supplies every field required by the applicable MCP revision. Omission in mcpdesc does not make the runtime URL optional.
 
-Validation of `url` is syntax-only. Validators and other consumers MUST NOT retrieve, prefetch, dereference, or otherwise access it while processing a description. A conforming declaration does not assert that the target is currently available, trusted, immutable, controlled by the server, or suitable for automatic navigation.
+Validation of `url` is syntax-only. <a id="req-elicitation-url-no-fetch"></a>Validators and other consumers MUST NOT retrieve, prefetch, dereference, or otherwise access it while processing a description. A conforming declaration does not assert that the target is currently available, trusted, immutable, controlled by the server, or suitable for automatic navigation.
 
 ### 12.5 Protocol Applicability
 
@@ -72,7 +74,7 @@ Complete revision-specific validation begins with MCP 2025-06-18:
 
 <a id="req-elicitation-revisions"></a>A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
 
-MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.5. Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
+MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.5. <a id="req-elicitation-legacy-incomplete"></a>Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
 
 ### 12.6 Static-Description Boundary
 

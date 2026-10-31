@@ -16,9 +16,58 @@ new fields that a previous closed schema rejects. Compatible additions are
 minor only when the previous schema permitted them. Editorial schema
 documentation corrections use a new patch-version URL. Published versioned
 URLs retain their exact bytes; older catalogs and specification snapshots are
-not rewritten. The `1.1.0` entry records the only exceptions so far.
+not rewritten. The `1.1.0` and `1.2.0` entries record the only exceptions so
+far.
 
-## [1.1.0] — Unreleased
+## [1.2.0] — Unreleased
+
+Rule format for the MCP Description 0.9.0 Draft 4 working tree, implementing
+review-stage
+[Proposal 0033](../proposal-snapshots/0033-complete-validation-catalog.md).
+The schema identity is
+`https://mcpdesc.org/schema/validation-rule/1.2.0.json`; it is a publication
+target until deployment is verified.
+
+### Record Format
+
+- Added optional `documentSchema` to rule records: JSON Pointer fragments into
+  the canonical MCP Description schema whose failures the rule reports. A
+  failure belongs to the rule owning the longest pointer that contains the
+  failing schema location.
+- Fixture citations may name files under `serialization-fixtures/`, cited
+  whole with the empty pointer; the outcome is `passes` when decoding accepts
+  the file and `error` when it rejects it.
+
+### Catalog
+
+- Added optional `uncheckedRequirements` to the aggregate catalog: requirement
+  anchors that no rule checks, each with `location`, `reason` (`runtime`,
+  `processing`, or `guidance`), and `note`. `#/$defs/unchecked-requirements`
+  validates the authored `validation/unchecked-requirements.yaml`.
+
+### Versioning Exception
+
+- **Minor number for an incompatible change.** The `1.1.0` record schema is
+  closed, so adding `documentSchema` would need `2.0.0` under the
+  compatibility policy. Because no `1.2.0` or later schema has shipped and
+  Draft 4 catalogs are the first to use the new fields, the maintainer chose
+  `1.2.0` on 2026-10-31. Records and catalogs valid under `1.1.0` remain
+  valid under `1.2.0`; consumers validating Draft 4 catalogs with `1.1.0`
+  reject them.
+
+### Publication Contract
+
+- Manifest and index envelopes declare `$schema` with the `1.2.0` URL and its
+  fragments, and manifests declare `ruleFormatVersion` `1.2.0`. Draft 3
+  catalogs keep `1.1.0`.
+
+### Consumer Migration
+
+- Pin `1.2.0` for Draft 4 catalogs. Use `documentSchema` to attribute
+  document-schema failures, and show `uncheckedRequirements` as the
+  requirements validation does not cover.
+
+## [1.1.0] — 2026-10-29 (Draft 3)
 
 Rule format of the first catalogs, implemented for the MCP Description 0.9.0
 Draft 3 working tree under review-stage

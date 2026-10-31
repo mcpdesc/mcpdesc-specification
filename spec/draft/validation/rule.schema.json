@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/validation-rule/1.1.0.json",
+  "$id": "https://mcpdesc.org/schema/validation-rule/1.2.0.json",
   "title": "MCP Description validation rule registry file",
-  "description": "Structure of each YAML file under validation/rules/. See Proposal 0024 and validation/README.md.",
+  "description": "Structure of each YAML file under validation/rules/ and of the aggregate catalog, which also lists the unchecked requirements. See Proposals 0024, 0030, and 0033, and validation/README.md.",
   "type": "object",
   "required": [
     "rules"
@@ -15,6 +15,9 @@
       },
       "minItems": 1,
       "type": "array"
+    },
+    "uncheckedRequirements": {
+      "$ref": "#/$defs/unchecked-requirement-list"
     }
   },
   "$defs": {
@@ -71,7 +74,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.1.0.json#/$defs/catalog-index"
+          "const": "https://mcpdesc.org/schema/validation-rule/1.2.0.json#/$defs/catalog-index"
         },
         "catalogs": {
           "items": {
@@ -109,7 +112,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.1.0.json#/$defs/catalog-manifest"
+          "const": "https://mcpdesc.org/schema/validation-rule/1.2.0.json#/$defs/catalog-manifest"
         },
         "catalog": {
           "$ref": "#/$defs/artifact"
@@ -122,7 +125,7 @@
           "type": "integer"
         },
         "ruleFormatVersion": {
-          "const": "1.1.0"
+          "const": "1.2.0"
         },
         "ruleSchema": {
           "$ref": "#/$defs/artifact"
@@ -316,6 +319,16 @@
           "pattern": "\\S",
           "type": "string"
         },
+        "documentSchema": {
+          "description": "Locations in the canonical MCP Description schema whose failures this rule reports, as JSON Pointer fragments. A failure belongs to the rule owning the longest pointer that contains the failing schema location.",
+          "items": {
+            "pattern": "^#(/[^/]+)*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
         "enforcement": {
           "enum": [
             "internal",
@@ -336,8 +349,8 @@
                 ]
               },
               "path": {
-                "description": "A validation fixture relative to fixtures/, or a native projection case under projection-fixtures/.",
-                "pattern": "^(expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)|projection-fixtures/[a-z0-9-]+\\.json)$",
+                "description": "A validation fixture relative to fixtures/, a native projection case under projection-fixtures/, or a serialization fixture under serialization-fixtures/.",
+                "pattern": "^(expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)|projection-fixtures/[a-z0-9-]+\\.json|serialization-fixtures/(expected-(valid|invalid)|equivalent)/[a-z0-9-]+\\.(json|ya?ml))$",
                 "type": "string"
               },
               "pointer": {
@@ -538,6 +551,53 @@
     "snapshot": {
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-(?:draft|rc)\\.[0-9]+)?(?:\\+editorial\\.[0-9]+)?$",
       "type": "string"
+    },
+    "unchecked-requirement-list": {
+      "description": "Normative requirements that no rule checks, each with the reason.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "description": "The requirement anchor in a section, relative to the specification folder.",
+            "pattern": "^sections/[0-9]{2}-[a-z-]+\\.md#req-[a-z0-9-]+$",
+            "type": "string"
+          },
+          "note": {
+            "description": "Why validation cannot check the requirement.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "description": "runtime: behavior of MCP clients, servers, or consumers; processing: behavior of MCP Description tools that document fixtures cannot show; guidance: an authoring choice the document cannot decide.",
+            "enum": [
+              "runtime",
+              "processing",
+              "guidance"
+            ]
+          }
+        },
+        "required": [
+          "location",
+          "reason",
+          "note"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "unchecked-requirements": {
+      "additionalProperties": false,
+      "description": "Structure of validation/unchecked-requirements.yaml.",
+      "properties": {
+        "uncheckedRequirements": {
+          "$ref": "#/$defs/unchecked-requirement-list"
+        }
+      },
+      "required": [
+        "uncheckedRequirements"
+      ],
+      "type": "object"
     },
     "version": {
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",

@@ -26,6 +26,23 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ### Community Working Draft 4 — Unreleased
 
+#### Resource URIs — 2026-10-31
+
+- Section 10.1.2: a Resource `uri` MUST be an RFC 3986 URI with a scheme; custom schemes remain allowed. The previous SHOULD contradicted Section 15, which requires URI values to conform to RFC 3986, and MCP, whose `schema.ts` annotates `Resource.uri` with `@format uri`. Documents with a relative or free-text Resource `uri` become invalid; previously their native projection failed the postcondition.
+- Canonical schema: `format: "uri"` on Resource `uri`, as on every other URI field. New rule `mcp.resource.uri` owns that location; fixture `expected-invalid/invalid-resource-uri.json`.
+- Version conversion: new rule `mcpdesc.conversion.0-8-to-0-9.resource-uri-checked` blocks such values without a fix; case `relative-resource-uri.json`.
+
+#### Complete validation catalog — 2026-10-30
+
+- Implemented review-stage [Proposal 0033](proposal-snapshots/0033-complete-validation-catalog.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #96](https://github.com/mcpdesc/mcpdesc-specification/issues/96). Document validity and diagnostics are unchanged except for the `rule` of document-schema failures. Review-stage content may still change incompatibly or be removed.
+- Schema ownership: rule records list the canonical schema locations they own in `documentSchema`; every definition and the document root have exactly one owner. 17 new object-level rules own the remaining definitions, for example `mcpdesc.tool.members`, `mcpdesc.example.members`, `mcp.content.members`, and `mcp.interaction-message.members`; existing rules own the locations they already covered. In the fixtures, 251 of 259 document-schema failures are now attributed below the document root, against 24 of 245 in Draft 3. Failures of a `oneOf` or `anyOf` alternative other than the best-matching one belong to the owner of the alternatives.
+- Requirement classification: every obligation sentence of the specification is covered by a requirement anchor, and every anchor is cited by a rule or listed in the new [`validation/unchecked-requirements.yaml`](validation/unchecked-requirements.yaml) with a reason (`runtime`, `processing`, or `guidance`). 240 anchors were added, without changing normative wording; 105 of the 341 anchors are listed as unchecked. Key words quoted as words, as in the RFC 2119 boilerplate, state no obligation.
+- New rule `mcpdesc.serialization.conforming` cites the serialization fixtures for the JSON and restricted YAML requirements of Section 15; rule fixtures may now cite `serialization-fixtures/` files, whose outcome is whether decoding accepts them.
+- Rule format `1.2.0`: `documentSchema` on rule records, `uncheckedRequirements` in the catalog, and serialization fixture citations; see the [rule-format changelog](validation/CHANGELOG.md).
+- New fixtures for rules without failure evidence: `expected-invalid/malformed-info-transport-tag-resource.json` and `expected-invalid/malformed-sampling-step.json`.
+- Version conversion profile: any target error at or next to a blocker location is a consequence of that blocker, whatever its rule.
+- `@mcpdesc/core` must attribute document-schema failures from the ownership map at its intake of the next draft; exported validator snapshots carry the map in their runtime.
+
 #### Dialect-governed Tool schemas — 2026-10-30
 
 - Implemented review-stage [Proposal 0032](proposal-snapshots/0032-dialect-governed-tool-schemas.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #95](https://github.com/mcpdesc/mcpdesc-specification/issues/95). For MCP 2025-11-25 and MCP 2026-07-28, the declared or default JSON Schema dialect decides whether an embedded Tool schema is valid; restrictions of schema syntax that only the TypeScript MCP `Tool` type imposes are reported, not enforced. Review-stage content may still change incompatibly or be removed.

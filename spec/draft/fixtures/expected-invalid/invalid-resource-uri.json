@@ -1,0 +1,25 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "invalid-resource-uri",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "resources": [
+    {
+      "uri": "status page",
+      "name": "status"
+    },
+    {
+      "uri": "docs/readme.md",
+      "name": "readme"
+    },
+    {
+      "uri": "acme-inventory:item/42",
+      "name": "inventory-item"
+    }
+  ]
+}
