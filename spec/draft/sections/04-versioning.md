@@ -91,7 +91,7 @@ When processing a document, implementations MUST check the `mcpdesc` value and:
 
 ### 4.9 MCP Protocol Coverage
 
-The root `protocolVersions` array identifies the MCP protocol revisions described by the document. It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
+The root `protocolVersions` array identifies the MCP protocol revisions described by the document. <a id="req-protocol-versions-values"></a>It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
 - `2024-11-05`
 - `2025-03-26`

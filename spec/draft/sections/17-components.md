@@ -2,7 +2,7 @@
 
 ### 17.1 Components Object
 
-The root MCP Description Object MAY contain a `components` property. A Components Object MUST contain at least one property when present and MAY contain these typed namespace maps:
+The root MCP Description Object MAY contain a `components` property. <a id="req-components-fields"></a>A Components Object MUST contain at least one property when present and MAY contain these typed namespace maps:
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -18,7 +18,7 @@ The outer Components Object MAY carry `x-*` specification extensions and MUST NO
 
 ### 17.2 Reference Object
 
-A Reference Object contains exactly one required property:
+<a id="req-reference-object-fields"></a>A Reference Object contains exactly one required property:
 
 | Property | Type | Description |
 |----------|------|-------------|

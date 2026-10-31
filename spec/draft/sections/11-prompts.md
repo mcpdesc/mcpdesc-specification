@@ -4,6 +4,8 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 
 ### 11.1 Prompt Object
 
+<a id="req-prompt-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
@@ -27,6 +29,8 @@ Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It 
 
 ### 11.2 Prompt Argument Object
 
+<a id="req-prompt-argument-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Programmatic argument name (identifier). |
@@ -38,7 +42,7 @@ Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It 
 
 A Prompt Object MAY contain `examples`, a map from a local example name to an inline Prompt Example Object or a Reference Object targeting `#/components/promptExamples/<name>`. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Prompt declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant. A referenced example MUST be resolved before applying every contextual requirement of the containing Prompt and effective protocol scope.
 
-A Prompt Example Object contains these core properties and MAY carry `x-*` specification extensions:
+<a id="req-prompt-example-fields"></a>A Prompt Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

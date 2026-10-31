@@ -10,7 +10,7 @@ Property ordering is not significant unless an individual field explicitly defin
 
 ### 3.2 Root Object
 
-The root of an MCP Description document is an object with the following structure:
+<a id="req-root-fields"></a>The root of an MCP Description document is an object with the following structure:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

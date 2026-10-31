@@ -13,6 +13,8 @@ rules:
       destructiveHint, idempotentHint, and openWorldHint.
     surface: ToolAnnotations
     kind: structural
+    documentSchema:
+      - "#/$defs/toolAnnotations"
     requirement: must
     applicability:
       protocolVersions:
@@ -59,6 +61,8 @@ rules:
       blocks contain only audience, priority, and lastModified.
     surface: Annotations
     kind: structural
+    documentSchema:
+      - "#/$defs/resourceAnnotations"
     requirement: must
     applicability:
       protocolVersions:
@@ -136,4 +140,38 @@ rules:
     fixtures:
       - path: expected-invalid/annotations-last-modified-before-2025-06-18.json
         pointer: /resources/0/annotations
+        outcome: error
+
+  - id: mcp.icon.members
+    title: "Use MCP Icon objects for icons"
+    description: >-
+      An icons array is non-empty, and each Icon has a src and only the MCP Icon
+      properties mimeType, sizes, and theme, with theme light or dark.
+    owner: mcp
+    summary: >-
+      icons is a non-empty array of MCP Icon objects with a src and only the
+      properties MCP defines.
+    surface: Icon
+    kind: structural
+    documentSchema:
+      - "#/$defs/icons"
+      - "#/$defs/icon"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Appendix A
+        locations:
+          - sections/99-appendices.md#req-icon-fields
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, interface Icon"
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L464-L501
+          - validation/mcp-schemas/2026-07-28/schema.ts#L890-L927
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/empty-ordinary-nested-collections.json
+        pointer: "/info/icons"
         outcome: error

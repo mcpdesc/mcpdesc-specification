@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/validation-rule/1.1.0.json",
+  "$id": "https://mcpdesc.org/schema/validation-rule/2.0.0.json",
   "title": "MCP Description validation rule registry file",
   "description": "Structure of each YAML file under validation/rules/. See Proposal 0024 and validation/README.md.",
   "type": "object",
@@ -71,7 +71,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.1.0.json#/$defs/catalog-index"
+          "const": "https://mcpdesc.org/schema/validation-rule/2.0.0.json#/$defs/catalog-index"
         },
         "catalogs": {
           "items": {
@@ -109,7 +109,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.1.0.json#/$defs/catalog-manifest"
+          "const": "https://mcpdesc.org/schema/validation-rule/2.0.0.json#/$defs/catalog-manifest"
         },
         "catalog": {
           "$ref": "#/$defs/artifact"
@@ -122,7 +122,7 @@
           "type": "integer"
         },
         "ruleFormatVersion": {
-          "const": "1.1.0"
+          "const": "2.0.0"
         },
         "ruleSchema": {
           "$ref": "#/$defs/artifact"
@@ -315,6 +315,16 @@
           "minLength": 1,
           "pattern": "\\S",
           "type": "string"
+        },
+        "documentSchema": {
+          "description": "Locations in the canonical MCP Description schema whose failures this rule reports, as JSON Pointer fragments. A failure belongs to the rule owning the longest pointer that contains the failing schema location.",
+          "items": {
+            "pattern": "^#(/[^/]+)*$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
         },
         "enforcement": {
           "enum": [

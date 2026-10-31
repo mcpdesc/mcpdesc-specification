@@ -41,3 +41,32 @@ rules:
       - path: expected-valid/named-prompt-examples.json
         pointer: /prompts/2
         outcome: passes
+
+  - id: mcpdesc.prompt.members
+    title: "Declare Prompts and arguments with their fields"
+    description: >-
+      A Prompt has a name, and each argument has a name. Both accept only the
+      properties of their Section 11 tables, each with its defined type.
+    owner: mcpdesc
+    summary: >-
+      Prompt and Prompt Argument Objects have their required fields, defined
+      property types, and no unknown properties.
+    surface: Prompt, PromptArgument
+    kind: structural
+    documentSchema:
+      - "#/$defs/prompt"
+      - "#/$defs/promptArgument"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 11.1 and 11.2
+        locations:
+          - sections/11-prompts.md#req-prompt-fields
+          - sections/11-prompts.md#req-prompt-argument-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/empty-ordinary-nested-collections.json
+        pointer: "/prompts/0/arguments"
+        outcome: error

@@ -2,7 +2,7 @@
 
 ## Appendix A: Icon Object
 
-The Icon object is used throughout the specification for UI display.
+<a id="req-icon-fields"></a>The Icon object is used throughout the specification for UI display.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

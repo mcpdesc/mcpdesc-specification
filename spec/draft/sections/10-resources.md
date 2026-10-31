@@ -6,6 +6,8 @@ The `resources` array declares the static resources exposed by the MCP server. E
 
 #### 10.1.1 Resource Object
 
+<a id="req-resource-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
@@ -36,6 +38,8 @@ The `uri` property identifies the resource. It SHOULD be a valid URI. The URI sc
 The `resourceTemplates` array declares parameterized resource definitions using URI templates ([RFC 6570](https://www.rfc-editor.org/rfc/rfc6570)).
 
 #### 10.2.1 Resource Template Object
+
+<a id="req-resource-template-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -86,6 +90,8 @@ Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol 
 
 #### 10.4.2 Static Resource Example Object
 
+<a id="req-resource-example-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `result` | [Completed Resource Read Result](#1044-completed-resource-read-result) | **Yes** | Completed `resources/read` result payload for the containing Resource's `uri`, excluding the JSON-RPC envelope. |
@@ -93,6 +99,8 @@ Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol 
 The object MAY carry `x-*` specification extensions; no other additional properties are allowed. The requested URI is implicit in the containing Resource and MUST NOT be duplicated at the example level.
 
 #### 10.4.3 Resource Template Example Object
+
+<a id="req-resource-template-example-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

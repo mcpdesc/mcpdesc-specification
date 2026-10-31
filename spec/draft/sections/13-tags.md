@@ -6,6 +6,8 @@ When present, `tags` declares all valid tags that MAY be referenced by tools, re
 
 ### 13.1 Tag Object
 
+<a id="req-tag-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Tag identifier. MUST be unique across all tags. |

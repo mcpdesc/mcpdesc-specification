@@ -104,3 +104,44 @@ rules:
       - path: expected-invalid/resource-example-result-semantics.json
         pointer: /resources/1/examples/unsupported-metadata/result/contents/0
         outcome: error
+
+  - id: mcp.content.members
+    title: "Use MCP content blocks and resource contents"
+    description: >-
+      Content in example results is an MCP content block selected by type: text,
+      image, audio, resource link, or embedded resource. Resource contents have a
+      uri and either text or blob. Each carries only the fields its MCP type defines.
+    owner: mcp
+    summary: >-
+      Content blocks and resource contents match exactly one MCP content type,
+      with its required fields and no unknown fields.
+    surface: ContentBlock, ResourceContents
+    kind: structural
+    documentSchema:
+      - "#/$defs/toolResultContent"
+      - "#/$defs/resourceContents"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 3.6
+        locations:
+          - sections/03-document-structure.md#req-carried-defined-fields
+          - sections/03-document-structure.md#req-carried-closed-reject
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, ContentBlock and ResourceContents"
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1740-L1741
+          - validation/mcp-schemas/2025-11-25/schema.ts#L881-L897
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2305-L2306
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1514-L1527
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/content-annotations-unknown-property.json
+        pointer: "/tools/0/examples/basic/result/content/0"
+        outcome: error
+      - path: expected-invalid/fractional-resource-link-size.json
+        pointer: "/tools/0/examples/listing/result/content/0"
+        outcome: error

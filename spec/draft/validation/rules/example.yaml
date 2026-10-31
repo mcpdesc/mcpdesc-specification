@@ -196,3 +196,101 @@ rules:
       - path: expected-valid/named-completion-examples.json
         pointer: /prompts/0/completionExamples
         outcome: passes
+
+  - id: mcpdesc.example.members
+    title: "Shape named example maps and example objects"
+    description: >-
+      Named example maps are non-empty, use names matching ^[A-Za-z0-9._-]+$, and
+      hold an example object or a Reference Object. Each example object has its
+      required members, such as input and result, and only its defined properties.
+    owner: mcpdesc
+    summary: >-
+      Example maps and Tool, Resource, Resource Template, Prompt, and completion
+      example objects have valid names, required members, and no unknown
+      properties.
+    surface: Tool, Resource, Resource Template, Prompt, and completion examples
+    kind: structural
+    documentSchema:
+      - "#/$defs/toolExamples"
+      - "#/$defs/toolExample"
+      - "#/$defs/resourceExamples"
+      - "#/$defs/resourceExample"
+      - "#/$defs/resourceTemplateExamples"
+      - "#/$defs/resourceTemplateExample"
+      - "#/$defs/promptExamples"
+      - "#/$defs/promptExample"
+      - "#/$defs/completionExamples"
+      - "#/$defs/completionExample"
+      - "#/$defs/completionArgument"
+      - "#/$defs/completionContext"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.3, 10.4, and 11.3
+        locations:
+          - sections/09-tools.md#req-tool-example-fields
+          - sections/10-resources.md#req-resource-example-fields
+          - sections/10-resources.md#req-resource-template-example-fields
+          - sections/11-prompts.md#req-prompt-example-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/content-annotations-unknown-property.json
+        pointer: "/tools/0/examples/basic"
+        outcome: error
+      - path: expected-invalid/fractional-resource-link-size.json
+        pointer: "/tools/0/examples/listing"
+        outcome: error
+
+  - id: mcp.example-result.members
+    title: "Give example results their MCP result shape"
+    description: >-
+      Example results carry MCP result values: a Tool result has content, a
+      resource read result has contents, a prompt result has messages, and a
+      completion result has completion. Their members follow the MCP types.
+    owner: mcp
+    summary: >-
+      Completed example results have the required members and member types of
+      the MCP result type they carry.
+    surface: CallToolResult, ReadResourceResult, GetPromptResult, CompleteResult
+    kind: structural
+    documentSchema:
+      - "#/$defs/completedToolResultExample"
+      - "#/$defs/completedReadResourceResultExample"
+      - "#/$defs/completedPromptResultExample"
+      - "#/$defs/promptMessageExample"
+      - "#/$defs/completedCompletionResultExample"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.6, 9.3, 10.4.4, and 11.3
+        locations:
+          - sections/03-document-structure.md#req-carried-defined-fields
+          - sections/09-tools.md#req-tool-example-result-shape
+          - sections/10-resources.md#req-resource-example-result-shape
+          - sections/11-prompts.md#req-prompt-example-result-shape
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, CallToolResult, ReadResourceResult, GetPromptResult, PromptMessage, and CompleteResult"
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1104-L1130
+          - validation/mcp-schemas/2025-11-25/schema.ts#L723-L725
+          - validation/mcp-schemas/2025-11-25/schema.ts#L971-L977
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1032-L1035
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2042-L2057
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1809-L1838
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1229-L1231
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1634-L1640
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1704-L1707
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2644-L2661
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-resource-examples.json
+        pointer: "/resourceTemplates/0/examples/missing-uri/result/contents"
+        outcome: error
+      - path: expected-invalid/resource-example-cache-fields.json
+        pointer: "/resources/1/examples/invalid/result/cacheScope"
+        outcome: error

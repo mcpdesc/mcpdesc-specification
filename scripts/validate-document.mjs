@@ -6,6 +6,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { UriTemplateMatcher } from 'uri-template-matcher';
 import schema from '../schemas/mcp-description/0.9.0.json' with { type: 'json' };
+import { documentSchemaOwners } from './document-schema-owners.mjs';
 import {
   classifyCarriedFields,
   mcpExtensionCatalogue,
@@ -18,7 +19,7 @@ export { mcpExtensionCatalogue, mcpExtensionMaturity, supportedProtocolVersions 
 
 const TOOL_INTERACTION_SENTINEL = '__interaction_example__';
 const specificationVersion = schema.properties.mcpdesc.const;
-const ajv = new Ajv2020({ allErrors: true, strict: false });
+const ajv = new Ajv2020({ allErrors: true, strict: false, verbose: true });
 addFormats(ajv);
 const ajvDraft7 = new Ajv({ allErrors: true, strict: false });
 addFormats(ajvDraft7);
@@ -199,28 +200,82 @@ function structuralPath(document, error) {
 
 function structuralDiagnostics(document) {
   if (validateStructure(document)) return [];
-  return (validateStructure.errors ?? []).map((error) => ({
+  const errors = validateStructure.errors ?? [];
+  return errors.map((error) => ({
     code: 'schema-validation',
     severity: 'error',
     message: `does not validate against ${specificationVersion}: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
     path: structuralPath(document, error),
-    rule: structuralRule(error)
+    rule: structuralRule(error, errors)
   }));
 }
 
-// Registered rule for a JSON Schema failure (Proposal 0024, Section 5).
-function structuralRule({ keyword, instancePath, schemaPath, params }) {
-  if (schemaPath.startsWith('#/$defs/toolAnnotations/')) return 'mcp.tool-annotations.members';
-  if (schemaPath.startsWith('#/$defs/resourceAnnotations/')) return 'mcp.annotations.members';
-  if (schemaPath === '#/$defs/completionResult/additionalProperties') return 'mcp.completion.result-closed';
-  // Ajv inlines these definitions, so match the property; the schema has no other size or ttlMs.
-  if (schemaPath.endsWith('/properties/size/type')) return 'mcp.resource.size';
-  if (/\/properties\/ttlMs\/(?:type|minimum)$/.test(schemaPath)) return 'mcp.cacheable-result.ttl-ms';
-  if (keyword === 'additionalProperties' && /^\/capabilities\/\d+$/.test(instancePath)) return 'mcp.server-capabilities.members';
-  if (keyword === 'additionalProperties' && /^\/(?:tools|resources|resourceTemplates|prompts)\/\d+\/clientRequirements$/.test(instancePath)) return 'mcp.client-capabilities.members';
-  if (schemaPath.startsWith('#/$defs/metaObject/propertyNames')) return 'mcp.meta.key-format';
-  if (schemaPath === '#/$defs/securityRequirement/additionalProperties/uniqueItems') return 'mcpdesc.security.requirements';
-  return 'mcpdesc.document.schema';
+// JSON Pointer of every subschema object, so a verbose error's parentSchema locates the failing keyword.
+const schemaPointers = new Map();
+(function indexSchema(node, pointer) {
+  if (node === null || typeof node !== 'object') return;
+  if (!Array.isArray(node)) schemaPointers.set(node, pointer);
+  for (const [key, child] of Object.entries(node)) indexSchema(child, `${pointer}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`);
+})(schema, '#');
+
+const within = (pointer, owned) => pointer === owned || pointer.startsWith(`${owned}/`);
+function schemaOwner(pointer) {
+  let best;
+  for (const [owned, rule] of documentSchemaOwners) {
+    if (within(pointer, owned) && (!best || owned.length > best[0].length)) best = [owned, rule];
+  }
+  return best;
+}
+const withinInstance = (instancePath, container) => instancePath === container || instancePath.startsWith(`${container}/`);
+
+// Subschema objects reachable from an alternative, following local $ref, so a failure can be traced to its alternative.
+const reachable = new WeakMap();
+function reachableFrom(node) {
+  if (reachable.has(node)) return reachable.get(node);
+  const found = new Set();
+  const stack = [node];
+  while (stack.length) {
+    const current = stack.pop();
+    if (current === null || typeof current !== 'object' || found.has(current)) continue;
+    found.add(current);
+    if (typeof current.$ref === 'string' && current.$ref.startsWith('#/$defs/')) stack.push(schema.$defs[current.$ref.slice(8)]);
+    stack.push(...Object.values(current));
+  }
+  reachable.set(node, found);
+  return found;
+}
+const depth = (instancePath) => (instancePath ? instancePath.split('/').length - 1 : 0);
+
+// The alternative of a failed oneOf or anyOf that best matches the instance: its failures reach
+// deepest into the instance, then it has the fewest failures, then it comes first.
+function selectedAlternative(container, errors) {
+  let best;
+  container.parentSchema[container.keyword].forEach((alternative, index) => {
+    const members = reachableFrom(alternative);
+    const failures = errors.filter((error) => error !== container && withinInstance(error.instancePath, container.instancePath) && members.has(error.parentSchema));
+    if (!failures.length) return;
+    const score = [Math.max(...failures.map((error) => depth(error.instancePath))), -failures.length, -index];
+    if (!best || score[0] > best.score[0] || (score[0] === best.score[0] && (score[1] > best.score[1] || (score[1] === best.score[1] && score[2] > best.score[2])))) {
+      best = { members, score };
+    }
+  });
+  return best?.members;
+}
+
+// Registered rule for a JSON Schema failure (Proposals 0024 and 0033): the rule owning the longest
+// documentSchema pointer that contains the failing location. A failure in an alternative of a
+// failed oneOf or anyOf other than the best-matching one belongs to the owner of the alternatives.
+function structuralRule(error, errors) {
+  const own = schemaOwner(schemaPointers.get(error.parentSchema) ?? '#')?.[1];
+  const containers = errors
+    .filter((candidate) => candidate !== error && (candidate.keyword === 'oneOf' || candidate.keyword === 'anyOf') && withinInstance(error.instancePath, candidate.instancePath))
+    .sort((left, right) => depth(left.instancePath) - depth(right.instancePath));
+  for (const container of containers) {
+    const alternatives = container.parentSchema[container.keyword];
+    if (!alternatives.some((alternative) => reachableFrom(alternative).has(error.parentSchema))) continue;
+    if (!selectedAlternative(container, errors)?.has(error.parentSchema)) return schemaOwner(schemaPointers.get(container.parentSchema) ?? '#')?.[1];
+  }
+  return own;
 }
 
 // Rules for diagnostic codes that only one registered rule emits. Codes shared

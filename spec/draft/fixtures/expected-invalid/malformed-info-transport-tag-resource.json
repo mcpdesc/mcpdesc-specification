@@ -1,0 +1,34 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "malformed-info-tags-resources",
+    "version": "1.0.0",
+    "owner": "Example Team",
+    "license": {
+      "url": "https://example.com/license"
+    }
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "args": [
+        "--verbose"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "description": "A tag without a name"
+    }
+  ],
+  "resources": [
+    {
+      "name": "readme",
+      "mimeType": "text/markdown"
+    }
+  ]
+}

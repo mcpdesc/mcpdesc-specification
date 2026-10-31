@@ -14,6 +14,8 @@ Every Transport Object MAY contain `protocolVersions` and `security`. `protocolV
 
 #### 6.2.1 Streamable HTTP Transport
 
+<a id="req-transport-streamable-http-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `type` | `"streamable-http"` | **Yes** | Transport type identifier |
@@ -29,6 +31,8 @@ The streamable HTTP transport connects to an MCP server over HTTP with streaming
 ```
 
 #### 6.2.2 stdio Transport
+
+<a id="req-transport-stdio-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -51,6 +55,8 @@ The stdio transport launches the MCP server as a subprocess and communicates ove
 ```
 
 #### 6.2.3 SSE Transport (Legacy)
+
+<a id="req-transport-sse-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

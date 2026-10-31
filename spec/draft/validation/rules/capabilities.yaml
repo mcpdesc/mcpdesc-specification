@@ -13,6 +13,12 @@ rules:
       and, from MCP 2026-07-28, in extensions.
     surface: ServerCapabilities
     kind: structural
+    documentSchema:
+      - "#/$defs/capabilities"
+      - "#/$defs/capabilityPrompts"
+      - "#/$defs/capabilityResources"
+      - "#/$defs/capabilityTools"
+      - "#/$defs/extensionCapabilities"
     requirement: must
     applicability:
       protocolVersions:
@@ -90,6 +96,9 @@ rules:
     surface: ClientCapabilities
     path: clientRequirements
     kind: structural
+    documentSchema:
+      - "#/$defs/clientCapabilityRequirements"
+      - "#/$defs/clientCapabilityValue"
     requirement: must
     applicability:
       protocolVersions:

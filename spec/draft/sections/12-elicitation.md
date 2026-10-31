@@ -10,6 +10,8 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 
 ### 12.2 Elicitation Declaration Object
 
+<a id="req-elicitation-declaration-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Stable local declaration name. |
@@ -36,7 +38,7 @@ For `mode: "form"`:
 
 - `requestedSchema` is REQUIRED;
 - `url` MUST NOT appear; and
-- `requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+- <a id="req-elicitation-form-shape"></a>`requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
 
 `requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 

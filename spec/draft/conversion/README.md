@@ -33,11 +33,10 @@ Conversion takes a document, its source version, and the target version:
    `conversion-fix-not-applicable`.
 5. Validate the result against the target version. Each error whose rule a
    conversion rule lists in `targetRules` becomes a `conversion-blocked`
-   diagnostic with that conversion rule and the error's path. A generic schema
-   error (`mcpdesc.document.schema`) reported at or next to a blocker location,
-   such as the other alternatives of a `oneOf`, is a consequence of that
-   blocker. Any other error is an undeclared incompatibility: a defect in
-   this profile.
+   diagnostic with that conversion rule and the error's path. Any other error
+   reported at or next to a blocker location, such as a failure of another
+   alternative of a `oneOf`, is a consequence of that blocker. Any other error
+   is an undeclared incompatibility: a defect in this profile.
 6. Return status `converted` with the converted document and an RFC 6902
    patch when no error remains; otherwise return status `blocked` with the
    diagnostics and no document. Target warnings are returned unchanged.

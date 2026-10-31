@@ -32,7 +32,7 @@ Root `securitySchemes` is a map from a local name to a Security Scheme Object. W
 
 ### 7.2 Security Scheme Object
 
-Each Security Scheme Object MUST include `type`.
+<a id="req-security-scheme-fields"></a>Each Security Scheme Object MUST include `type`.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

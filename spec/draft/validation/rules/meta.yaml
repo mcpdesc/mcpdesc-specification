@@ -12,6 +12,8 @@ rules:
       slash, and a name that begins and ends with an alphanumeric character.
     surface: _meta
     kind: structural
+    documentSchema:
+      - "#/$defs/metaObject"
     requirement: must
     applicability:
       protocolVersions: independent

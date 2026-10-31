@@ -15,6 +15,10 @@ rules:
       rule.
     surface: Document
     kind: structural
+    documentSchema:
+      - "#"
+      - "#/$defs/jsonValue"
+      - "#/$defs/specificationExtensionValue"
     specification:
       - reference: MCP Description 0.9.0, Section 16.1, item 7
         locations:
@@ -24,11 +28,11 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/missing-tool-input-schema.json
-        pointer: /tools/0
+      - path: expected-invalid/empty-ordinary-root-collections.json
+        pointer: "/capabilities"
         outcome: error
-      - path: expected-invalid/object-level-unknown-property.json
-        pointer: /tools/0
+      - path: expected-invalid/empty-tag-catalog-reference.json
+        pointer: "/tags"
         outcome: error
 
   - id: mcp.declaration.field.revision-availability
@@ -196,6 +200,9 @@ rules:
       scopes when the scheme declares a static catalogue.
     surface: Security Requirement
     kind: mcpdesc-semantic
+    documentSchema:
+      - "#/$defs/securityRequirementArray"
+      - "#/$defs/securityRequirement"
     requirement: must
     specification:
       - reference: MCP Description 0.9.0, Sections 7.1 to 7.3
@@ -291,3 +298,158 @@ rules:
       - path: expected-warning/legacy-result-meta.json
         pointer: /protocolVersions
         outcome: warning
+
+  - id: mcpdesc.info.members
+    title: "Describe the server in a valid Info Object"
+    description: >-
+      The required info object names and versions the server. Its contact and
+      license objects are closed and follow the property tables of Section 5.
+    owner: mcpdesc
+    summary: >-
+      Info has a non-empty name and version, and Info, Contact, and License
+      contain only their defined properties with the defined types.
+    surface: Info, Contact, License
+    kind: structural
+    documentSchema:
+      - "#/$defs/info"
+      - "#/$defs/contact"
+      - "#/$defs/license"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 5
+        locations:
+          - sections/05-info-object.md#req-info-fields
+          - sections/05-info-object.md#req-contact-fields
+          - sections/05-info-object.md#req-license-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-info-transport-tag-resource.json
+        pointer: "/info/owner"
+        outcome: error
+
+  - id: mcpdesc.protocol-versions.values
+    title: "List supported MCP revisions in protocol scopes"
+    description: >-
+      Root and declaration protocolVersions arrays are non-empty, contain no
+      duplicates, and name only MCP revisions this specification supports.
+    owner: mcpdesc
+    summary: >-
+      A protocolVersions array is non-empty, has unique values, and contains
+      only supported MCP revision identifiers.
+    surface: Document, scoped declarations
+    kind: structural
+    documentSchema:
+      - "#/$defs/protocolVersionScope"
+      - "#/$defs/supportedProtocolVersion"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 4
+        locations:
+          - sections/04-versioning.md#req-protocol-versions-values
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/closed-protocol-enum.json
+        pointer: "/protocolVersions/0"
+        outcome: error
+
+  - id: mcpdesc.security-scheme.members
+    title: "Define security schemes with their required fields"
+    description: >-
+      Named security schemes are non-empty and each scheme has a type and the
+      fields that type requires, such as OAuth flows with their URLs and scopes.
+      Unknown properties are rejected.
+    owner: mcpdesc
+    summary: >-
+      securitySchemes is a non-empty map of Security Scheme Objects that
+      contain their type-specific required fields and only defined properties.
+    surface: Security Scheme
+    kind: structural
+    documentSchema:
+      - "#/$defs/securitySchemeMap"
+      - "#/$defs/securityScheme"
+      - "#/$defs/oauthFlows"
+      - "#/$defs/oauthFlow"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 7.1 and 7.2
+        locations:
+          - sections/07-security.md#req-security-scheme-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/empty-ordinary-root-collections.json
+        pointer: "/securitySchemes"
+        outcome: error
+      - path: expected-invalid/invalid-security-scheme-name.json
+        pointer: "/securitySchemes"
+        outcome: error
+
+  - id: mcpdesc.tag.members
+    title: "Declare tags with a name"
+    description: >-
+      Each entry of the root tags catalogue is a Tag Object with a name and only
+      the properties of Section 13.1.
+    owner: mcpdesc
+    summary: >-
+      A Tag Object has a non-empty name and only its defined properties.
+    surface: Tag
+    kind: structural
+    documentSchema:
+      - "#/$defs/tag"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 13.1
+        locations:
+          - sections/13-tags.md#req-tag-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-info-transport-tag-resource.json
+        pointer: "/tags/0"
+        outcome: error
+
+  - id: mcpdesc.components.members
+    title: "Shape components and Reference Objects"
+    description: >-
+      The components object holds non-empty named maps in its five namespaces.
+      A Reference Object has exactly one $componentRef. Where a value may be
+      inline or a reference, the inline form is a JSON object without $componentRef.
+    owner: mcpdesc
+    summary: >-
+      Components contain non-empty, well-named maps; a Reference Object has
+      only $componentRef; an inline schema or example is an object.
+    surface: Components, Reference Object
+    kind: structural
+    documentSchema:
+      - "#/$defs/components"
+      - "#/$defs/componentMap"
+      - "#/$defs/referenceObject"
+      - "#/$defs/schemaComponentValue"
+      - "#/$defs/jsonSchemaObject"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 17.1 and 17.2
+        locations:
+          - sections/17-components.md#req-components-fields
+          - sections/17-components.md#req-reference-object-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/component-extension-boundaries.json
+        pointer: "/components/toolExamples/x-map-extension"
+        outcome: error
+      - path: expected-invalid/components-empty-and-reference-shapes.json
+        pointer: "/components/schemas"
+        outcome: error

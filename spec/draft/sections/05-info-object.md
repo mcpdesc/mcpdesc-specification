@@ -10,6 +10,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 
 ### 5.1 Properties
 
+<a id="req-info-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Programmatic server name (identifier). MUST be non-empty. Maps to `Implementation.name` (MCP `BaseMetadata`). |
@@ -24,6 +26,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 
 ### 5.2 Contact Object
 
+<a id="req-contact-fields"></a>
+
 | Property | Type | Description |
 |----------|------|-------------|
 | `name` | string | Organization or maintainer name |
@@ -31,6 +35,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 | `email` | string (email) | Contact email address |
 
 ### 5.3 License Object
+
+<a id="req-license-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|

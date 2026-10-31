@@ -170,6 +170,9 @@ rules:
     surface: Resource
     path: size
     kind: structural
+    documentSchema:
+      - "#/$defs/resource/properties/size"
+      - "#/$defs/toolResultContent/oneOf/3/properties/size"
     requirement: must
     applicability:
       protocolVersions: independent
@@ -229,3 +232,33 @@ rules:
           generated schema and matches what MCP tooling validates.
         reviewTrigger: MCP changes its generator configuration or annotates size with @TJS-type number.
         status: active
+
+  - id: mcpdesc.resource.members
+    title: "Declare Resources and templates with their fields"
+    description: >-
+      A Resource has a uri and a name; a Resource Template has a uriTemplate and
+      a name. Both accept only the properties of their Section 10 tables, each
+      with its defined type.
+    owner: mcpdesc
+    summary: >-
+      Resource and Resource Template Objects have their required fields,
+      defined property types, and no unknown properties.
+    surface: Resource, ResourceTemplate
+    kind: structural
+    documentSchema:
+      - "#/$defs/resource"
+      - "#/$defs/resourceTemplate"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.1.1 and 10.2.1
+        locations:
+          - sections/10-resources.md#req-resource-fields
+          - sections/10-resources.md#req-resource-template-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-info-transport-tag-resource.json
+        pointer: "/resources/0"
+        outcome: error

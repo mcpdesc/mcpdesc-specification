@@ -4,6 +4,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 
 ### 9.1 Tool Object
 
+<a id="req-tool-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
@@ -52,7 +54,7 @@ MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input t
 
 A Tool Object MAY contain `examples`, a map from a local example name to an inline Tool Example Object or a Reference Object targeting `#/components/toolExamples/<name>`. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant. A referenced example MUST be resolved before applying every contextual requirement of the containing Tool and effective protocol scope.
 
-A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
+<a id="req-tool-example-fields"></a>A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -87,7 +89,7 @@ A Tool Object MAY contain `interactionExamples`, a non-empty map from a local sc
 
 Tool `interactionExamples` are separate from completed Tool `examples`. A producer MUST NOT place an incomplete workflow, semantic interaction step, or non-terminal Tool result in the completed `examples` map.
 
-A Tool Interaction Example Object contains these core properties and MAY carry `x-*` specification extensions:
+<a id="req-interaction-example-fields"></a>A Tool Interaction Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -97,7 +99,7 @@ A Tool Interaction Example Object contains these core properties and MAY carry `
 
 `input` follows the same schema-compatibility rules as Tool Example `input`. `result` follows the same completed success and execution-error rules as Tool Example `result`. The scenario is illustrative and non-exhaustive: it asserts only that the shown steps occur in the displayed order in this example. It does not define branching, retries, correlation IDs, task state, transport framing, timing, or behavior for responses not shown.
 
-Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. MCP Description 0.9.0 defines three step kinds:
+<a id="req-interaction-step-fields"></a>Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. MCP Description 0.9.0 defines three step kinds:
 
 | `type` | Request payload | Response payload |
 |--------|-----------------|------------------|
@@ -146,6 +148,8 @@ All Tool Annotation properties are advisory. They are not guaranteed to describe
 <a id="req-tool-annotations-closed"></a>The Tool Annotations object contains only the properties above. MCP defines `ToolAnnotations` as a closed type in every supported revision, so other properties, including `x-*` keys, MUST NOT appear. Resource Annotation fields MUST NOT be used here.
 
 ### 9.7 Execution Object
+
+<a id="req-execution-fields"></a>
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|

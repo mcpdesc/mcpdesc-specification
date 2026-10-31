@@ -163,7 +163,7 @@ Property ordering is not significant unless an individual field explicitly defin
 
 ### 3.2 Root Object
 
-The root of an MCP Description document is an object with the following structure:
+<a id="req-root-fields"></a>The root of an MCP Description document is an object with the following structure:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -357,7 +357,7 @@ When processing a document, implementations MUST check the `mcpdesc` value and:
 
 ### 4.9 MCP Protocol Coverage
 
-The root `protocolVersions` array identifies the MCP protocol revisions described by the document. It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
+The root `protocolVersions` array identifies the MCP protocol revisions described by the document. <a id="req-protocol-versions-values"></a>It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
 - `2024-11-05`
 - `2025-03-26`
@@ -457,6 +457,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 
 ### 5.1 Properties
 
+<a id="req-info-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Programmatic server name (identifier). MUST be non-empty. Maps to `Implementation.name` (MCP `BaseMetadata`). |
@@ -471,6 +473,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 
 ### 5.2 Contact Object
 
+<a id="req-contact-fields"></a>
+
 | Property | Type | Description |
 |----------|------|-------------|
 | `name` | string | Organization or maintainer name |
@@ -478,6 +482,8 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 | `email` | string (email) | Contact email address |
 
 ### 5.3 License Object
+
+<a id="req-license-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -537,6 +543,8 @@ Every Transport Object MAY contain `protocolVersions` and `security`. `protocolV
 
 #### 6.2.1 Streamable HTTP Transport
 
+<a id="req-transport-streamable-http-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `type` | `"streamable-http"` | **Yes** | Transport type identifier |
@@ -552,6 +560,8 @@ The streamable HTTP transport connects to an MCP server over HTTP with streaming
 ```
 
 #### 6.2.2 stdio Transport
+
+<a id="req-transport-stdio-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -574,6 +584,8 @@ The stdio transport launches the MCP server as a subprocess and communicates ove
 ```
 
 #### 6.2.3 SSE Transport (Legacy)
+
+<a id="req-transport-sse-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -681,7 +693,7 @@ Root `securitySchemes` is a map from a local name to a Security Scheme Object. W
 
 ### 7.2 Security Scheme Object
 
-Each Security Scheme Object MUST include `type`.
+<a id="req-security-scheme-fields"></a>Each Security Scheme Object MUST include `type`.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -863,6 +875,8 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 
 ### 9.1 Tool Object
 
+<a id="req-tool-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
@@ -911,7 +925,7 @@ MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input t
 
 A Tool Object MAY contain `examples`, a map from a local example name to an inline Tool Example Object or a Reference Object targeting `#/components/toolExamples/<name>`. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Tool declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant. A referenced example MUST be resolved before applying every contextual requirement of the containing Tool and effective protocol scope.
 
-A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
+<a id="req-tool-example-fields"></a>A Tool Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -946,7 +960,7 @@ A Tool Object MAY contain `interactionExamples`, a non-empty map from a local sc
 
 Tool `interactionExamples` are separate from completed Tool `examples`. A producer MUST NOT place an incomplete workflow, semantic interaction step, or non-terminal Tool result in the completed `examples` map.
 
-A Tool Interaction Example Object contains these core properties and MAY carry `x-*` specification extensions:
+<a id="req-interaction-example-fields"></a>A Tool Interaction Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -956,7 +970,7 @@ A Tool Interaction Example Object contains these core properties and MAY carry `
 
 `input` follows the same schema-compatibility rules as Tool Example `input`. `result` follows the same completed success and execution-error rules as Tool Example `result`. The scenario is illustrative and non-exhaustive: it asserts only that the shown steps occur in the displayed order in this example. It does not define branching, retries, correlation IDs, task state, transport framing, timing, or behavior for responses not shown.
 
-Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. MCP Description 0.9.0 defines three step kinds:
+<a id="req-interaction-step-fields"></a>Every Tool Interaction Step Object MUST contain `type`, `request`, and `response`. MCP Description 0.9.0 defines three step kinds:
 
 | `type` | Request payload | Response payload |
 |--------|-----------------|------------------|
@@ -1005,6 +1019,8 @@ All Tool Annotation properties are advisory. They are not guaranteed to describe
 <a id="req-tool-annotations-closed"></a>The Tool Annotations object contains only the properties above. MCP defines `ToolAnnotations` as a closed type in every supported revision, so other properties, including `x-*` keys, MUST NOT appear. Resource Annotation fields MUST NOT be used here.
 
 ### 9.7 Execution Object
+
+<a id="req-execution-fields"></a>
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -1123,6 +1139,8 @@ The `resources` array declares the static resources exposed by the MCP server. E
 
 #### 10.1.1 Resource Object
 
+<a id="req-resource-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
@@ -1153,6 +1171,8 @@ The `uri` property identifies the resource. It SHOULD be a valid URI. The URI sc
 The `resourceTemplates` array declares parameterized resource definitions using URI templates ([RFC 6570](https://www.rfc-editor.org/rfc/rfc6570)).
 
 #### 10.2.1 Resource Template Object
+
+<a id="req-resource-template-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -1203,6 +1223,8 @@ Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol 
 
 #### 10.4.2 Static Resource Example Object
 
+<a id="req-resource-example-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `result` | [Completed Resource Read Result](#1044-completed-resource-read-result) | **Yes** | Completed `resources/read` result payload for the containing Resource's `uri`, excluding the JSON-RPC envelope. |
@@ -1210,6 +1232,8 @@ Declarations for the same `uri` or `uriTemplate` in disjoint effective protocol 
 The object MAY carry `x-*` specification extensions; no other additional properties are allowed. The requested URI is implicit in the containing Resource and MUST NOT be duplicated at the example level.
 
 #### 10.4.3 Resource Template Example Object
+
+<a id="req-resource-template-example-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -1386,6 +1410,8 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 
 ### 11.1 Prompt Object
 
+<a id="req-prompt-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
@@ -1409,6 +1435,8 @@ Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It 
 
 ### 11.2 Prompt Argument Object
 
+<a id="req-prompt-argument-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Programmatic argument name (identifier). |
@@ -1420,7 +1448,7 @@ Prompt `clientRequirements` applies only to retrieval through `prompts/get`. It 
 
 A Prompt Object MAY contain `examples`, a map from a local example name to an inline Prompt Example Object or a Reference Object targeting `#/components/promptExamples/<name>`. When present, the map MUST contain at least one entry. Each name MUST match `^[A-Za-z0-9._-]+$`; names are case-sensitive, scoped to the containing Prompt declaration, and serve as both human-meaningful labels and stable local selection names. Entry order is not semantically significant. A referenced example MUST be resolved before applying every contextual requirement of the containing Prompt and effective protocol scope.
 
-A Prompt Example Object contains these core properties and MAY carry `x-*` specification extensions:
+<a id="req-prompt-example-fields"></a>A Prompt Example Object contains these core properties and MAY carry `x-*` specification extensions:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -1541,6 +1569,8 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 
 ### 12.2 Elicitation Declaration Object
 
+<a id="req-elicitation-declaration-fields"></a>
+
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `name` | string | **Yes** | Stable local declaration name. |
@@ -1567,7 +1597,7 @@ For `mode: "form"`:
 
 - `requestedSchema` is REQUIRED;
 - `url` MUST NOT appear; and
-- `requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+- <a id="req-elicitation-form-shape"></a>`requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
 
 `requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 
@@ -1653,6 +1683,8 @@ The root-level `tags` array defines a flat, document-wide tag catalogue for the 
 When present, `tags` declares all valid tags that MAY be referenced by tools, resources, resource templates, and prompts. The array order determines display priority — tags appearing earlier in the array SHOULD be presented first in UIs and documentation.
 
 ### 13.1 Tag Object
+
+<a id="req-tag-fields"></a>
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -1975,7 +2007,7 @@ Conformance is assessed against a specific specification version. An implementat
 
 ### 17.1 Components Object
 
-The root MCP Description Object MAY contain a `components` property. A Components Object MUST contain at least one property when present and MAY contain these typed namespace maps:
+The root MCP Description Object MAY contain a `components` property. <a id="req-components-fields"></a>A Components Object MUST contain at least one property when present and MAY contain these typed namespace maps:
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -1991,7 +2023,7 @@ The outer Components Object MAY carry `x-*` specification extensions and MUST NO
 
 ### 17.2 Reference Object
 
-A Reference Object contains exactly one required property:
+<a id="req-reference-object-fields"></a>A Reference Object contains exactly one required property:
 
 | Property | Type | Description |
 |----------|------|-------------|
@@ -2058,7 +2090,7 @@ See the [complete reusable-components example](examples/reusable-components.yaml
 
 ## Appendix A: Icon Object
 
-The Icon object is used throughout the specification for UI display.
+<a id="req-icon-fields"></a>The Icon object is used throughout the specification for UI display.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
