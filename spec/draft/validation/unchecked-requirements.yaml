@@ -1,0 +1,88 @@
+# Normative requirements that no validation rule checks, with the reason (Proposal 0033).
+# runtime: behavior of MCP clients, servers, or consumers; processing: behavior of MCP Description
+# tools that document fixtures cannot show; guidance: an authoring choice the document cannot decide.
+uncheckedRequirements:
+  - location: sections/03-document-structure.md#req-conforming-serialization
+    reason: processing
+    note: "Serialization conformance is exercised by the serialization fixtures, which no catalog rule cites yet."
+  - location: sections/03-document-structure.md#req-serialization-order
+    reason: processing
+    note: "Concerns how tools read a serialization, not a document value."
+  - location: sections/03-document-structure.md#req-omission-not-absence
+    reason: runtime
+    note: "Constrains how consumers interpret an absent property."
+  - location: sections/03-document-structure.md#req-security-empties-preserved
+    reason: processing
+    note: "Preservation by tools is not shown by a document fixture."
+  - location: sections/03-document-structure.md#req-primitive-absence
+    reason: runtime
+    note: "Constrains how consumers interpret an absent collection."
+  - location: sections/03-document-structure.md#req-property-order
+    reason: processing
+    note: "Concerns how tools read a serialization, not a document value."
+  - location: sections/07-security.md#req-security-schemes-omission
+    reason: runtime
+    note: "Constrains how consumers interpret absent security schemes."
+  - location: sections/07-security.md#req-security-empty-distinction
+    reason: processing
+    note: "Preservation by tools is not shown by a document fixture."
+  - location: sections/07-security.md#req-security-projection
+    reason: processing
+    note: "Protocol-version projection is checked by repository tests, not by catalog fixtures."
+  - location: sections/07-security.md#req-security-transport-variants
+    reason: guidance
+    note: "An authoring choice that a document cannot show."
+  - location: sections/07-security.md#req-security-no-combined-requirement
+    reason: processing
+    note: "Concerns tool behavior when transports differ."
+  - location: sections/09-tools.md#req-tool-schema-closed-recommended
+    reason: guidance
+    note: "Recommends a schema style; both styles are valid."
+  - location: sections/09-tools.md#req-tool-schema-no-fetch
+    reason: processing
+    note: "Network access by a validator cannot be shown by a document fixture."
+  - location: sections/09-tools.md#req-tool-schema-consumer-certainty
+    reason: runtime
+    note: "Advice to consumers about unresolved references."
+  - location: sections/09-tools.md#req-tool-schema-self-contained
+    reason: guidance
+    note: "An authoring preference; external references remain valid."
+  - location: sections/09-tools.md#req-tool-example-not-inferred
+    reason: processing
+    note: "Concerns how producers create documents."
+  - location: sections/09-tools.md#req-tool-example-tooling
+    reason: processing
+    note: "Concerns documentation and mock tooling."
+  - location: sections/09-tools.md#req-tool-example-no-secrets
+    reason: guidance
+    note: "Whether a value is a secret cannot be decided from the document."
+  - location: sections/09-tools.md#req-tool-example-untrusted
+    reason: runtime
+    note: "Constrains how consumers use example content."
+  - location: sections/09-tools.md#req-tool-example-views-preserved
+    reason: processing
+    note: "Protocol-version projection is checked by repository tests, not by catalog fixtures."
+  - location: sections/09-tools.md#req-interaction-step-not-wire
+    reason: runtime
+    note: "Concerns MCP connections, not documents."
+  - location: sections/09-tools.md#req-interaction-views-preserved
+    reason: processing
+    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
+  - location: sections/09-tools.md#req-interaction-no-secrets
+    reason: guidance
+    note: "Whether a value is a secret cannot be decided from the document."
+  - location: sections/09-tools.md#req-interaction-untrusted
+    reason: runtime
+    note: "Constrains how consumers use scenario content."
+  - location: sections/09-tools.md#req-tool-annotations-untrusted
+    reason: runtime
+    note: "Constrains MCP clients."
+  - location: sections/12-elicitation.md#req-elicitation-not-capability
+    reason: runtime
+    note: "Constrains how consumers interpret a declaration."
+  - location: sections/12-elicitation.md#req-elicitation-runtime-wording
+    reason: runtime
+    note: "Concerns the message a server sends at run time."
+  - location: sections/12-elicitation.md#req-elicitation-url-no-fetch
+    reason: processing
+    note: "Network access by a validator cannot be shown by a document fixture."

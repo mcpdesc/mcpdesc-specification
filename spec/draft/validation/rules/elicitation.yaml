@@ -189,6 +189,13 @@ rules:
       - reference: MCP Description 0.9.0, Section 12.2
         locations:
           - sections/12-elicitation.md#req-elicitation-declaration-fields
+          - sections/12-elicitation.md#req-elicitation-name-format
+          - sections/12-elicitation.md#req-elicitation-message
+          - sections/12-elicitation.md#req-elicitation-documentation-fields
+          - sections/12-elicitation.md#req-elicitation-form-schema-required
+          - sections/12-elicitation.md#req-elicitation-form-no-url
+          - sections/12-elicitation.md#req-elicitation-url-no-schema
+          - sections/12-elicitation.md#req-elicitation-url-syntax
     enforcement: internal
     status: internal
     fixtures:

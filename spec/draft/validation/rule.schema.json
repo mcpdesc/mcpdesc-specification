@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://mcpdesc.org/schema/validation-rule/2.0.0.json",
   "title": "MCP Description validation rule registry file",
-  "description": "Structure of each YAML file under validation/rules/. See Proposal 0024 and validation/README.md.",
+  "description": "Structure of each YAML file under validation/rules/ and of the aggregate catalog, which also lists the unchecked requirements. See Proposals 0024, 0030, and 0033, and validation/README.md.",
   "type": "object",
   "required": [
     "rules"
@@ -15,6 +15,9 @@
       },
       "minItems": 1,
       "type": "array"
+    },
+    "uncheckedRequirements": {
+      "$ref": "#/$defs/unchecked-requirement-list"
     }
   },
   "$defs": {
@@ -548,6 +551,53 @@
     "snapshot": {
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:-(?:draft|rc)\\.[0-9]+)?(?:\\+editorial\\.[0-9]+)?$",
       "type": "string"
+    },
+    "unchecked-requirement-list": {
+      "description": "Normative requirements that no rule checks, each with the reason.",
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "description": "The requirement anchor in a section, relative to the specification folder.",
+            "pattern": "^sections/[0-9]{2}-[a-z-]+\\.md#req-[a-z0-9-]+$",
+            "type": "string"
+          },
+          "note": {
+            "description": "Why validation cannot check the requirement.",
+            "minLength": 1,
+            "type": "string"
+          },
+          "reason": {
+            "description": "runtime: behavior of MCP clients, servers, or consumers; processing: behavior of MCP Description tools that document fixtures cannot show; guidance: an authoring choice the document cannot decide.",
+            "enum": [
+              "runtime",
+              "processing",
+              "guidance"
+            ]
+          }
+        },
+        "required": [
+          "location",
+          "reason",
+          "note"
+        ],
+        "type": "object"
+      },
+      "minItems": 1,
+      "type": "array"
+    },
+    "unchecked-requirements": {
+      "additionalProperties": false,
+      "description": "Structure of validation/unchecked-requirements.yaml.",
+      "properties": {
+        "uncheckedRequirements": {
+          "$ref": "#/$defs/unchecked-requirement-list"
+        }
+      },
+      "required": [
+        "uncheckedRequirements"
+      ],
+      "type": "object"
     },
     "version": {
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",

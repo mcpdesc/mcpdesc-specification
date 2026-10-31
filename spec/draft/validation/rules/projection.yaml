@@ -111,6 +111,8 @@ rules:
           - sections/04-versioning.md#req-native-projection-postcondition
           - sections/04-versioning.md#req-native-projection-no-synthesis
           - sections/04-versioning.md#req-native-projection-lists
+          - sections/09-tools.md#req-tool-example-projection-omitted
+          - sections/09-tools.md#req-interaction-projection-omitted
     enforcement: external
     status: delegated
     fixtures:

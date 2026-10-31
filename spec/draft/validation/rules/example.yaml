@@ -84,6 +84,7 @@ rules:
           - sections/09-tools.md#req-tool-example-completed-form
           - sections/10-resources.md#req-resource-example-completed-form
           - sections/11-prompts.md#req-prompt-example-completed-form
+          - sections/09-tools.md#req-tool-example-not-interaction
     sources:
       - tier: 1
         reference: MCP 2026-07-28 schema.ts, InputRequiredResult (inputRequests, requestState) and Result.resultType
@@ -233,6 +234,8 @@ rules:
           - sections/10-resources.md#req-resource-example-fields
           - sections/10-resources.md#req-resource-template-example-fields
           - sections/11-prompts.md#req-prompt-example-fields
+          - sections/09-tools.md#req-tool-examples-map
+          - sections/09-tools.md#req-tool-example-closed
     enforcement: internal
     status: internal
     fixtures:
@@ -271,6 +274,7 @@ rules:
           - sections/09-tools.md#req-tool-example-result-shape
           - sections/10-resources.md#req-resource-example-result-shape
           - sections/11-prompts.md#req-prompt-example-result-shape
+          - sections/03-document-structure.md#req-completed-result-fields
     sources:
       - tier: 1
         reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, CallToolResult, ReadResourceResult, GetPromptResult, PromptMessage, and CompleteResult"

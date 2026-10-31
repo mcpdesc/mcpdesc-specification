@@ -16,14 +16,17 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { candidateSpecification } from './candidate-specification.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
+import { obligationSentences } from './normative-sentences.mjs';
 import { supportedProtocolVersions, validateDocument } from './validate-document.mjs';
 import { checkRuleApplicability } from './validation-catalog.mjs';
 
 // Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
 const historicalRevisions = new Set(['2024-11-05', '2025-03-26']);
+// Sections whose obligation sentences must all start with or follow a requirement anchor (Proposal 0033).
+const classifiedSections = new Set(['03-document-structure.md', '07-security.md', '09-tools.md', '12-elicitation.md']);
 
 const root = process.cwd();
-const { specificationRoot } = candidateSpecification(root);
+const { specificationRoot, schemaPath } = candidateSpecification(root);
 const validationRoot = path.join(root, specificationRoot, 'validation');
 const rulesDirectory = path.join(validationRoot, 'rules');
 const errors = [];
@@ -36,7 +39,10 @@ if (!fs.existsSync(rulesDirectory)) {
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
-const validateRegistryFile = ajv.compile(JSON.parse(fs.readFileSync(path.join(validationRoot, 'rule.schema.json'), 'utf8')));
+const ruleSchema = JSON.parse(fs.readFileSync(path.join(validationRoot, 'rule.schema.json'), 'utf8'));
+ajv.addSchema(ruleSchema);
+const validateRegistryFile = ajv.getSchema(ruleSchema.$id);
+const validateUnchecked = ajv.getSchema(`${ruleSchema.$id}#/$defs/unchecked-requirements`);
 
 const validatorRuleReferences = new Set();
 for (const file of ['scripts/validator-base.mjs', 'scripts/validate-document.mjs']) {
@@ -234,11 +240,17 @@ for (const filename of files) {
 
 // Every fixture diagnostic identifies a registered rule that cites evidence of its severity (Proposals 0024 and 0030).
 let attributed = 0;
+let schemaDiagnostics = 0;
+let rootSchemaDiagnostics = 0;
 const observedSeverities = new Map();
 for (const category of fs.readdirSync(fixtureRoot).filter((name) => name.startsWith('expected-')).sort()) {
   for (const name of fs.readdirSync(path.join(fixtureRoot, category)).filter((file) => /\.(?:json|ya?ml)$/.test(file)).sort()) {
     const fixture = `${category}/${name}`;
     for (const diagnostic of diagnosticsForFixture(fixture)) {
+      if (diagnostic.code === 'schema-validation') {
+        schemaDiagnostics += 1;
+        if (diagnostic.rule === 'mcpdesc.document.schema') rootSchemaDiagnostics += 1;
+      }
       if (!diagnostic.rule) {
         fail(`${fixture}: diagnostic ${diagnostic.code} does not identify a rule`);
         continue;
@@ -301,6 +313,55 @@ if (!fs.existsSync(path.join(mcpSchemasDirectory, 'manifest.json'))) {
 
 const uncitedAnchors = [...anchorIds.keys()].filter((id) => !citedAnchors.has(id));
 
+// Every requirement anchor is checked by a rule or listed as unchecked, never both (Proposal 0033).
+const uncheckedRel = `${specificationRoot}/validation/unchecked-requirements.yaml`;
+const uncheckedAnchors = new Map();
+if (fs.existsSync(path.join(root, uncheckedRel))) {
+  const unchecked = decodeDocumentSource(fs.readFileSync(path.join(root, uncheckedRel), 'utf8'), 'yaml', uncheckedRel);
+  if (!validateUnchecked(unchecked)) {
+    for (const error of validateUnchecked.errors ?? []) fail(`${uncheckedRel}: ${error.instancePath || '/'} ${error.message}`);
+  } else {
+    for (const { location, reason } of unchecked.uncheckedRequirements) {
+      const [target, fragment] = location.split('#');
+      if (anchorIds.get(fragment) !== path.basename(target)) fail(`${uncheckedRel}: requirement anchor ${fragment} is not in ${target}`);
+      else if (uncheckedAnchors.has(fragment)) fail(`${uncheckedRel}: ${fragment} is listed twice`);
+      else if (citedAnchors.has(fragment)) fail(`${uncheckedRel}: ${fragment} is cited by a rule, so it is not unchecked`);
+      uncheckedAnchors.set(fragment, reason);
+    }
+  }
+}
+for (const id of uncitedAnchors) {
+  if (!uncheckedAnchors.has(id)) fail(`${specificationRoot}/sections/${anchorIds.get(id)}: requirement anchor ${id} is neither cited by a rule nor listed in ${uncheckedRel}`);
+}
+
+// Obligation sentences in classified sections start with, or follow in the same block, a requirement anchor.
+let obligations = 0;
+let anchoredObligations = 0;
+for (const name of fs.existsSync(sectionsDirectory) ? fs.readdirSync(sectionsDirectory).filter((file) => file.endsWith('.md')).sort() : []) {
+  for (const { line, sentence, anchor } of obligationSentences(readText(`sections/${name}`))) {
+    obligations += 1;
+    if (anchor) anchoredObligations += 1;
+    else if (classifiedSections.has(name)) fail(`${specificationRoot}/sections/${name}:${line}: obligation without a requirement anchor: ${sentence.slice(0, 120)}`);
+  }
+}
+
+// Every canonical schema location belongs to a rule (Proposal 0033).
+const documentSchema = JSON.parse(fs.readFileSync(path.join(root, schemaPath), 'utf8'));
+const schemaOwners = new Map();
+for (const rule of registeredRules.values()) {
+  for (const pointer of rule.documentSchema ?? []) {
+    const found = pointer.split('/').slice(1).map((token) => token.replaceAll('~1', '/').replaceAll('~0', '~'))
+      .reduce((node, token) => (node !== null && typeof node === 'object' && Object.hasOwn(node, token) ? node[token] : undefined), documentSchema);
+    if (found === undefined) fail(`${rule.id}: documentSchema location ${pointer} does not resolve in ${schemaPath}`);
+    if (schemaOwners.has(pointer)) fail(`${rule.id}: documentSchema location ${pointer} is also owned by ${schemaOwners.get(pointer)}`);
+    schemaOwners.set(pointer, rule.id);
+  }
+}
+for (const pointer of ['#', ...Object.keys(documentSchema.$defs ?? {}).map((name) => `#/$defs/${name}`)]) {
+  if (!schemaOwners.has(pointer)) fail(`${schemaPath}: ${pointer} is not owned by any rule's documentSchema`);
+}
+const rulesWithFailureEvidence = [...citedOutcomes.values()].filter((outcomes) => outcomes.has('error') || outcomes.has('warning')).length;
+
 if (errors.length) {
   console.error(`Validation rule registry check failed with ${errors.length} error(s):`);
   for (const error of errors.sort()) console.error(`- ${error}`);
@@ -308,4 +369,5 @@ if (errors.length) {
 }
 
 const citations = outcomeCounts.passes + outcomeCounts.error + outcomeCounts.warning;
-console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); ${citations} fixture citation(s) match their outcome (${outcomeCounts.passes} passes, ${outcomeCounts.error} error, ${outcomeCounts.warning} warning); ${attributed} fixture diagnostic(s) identify a rule with cited evidence of their severity; ${validatorRuleReferences.size} validator rule reference(s) resolve; ${citedAnchors.size} of ${anchorIds.size} requirement anchor(s) cited by a rule${uncitedAnchors.length ? ` (uncited: ${uncitedAnchors.join(', ')})` : ''}.`);
+console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); ${citations} fixture citation(s) match their outcome (${outcomeCounts.passes} passes, ${outcomeCounts.error} error, ${outcomeCounts.warning} warning); ${attributed} fixture diagnostic(s) identify a rule with cited evidence of their severity; ${validatorRuleReferences.size} validator rule reference(s) resolve; ${citedAnchors.size} of ${anchorIds.size} requirement anchor(s) cited by a rule and ${uncheckedAnchors.size} listed as unchecked.`);
+console.log(`Catalog coverage: ${schemaOwners.size} document-schema location(s) owned; ${schemaDiagnostics - rootSchemaDiagnostics} of ${schemaDiagnostics} document-schema diagnostic(s) in fixtures attributed below the document root; ${rulesWithFailureEvidence} of ${ruleIds.size} rule(s) cite error or warning evidence; ${anchoredObligations} of ${obligations} obligation sentence(s) anchored (classified sections: ${[...classifiedSections].join(', ')}).`);

@@ -27,6 +27,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 9.6
         locations:
           - sections/09-tools.md#req-tool-annotations-closed
+          - sections/09-tools.md#req-tool-annotations-fields
     sources:
       - tier: 1
         reference: MCP 2025-03-26 to 2026-07-28 schema.ts, interface ToolAnnotations (no index signature)

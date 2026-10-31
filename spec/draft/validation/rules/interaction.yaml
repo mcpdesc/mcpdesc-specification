@@ -183,6 +183,8 @@ rules:
         locations:
           - sections/09-tools.md#req-interaction-example-fields
           - sections/09-tools.md#req-interaction-step-fields
+          - sections/09-tools.md#req-interaction-examples-map
+          - sections/09-tools.md#req-interaction-step-closed
     enforcement: internal
     status: internal
     fixtures:

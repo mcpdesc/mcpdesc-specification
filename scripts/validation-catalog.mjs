@@ -34,7 +34,7 @@ function schemaValidators(schema) {
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addFormats(ajv);
   ajv.addSchema(schema);
-  return Object.fromEntries(['', '#/$defs/catalog-manifest', '#/$defs/catalog-index'].map((fragment) => {
+  return Object.fromEntries(['', '#/$defs/catalog-manifest', '#/$defs/catalog-index', '#/$defs/unchecked-requirements'].map((fragment) => {
     const validate = ajv.getSchema(`${ruleSchemaUrl}${fragment}`);
     return [fragment || 'rules', (value) => assert.ok(validate(value), ajv.errorsText(validate.errors))];
   }));
@@ -119,6 +119,13 @@ export function buildValidationCatalog(root, snapshot, commit) {
     return record.rules;
   }).sort((left, right) => left.id < right.id ? -1 : left.id > right.id ? 1 : 0);
   const catalog = { rules };
+  const uncheckedPath = `${identity.specificationPath}/validation/unchecked-requirements.yaml`;
+  if (fs.existsSync(path.join(root, uncheckedPath))) {
+    const unchecked = decodeDocumentSource(fs.readFileSync(resolveCatalogFile(root, uncheckedPath), 'utf8'), 'yaml', uncheckedPath);
+    validate['#/$defs/unchecked-requirements'](unchecked);
+    catalog.uncheckedRequirements = [...unchecked.uncheckedRequirements].sort((left, right) => left.location < right.location ? -1 : left.location > right.location ? 1 : 0);
+    for (const entry of catalog.uncheckedRequirements) checkReference(root, identity.specificationPath, entry.location);
+  }
   validate.rules(catalog);
   checkRecords(catalog, descriptionSchema.$defs.supportedProtocolVersion.enum);
   for (const rule of rules) {

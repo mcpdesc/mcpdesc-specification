@@ -2,17 +2,17 @@ rules:
   - id: mcpdesc.document.schema
     title: "Match the MCP Description document schema"
     description: >-
-      The structural schema checks required fields, types, allowed members,
-      and collection shapes. Use the diagnostic path to locate the invalid
-      value. Passing this check is necessary but does not replace semantic
-      checks such as reference resolution or protocol scoping.
+      The document root has the required mcpdesc, info, and protocolVersions
+      members, only the members of Section 3.2, and non-empty ordinary
+      collections. Failures inside a root member belong to the rule that owns
+      that member's schema location; this rule reports root-level failures.
     applicability:
       protocolVersions: independent
     owner: mcpdesc
     summary: >-
       A document validates against the JSON Schema for its declared mcpdesc
-      version. Used for structural failures not attributed to a more specific
-      rule.
+      version. This rule owns the document root and generic JSON values; every
+      other schema location belongs to a more specific rule.
     surface: Document
     kind: structural
     documentSchema:
@@ -23,8 +23,11 @@ rules:
       - reference: MCP Description 0.9.0, Section 16.1, item 7
         locations:
           - sections/16-conformance.md#req-document-schema
+          - sections/03-document-structure.md#req-root-fields
           - sections/03-document-structure.md#req-closed-objects
           - sections/09-tools.md#req-tool-input-schema-required
+          - sections/03-document-structure.md#req-ordinary-collections-non-empty
+          - sections/03-document-structure.md#req-ordinary-collections-omitted
     enforcement: internal
     status: internal
     fixtures:
@@ -174,6 +177,7 @@ rules:
         locations:
           - sections/13-tags.md#req-tags-unique
           - sections/13-tags.md#req-tags-references
+          - sections/09-tools.md#req-tool-tags-references
     enforcement: internal
     status: internal
     fixtures:
@@ -257,6 +261,8 @@ rules:
           - sections/17-components.md#req-component-reference-form
           - sections/17-components.md#req-component-reference-resolution
           - sections/09-tools.md#req-tool-schema-references-resolved
+          - sections/09-tools.md#req-tool-example-references-resolved
+          - sections/12-elicitation.md#req-elicitation-schema-references-resolved
     enforcement: internal
     status: internal
     fixtures:
@@ -292,6 +298,7 @@ rules:
         locations:
           - sections/16-conformance.md#req-legacy-validation-scope
           - proposal-snapshots/0024-validation-rule-identity-and-provenance.md
+          - sections/12-elicitation.md#req-elicitation-legacy-incomplete
     enforcement: internal
     status: internal
     fixtures:
@@ -382,6 +389,8 @@ rules:
       - reference: MCP Description 0.9.0, Sections 7.1 and 7.2
         locations:
           - sections/07-security.md#req-security-scheme-fields
+          - sections/07-security.md#req-security-schemes-map
+          - sections/07-security.md#req-oauth-flows-fields
     enforcement: internal
     status: internal
     fixtures:
