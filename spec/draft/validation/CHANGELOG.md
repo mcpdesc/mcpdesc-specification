@@ -19,7 +19,7 @@ URLs retain their exact bytes; older catalogs and specification snapshots are
 not rewritten. The `1.1.0` and `1.2.0` entries record the only exceptions so
 far.
 
-## [1.2.0] — Unreleased
+## [1.2.0] — 2026-10-31 (Draft 4)
 
 Rule format for the MCP Description 0.9.0 Draft 4 working tree, implementing
 review-stage

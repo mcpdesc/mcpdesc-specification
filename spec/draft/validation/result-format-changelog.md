@@ -14,7 +14,7 @@ properties and new status values, which consumers must be able to interpret.
 Compatible additions are minor. Editorial schema documentation corrections use
 a new patch-version URL. Published versioned URLs retain their exact bytes.
 
-## [1.0.0] — Unreleased
+## [1.0.0] — 2026-10-31 (Draft 4)
 
 First format, for the MCP Description 0.9.0 Draft 4 working tree,
 implementing review-stage

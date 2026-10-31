@@ -162,8 +162,10 @@ document-conformance specification.
 Catalogs belong to exact MCP Description snapshots, not validator package
 versions. Once deployed, the [catalog discovery index](https://mcpdesc.org/validation/catalogs/index.json)
 lists the published manifests, with separate stable and draft pointers. The
-Draft 3 catalog and rule-format `1.1.0` endpoints are publication targets until
-deployment is verified; this working tree does not imply they are live. See
+Draft 3 catalog and rule-format `1.1.0` are published. The Draft 4 catalog,
+rule-format `1.2.0`, and validation result format `1.0.0` endpoints are
+publication targets until deployment is verified; this working tree does not
+imply they are live. See
 [catalog publication and discovery](#catalog-publication-and-discovery).
 
 Every diagnostic of this repository's candidate validator identifies a
@@ -180,8 +182,8 @@ projection for Community Working Drafts 1 and 2 (`0.9.0-draft.1` and
   cases expect.
 
 Both are prereleases, not stable releases. Install them by exact version: the
-npm `next` dist-tag moves to later prereleases. Support for Draft 3 follows in
-later releases.
+npm `next` dist-tag moves to later prereleases. Support for Drafts 3 and 4
+follows in later releases.
 
 <!-- mcpdesc:validation-overview:end -->
 
@@ -222,8 +224,8 @@ of `scripts/mcpdesc-views.mjs`.
 | [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
 | [`rule.schema.json`](rule.schema.json) | Rule-format `1.2.0`: registry files, aggregate catalog, unchecked requirements, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
 | [`result.schema.json`](result.schema.json) | Validation result format `1.0.0`: validity, diagnostics, and rule results (Proposal 0031) | Pilot; published with the catalog, verified separately |
-| [`result-format-changelog.md`](result-format-changelog.md) | Validation result format versions and consumer migration | `1.0.0` unreleased |
-| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.2.0` unreleased, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
+| [`result-format-changelog.md`](result-format-changelog.md) | Validation result format versions and consumer migration | `1.0.0` for Draft 4 |
+| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.2.0` for Draft 4, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
 | [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records cite fixtures with checked outcomes; `scripts/test-validation-rules.mjs` checks them and reports the counts |
 | [`unchecked-requirements.yaml`](unchecked-requirements.yaml) | Requirement anchors that no rule checks, each with a reason (`runtime`, `processing`, or `guidance`) and a note | Pilot: published in the catalog as `uncheckedRequirements` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported revision (`<revision>/schema.ts`, `<revision>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
@@ -611,6 +613,8 @@ this work.
 | Validation result schema | `https://mcpdesc.org/schema/validation-result/1.0.0.json` (from Draft 4) |
 | Draft 3 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/manifest.json` |
 | Draft 3 aggregate | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/rules.json` |
+| Draft 4 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.4/manifest.json` |
+| Draft 4 aggregate | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.4/rules.json` |
 | Mutable discovery index | `https://mcpdesc.org/validation/catalogs/index.json` |
 
 The schema's root validates `{ "rules": [...] }` in authored YAML files and

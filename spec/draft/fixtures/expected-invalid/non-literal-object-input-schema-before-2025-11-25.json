@@ -1,5 +1,5 @@
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json",
   "mcpdesc": "0.9.0",
   "info": {
     "name": "non-literal-object-input-schema-before-2025-11-25",

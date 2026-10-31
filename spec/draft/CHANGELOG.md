@@ -24,7 +24,19 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
-### Community Working Draft 4 — Unreleased
+### Community Working Draft 4 — 2026-10-31 (`v0.9.0-draft.4`)
+
+Fourth 0.9.0 snapshot, implementing review-stage Proposals 0031, 0032, and
+0033 and the changes tracked in issues #66 and #102 since `v0.9.0-draft.3`.
+Document validation changes in two ways: an embedded Tool `inputSchema` root
+is governed by its JSON Schema dialect from MCP 2025-11-25, with a new warning
+for restrictions only the MCP `Tool` type imposes, and a Resource `uri` must be
+an RFC 3986 URI. Diagnostics name the rule that owns each failing schema
+location and the protocol versions they concern, and validators can report a
+result for every rule. The rule format becomes `1.2.0`, and a new validation
+result format `1.0.0` is published with the catalog. Every obligation of the
+specification is anchored and either cited by a rule or listed as unchecked,
+and Effective Protocol View and merge cases join the conformance fixtures.
 
 #### Documents without `$schema` — 2026-10-31
 
