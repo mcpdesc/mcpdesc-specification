@@ -38,7 +38,8 @@ try {
     fs.writeFileSync(indexOutput, formatCanonicalJson(next));
     console.log(`Verified index update prepared at ${indexOutput}; publish it last.`);
   }
-  console.log(flags.includes('--schema-only') ? 'Verified rule-format schema only; catalog publication is not checked.'
+  console.log(flags.includes('--schema-only')
+    ? `Verified ${bundle.manifest.resultSchema ? 'rule-format and validation result schemas' : 'rule-format schema'} only; catalog publication is not checked.`
     : `Verified catalog publication: ${snapshot}, ${bundle.manifest.ruleCount} rules.`);
 } catch (error) {
   console.error(`check-rule-catalog-publication: ${error.message}`);
