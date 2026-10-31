@@ -2,9 +2,6 @@
 # runtime: behavior of MCP clients, servers, or consumers; processing: behavior of MCP Description
 # tools that document fixtures cannot show; guidance: an authoring choice the document cannot decide.
 uncheckedRequirements:
-  - location: sections/03-document-structure.md#req-conforming-serialization
-    reason: processing
-    note: "Serialization conformance is exercised by the serialization fixtures, which no catalog rule cites yet."
   - location: sections/03-document-structure.md#req-serialization-order
     reason: processing
     note: "Concerns how tools read a serialization, not a document value."

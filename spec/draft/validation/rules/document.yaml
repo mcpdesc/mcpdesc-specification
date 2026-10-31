@@ -522,6 +522,7 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Section 15
         locations:
+          - sections/03-document-structure.md#req-conforming-serialization
           - sections/15-serialization.md#req-serialization-json
           - sections/15-serialization.md#req-serialization-yaml-claims
           - sections/15-serialization.md#req-serialization-yaml-single-document
