@@ -85,8 +85,9 @@ rules:
       Native projection resolves Tool schema components, removes
       description-only fields, and checks the value against the selected MCP
       schema. It does not repair values or invent defaults. A postcondition
-      failure is an implementation or specification defect and returns no
-      projected value.
+      failure returns no projected value. It is an implementation or
+      specification defect, unless validation warned about the Tool schema
+      under mcp.tool.schema.native-shape for that revision.
     applicability:
       protocolVersions:
         "2024-11-05": applies
@@ -134,18 +135,17 @@ rules:
       - path: projection-fixtures/tools-list-postcondition-failed-2025-11-25.json
         pointer: /expectedError
         outcome: error
-    gaps:
-      - revisions: ["2025-11-25"]
-        behavior: >-
-          A valid document can give a Tool schema property a boolean subschema,
-          which JSON Schema 2020-12 allows, while the pinned MCP 2025-11-25
-          schema.json requires an object there. Projecting that Tool for MCP
-          2025-11-25 fails the postcondition; MCP 2026-07-28 accepts it.
-        reference: https://github.com/mcpdesc/mcpdesc-specification/issues/95
-        resolution: planned
+      - path: projection-fixtures/tool-ref-root-postcondition-failed-2025-11-25.json
+        pointer: /expectedError
+        outcome: error
+      - path: projection-fixtures/tool-ref-root-postcondition-failed-2026-07-28.json
+        pointer: /expectedError
+        outcome: error
     notes: >-
-      The postcondition cases come from the recorded gap, not from an injected
-      fault: the source is valid, yet the native value fails the pinned MCP
-      2025-11-25 schema. A list fails as a whole. scripts/test-projection-fixtures.mjs
-      checks that each failure case's value really fails that schema and that
-      every expected value passes it.
+      The postcondition cases come from Tool schemas that are valid under
+      their JSON Schema dialect but miss a schema-syntax restriction of the MCP
+      Tool type (Proposal 0032), not from an injected fault: the source is
+      valid with a warning, yet the native value fails the pinned MCP schema.
+      A list fails as a whole. scripts/test-projection-fixtures.mjs checks that
+      each failure case's value really fails that schema and that every
+      expected value passes it.

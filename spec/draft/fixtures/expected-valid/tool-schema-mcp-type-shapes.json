@@ -1,0 +1,84 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "tool-schema-mcp-type-shapes",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "tool-schema-mcp-type-shapes"
+    }
+  ],
+  "tools": [
+    {
+      "name": "toggle",
+      "description": "Enables or disables the feature; any value is accepted for enabled, and debug must be absent.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "enabled": {},
+          "debug": {
+            "not": {}
+          }
+        }
+      }
+    },
+    {
+      "name": "search",
+      "inputSchema": {
+        "type": "object",
+        "$ref": "#/$defs/Arguments",
+        "$defs": {
+          "Arguments": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "query"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "filter",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "object",
+            "properties": {
+              "strict": true
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "switch",
+      "protocolVersions": [
+        "2026-07-28"
+      ],
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "enabled": true
+        }
+      }
+    }
+  ]
+}

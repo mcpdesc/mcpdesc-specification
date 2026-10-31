@@ -175,7 +175,7 @@ Because validation already rejects fields that `V` does not define, step 5 remov
 
 <a id="req-native-projection-lists"></a>The list projection of kind `k` for `V` is the sequence of `N_V(D, k, i)` for every declaration of kind `k` in `P_V(D)`, in document order. A failure for any declaration fails the whole list.
 
-A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation; implementations MUST NOT repair the value.
+A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation, except for a Tool and revision for which validation reports the warning of [Section 9.2](#req-tool-schema-native-shape): there it reflects a restriction of the MCP `Tool` type that this specification reports but does not enforce. In both cases implementations MUST NOT repair the value.
 
 The `projection-fixtures/` folder of this specification gives, for each kind and supported revision, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
 

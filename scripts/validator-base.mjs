@@ -1082,6 +1082,34 @@ function validateLegacyToolSchemaShape(schema, location, locationPath, rel, diag
   }
 }
 
+const openToolSchemaVersion = '2026-07-28';
+const admitsObject = (schema) => schema.type === undefined || schema.type === 'object' || (Array.isArray(schema.type) && schema.type.includes('object'));
+const isSchemaObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+
+// Section 9.2: restrictions of the MCP Tool type that the embedded dialect does not impose.
+function validateNativeToolSchemaShape(schema, fieldName, scope, location, locationPath, diagnostics) {
+  const dialectScope = scope.filter((version) => protocolOrder.get(version) >= protocolOrder.get(toolSchemaDialectVersion));
+  const closedScope = dialectScope.filter((version) => protocolOrder.get(version) < protocolOrder.get(openToolSchemaVersion));
+  const report = (versions, subject, requirement, path) => {
+    if (!versions.length) return;
+    diagnostics.push(
+      makeDiagnostic(
+        'tool-schema-mcp-type-mismatch',
+        'warning',
+        `${subject} is valid under its JSON Schema dialect, but the MCP ${versions.join(' and ')} Tool type requires ${requirement}; native projection for MCP ${versions.join(' and ')} fails`,
+        path
+      )
+    );
+  };
+  if (schema.type !== 'object' && admitsObject(schema)) {
+    report(fieldName === 'inputSchema' ? dialectScope : closedScope, location, 'a literal "type": "object" at the root', locationPath);
+  }
+  if (!isSchemaObject(schema.properties)) return;
+  for (const [name, propertySchema] of Object.entries(schema.properties)) {
+    if (!isSchemaObject(propertySchema)) report(closedScope, `${location}.properties[${JSON.stringify(name)}]`, 'an object here', [...locationPath, 'properties', name]);
+  }
+}
+
 function validateToolSchemas(document, rel, diagnostics) {
   const rootScope = normalizeScope(document.protocolVersions ?? []);
 
@@ -1165,20 +1193,35 @@ function validateToolSchemas(document, rel, diagnostics) {
         }
       }
 
-      if (fieldName === 'outputSchema' && schema.type !== 'object') {
+      const rootPath = Object.hasOwn(schema, 'type') ? [...locationPath, 'type'] : locationPath;
+      if (fieldName === 'inputSchema' && !admitsObject(schema)) {
+        diagnostics.push(
+          makeDiagnostic('tool-input-schema-not-object', 'error', `${location} declares type ${JSON.stringify(schema.type)}, which excludes the object that carries Tool arguments`, rootPath)
+        );
+      } else if (fieldName === 'inputSchema' && hasLegacyScope && schema.type !== 'object') {
+        diagnostics.push(
+          makeDiagnostic('tool-input-schema-not-object', 'error', `${location} must declare type "object" for MCP revisions before ${toolSchemaDialectVersion}`, rootPath)
+        );
+      }
+      if (fieldName === 'outputSchema') {
         for (const version of scope) {
-          if (version === '2026-07-28') continue;
+          if (version === openToolSchemaVersion) continue;
+          const literalRoot = protocolOrder.get(version) < protocolOrder.get(toolSchemaDialectVersion);
+          if (literalRoot ? schema.type === 'object' : admitsObject(schema)) continue;
           diagnostics.push(
             makeDiagnostic(
               'field-not-supported-by-version',
               'error',
-              `${location} must have type "object" when it applies to MCP ${version}`,
-              [...locationPath, 'type'],
+              literalRoot
+                ? `${location} must have type "object" when it applies to MCP ${version}`
+                : `${location} declares type ${JSON.stringify(schema.type)}, which excludes the object structured output that MCP ${version} requires`,
+              rootPath,
               'mcp.tool.output-schema.object-root'
             )
           );
         }
       }
+      validateNativeToolSchemaShape(schema, fieldName, scope, location, locationPath, diagnostics);
     }
     validateMcpHeaderAnnotations(tool, toolIndex, scope, rel, diagnostics);
   });

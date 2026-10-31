@@ -24,6 +24,18 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### Community Working Draft 4 — Unreleased
+
+#### Dialect-governed Tool schemas — 2026-10-30
+
+- Implemented review-stage [Proposal 0032](proposal-snapshots/0032-dialect-governed-tool-schemas.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #95](https://github.com/mcpdesc/mcpdesc-specification/issues/95). For MCP 2025-11-25 and MCP 2026-07-28, the declared or default JSON Schema dialect decides whether an embedded Tool schema is valid; restrictions of schema syntax that only the TypeScript MCP `Tool` type imposes are reported, not enforced. Review-stage content may still change incompatibly or be removed.
+- Section 9.2: the `inputSchema` root, and before MCP 2026-07-28 the `outputSchema` root, must describe an object. Before MCP 2025-11-25 (MCP 2025-06-18 for `outputSchema`) that still means a literal `"type": "object"`; from MCP 2025-11-25 a declared root `type` must give or contain `"object"`, and a root in `$ref` or `allOf` is valid. New requirement `req-tool-schema-native-shape`: a dialect-valid schema that misses a restriction of the MCP `Tool` type (a literal `"type": "object"` root; for MCP 2025-11-25 also on `outputSchema`, and an object for each top-level `properties` value) stays valid, and validators must warn for each location, naming the revisions concerned.
+- Section 4.14: a `projection-postcondition-failed` failure for a Tool and revision that received that warning reflects the recorded MCP restriction rather than a defect; values are still never repaired.
+- Canonical schema: an inline Tool `inputSchema` no longer requires `type: "object"`; the root rules moved to semantic validation, where the protocol scope is known. Documents valid under Draft 3 stay valid.
+- Rules: revised the arbitrations of `mcp.tool.input-schema.object-root` (now per revision instead of protocol-independent) and `mcp.tool.output-schema.object-root` to follow MCP's dialect text, with MCP issue [#3238](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238) as upstream reference; added the `should`-level rule `mcp.tool.schema.native-shape` (warning `tool-schema-mcp-type-mismatch`); resolved the Draft 3 planned gap on `mcpdesc.projection.native-schema`. The candidate validator reports a non-object `inputSchema` root with `tool-input-schema-not-object` instead of `schema-validation`.
+- Fixtures: new `expected-warning/tool-schema-mcp-type-mismatch.json`, `expected-valid/tool-schema-mcp-type-shapes.json`, and `expected-invalid/non-literal-object-input-schema-before-2025-11-25.json`; `expected-invalid/non-object-input-schema.json` replaces its `$ref` root, now valid with a warning, with an array root and a referenced string component. New projection cases show a `$ref`-rooted `inputSchema` failing the postcondition for both MCP 2025-11-25 and MCP 2026-07-28.
+- `@mcpdesc/core` must implement the relaxed root checks, the warning, and the postcondition cases at its intake of the next draft.
+
 ### Community Working Draft 3 — 2026-10-29 (`v0.9.0-draft.3`)
 
 Third 0.9.0 snapshot, implementing review-stage Proposal 0030 and editorial
