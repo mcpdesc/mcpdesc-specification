@@ -37,6 +37,9 @@ rules:
           - sections/13-tags.md#req-tags-non-empty
           - sections/13-tags.md#req-tags-omitted
           - sections/16-conformance.md#req-conforming-document
+          - sections/14-specification-extensions.md#req-extension-names
+          - sections/14-specification-extensions.md#req-extension-unknown-accepted
+          - sections/15-serialization.md#req-serialization-empty-collections
     enforcement: internal
     status: internal
     fixtures:
@@ -234,6 +237,7 @@ rules:
           - sections/07-security.md#req-security-scopes-oauth-only
           - sections/07-security.md#req-security-uncatalogued-scope
           - sections/06-transports.md#req-transport-security-example
+          - sections/14-specification-extensions.md#req-extension-ineligible-locations
     enforcement: internal
     status: internal
     fixtures:
@@ -284,6 +288,11 @@ rules:
           - sections/12-elicitation.md#req-elicitation-schema-references-resolved
           - sections/10-resources.md#req-resource-example-references-resolved
           - sections/11-prompts.md#req-prompt-example-references-resolved
+          - sections/17-components.md#req-component-ref-distinct
+          - sections/17-components.md#req-component-contextual-validation
+          - sections/17-components.md#req-component-reference-pointer
+          - sections/17-components.md#req-component-resolution-errors
+          - sections/17-components.md#req-component-cycles
     enforcement: internal
     status: internal
     fixtures:
@@ -355,6 +364,7 @@ rules:
           - sections/05-info-object.md#req-info-revision-independent
           - sections/05-info-object.md#req-info-name-non-empty
           - sections/05-info-object.md#req-info-version-non-empty
+          - sections/15-serialization.md#req-serialization-value-formats
     enforcement: internal
     status: internal
     fixtures:
@@ -416,6 +426,7 @@ rules:
           - sections/07-security.md#req-security-scheme-fields
           - sections/07-security.md#req-security-schemes-map
           - sections/07-security.md#req-oauth-flows-fields
+          - sections/15-serialization.md#req-serialization-value-formats
     enforcement: internal
     status: internal
     fixtures:
@@ -478,6 +489,10 @@ rules:
         locations:
           - sections/17-components.md#req-components-fields
           - sections/17-components.md#req-reference-object-fields
+          - sections/14-specification-extensions.md#req-extension-ineligible-locations
+          - sections/14-specification-extensions.md#req-extension-component-names
+          - sections/17-components.md#req-component-maps
+          - sections/17-components.md#req-components-closed
     enforcement: internal
     status: internal
     fixtures:
@@ -487,3 +502,70 @@ rules:
       - path: expected-invalid/components-empty-and-reference-shapes.json
         pointer: "/components/schemas"
         outcome: error
+
+  - id: mcpdesc.serialization.conforming
+    title: "Serialize documents as JSON or restricted YAML"
+    description: >-
+      A document is UTF-8 JSON or a single restricted YAML document that
+      decodes to the JSON data model: string keys only, no duplicate keys,
+      tags, or aliases, no merge semantics, and only finite numbers. Rejected
+      YAML is not validated further.
+    owner: mcpdesc
+    summary: >-
+      A document uses a conforming serialization: RFC 8259 JSON in UTF-8, or
+      exactly one YAML document within the restricted YAML profile.
+    surface: Document serialization
+    kind: structural
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 15
+        locations:
+          - sections/15-serialization.md#req-serialization-json
+          - sections/15-serialization.md#req-serialization-yaml-claims
+          - sections/15-serialization.md#req-serialization-yaml-single-document
+          - sections/15-serialization.md#req-serialization-yaml-string-keys
+          - sections/15-serialization.md#req-serialization-yaml-duplicate-keys
+          - sections/15-serialization.md#req-serialization-yaml-scalars
+          - sections/15-serialization.md#req-serialization-yaml-tags
+          - sections/15-serialization.md#req-serialization-yaml-aliases
+          - sections/15-serialization.md#req-serialization-yaml-merge-keys
+          - sections/15-serialization.md#req-serialization-yaml-validation
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: serialization-fixtures/equivalent/document.json
+        pointer: ""
+        outcome: passes
+      - path: serialization-fixtures/equivalent/document.yaml
+        pointer: ""
+        outcome: passes
+      - path: serialization-fixtures/expected-valid/scalars-and-ordinary-merge-key.yaml
+        pointer: ""
+        outcome: passes
+      - path: serialization-fixtures/expected-invalid/multiple-documents.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/non-string-key.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/duplicate-key.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/positive-infinity.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/custom-tag.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/alias.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/merge-alias.yaml
+        pointer: ""
+        outcome: error
+    notes: >-
+      Checked by decoding the serialization fixtures; scripts/test-serializations.mjs
+      also checks that the equivalent JSON and YAML documents decode and
+      validate identically.

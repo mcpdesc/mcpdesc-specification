@@ -134,8 +134,13 @@ export function buildValidationCatalog(root, snapshot, commit) {
     }
     for (const match of rule.description.matchAll(/\]\(([^)\s]+)\)/g)) checkReference(root, identity.specificationPath, match[1]);
     for (const fixture of rule.fixtures) {
-      const relative = `${fixture.path.startsWith('projection-fixtures/') ? '' : 'fixtures/'}${fixture.path}`;
+      const relative = `${/^(?:projection|serialization)-fixtures\//.test(fixture.path) ? '' : 'fixtures/'}${fixture.path}`;
       const file = resolveCatalogFile(root, `${identity.specificationPath}/${relative}`);
+      // A serialization fixture may be undecodable by design; it is cited as a whole.
+      if (fixture.path.startsWith('serialization-fixtures/')) {
+        assert.equal(fixture.pointer, '', `Serialization fixtures are cited whole: ${rule.id} ${fixture.path}`);
+        continue;
+      }
       let node = decodeDocumentSource(fs.readFileSync(file, 'utf8'), documentFormatForPath(file), fixture.path);
       for (const key of fixture.pointer.split('/').slice(1).map((token) => token.replaceAll('~1', '/').replaceAll('~0', '~'))) {
         assert.ok(node !== null && typeof node === 'object' && Object.hasOwn(node, key), `Missing fixture pointer: ${rule.id} ${fixture.pointer}`);

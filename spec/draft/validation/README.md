@@ -376,7 +376,7 @@ Each validation rule has a permanent identifier and a record:
 | `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `enforcement` | `internal` for a check of the candidate validator, `official-schema`, or `external` for a check that another operation performs, such as native projection in `@mcpdesc/core`; the candidate validator neither performs nor reports external checks |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
-| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, or `warning`. The path is relative to `fixtures/`, or names a native projection case under `projection-fixtures/` |
+| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, or `warning`. The path is relative to `fixtures/`, names a native projection case under `projection-fixtures/`, or names a file under `serialization-fixtures/`, cited whole with the pointer `""`: `passes` when decoding accepts it and `error` when decoding rejects it |
 | `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
 | `notes` | Optional maintainer information, such as implementation and testing remarks |
 
@@ -404,10 +404,10 @@ Every anchor is either cited by a rule or listed in
 unchecked requirement has a `reason`: `runtime` for behavior of MCP clients,
 servers, or consumers; `processing` for behavior of MCP Description tools that
 document fixtures cannot show, such as preservation or network access; or
-`guidance` for an authoring choice the document cannot decide. In the
-classified sections, every obligation sentence (MUST, SHALL, SHOULD,
-REQUIRED, RECOMMENDED, and their negations) is covered by an anchor
-(Proposal 0033).
+`guidance` for an authoring choice the document cannot decide. Every
+obligation sentence (MUST, SHALL, SHOULD, REQUIRED, RECOMMENDED, and their
+negations) is covered by an anchor (Proposal 0033); key words quoted as words,
+as in the RFC 2119 boilerplate, state no obligation.
 
 Fixture pointers select the fragment of the fixture document that a reader
 needs. When the fragment is a reusable component, the pointer selects the
@@ -435,7 +435,7 @@ information is tested by operations such as projection and merge
 `scripts/test-validation-rules.mjs` resolves every location, anchor, and
 pointer, checks every outcome against the candidate validator or the
 projection case, checks that every anchor is cited or listed as unchecked, that
-every obligation in a classified section is anchored, and that every canonical
+every obligation sentence is anchored, and that every canonical
 schema definition has exactly one owner, and reports the catalog coverage.
 
 Rules are anchored to the MCP type, not to where MCP Description carries it.

@@ -22,11 +22,6 @@ import { checkRuleApplicability } from './validation-catalog.mjs';
 
 // Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
 const historicalRevisions = new Set(['2024-11-05', '2025-03-26']);
-// Sections whose obligation sentences must all start with or follow a requirement anchor (Proposal 0033).
-const classifiedSections = new Set([
-  '03-document-structure.md', '04-versioning.md', '05-info-object.md', '06-transports.md', '07-security.md', '08-capabilities.md',
-  '09-tools.md', '10-resources.md', '11-prompts.md', '12-elicitation.md', '13-tags.md', '16-conformance.md'
-]);
 
 const root = process.cwd();
 const { specificationRoot, schemaPath } = candidateSpecification(root);
@@ -197,6 +192,22 @@ for (const filename of files) {
     for (const { path: fixture, pointer, outcome } of rule.fixtures) {
       outcomes.add(outcome);
       outcomeCounts[outcome] += 1;
+      if (fixture.startsWith('serialization-fixtures/')) {
+        const full = path.join(specificationDirectory, fixture);
+        if (!fs.existsSync(full)) {
+          fail(`${where}: missing fixture ${fixture}`);
+          continue;
+        }
+        if (pointer !== '') fail(`${where}: ${fixture} must be cited whole, with the empty pointer`);
+        let actual = 'passes';
+        try {
+          decodeDocumentSource(fs.readFileSync(full, 'utf8'), documentFormatForPath(full), fixture);
+        } catch {
+          actual = 'error';
+        }
+        if (outcome !== actual) fail(`${where}: ${fixture} is cited as ${outcome}, but decoding ${actual === 'error' ? 'rejects' : 'accepts'} it`);
+        continue;
+      }
       if (fixture.startsWith('projection-fixtures/')) {
         const full = path.join(specificationDirectory, fixture);
         if (!fs.existsSync(full)) {
@@ -337,14 +348,12 @@ for (const id of uncitedAnchors) {
   if (!uncheckedAnchors.has(id)) fail(`${specificationRoot}/sections/${anchorIds.get(id)}: requirement anchor ${id} is neither cited by a rule nor listed in ${uncheckedRel}`);
 }
 
-// Obligation sentences in classified sections start with, or follow in the same block, a requirement anchor.
+// Every obligation sentence starts with, or follows in the same block, a requirement anchor (Proposal 0033).
 let obligations = 0;
-let anchoredObligations = 0;
 for (const name of fs.existsSync(sectionsDirectory) ? fs.readdirSync(sectionsDirectory).filter((file) => file.endsWith('.md')).sort() : []) {
   for (const { line, sentence, anchor } of obligationSentences(readText(`sections/${name}`))) {
     obligations += 1;
-    if (anchor) anchoredObligations += 1;
-    else if (classifiedSections.has(name)) fail(`${specificationRoot}/sections/${name}:${line}: obligation without a requirement anchor: ${sentence.slice(0, 120)}`);
+    if (!anchor) fail(`${specificationRoot}/sections/${name}:${line}: obligation without a requirement anchor: ${sentence.slice(0, 120)}`);
   }
 }
 
@@ -373,4 +382,4 @@ if (errors.length) {
 
 const citations = outcomeCounts.passes + outcomeCounts.error + outcomeCounts.warning;
 console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); ${citations} fixture citation(s) match their outcome (${outcomeCounts.passes} passes, ${outcomeCounts.error} error, ${outcomeCounts.warning} warning); ${attributed} fixture diagnostic(s) identify a rule with cited evidence of their severity; ${validatorRuleReferences.size} validator rule reference(s) resolve; ${citedAnchors.size} of ${anchorIds.size} requirement anchor(s) cited by a rule and ${uncheckedAnchors.size} listed as unchecked.`);
-console.log(`Catalog coverage: ${schemaOwners.size} document-schema location(s) owned; ${schemaDiagnostics - rootSchemaDiagnostics} of ${schemaDiagnostics} document-schema diagnostic(s) in fixtures attributed below the document root; ${rulesWithFailureEvidence} of ${ruleIds.size} rule(s) cite error or warning evidence; ${anchoredObligations} of ${obligations} obligation sentence(s) anchored (classified sections: ${[...classifiedSections].join(', ')}).`);
+console.log(`Catalog coverage: ${schemaOwners.size} document-schema location(s) owned; ${schemaDiagnostics - rootSchemaDiagnostics} of ${schemaDiagnostics} document-schema diagnostic(s) in fixtures attributed below the document root; ${rulesWithFailureEvidence} of ${ruleIds.size} rule(s) cite error or warning evidence; all ${obligations} obligation sentence(s) anchored.`);

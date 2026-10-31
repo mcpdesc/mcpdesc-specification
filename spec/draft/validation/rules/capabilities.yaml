@@ -32,6 +32,7 @@ rules:
         locations:
           - sections/08-capabilities.md#req-capabilities-closed
           - sections/08-capabilities.md#req-extensions-identifier-form
+          - sections/14-specification-extensions.md#req-extension-ineligible-locations
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ServerCapabilities (no index signature)

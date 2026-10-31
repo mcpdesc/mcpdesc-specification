@@ -1754,13 +1754,13 @@ MCP Description documents support vendor-specific metadata through specification
 
 ### 14.1 Extension Naming
 
-Specification extension properties MUST match the pattern `^x-`. Names are case-sensitive. The RECOMMENDED naming convention is:
+<a id="req-extension-names"></a>Specification extension properties MUST match the pattern `^x-`. Names are case-sensitive. <a id="req-extension-naming-convention"></a>The RECOMMENDED naming convention is:
 
 ```
 x-{organization}-{feature}
 ```
 
-Authors SHOULD use lowercase organization prefixes. Examples include `x-acme-owner`, `x-example-runtime-observations`, and `x-example-cost-profile`.
+<a id="req-extension-lowercase-prefixes"></a>Authors SHOULD use lowercase organization prefixes. Examples include `x-acme-owner`, `x-example-runtime-observations`, and `x-example-cost-profile`.
 
 ### 14.2 Extension Placement
 
@@ -1776,41 +1776,41 @@ A specification extension MAY appear directly on the root MCP Description Object
 
 Eligibility follows the object's specification-defined role, not the fact that a serialized value is a JSON object. A map value that is an eligible object MAY carry extensions, but the containing map does not thereby gain an extension slot.
 
-Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` or `clientRequirements.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
+<a id="req-extension-ineligible-locations"></a>Specification extensions MUST NOT appear directly on scalar values; domain-keyed maps; Security Requirement Objects; the `capabilities.extensions` or `clientRequirements.extensions` protocol-extension map; embedded JSON Schemas; carried MCP payload, result, annotation, or `_meta` objects; opaque example or extension values; arbitrary JSON payloads; or Reference Objects unless the Reference Object specification explicitly defines adjacent-extension resolution behavior. Those locations retain the rules of their owning format or object model.
 
-The outer Components Object and eligible semantic example component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible. An `x-*` key inside a component namespace map is an ordinary component name and its value MUST satisfy that namespace's component type.
+The outer Components Object and eligible semantic example component values MAY carry `x-*` properties. Component namespace maps, embedded schemas, and Reference Objects remain ineligible. <a id="req-extension-component-names"></a>An `x-*` key inside a component namespace map is an ordinary component name and its value MUST satisfy that namespace's component type.
 
 ### 14.3 Extension Values
 
-An extension value MAY be any JSON-compatible value: object, array, string, number, boolean, or null. Authors SHOULD prefer an object when the value may evolve compatibly.
+An extension value MAY be any JSON-compatible value: object, array, string, number, boolean, or null. <a id="req-extension-object-values"></a>Authors SHOULD prefer an object when the value may evolve compatibly.
 
 ### 14.4 Processing Rules
 
-An implementation that does not recognize a specification extension MUST NOT reject the document because of that extension, MUST ignore it when interpreting core MCP Description semantics, and SHOULD preserve it when processing and reserializing the document. A consumer MUST NOT infer core semantics from an unrecognized extension.
+<a id="req-extension-unknown-accepted"></a>An implementation that does not recognize a specification extension MUST NOT reject the document because of that extension, MUST ignore it when interpreting core MCP Description semantics, and SHOULD preserve it when processing and reserializing the document. A consumer MUST NOT infer core semantics from an unrecognized extension.
 
-A specification extension MUST NOT redefine, contradict, or weaken a core requirement. It cannot make a required field optional, change `security` or protocol applicability, or make an invalid example conforming. Core fields remain authoritative.
+<a id="req-extension-no-core-override"></a>A specification extension MUST NOT redefine, contradict, or weaken a core requirement. It cannot make a required field optional, change `security` or protocol applicability, or make an invalid example conforming. Core fields remain authoritative.
 
-A validator MAY validate a recognized extension using a configured trusted schema. Failure to obtain that schema MUST NOT invalidate an otherwise conforming document unless the validator identifies a separate profile that requires the extension.
+A validator MAY validate a recognized extension using a configured trusted schema. <a id="req-extension-schema-unavailable"></a>Failure to obtain that schema MUST NOT invalidate an otherwise conforming document unless the validator identifies a separate profile that requires the extension.
 
 ### 14.5 Ownership, Projection, and Merge
 
 An object-level extension belongs to its containing semantic object and follows that object's lifecycle and Effective Protocol View. A nested `protocolVersions` member inside an extension value has no MCP Description scoping meaning.
 
-A single-version projection MUST preserve every `x-*` property on a retained eligible object unless extension stripping was explicitly requested. Projection MUST NOT move it, combine it with `_meta`, or reinterpret it as an MCP protocol extension. Removing an out-of-scope owner removes its extensions with it. Native MCP projection (Section 4.14) produces MCP values rather than an MCP Description document and omits `x-*` properties outside embedded JSON Schemas.
+<a id="req-extension-views"></a>A single-version projection MUST preserve every `x-*` property on a retained eligible object unless extension stripping was explicitly requested. Projection MUST NOT move it, combine it with `_meta`, or reinterpret it as an MCP protocol extension. Removing an out-of-scope owner removes its extensions with it. Native MCP projection (Section 4.14) produces MCP values rather than an MCP Description document and omits `x-*` properties outside embedded JSON Schemas.
 
-Extensions participate in the semantic representation of their containing object. Merge tools MAY collapse objects with semantically equivalent extension values under the ordinary merge rules. For conflicting values on corresponding objects, a merge tool MUST retain distinct non-overlapping variants where representable or report a conflict. It MUST NOT guess, silently discard an extension, or move it to another object.
+Extensions participate in the semantic representation of their containing object. Merge tools MAY collapse objects with semantically equivalent extension values under the ordinary merge rules. <a id="req-extension-merge"></a>For conflicting values on corresponding objects, a merge tool MUST retain distinct non-overlapping variants where representable or report a conflict. It MUST NOT guess, silently discard an extension, or move it to another object.
 
 ### 14.6 Extension Documentation
 
-Extension authors SHOULD publish a JSON Schema for the value, purpose and semantic documentation, versioning information, and the eligible MCP Description object types on which the extension is valid.
+<a id="req-extension-documentation"></a>Extension authors SHOULD publish a JSON Schema for the value, purpose and semantic documentation, versioning information, and the eligible MCP Description object types on which the extension is valid.
 
 ### 14.7 Relationship to Other Extension Mechanisms
 
-Object-level `x-*`, literal MCP `_meta`, formal MCP `capabilities.extensions`, and formal MCP `clientRequirements.extensions` are separate mechanisms. Tooling MUST NOT automatically copy, project, or reinterpret data among them. `x-*` is MCP Description-specific vendor metadata; `_meta` represents literal MCP metadata in supported contexts; `capabilities.extensions` declares server extension support; and `clientRequirements.extensions` declares an unconditional primitive-level client extension requirement.
+Object-level `x-*`, literal MCP `_meta`, formal MCP `capabilities.extensions`, and formal MCP `clientRequirements.extensions` are separate mechanisms. <a id="req-extension-mechanisms-separate"></a>Tooling MUST NOT automatically copy, project, or reinterpret data among them. `x-*` is MCP Description-specific vendor metadata; `_meta` represents literal MCP metadata in supported contexts; `capabilities.extensions` declares server extension support; and `clientRequirements.extensions` declares an unconditional primitive-level client extension requirement.
 
 ### 14.8 Security and Privacy
 
-Authors MUST NOT publish credentials, tokens, user identifiers, confidential topology, live trace identifiers, or other secrets in extensions. Consumers MUST treat extension names and values as untrusted content and apply appropriate size, output-encoding, rendering, logging, and execution controls. Unknown extensions MUST NOT bypass core conformance or security checks. Validators SHOULD avoid automatic network retrieval of extension schemas.
+<a id="req-extension-no-secrets"></a>Authors MUST NOT publish credentials, tokens, user identifiers, confidential topology, live trace identifiers, or other secrets in extensions. <a id="req-extension-untrusted"></a>Consumers MUST treat extension names and values as untrusted content and apply appropriate size, output-encoding, rendering, logging, and execution controls. Unknown extensions MUST NOT bypass core conformance or security checks. Validators SHOULD avoid automatic network retrieval of extension schemas.
 
 ### 14.9 Example
 
@@ -1842,13 +1842,13 @@ Authors MUST NOT publish credentials, tokens, user identifiers, confidential top
 
 An MCP Description MAY be serialized as JSON or as restricted YAML. Both serializations decode to the single JSON-compatible MCP Description data model defined in Section 3.1 and use the same JSON Schema and semantic-validation requirements.
 
-A conforming document consumer or producer MUST support at least one conforming serialization and MUST declare whether it supports JSON, YAML, or both for each applicable input or output capability.
+<a id="req-serialization-support"></a>A conforming document consumer or producer MUST support at least one conforming serialization and MUST declare whether it supports JSON, YAML, or both for each applicable input or output capability.
 
 ### 15.2 JSON Serialization
 
-An MCP Description MAY be serialized as JSON. JSON serialization MUST conform to [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259) and MUST be encoded in UTF-8.
+An MCP Description MAY be serialized as JSON. <a id="req-serialization-json"></a>JSON serialization MUST conform to [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259) and MUST be encoded in UTF-8.
 
-A consumer that claims JSON input support MUST accept conforming JSON MCP Description documents. A producer that claims JSON output support MUST emit conforming JSON MCP Description documents. General MCP Description conformance does not make JSON support mandatory or preferred over YAML support.
+<a id="req-serialization-json-claims"></a>A consumer that claims JSON input support MUST accept conforming JSON MCP Description documents. A producer that claims JSON output support MUST emit conforming JSON MCP Description documents. General MCP Description conformance does not make JSON support mandatory or preferred over YAML support.
 
 The recommended JSON file extension remains:
 
@@ -1866,9 +1866,9 @@ application/mcp-description+json
 
 An MCP Description MAY be serialized as YAML 1.2.2 using the JSON schema defined by Section 10.2.1.3 of the [YAML 1.2.2 specification](https://yaml.org/spec/1.2.2/) for scalar resolution.
 
-A consumer that claims YAML input support MUST accept YAML MCP Description documents that satisfy this restricted profile and MUST reject documents that violate it. A producer that claims YAML output support MUST emit only documents that satisfy the restricted profile. General MCP Description conformance does not make YAML support mandatory or preferred over JSON support.
+<a id="req-serialization-yaml-claims"></a>A consumer that claims YAML input support MUST accept YAML MCP Description documents that satisfy this restricted profile and MUST reject documents that violate it. A producer that claims YAML output support MUST emit only documents that satisfy the restricted profile. General MCP Description conformance does not make YAML support mandatory or preferred over JSON support.
 
-A YAML MCP Description MUST consist of exactly one YAML document and MUST decode to the JSON-compatible MCP Description data model defined in Section 3.1. A YAML stream containing zero or multiple documents MUST be rejected.
+<a id="req-serialization-yaml-single-document"></a>A YAML MCP Description MUST consist of exactly one YAML document and MUST decode to the JSON-compatible MCP Description data model defined in Section 3.1. A YAML stream containing zero or multiple documents MUST be rejected.
 
 The recommended YAML file extensions are:
 
@@ -1885,39 +1885,39 @@ The recommended YAML media type is:
 application/mcp-description+yaml
 ```
 
-The project-specific `application/mcp-description+yaml` media type is not registered by RFC 9512. Its `+yaml` structured syntax suffix and the generic `application/yaml` media type are registered by [RFC 9512](https://www.rfc-editor.org/rfc/rfc9512). Generic tooling SHOULD use `application/yaml` when the project-specific media type is unavailable or inappropriate.
+The project-specific `application/mcp-description+yaml` media type is not registered by RFC 9512. Its `+yaml` structured syntax suffix and the generic `application/yaml` media type are registered by [RFC 9512](https://www.rfc-editor.org/rfc/rfc9512). <a id="req-serialization-media-type"></a>Generic tooling SHOULD use `application/yaml` when the project-specific media type is unavailable or inappropriate.
 
 #### 15.3.1 String Mapping Keys
 
-Every YAML mapping key MUST resolve to a string. Complex keys, sequence keys, numeric keys, boolean keys, null keys, and other non-string keys MUST be rejected.
+<a id="req-serialization-yaml-string-keys"></a>Every YAML mapping key MUST resolve to a string. Complex keys, sequence keys, numeric keys, boolean keys, null keys, and other non-string keys MUST be rejected.
 
 #### 15.3.2 Duplicate Mapping Keys
 
-A YAML mapping MUST NOT contain duplicate keys after scalar resolution. Implementations MUST reject duplicate keys rather than silently keeping the first or last value.
+<a id="req-serialization-yaml-duplicate-keys"></a>A YAML mapping MUST NOT contain duplicate keys after scalar resolution. Implementations MUST reject duplicate keys rather than silently keeping the first or last value.
 
 #### 15.3.3 Scalar Resolution and Numeric Values
 
-A YAML processor MUST use the YAML 1.2.2 JSON schema for scalar resolution. A YAML scalar used as an MCP Description value MUST resolve to a string, finite number, boolean, or null. Non-finite numeric values such as positive infinity, negative infinity, and NaN MUST be rejected.
+<a id="req-serialization-yaml-scalars"></a>A YAML processor MUST use the YAML 1.2.2 JSON schema for scalar resolution. A YAML scalar used as an MCP Description value MUST resolve to a string, finite number, boolean, or null. Non-finite numeric values such as positive infinity, negative infinity, and NaN MUST be rejected.
 
-The YAML 1.2.2 JSON schema does not implicitly resolve timestamps. Date-time and date values therefore remain strings; authors SHOULD still quote them for clarity and portability across authoring tools.
+The YAML 1.2.2 JSON schema does not implicitly resolve timestamps. Date-time and date values therefore remain strings; <a id="req-serialization-yaml-quoted-dates"></a>authors SHOULD still quote them for clarity and portability across authoring tools.
 
 #### 15.3.4 Tags and Safe Parsing
 
-Application-specific, language-specific, or custom YAML tags MUST NOT be used. Implementations MUST use a safe parser mode that does not instantiate application objects or execute constructors based on tags.
+<a id="req-serialization-yaml-tags"></a>Application-specific, language-specific, or custom YAML tags MUST NOT be used. Implementations MUST use a safe parser mode that does not instantiate application objects or execute constructors based on tags.
 
 #### 15.3.5 Anchors and Aliases
 
-YAML aliases and alias-based recursive structures MUST NOT be used in a conforming MCP Description YAML serialization. Implementations SHOULD reject documents containing aliases. This restriction avoids graph identity, recursion, and expansion semantics that have no representation in the JSON-compatible data model.
+<a id="req-serialization-yaml-aliases"></a>YAML aliases and alias-based recursive structures MUST NOT be used in a conforming MCP Description YAML serialization. Implementations SHOULD reject documents containing aliases. This restriction avoids graph identity, recursion, and expansion semantics that have no representation in the JSON-compatible data model.
 
-Authors who need semantic reuse SHOULD duplicate the value explicitly or use a specification-defined reuse mechanism when one is available.
+<a id="req-serialization-explicit-reuse"></a>Authors who need semantic reuse SHOULD duplicate the value explicitly or use a specification-defined reuse mechanism when one is available.
 
 #### 15.3.6 Merge Keys
 
-YAML merge-key conventions such as `<<` MUST NOT be interpreted as structural merge operations by MCP Description tooling. If a parser exposes `<<` as an ordinary string key, the resulting MCP Description will normally fail the MCP Description schema because `<<` is not a defined property. Implementations MUST NOT apply YAML merge semantics before MCP Description validation.
+<a id="req-serialization-yaml-merge-keys"></a>YAML merge-key conventions such as `<<` MUST NOT be interpreted as structural merge operations by MCP Description tooling. If a parser exposes `<<` as an ordinary string key, the resulting MCP Description will normally fail the MCP Description schema because `<<` is not a defined property. Implementations MUST NOT apply YAML merge semantics before MCP Description validation.
 
 ### 15.4 Parsing and Validation Pipeline
 
-A conforming validator that accepts YAML MUST parse YAML using the restrictions above, reject unsupported YAML constructs, normalize the parsed representation to the JSON-compatible MCP Description data model, apply the same MCP Description JSON Schema used for JSON documents, and apply the same cross-object and semantic validation used for JSON documents. A validator MUST NOT have weaker semantic validation for YAML than for JSON.
+<a id="req-serialization-yaml-validation"></a>A conforming validator that accepts YAML MUST parse YAML using the restrictions above, reject unsupported YAML constructs, normalize the parsed representation to the JSON-compatible MCP Description data model, apply the same MCP Description JSON Schema used for JSON documents, and apply the same cross-object and semantic validation used for JSON documents. A validator MUST NOT have weaker semantic validation for YAML than for JSON.
 
 The MCP Description JSON Schema remains authoritative for structural instance validation. It is published as JSON and applies to the decoded data model regardless of the source serialization.
 
@@ -1925,19 +1925,19 @@ The MCP Description JSON Schema remains authoritative for structural instance va
 
 If a JSON document and a YAML document decode to the same JSON-compatible data model, they are semantically equivalent MCP Description documents, subject to the ordinary MCP Description semantic-equivalence rules. Source formatting, comments, quoting style, YAML block style, and object-key order do not participate in semantic equivalence.
 
-Tools that convert between JSON and YAML MUST preserve the decoded MCP Description data model, subject only to non-semantic source details such as comments, scalar style, and mapping order.
+<a id="req-serialization-conversion"></a>Tools that convert between JSON and YAML MUST preserve the decoded MCP Description data model, subject only to non-semantic source details such as comments, scalar style, and mapping order.
 
 ### 15.6 Common Value Requirements
 
-Implementations MUST support finite IEEE 754 double-precision floating-point numbers. Properties with `null` values SHOULD be omitted rather than included with a `null` value unless the property explicitly permits `null`.
+<a id="req-serialization-numbers"></a>Implementations MUST support finite IEEE 754 double-precision floating-point numbers. Properties with `null` values SHOULD be omitted rather than included with a `null` value unless the property explicitly permits `null`.
 
-An ordinary declaration collection with no entries MUST be omitted; an explicit empty array or object is not conforming. Serialization MUST NOT convert omission into an explicit empty value. Implementations MUST preserve semantically significant empty values and MUST NOT convert them to omission. In particular, `security: []` clears inherited security while omission inherits it, `security: [{}]` declares an anonymous alternative, and empty Security Requirement scope arrays remain significant; these forms are not interchangeable.
+<a id="req-serialization-empty-collections"></a>An ordinary declaration collection with no entries MUST be omitted; an explicit empty array or object is not conforming. <a id="req-serialization-empty-values-preserved"></a>Serialization MUST NOT convert omission into an explicit empty value. Implementations MUST preserve semantically significant empty values and MUST NOT convert them to omission. In particular, `security: []` clears inherited security while omission inherits it, `security: [{}]` declares an anonymous alternative, and empty Security Requirement scope arrays remain significant; these forms are not interchangeable.
 
-String values MUST be valid JSON strings after decoding. URI values MUST conform to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986). Email values SHOULD conform to [RFC 5322](https://www.rfc-editor.org/rfc/rfc5322). Date values MUST conform to ISO 8601.
+<a id="req-serialization-value-formats"></a>String values MUST be valid JSON strings after decoding. URI values MUST conform to [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986). Email values SHOULD conform to [RFC 5322](https://www.rfc-editor.org/rfc/rfc5322). Date values MUST conform to ISO 8601.
 
 ### 15.7 Schema Reference
 
-MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
+<a id="req-serialization-schema-property"></a>MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
 For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
 
@@ -1948,9 +1948,9 @@ mcpdesc: 0.9.0
 
 ### 15.8 Producer and Consumer Guidance
 
-Producers and consumers SHOULD explicitly communicate or negotiate the serialization when it cannot be determined from a file extension, media type, or other enclosing protocol metadata. Implementations MAY support JSON, YAML, or both according to their use case and declared capabilities.
+<a id="req-serialization-negotiation"></a>Producers and consumers SHOULD explicitly communicate or negotiate the serialization when it cannot be determined from a file extension, media type, or other enclosing protocol metadata. Implementations MAY support JSON, YAML, or both according to their use case and declared capabilities.
 
-Implementations MUST treat JSON and YAML input as untrusted and impose reasonable document-size, nesting-depth, scalar-length, and collection-size limits.
+<a id="req-serialization-untrusted"></a>Implementations MUST treat JSON and YAML input as untrusted and impose reasonable document-size, nesting-depth, scalar-length, and collection-size limits.
 
 ## 16. Conformance
 
@@ -2017,9 +2017,9 @@ The root MCP Description Object MAY contain a `components` property. <a id="req-
 | `resourceTemplateExamples` | non-empty map\<string, Resource Template Example Object or Reference Object\> | Reusable Resource Template examples. |
 | `promptExamples` | non-empty map\<string, Prompt Example Object or Reference Object\> | Reusable Prompt examples. |
 
-Every present namespace map MUST contain at least one entry. Each component name MUST match `^[A-Za-z0-9._-]+$`. Names are case-sensitive and unique only within their namespace.
+<a id="req-component-maps"></a>Every present namespace map MUST contain at least one entry. Each component name MUST match `^[A-Za-z0-9._-]+$`. Names are case-sensitive and unique only within their namespace.
 
-The outer Components Object MAY carry `x-*` specification extensions and MUST NOT contain other properties. Namespace maps are closed component-name maps rather than extension locations. Schema component values follow JSON Schema, including its extension-keyword rules. Tool, Resource, Resource Template, and Prompt Example component values are eligible semantic objects and MAY carry the same `x-*` specification extensions as their inline forms. Components and component values MUST NOT declare MCP Description `protocolVersions`; protocol applicability is inherited exclusively from each use site.
+<a id="req-components-closed"></a>The outer Components Object MAY carry `x-*` specification extensions and MUST NOT contain other properties. Namespace maps are closed component-name maps rather than extension locations. Schema component values follow JSON Schema, including its extension-keyword rules. Tool, Resource, Resource Template, and Prompt Example component values are eligible semantic objects and MAY carry the same `x-*` specification extensions as their inline forms. Components and component values MUST NOT declare MCP Description `protocolVersions`; protocol applicability is inherited exclusively from each use site.
 
 ### 17.2 Reference Object
 
@@ -2031,7 +2031,7 @@ The outer Components Object MAY carry `x-*` specification extensions and MUST NO
 
 No sibling property, including an `x-*` property, is permitted. <a id="req-component-reference-form"></a>The pointer MUST have the form `#/components/<namespace>/<name>`, where `<namespace>` is one of the five namespaces in Section 17.1 and `<name>` follows the component-name grammar. Remote URIs, relative-file references, pointers outside `#/components`, missing targets, and targets in an incompatible namespace are invalid.
 
-A `$componentRef` is an MCP Description reference only at a use site that permits a Reference Object. JSON Schema `$ref` remains governed exclusively by the applicable embedded JSON Schema dialect. Implementations MUST NOT accept `$ref` as an MCP Description component reference and MUST NOT reinterpret a `$componentRef` nested inside an embedded JSON Schema.
+A `$componentRef` is an MCP Description reference only at a use site that permits a Reference Object. JSON Schema `$ref` remains governed exclusively by the applicable embedded JSON Schema dialect. <a id="req-component-ref-distinct"></a>Implementations MUST NOT accept `$ref` as an MCP Description component reference and MUST NOT reinterpret a `$componentRef` nested inside an embedded JSON Schema.
 
 The distinct keyword separates two reference systems embedded in the same document. A JSON Schema `$ref` is an applicator: it applies another schema to the current instance location, participates in the schema dialect's URI-base and dynamic-scope rules, and may have adjacent schema keywords when the dialect permits them. A `$componentRef` instead replaces one complete MCP Description value before that value is checked in its use-site context. It can therefore reference non-schema values, but it does not compose, constrain, or annotate its target.
 
@@ -2041,29 +2041,29 @@ Local-only resolution is a separate design constraint, not a consequence of usin
 
 Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; Resource Template `examples` values MAY reference `resourceTemplateExamples`; and Prompt `examples` values MAY reference `promptExamples`.
 
-Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output revision rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
+Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. <a id="req-component-contextual-validation"></a>A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output revision rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
 
 ### 17.4 Resolution
 
-A conforming implementation MUST resolve Reference Objects as JSON Pointers into the same parsed MCP Description document. <a id="req-component-reference-resolution"></a>It MUST require the target to exist in the namespace appropriate to the use site, preserve the target JSON value for validation, follow component-to-component references transitively, and reject cycles. It MUST NOT access the network, filesystem, package registry, or another document while resolving `$componentRef`.
+<a id="req-component-reference-pointer"></a>A conforming implementation MUST resolve Reference Objects as JSON Pointers into the same parsed MCP Description document. <a id="req-component-reference-resolution"></a>It MUST require the target to exist in the namespace appropriate to the use site, preserve the target JSON value for validation, follow component-to-component references transitively, and reject cycles. It MUST NOT access the network, filesystem, package registry, or another document while resolving `$componentRef`.
 
-Resolution errors are document-conformance errors. A validator SHOULD report the use-site or component path and distinguish a malformed pointer, missing target, incompatible namespace, and cycle.
+<a id="req-component-resolution-errors"></a>Resolution errors are document-conformance errors. A validator SHOULD report the use-site or component path and distinguish a malformed pointer, missing target, incompatible namespace, and cycle.
 
 ### 17.5 Projection
 
-An Effective Protocol View MAY retain every component or prune components unused by retained declarations. A pruning projection MUST retain every component transitively reached through a retained Reference Object and MUST remove no target required by the projected document. It MUST validate all retained references after projection. The outer Components Object and namespace maps MUST be omitted if pruning would otherwise leave them empty, except that retained outer specification extensions keep the Components Object non-empty.
+An Effective Protocol View MAY retain every component or prune components unused by retained declarations. <a id="req-component-pruning"></a>A pruning projection MUST retain every component transitively reached through a retained Reference Object and MUST remove no target required by the projected document. It MUST validate all retained references after projection. The outer Components Object and namespace maps MUST be omitted if pruning would otherwise leave them empty, except that retained outer specification extensions keep the Components Object non-empty.
 
 Components have no independent protocol scope. Their validity is determined only after use-site projection.
 
 ### 17.6 Merge
 
-Merge tooling MUST preserve every referenced component and MUST NOT silently bind different component values to one name. It MAY deduplicate equivalent values. When different values collide at one namespace and name, tooling MAY fail with a merge conflict or deterministically rename one value and rewrite every affected Reference Object. A generated name MUST satisfy the component-name grammar, and all rewritten references MUST validate in the merged result.
+<a id="req-component-merge"></a>Merge tooling MUST preserve every referenced component and MUST NOT silently bind different component values to one name. It MAY deduplicate equivalent values. When different values collide at one namespace and name, tooling MAY fail with a merge conflict or deterministically rename one value and rewrite every affected Reference Object. A generated name MUST satisfy the component-name grammar, and all rewritten references MUST validate in the merged result.
 
-Outer Components Object extensions with the same name and different values are conflicts unless the merge operation has an independently defined lossless representation. Merge processing MUST remain local and MUST NOT retrieve component values from a network or another document.
+<a id="req-component-merge-extensions"></a>Outer Components Object extensions with the same name and different values are conflicts unless the merge operation has an independently defined lossless representation. Merge processing MUST remain local and MUST NOT retrieve component values from a network or another document.
 
 ### 17.7 Security and Processing Limits
 
-Components and referenced examples are untrusted document content. Implementations SHOULD bound reference depth, component count, nesting, and resolved validation work. They MUST detect cycles without unbounded recursion and MUST apply the same safe rendering, schema-evaluation, URI, content, and secret-handling rules as for inline values.
+Components and referenced examples are untrusted document content. <a id="req-component-limits"></a>Implementations SHOULD bound reference depth, component count, nesting, and resolved validation work. <a id="req-component-cycles"></a>They MUST detect cycles without unbounded recursion and MUST apply the same safe rendering, schema-evaluation, URI, content, and secret-handling rules as for inline values.
 
 ### 17.8 Example
 
@@ -2099,7 +2099,7 @@ See the [complete reusable-components example](examples/reusable-components.yaml
 | `sizes` | array\<string\> | No | Sizes at which the icon can be used (e.g., `"48x48"`, `"96x96"`, `"any"`). |
 | `theme` | string | No | Theme this icon is designed for: `"light"` or `"dark"`. |
 
-Clients MUST support `image/png` and `image/jpeg`. Clients SHOULD also support `image/svg+xml` and `image/webp`.
+<a id="req-icon-client-formats"></a>Clients MUST support `image/png` and `image/jpeg`. Clients SHOULD also support `image/svg+xml` and `image/webp`.
 
 ---
 

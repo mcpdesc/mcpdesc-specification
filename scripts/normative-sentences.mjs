@@ -39,7 +39,8 @@ function blocks(text) {
 }
 
 function sentences(block) {
-  const text = block.replace(/`[^`]*`/g, '`code`');
+  // Code spans and quoted key words, as in the RFC 2119 boilerplate, state no obligation.
+  const text = block.replace(/`[^`]*`/g, '`code`').replace(/"(?:NOT )?[A-Z]+(?: NOT)?"/g, '"keyword"');
   const parts = [];
   let begin = 0;
   for (const match of text.matchAll(/[.!?](?=\s+(?:[A-Z<*[(`"]|\d))/g)) {

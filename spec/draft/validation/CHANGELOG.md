@@ -34,6 +34,9 @@ target until deployment is verified.
   the canonical MCP Description schema whose failures the rule reports. A
   failure belongs to the rule owning the longest pointer that contains the
   failing schema location.
+- Fixture citations may name files under `serialization-fixtures/`, cited
+  whole with the empty pointer; the outcome is `passes` when decoding accepts
+  the file and `error` when it rejects it.
 
 ### Catalog
 

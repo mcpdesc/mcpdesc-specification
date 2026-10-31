@@ -129,6 +129,7 @@ rules:
           - sections/06-transports.md#req-transport-sse-fields
           - sections/06-transports.md#req-transport-type
           - sections/06-transports.md#req-transport-closed
+          - sections/15-serialization.md#req-serialization-value-formats
     enforcement: internal
     status: internal
     fixtures:
