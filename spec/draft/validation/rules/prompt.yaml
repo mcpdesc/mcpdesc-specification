@@ -64,6 +64,8 @@ rules:
         locations:
           - sections/11-prompts.md#req-prompt-fields
           - sections/11-prompts.md#req-prompt-argument-fields
+          - sections/13-tags.md#req-entity-tags-shape
+          - sections/13-tags.md#req-entity-tags-unique
     enforcement: internal
     status: internal
     fixtures:

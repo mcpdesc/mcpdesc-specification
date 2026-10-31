@@ -28,6 +28,15 @@ rules:
           - sections/09-tools.md#req-tool-input-schema-required
           - sections/03-document-structure.md#req-ordinary-collections-non-empty
           - sections/03-document-structure.md#req-ordinary-collections-omitted
+          - sections/04-versioning.md#req-mcpdesc-required
+          - sections/04-versioning.md#req-mcpdesc-version
+          - sections/04-versioning.md#req-version-check
+          - sections/05-info-object.md#req-info-required
+          - sections/06-transports.md#req-transports-non-empty
+          - sections/08-capabilities.md#req-capabilities-non-empty
+          - sections/13-tags.md#req-tags-non-empty
+          - sections/13-tags.md#req-tags-omitted
+          - sections/16-conformance.md#req-conforming-document
     enforcement: internal
     status: internal
     fixtures:
@@ -142,6 +151,10 @@ rules:
           - sections/08-capabilities.md#req-capability-scopes-disjoint
           - sections/09-tools.md#req-tool-names-disjoint
           - sections/12-elicitation.md#req-elicitation-scope
+          - sections/04-versioning.md#req-scope-root-subset
+          - sections/10-resources.md#req-resource-scopes-disjoint
+          - sections/11-prompts.md#req-prompt-scopes-disjoint
+          - sections/11-prompts.md#req-prompt-variants-disjoint
     enforcement: internal
     status: internal
     fixtures:
@@ -178,6 +191,11 @@ rules:
           - sections/13-tags.md#req-tags-unique
           - sections/13-tags.md#req-tags-references
           - sections/09-tools.md#req-tool-tags-references
+          - sections/10-resources.md#req-resource-tags-references
+          - sections/10-resources.md#req-resource-template-tags-references
+          - sections/11-prompts.md#req-prompt-tags-references
+          - sections/13-tags.md#req-tag-name-unique
+          - sections/13-tags.md#req-tags-undeclared-error
     enforcement: internal
     status: internal
     fixtures:
@@ -215,6 +233,7 @@ rules:
           - sections/07-security.md#req-security-scopes-unique
           - sections/07-security.md#req-security-scopes-oauth-only
           - sections/07-security.md#req-security-uncatalogued-scope
+          - sections/06-transports.md#req-transport-security-example
     enforcement: internal
     status: internal
     fixtures:
@@ -263,6 +282,8 @@ rules:
           - sections/09-tools.md#req-tool-schema-references-resolved
           - sections/09-tools.md#req-tool-example-references-resolved
           - sections/12-elicitation.md#req-elicitation-schema-references-resolved
+          - sections/10-resources.md#req-resource-example-references-resolved
+          - sections/11-prompts.md#req-prompt-example-references-resolved
     enforcement: internal
     status: internal
     fixtures:
@@ -330,6 +351,10 @@ rules:
           - sections/05-info-object.md#req-info-fields
           - sections/05-info-object.md#req-contact-fields
           - sections/05-info-object.md#req-license-fields
+          - sections/04-versioning.md#req-info-unscoped
+          - sections/05-info-object.md#req-info-revision-independent
+          - sections/05-info-object.md#req-info-name-non-empty
+          - sections/05-info-object.md#req-info-version-non-empty
     enforcement: internal
     status: internal
     fixtures:

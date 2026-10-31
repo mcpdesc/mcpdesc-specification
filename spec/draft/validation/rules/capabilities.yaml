@@ -31,6 +31,7 @@ rules:
       - reference: MCP Description 0.9.0, Sections 8.2 and 8.4
         locations:
           - sections/08-capabilities.md#req-capabilities-closed
+          - sections/08-capabilities.md#req-extensions-identifier-form
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ServerCapabilities (no index signature)
@@ -111,6 +112,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 8.5
         locations:
           - sections/08-capabilities.md#req-client-requirements-closed
+          - sections/08-capabilities.md#req-client-requirements-shape
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (no index signature)
@@ -184,6 +186,7 @@ rules:
         locations:
           - sections/08-capabilities.md#req-client-requirements-revision-valid
           - sections/08-capabilities.md#req-client-requirements-values
+          - sections/08-capabilities.md#req-client-requirements-extensions
     sources:
       - tier: 1
         reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (members and nested members per revision)
@@ -331,6 +334,7 @@ rules:
         locations:
           - sections/08-capabilities.md#req-extensions-reserved-identifiers
           - sections/08-capabilities.md#req-extensions-catalogue-maturity
+          - sections/08-capabilities.md#req-extensions-official-no-warning
     sources:
       - tier: 1
         reference: MCP 2026-07-28 specification, Basic, General fields, _meta key name format (second label modelcontextprotocol or mcp is reserved)

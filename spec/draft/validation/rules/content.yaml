@@ -128,6 +128,8 @@ rules:
         locations:
           - sections/03-document-structure.md#req-carried-defined-fields
           - sections/03-document-structure.md#req-carried-closed-reject
+          - sections/10-resources.md#req-resource-annotations-not-in-examples
+          - sections/10-resources.md#req-resource-contents-fields
     sources:
       - tier: 1
         reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, ContentBlock and ResourceContents"

@@ -76,6 +76,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 10.3
         locations:
           - sections/10-resources.md#req-resource-annotations-closed
+          - sections/10-resources.md#req-content-annotations-distinct
     sources:
       - tier: 1
         reference: MCP 2024-11-05 schema.ts, inline annotations on Resource, ResourceTemplate, and content types; MCP 2025-03-26 to 2026-07-28 schema.ts, interface Annotations (no index signature)

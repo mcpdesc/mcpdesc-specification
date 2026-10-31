@@ -236,6 +236,17 @@ rules:
           - sections/11-prompts.md#req-prompt-example-fields
           - sections/09-tools.md#req-tool-examples-map
           - sections/09-tools.md#req-tool-example-closed
+          - sections/10-resources.md#req-resource-examples-map
+          - sections/10-resources.md#req-resource-example-closed
+          - sections/10-resources.md#req-template-completion-examples-map
+          - sections/10-resources.md#req-template-completion-example-closed
+          - sections/10-resources.md#req-template-completion-context-shape
+          - sections/11-prompts.md#req-prompt-examples-map
+          - sections/11-prompts.md#req-prompt-example-closed
+          - sections/11-prompts.md#req-prompt-example-arguments-shape
+          - sections/11-prompts.md#req-prompt-completion-examples-map
+          - sections/11-prompts.md#req-prompt-completion-example-closed
+          - sections/11-prompts.md#req-prompt-completion-context-shape
     enforcement: internal
     status: internal
     fixtures:
@@ -275,6 +286,9 @@ rules:
           - sections/10-resources.md#req-resource-example-result-shape
           - sections/11-prompts.md#req-prompt-example-result-shape
           - sections/03-document-structure.md#req-completed-result-fields
+          - sections/10-resources.md#req-resource-example-contents
+          - sections/10-resources.md#req-template-completion-result
+          - sections/11-prompts.md#req-prompt-completion-result
     sources:
       - tier: 1
         reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, CallToolResult, ReadResourceResult, GetPromptResult, PromptMessage, and CompleteResult"

@@ -113,6 +113,12 @@ rules:
           - sections/04-versioning.md#req-native-projection-lists
           - sections/09-tools.md#req-tool-example-projection-omitted
           - sections/09-tools.md#req-interaction-projection-omitted
+          - sections/04-versioning.md#req-native-projection-steps
+          - sections/04-versioning.md#req-native-projection-no-repair
+          - sections/10-resources.md#req-resource-example-projection-omitted
+          - sections/10-resources.md#req-template-completion-projection-omitted
+          - sections/11-prompts.md#req-prompt-example-projection-omitted
+          - sections/11-prompts.md#req-prompt-completion-projection-omitted
     enforcement: external
     status: delegated
     fixtures:

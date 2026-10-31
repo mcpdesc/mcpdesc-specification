@@ -732,6 +732,8 @@ rules:
           - sections/09-tools.md#req-tool-input-schema-required
           - sections/09-tools.md#req-execution-fields
           - sections/12-elicitation.md#req-elicitations-non-empty
+          - sections/13-tags.md#req-entity-tags-shape
+          - sections/13-tags.md#req-entity-tags-unique
     enforcement: internal
     status: internal
     fixtures:

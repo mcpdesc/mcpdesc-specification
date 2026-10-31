@@ -93,6 +93,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 6.5
         locations:
           - sections/06-transports.md#req-transport-coverage
+          - sections/06-transports.md#req-transport-coverage-omitted
     enforcement: internal
     status: internal
     fixtures:
@@ -126,6 +127,8 @@ rules:
           - sections/06-transports.md#req-transport-streamable-http-fields
           - sections/06-transports.md#req-transport-stdio-fields
           - sections/06-transports.md#req-transport-sse-fields
+          - sections/06-transports.md#req-transport-type
+          - sections/06-transports.md#req-transport-closed
     enforcement: internal
     status: internal
     fixtures:

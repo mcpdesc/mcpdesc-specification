@@ -23,7 +23,10 @@ import { checkRuleApplicability } from './validation-catalog.mjs';
 // Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
 const historicalRevisions = new Set(['2024-11-05', '2025-03-26']);
 // Sections whose obligation sentences must all start with or follow a requirement anchor (Proposal 0033).
-const classifiedSections = new Set(['03-document-structure.md', '07-security.md', '09-tools.md', '12-elicitation.md']);
+const classifiedSections = new Set([
+  '03-document-structure.md', '04-versioning.md', '05-info-object.md', '06-transports.md', '07-security.md', '08-capabilities.md',
+  '09-tools.md', '10-resources.md', '11-prompts.md', '12-elicitation.md', '13-tags.md', '16-conformance.md'
+]);
 
 const root = process.cwd();
 const { specificationRoot, schemaPath } = candidateSpecification(root);
