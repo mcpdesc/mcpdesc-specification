@@ -7,10 +7,16 @@ import addFormats from 'ajv-formats';
 import { UriTemplateMatcher } from 'uri-template-matcher';
 import schema from '../schemas/mcp-description/0.9.0.json' with { type: 'json' };
 import { documentSchemaOwners } from './document-schema-owners.mjs';
+import { ruleSummaries } from './rule-summaries.mjs';
 import {
+  checkStage,
   classifyCarriedFields,
+  declareChecks,
+  evaluated,
+  isRecording,
   mcpExtensionCatalogue,
   mcpExtensionMaturity,
+  recordEvaluations,
   semanticValidateDocument as validateBaseSemantics,
   supportedProtocolVersions
 } from './validator-base.mjs';
@@ -23,7 +29,26 @@ const ajv = new Ajv2020({ allErrors: true, strict: false, verbose: true });
 addFormats(ajv);
 const ajvDraft7 = new Ajv({ allErrors: true, strict: false });
 addFormats(ajvDraft7);
-const validateStructure = ajv.compile(schema);
+
+// Each owned schema location records the instances it evaluates, for rule results (Proposal 0031).
+const evaluationKeyword = 'x-mcpdesc-rule';
+let structuralEvaluations;
+ajv.addKeyword({
+  keyword: evaluationKeyword,
+  schemaType: 'string',
+  errors: false,
+  validate(rule, data, parentSchema, dataContext) {
+    structuralEvaluations?.push([rule, dataContext?.instancePath ?? '']);
+    return true;
+  }
+});
+const instrumentedSchema = structuredClone(schema);
+for (const [pointer, rule] of documentSchemaOwners) {
+  const target = pointer.split('/').slice(1).map((token) => token.replaceAll('~1', '/').replaceAll('~0', '~'))
+    .reduce((node, token) => node?.[token], instrumentedSchema);
+  if (target && typeof target === 'object' && !Array.isArray(target)) target[evaluationKeyword] = rule;
+}
+const validateStructure = ajv.compile(instrumentedSchema);
 const primitiveCollections = ['tools', 'resources', 'resourceTemplates', 'prompts'];
 const componentNamespaces = ['schemas', 'toolExamples', 'resourceExamples', 'resourceTemplateExamples', 'promptExamples'];
 const knownClientCapabilities = new Set(['roots', 'sampling', 'elicitation', 'tasks', 'extensions', 'experimental']);
@@ -37,9 +62,40 @@ const clientCapabilitiesByVersion = {
   '2026-07-28': new Set(['roots', 'sampling', 'elicitation', 'extensions', 'experimental'])
 };
 
-function semanticDiagnostic(code, severity, message, path, rule) {
-  return rule ? { code, severity, message, path, rule } : { code, severity, message, path };
+function semanticDiagnostic(code, severity, message, path, rule, protocolVersions) {
+  return {
+    code,
+    severity,
+    message,
+    path,
+    ...(rule ? { rule } : {}),
+    ...(protocolVersions ? { protocolVersions: [protocolVersions].flat() } : {})
+  };
 }
+
+declareChecks('semantic', [
+  'mcp.annotations.last-modified.revision-availability',
+  'mcp.client-capabilities.deprecated',
+  'mcp.client-capabilities.revision-shape',
+  'mcp.completion.context.revision-availability',
+  'mcp.completion.revision-availability',
+  'mcp.content-block.revision-availability',
+  'mcp.elicitation.revision-availability',
+  'mcp.input-response.closed',
+  'mcp.resource-contents.meta.revision-availability',
+  'mcp.result.additional-properties.preserve',
+  'mcp.root.meta.revision-availability',
+  'mcp.root.uri.file-scheme',
+  'mcp.sampling.tools.revision-availability',
+  'mcpdesc.completion-example.target',
+  'mcpdesc.components.references',
+  'mcpdesc.example.completed-result-form',
+  'mcpdesc.example.result.revision-fidelity',
+  'mcpdesc.extensions.catalogue-maturity',
+  'mcpdesc.prompt.example.arguments',
+  'mcpdesc.tool.interaction.client-requirements-consistency',
+  'mcpdesc.tool.interaction.elicitation-consistency'
+]);
 
 function usesMcpReservedPrefix(identifier) {
   if (typeof identifier !== 'string' || !identifier.includes('/')) return false;
@@ -114,6 +170,7 @@ export function resolveComponentReferences(document, rel = 'document') {
   }
 
   function substitute(reference, expectedNamespace, path, stack = []) {
+    evaluated('mcpdesc.components.references', path);
     const result = resolve(reference, expectedNamespace, path, stack);
     if (result.targetPath) {
       provenance.push({ referencePath: path, targetPath: result.targetPath });
@@ -199,7 +256,15 @@ function structuralPath(document, error) {
 }
 
 function structuralDiagnostics(document) {
-  if (validateStructure(document)) return [];
+  const outer = structuralEvaluations;
+  structuralEvaluations = isRecording() ? [] : undefined;
+  const valid = validateStructure(document);
+  for (const visit of new Set((structuralEvaluations ?? []).map((entry) => JSON.stringify(entry)))) {
+    const [rule, instancePath] = JSON.parse(visit);
+    evaluated(rule, structuralPath(document, { instancePath, keyword: undefined, params: {} }));
+  }
+  structuralEvaluations = outer;
+  if (valid) return [];
   const errors = validateStructure.errors ?? [];
   return errors.map((error) => ({
     code: 'schema-validation',
@@ -216,7 +281,7 @@ const schemaPointers = new Map();
   if (node === null || typeof node !== 'object') return;
   if (!Array.isArray(node)) schemaPointers.set(node, pointer);
   for (const [key, child] of Object.entries(node)) indexSchema(child, `${pointer}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`);
-})(schema, '#');
+})(instrumentedSchema, '#');
 
 const within = (pointer, owned) => pointer === owned || pointer.startsWith(`${owned}/`);
 function schemaOwner(pointer) {
@@ -238,7 +303,7 @@ function reachableFrom(node) {
     const current = stack.pop();
     if (current === null || typeof current !== 'object' || found.has(current)) continue;
     found.add(current);
-    if (typeof current.$ref === 'string' && current.$ref.startsWith('#/$defs/')) stack.push(schema.$defs[current.$ref.slice(8)]);
+    if (typeof current.$ref === 'string' && current.$ref.startsWith('#/$defs/')) stack.push(instrumentedSchema.$defs[current.$ref.slice(8)]);
     stack.push(...Object.values(current));
   }
   reachable.set(node, found);
@@ -422,7 +487,12 @@ function validateToolInteractionInputAndResult(tool, toolIndex, exampleName, exa
       }
     ]
   };
-  return validateBaseSemantics(synthetic)
+  const { result: diagnostics, evaluations } = recordEvaluations(() => validateBaseSemantics(synthetic));
+  for (const evaluation of evaluations) {
+    const remapped = remapSyntheticToolExampleDiagnostic({ ...evaluation, message: '' }, toolIndex, exampleName);
+    if (remapped.path[2] === 'interactionExamples') evaluated(evaluation.rule, remapped.path, evaluation.protocolVersions);
+  }
+  return diagnostics
     .map((diagnostic) => remapSyntheticToolExampleDiagnostic(diagnostic, toolIndex, exampleName))
     .filter((diagnostic) => diagnostic.path?.[0] === 'tools' && diagnostic.path?.[1] === toolIndex && diagnostic.path?.[2] === 'interactionExamples');
 }
@@ -460,6 +530,7 @@ function validateAgainstRequestedSchema(schemaValue, value, location, path, diag
 function warnClientRequirementsContradiction(tool, step, stepLocation, stepPath, diagnostics) {
   const requirements = tool.clientRequirements;
   if (!requirements || typeof requirements !== 'object' || Array.isArray(requirements)) return;
+  evaluated('mcpdesc.tool.interaction.client-requirements-consistency', stepPath);
 
   function warn(message, path) {
     diagnostics.push(semanticDiagnostic(
@@ -548,14 +619,17 @@ function validateToolInteractionExamples(document) {
             ? (tool.elicitations ?? []).find((candidate) => candidate.name === step.declaration)
             : undefined;
 
+          evaluated('mcpdesc.tool.interaction.elicitation-consistency', stepPath);
           for (const version of scope) {
+            evaluated('mcp.elicitation.revision-availability', [...stepPath, 'type'], version);
             if (protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
               diagnostics.push(semanticDiagnostic(
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.type is not defined for MCP ${version}`,
                 [...stepPath, 'type'],
-                'mcp.elicitation.revision-availability'
+                'mcp.elicitation.revision-availability',
+                version
               ));
             }
             if (request.mode === 'url' && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
@@ -564,7 +638,8 @@ function validateToolInteractionExamples(document) {
                 'error',
                 `${stepLocation}.request.mode "url" is not defined for MCP ${version}`,
                 [...stepPath, 'request', 'mode'],
-                'mcp.elicitation.revision-availability'
+                'mcp.elicitation.revision-availability',
+                version
               ));
             }
           }
@@ -643,6 +718,9 @@ function validateToolInteractionExamples(document) {
 
         if (step.type === 'sampling') {
           for (const version of scope) {
+            if (Object.hasOwn(step.request, 'tools') || Object.hasOwn(step.request, 'toolChoice')) {
+              evaluated('mcp.sampling.tools.revision-availability', [...stepPath, 'request'], version);
+            }
             if ((Object.hasOwn(step.request, 'tools') || Object.hasOwn(step.request, 'toolChoice'))
               && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
               diagnostics.push(semanticDiagnostic(
@@ -650,7 +728,8 @@ function validateToolInteractionExamples(document) {
                 'error',
                 `${stepLocation}.request uses sampling Tool fields that are not defined for MCP ${version}`,
                 [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice'],
-                'mcp.sampling.tools.revision-availability'
+                'mcp.sampling.tools.revision-availability',
+                version
               ));
             }
           }
@@ -659,16 +738,19 @@ function validateToolInteractionExamples(document) {
         if (step.type === 'roots') {
           for (const [rootIndex, root] of (step.response.roots ?? []).entries()) {
             for (const version of scope) {
+              if (Object.hasOwn(root, '_meta')) evaluated('mcp.root.meta.revision-availability', [...stepPath, 'response', 'roots', rootIndex, '_meta'], version);
               if (Object.hasOwn(root, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
                 diagnostics.push(semanticDiagnostic(
                   'interaction-example-version-mismatch',
                   'error',
                   `${stepLocation}.response.roots[${rootIndex}]._meta is not defined for MCP ${version}`,
                   [...stepPath, 'response', 'roots', rootIndex, '_meta'],
-                  'mcp.root.meta.revision-availability'
+                  'mcp.root.meta.revision-availability',
+                  version
                 ));
               }
             }
+            if (typeof root.uri === 'string') evaluated('mcp.root.uri.file-scheme', [...stepPath, 'response', 'roots', rootIndex, 'uri']);
             if (typeof root.uri === 'string' && !root.uri.startsWith('file://')) {
               diagnostics.push(semanticDiagnostic(
                 'interaction-example-roots-uri',
@@ -695,7 +777,9 @@ function validateClientRequirements(document) {
       'client-requirement-version-mismatch',
       'error',
       `${location} member ${JSON.stringify(member)} is not defined by MCP ${version}`,
-      [...path, member]
+      [...path, member],
+      undefined,
+      version
     ));
   }
 
@@ -705,7 +789,9 @@ function validateClientRequirements(document) {
       'invalid-client-requirement-value',
       'error',
       `${location} must be an object for MCP ${version}`,
-      path
+      path,
+      undefined,
+      version
     ));
     return false;
   }
@@ -748,12 +834,15 @@ function validateClientRequirements(document) {
         const available = clientCapabilitiesByVersion[version] ?? new Set();
         for (const [capability, value] of Object.entries(requirements)) {
           if (capability.startsWith('x-')) continue;
+          if (knownClientCapabilities.has(capability)) evaluated('mcp.client-capabilities.revision-shape', [...basePath, capability], version);
           if (knownClientCapabilities.has(capability) && !available.has(capability)) {
             diagnostics.push(semanticDiagnostic(
               'client-requirement-version-mismatch',
               'error',
               `${baseLocation}.${capability} is not defined by MCP ${version}; split the primitive into disjoint protocol-scoped variants when requirements differ`,
-              [...basePath, capability]
+              [...basePath, capability],
+              undefined,
+              version
             ));
             continue;
           }
@@ -764,7 +853,7 @@ function validateClientRequirements(document) {
           if (capability === 'roots') {
             validateClosedMembers(value, version === '2026-07-28' ? new Set() : new Set(['listChanged']), location, path, version);
             if (version !== '2026-07-28' && Object.hasOwn(value, 'listChanged') && typeof value.listChanged !== 'boolean') {
-              diagnostics.push(semanticDiagnostic('invalid-client-requirement-value', 'error', `${location}.listChanged must be a boolean for MCP ${version}`, [...path, 'listChanged']));
+              diagnostics.push(semanticDiagnostic('invalid-client-requirement-value', 'error', `${location}.listChanged must be a boolean for MCP ${version}`, [...path, 'listChanged'], undefined, version));
             }
           } else if (capability === 'sampling' && ['2025-11-25', '2026-07-28'].includes(version)) {
             validateClosedMembers(value, new Set(['context', 'tools']), location, path, version);
@@ -772,7 +861,7 @@ function validateClientRequirements(document) {
               if (Object.hasOwn(value, member)) requireObject(value[member], `${location}.${member}`, [...path, member], version);
             }
             if (Object.hasOwn(value, 'context')) {
-              diagnostics.push(semanticDiagnostic('deprecated-client-requirement', 'warning', `${location}.context uses deprecated MCP context-inclusion capability semantics in MCP ${version}`, [...path, 'context']));
+              diagnostics.push(semanticDiagnostic('deprecated-client-requirement', 'warning', `${location}.context uses deprecated MCP context-inclusion capability semantics in MCP ${version}`, [...path, 'context'], undefined, version));
             }
           } else if (capability === 'elicitation' && ['2025-11-25', '2026-07-28'].includes(version)) {
             validateClosedMembers(value, new Set(['form', 'url']), location, path, version);
@@ -783,6 +872,7 @@ function validateClientRequirements(document) {
             validateTasks(value, location, path, version);
           } else if (capability === 'extensions') {
             for (const extension of Object.keys(value)) {
+              evaluated('mcpdesc.extensions.catalogue-maturity', [...path, extension]);
               if (!usesMcpReservedPrefix(extension)) continue;
               const maturity = mcpExtensionMaturity(extension);
               if (maturity === 'official') continue;
@@ -804,12 +894,15 @@ function validateClientRequirements(document) {
             }
           }
 
+          if (['roots', 'sampling'].includes(capability)) evaluated('mcp.client-capabilities.deprecated', path, version);
           if (version === '2026-07-28' && ['roots', 'sampling'].includes(capability)) {
             diagnostics.push(semanticDiagnostic(
               'deprecated-client-requirement',
               'warning',
               `${location} requires an MCP capability deprecated in MCP ${version}`,
-              path
+              path,
+              undefined,
+              version
             ));
           }
         }
@@ -821,23 +914,26 @@ function validateClientRequirements(document) {
 }
 
 function validatePromptContentVersion(content, contentLocation, contentPath, version, diagnostics) {
+  evaluated('mcp.content-block.revision-availability', contentPath, version);
+  if (content.type === 'resource') evaluated('mcp.resource-contents.meta.revision-availability', [...contentPath, 'resource'], version);
+  if (content.annotations?.lastModified !== undefined) evaluated('mcp.annotations.last-modified.revision-availability', [...contentPath, 'annotations', 'lastModified'], version);
   if (content.type === 'audio' && protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability'));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability', version));
   }
   if (content.type === 'resource_link' && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability'));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability', version));
   }
   if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.revision-availability'));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.revision-availability', version));
   }
   if (content.type === 'resource' && Object.hasOwn(content.resource ?? {}, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.revision-availability'));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.revision-availability', version));
   }
   if (content.type === 'resource_link' && Array.isArray(content.icons) && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.revision-availability'));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.revision-availability', version));
   }
   if (content.annotations?.lastModified !== undefined && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.revision-availability'));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.revision-availability', version));
   }
 }
 
@@ -857,6 +953,7 @@ function validatePromptExamples(document) {
       const result = example.result ?? {};
       const resultPath = [...examplePath, 'result'];
       const argumentsValue = example.arguments;
+      evaluated('mcpdesc.prompt.example.arguments', [...examplePath, 'arguments']);
 
       if (argumentsValue && typeof argumentsValue === 'object' && !Array.isArray(argumentsValue)) {
         for (const [argumentName] of Object.entries(argumentsValue)) {
@@ -882,6 +979,7 @@ function validatePromptExamples(document) {
         }
       }
 
+      evaluated('mcpdesc.example.completed-result-form', resultPath);
       for (const envelopeField of ['jsonrpc', 'id', 'error']) {
         if (Object.hasOwn(result, envelopeField)) {
           diagnostics.push(semanticDiagnostic('prompt-example-json-rpc-envelope', 'error', `${exampleLocation}.result must not contain JSON-RPC envelope field ${JSON.stringify(envelopeField)}`, [...resultPath, envelopeField]));
@@ -895,8 +993,9 @@ function validatePromptExamples(document) {
 
       for (const version of scope) {
         const resultLocation = `${exampleLocation}.result`;
+        evaluated('mcpdesc.example.result.revision-fidelity', resultPath, version);
         if (version === '2026-07-28' && result.resultType !== 'complete') {
-          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType']));
+          diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType'], undefined, version));
         }
         diagnostics.push(...classifyCarriedFields(result, 'GetPromptResult', version, resultLocation, resultPath));
         (result.messages ?? []).forEach((message, messageIndex) => {
@@ -924,6 +1023,8 @@ function extractUriTemplateVariables(uriTemplate) {
 function validateCompletionExampleResult(result, exampleLocation, examplePath, version, diagnostics) {
   const resultLocation = `${exampleLocation}.result`;
   const resultPath = [...examplePath, 'result'];
+  evaluated('mcpdesc.example.completed-result-form', resultPath);
+  evaluated('mcpdesc.example.result.revision-fidelity', resultPath, version);
 
   for (const envelopeField of ['jsonrpc', 'id', 'error']) {
     if (Object.hasOwn(result, envelopeField)) {
@@ -950,7 +1051,9 @@ function validateCompletionExampleResult(result, exampleLocation, examplePath, v
       'completion-example-result-version-mismatch',
       'error',
       `${resultLocation}.resultType must be "complete" for MCP ${version}`,
-      [...resultPath, 'resultType']
+      [...resultPath, 'resultType'],
+      undefined,
+      version
     ));
   }
   diagnostics.push(...classifyCarriedFields(result, 'CompleteResult', version, resultLocation, resultPath));
@@ -987,6 +1090,7 @@ function validateCompletionExamples(document) {
         const examplePath = [kind, ownerIndex, 'completionExamples', exampleName];
         const targetName = example.argument?.name;
         const contextArguments = example.context?.arguments;
+        if (allowedNames) evaluated('mcpdesc.completion-example.target', [...examplePath, 'argument']);
 
         if (typeof targetName === 'string' && allowedNames && !allowedNames.has(targetName)) {
           diagnostics.push(semanticDiagnostic(
@@ -1028,21 +1132,27 @@ function validateCompletionExamples(document) {
 
         const result = example.result ?? {};
         for (const version of scope) {
+          evaluated('mcp.completion.revision-availability', examplePath, version);
           if (protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
             diagnostics.push(semanticDiagnostic(
               'completion-example-version-mismatch',
               'error',
               `${exampleLocation} is not supported by MCP Description for MCP ${version}`,
-              examplePath
+              examplePath,
+              undefined,
+              version
             ));
             continue;
           }
+          if (Object.hasOwn(example, 'context')) evaluated('mcp.completion.context.revision-availability', [...examplePath, 'context'], version);
           if (Object.hasOwn(example, 'context') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
             diagnostics.push(semanticDiagnostic(
               'completion-example-context-version-mismatch',
               'error',
               `${exampleLocation}.context is not defined for MCP ${version}`,
-              [...examplePath, 'context']
+              [...examplePath, 'context'],
+              undefined,
+              version
             ));
           }
           validateCompletionExampleResult(result, exampleLocation, examplePath, version, diagnostics);
@@ -1127,17 +1237,16 @@ export function evaluateClientRequirements(requirements, clientCapabilities, ver
   };
 }
 
-export function semanticValidateDocument(document, rel = 'document') {
+function runSemantics(document, rel = 'document') {
   const resolution = resolveComponentReferences(document, rel);
   const resolvedStructureDiagnostics = resolution.diagnostics.length || resolution.substitutions === 0
     ? []
     : structuralDiagnostics(resolution.document);
+  const base = !resolution.diagnostics.length && !resolvedStructureDiagnostics.length;
   const diagnostics = [
     ...resolution.diagnostics,
     ...resolvedStructureDiagnostics,
-    ...(resolution.diagnostics.length || resolvedStructureDiagnostics.length
-      ? []
-      : validateBaseSemantics(resolution.document, rel)),
+    ...(base ? validateBaseSemantics(resolution.document, rel) : []),
     ...validateToolInteractionExamples(resolution.document),
     ...validatePromptExamples(resolution.document),
     ...validateCompletionExamples(resolution.document),
@@ -1146,16 +1255,88 @@ export function semanticValidateDocument(document, rel = 'document') {
   const filtered = Object.hasOwn(document, 'transports')
     ? diagnostics
     : diagnostics.filter((diagnostic) => diagnostic.code !== 'transport-coverage-gap');
-  return filtered.map(attributeRule).sort(
-    (left, right) => left.code.localeCompare(right.code)
-      || left.message.localeCompare(right.message)
-      || JSON.stringify(left.path).localeCompare(JSON.stringify(right.path))
-  );
+  return {
+    diagnostics: filtered.map(attributeRule).sort(
+      (left, right) => left.code.localeCompare(right.code)
+        || left.message.localeCompare(right.message)
+        || JSON.stringify(left.path).localeCompare(JSON.stringify(right.path))
+    ),
+    stages: { semantic: true, base }
+  };
+}
+
+export function semanticValidateDocument(document, rel = 'document') {
+  return runSemantics(document, rel).diagnostics;
 }
 
 export { specificationVersion };
 
-export function validateDocument(document) {
+function runValidation(document) {
   const diagnostics = structuralDiagnostics(document);
-  return diagnostics.length ? diagnostics : semanticValidateDocument(document);
+  return diagnostics.length ? { diagnostics, stages: { semantic: false, base: false } } : runSemantics(document);
+}
+
+export function validateDocument(document) {
+  return runValidation(document).diagnostics;
+}
+
+function declaredVersions(document) {
+  const declared = Array.isArray(document?.protocolVersions) ? document.protocolVersions : [];
+  return supportedProtocolVersions.filter((version) => declared.includes(version));
+}
+
+// The versions of the nearest object on the path that declares protocolVersions, else the document's.
+function scopeAt(document, path) {
+  let scope = declaredVersions(document);
+  let node = document;
+  for (const segment of path) {
+    node = node !== null && typeof node === 'object' ? node[segment] : undefined;
+    if (node && typeof node === 'object' && Array.isArray(node.protocolVersions)) {
+      scope = supportedProtocolVersions.filter((version) => node.protocolVersions.includes(version));
+    }
+  }
+  return scope;
+}
+
+// One status per rule and declared protocol version, or one status for an independent rule (Proposal 0031).
+// A status comes from the checks that ran: passed needs a recorded evaluation, never only silence.
+function ruleResults(document, diagnostics, evaluations, stages) {
+  const versions = declaredVersions(document);
+  const concerns = (entry, version) => version === undefined || (entry.protocolVersions ?? scopeAt(document, entry.path)).includes(version);
+  return ruleSummaries.flatMap((rule) => {
+    const independent = rule.protocolVersions === 'independent';
+    const ruleDiagnostics = diagnostics.filter((diagnostic) => diagnostic.rule === rule.id);
+    const ruleEvaluations = evaluations.filter((evaluation) => evaluation.rule === rule.id);
+    const stage = checkStage(rule.id);
+    return (independent || !versions.length ? [undefined] : versions).map((version) => {
+      const result = version ? { rule: rule.id, protocolVersion: version } : { rule: rule.id };
+      const found = ruleDiagnostics.filter((diagnostic) => concerns(diagnostic, version));
+      if (rule.delegated) return { ...result, status: 'delegated' };
+      if (found.some((diagnostic) => diagnostic.severity === 'error')) return { ...result, status: 'failed' };
+      if (found.length) return { ...result, status: 'warning' };
+      if (version && !independent && rule.protocolVersions[version] !== 'applies') return { ...result, status: 'not-applicable' };
+      if (stage && !stages[stage]) return { ...result, status: 'not-evaluated', reason: 'earlier-stage-failed' };
+      if (!stage && !rule.documentSchema) {
+        return { ...result, status: 'not-evaluated', reason: rule.kind === 'preservation' ? 'operation' : 'not-implemented' };
+      }
+      return { ...result, status: ruleEvaluations.some((evaluation) => concerns(evaluation, version)) ? 'passed' : 'not-applicable' };
+    });
+  });
+}
+
+// The report with the stages and evaluations behind it, so tests can check where each rule ran.
+export function evaluateDocument(document) {
+  const { result: { diagnostics, stages }, evaluations } = recordEvaluations(() => runValidation(document));
+  return {
+    valid: !diagnostics.some((diagnostic) => diagnostic.severity === 'error'),
+    diagnostics,
+    results: ruleResults(document, diagnostics, evaluations, stages),
+    stages,
+    evaluations: evaluations.map((evaluation) => ({ ...evaluation, protocolVersions: evaluation.protocolVersions ?? scopeAt(document, evaluation.path) }))
+  };
+}
+
+export function validateDocumentWithResults(document) {
+  const { stages, evaluations, ...report } = evaluateDocument(document);
+  return report;
 }

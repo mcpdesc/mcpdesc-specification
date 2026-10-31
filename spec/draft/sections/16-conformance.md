@@ -48,3 +48,13 @@ Complete revision-specific `_meta` validation begins with MCP 2025-06-18. <a id=
 ### 16.4 Versioned Conformance
 
 Conformance is assessed against a specific specification version. <a id="req-conformance-claim"></a>An implementation claiming conformance MUST state which `mcpdesc` version(s) it supports.
+
+### 16.5 Validation Results
+
+Validation rules identify the requirements that validators check (Section 2.3). The validation result format, published as [`validation/result.schema.json`](../validation/result.schema.json), represents diagnostics and rule results; [`validation/README.md`](../validation/README.md#rule-results) explains them.
+
+<a id="req-diagnostic-rule"></a>Each diagnostic that a validator reports MUST identify the registered validation rule it reports, its severity, and the location it concerns in the document. When the finding depends on an MCP protocol version, the diagnostic SHOULD identify that version. A diagnostic MAY carry a code and a message; their values belong to the validator and are not defined by this specification.
+
+<a id="req-rule-results"></a>A validator MAY report rule results. A validator that claims conformance with this specification's validation fixtures MUST report them: one status for each rule and each protocol version declared by the document, or one status for a rule whose applicability does not depend on the protocol version. A status is `passed`, `failed`, `warning`, `not-applicable`, `not-evaluated`, or `delegated`. Rule results do not change document validity, which errors alone determine.
+
+<a id="req-rule-results-executed"></a>A rule result MUST come from the checks the validator executed. A validator MUST NOT report `passed` for a rule that it did not check for that protocol version, including when an earlier validation stage failed, when it does not implement the check, or when the check is not applied to a legacy compatibility revision.

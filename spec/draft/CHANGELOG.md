@@ -26,6 +26,15 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ### Community Working Draft 4 — Unreleased
 
+#### Rule-level validation results — 2026-10-31
+
+- Implemented review-stage [Proposal 0031](proposal-snapshots/0031-rule-level-validation-results.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #93](https://github.com/mcpdesc/mcpdesc-specification/issues/93). Document validity is unchanged. Review-stage content may still change incompatibly or be removed.
+- New Section 16.5, Validation Results: a diagnostic MUST identify its rule, severity, and location, and SHOULD identify the protocol versions it concerns; `code` and `message` are optional producer output, amending Proposal 0024, Section 5. A validator that claims conformance with the validation fixtures MUST report rule results, one status per rule and declared protocol version (`passed`, `failed`, `warning`, `not-applicable`, `not-evaluated`, or `delegated`), and MUST NOT report `passed` for a check it did not run. The three new anchors are listed as unchecked (`processing`).
+- New [validation result format](validation/result.schema.json) `1.0.0` (`https://mcpdesc.org/schema/validation-result/1.0.0.json`), with its own [changelog](validation/result-format-changelog.md); catalog manifests list it as `resultSchema`.
+- The candidate validator reports rule results: every JSON Schema location a rule owns and every semantic check records the subjects and versions it examines, and a rule is `passed` only where such an evaluation exists. Diagnostics list `protocolVersions` when the finding depends on them. The exported validator's `validate()` returns `results`.
+- Fixture citations are checked against rule results: `passes` requires that the rule ran within the fragment. New outcome `not-applicable` for fragments where a rule does not run, used for `mcp.tool.output-schema.object-root` and `mcp.tool.input-schema.x-mcp-header`. The `passes` citations of `mcp.resource.size` and `mcp.cacheable-result.ttl-ms` now point at fragments with the checked field. `mcp.tool.schema-keywords.preserve` cites the new view case `view-tool-schema-keywords-2025-11-25.json` instead of validation fixtures.
+- `mcpdesc.serialization.conforming` is now delegated (`enforcement: external`): decoding checks it before document validation.
+
 #### View and merge cases — 2026-10-31
 
 - Added [`view-fixtures/`](view-fixtures/): 23 Effective Protocol View and merge cases giving the exact expected document or the requirement anchor of the expected failure, with authored inputs under `view-fixtures/inputs/`, expected documents under `view-fixtures/expected/`, and the case format in `view-fixtures/schema/view-case.schema.json`. They cover protocol-scoped primitives, security forms and empty values, tool, interaction, resource, completion, and prompt examples, client requirements, tags, specification extensions, component pruning and renaming, and every merge failure. Tracked in [issue #102](https://github.com/mcpdesc/mcpdesc-specification/issues/102); no normative wording changes.

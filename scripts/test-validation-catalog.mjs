@@ -11,7 +11,7 @@ import { candidateSpecification } from './candidate-specification.mjs';
 import { validateDocument } from './validate-document.mjs';
 import {
   buildValidationCatalog, catalogIdentity, catalogIndexUrl, checkRuleApplicability, emptyCatalogIndex,
-  extendCatalogIndex, readCatalogBundle, resolveCatalogFile, ruleSchemaUrl,
+  extendCatalogIndex, readCatalogBundle, resolveCatalogFile, resultSchemaUrl, ruleSchemaUrl,
   validateCatalogBundle, validateCatalogIndex, verifyCatalogIndexPublication,
   verifyCatalogPublication
 } from './validation-catalog.mjs';
@@ -29,7 +29,7 @@ const bundle = buildValidationCatalog(root, snapshot, commit);
 const second = buildValidationCatalog(root, snapshot, commit);
 assert.deepEqual(bundle.files, second.files, 'Catalog generation is deterministic');
 assert.equal(bundle.catalog.rules.length, bundle.manifest.ruleCount);
-assert.equal(bundle.files.size, 3);
+assert.equal(bundle.files.size, bundle.manifest.resultSchema ? 4 : 3);
 const schemaBytes = fs.readFileSync(schemaFile);
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
@@ -87,6 +87,7 @@ for (const change of [
   (manifest) => { manifest.specificationBaseUrl = 'https://github.com/mcpdesc/mcpdesc-specification/blob/main/spec/draft/'; },
   (manifest) => { manifest.status = 'stable'; },
   (manifest) => { manifest.ruleSchema.url = 'https://untrusted.invalid/schema.json'; },
+  (manifest) => { if (manifest.resultSchema) manifest.resultSchema.sha256 = '0'.repeat(64); else manifest.ruleCount++; },
   (manifest) => { manifest.catalog.url = 'https://untrusted.invalid/rules.json'; }
 ]) assert.throws(() => validateCatalogBundle(changedManifest(change), snapshot));
 const corrupt = new Map(bundle.files);
@@ -132,7 +133,7 @@ await verifyCatalogPublication(bundle, async (url, options) => {
   schemaRequests.push(url);
   return makeFetch()(url, options);
 }, { schemaOnly: true });
-assert.deepEqual(schemaRequests, [ruleSchemaUrl], 'Pre-tag schema check fetches no catalog or index');
+assert.deepEqual(schemaRequests, [ruleSchemaUrl, ...(bundle.manifest.resultSchema ? [resultSchemaUrl] : [])], 'Pre-tag schema check fetches no catalog or index');
 assert.deepEqual(await verifyCatalogIndexPublication(schemaBytes, makeFetch()), index);
 for (const options of [
   { body: '<html>fallback</html>' },

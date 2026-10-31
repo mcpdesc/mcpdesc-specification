@@ -23,7 +23,8 @@ far.
 
 Rule format for the MCP Description 0.9.0 Draft 4 working tree, implementing
 review-stage
-[Proposal 0033](../proposal-snapshots/0033-complete-validation-catalog.md).
+[Proposal 0033](../proposal-snapshots/0033-complete-validation-catalog.md)
+and [Proposal 0031](../proposal-snapshots/0031-rule-level-validation-results.md).
 The schema identity is
 `https://mcpdesc.org/schema/validation-rule/1.2.0.json`; it is a publication
 target until deployment is verified.
@@ -41,6 +42,10 @@ target until deployment is verified.
   `view-fixtures/`; the outcome is `passes` when the case expects a document
   and `error` when it expects a failure, whose requirement anchor the citing
   rule must cite.
+- Added the fixture outcome `not-applicable`: the rule does not run within the
+  cited fragment for a protocol version it applies to. Outcomes of validation
+  fixtures are checked against the candidate validator's rule results
+  (Proposal 0031): `passes` now requires that the rule ran within the fragment.
 
 ### Catalog
 
@@ -64,6 +69,9 @@ target until deployment is verified.
 - Manifest and index envelopes declare `$schema` with the `1.2.0` URL and its
   fragments, and manifests declare `ruleFormatVersion` `1.2.0`. Draft 3
   catalogs keep `1.1.0`.
+- Added optional `resultSchema` to the manifest: the URL and SHA-256 digest of
+  the [validation result schema](result-format-changelog.md) published with
+  the catalog.
 
 ### Consumer Migration
 

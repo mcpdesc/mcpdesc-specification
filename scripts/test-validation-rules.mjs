@@ -17,8 +17,9 @@ import addFormats from 'ajv-formats';
 import { candidateSpecification } from './candidate-specification.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { obligationSentences } from './normative-sentences.mjs';
-import { supportedProtocolVersions, validateDocument } from './validate-document.mjs';
+import { evaluateDocument, supportedProtocolVersions } from './validate-document.mjs';
 import { checkRuleApplicability } from './validation-catalog.mjs';
+import { checkStage, declaredCheckRules } from './validator-base.mjs';
 
 // Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
 const historicalRevisions = new Set(['2024-11-05', '2025-03-26']);
@@ -41,6 +42,8 @@ const ruleSchema = JSON.parse(fs.readFileSync(path.join(validationRoot, 'rule.sc
 ajv.addSchema(ruleSchema);
 const validateRegistryFile = ajv.getSchema(ruleSchema.$id);
 const validateUnchecked = ajv.getSchema(`${ruleSchema.$id}#/$defs/unchecked-requirements`);
+const resultSchemaPath = path.join(validationRoot, 'result.schema.json');
+const validateResult = fs.existsSync(resultSchemaPath) ? ajv.compile(JSON.parse(fs.readFileSync(resultSchemaPath, 'utf8'))) : undefined;
 
 const validatorRuleReferences = new Set();
 for (const file of ['scripts/validator-base.mjs', 'scripts/validate-document.mjs']) {
@@ -49,15 +52,17 @@ for (const file of ['scripts/validator-base.mjs', 'scripts/validate-document.mjs
 }
 
 const fixtureRoot = path.join(root, specificationRoot, 'fixtures');
-const fixtureDiagnostics = new Map();
-function diagnosticsForFixture(relative) {
-  if (!fixtureDiagnostics.has(relative)) {
+const fixtureReports = new Map();
+// The candidate validator's result with rule results (Proposal 0031) and the evaluations behind them.
+function reportForFixture(relative) {
+  if (!fixtureReports.has(relative)) {
     const full = path.join(fixtureRoot, relative);
     const document = decodeDocumentSource(fs.readFileSync(full, 'utf8'), documentFormatForPath(full), relative);
-    fixtureDiagnostics.set(relative, validateDocument(document));
+    fixtureReports.set(relative, evaluateDocument(document));
   }
-  return fixtureDiagnostics.get(relative);
+  return fixtureReports.get(relative);
 }
+const diagnosticsForFixture = (relative) => reportForFixture(relative).diagnostics;
 const registeredRules = new Map();
 
 const specificationDirectory = path.join(root, specificationRoot);
@@ -118,12 +123,16 @@ function resolvePointer(document, pointer) {
 const pointerOf = (segments) => segments.map((segment) => `/${String(segment).replaceAll('~', '~0').replaceAll('/', '~1')}`).join('');
 const withinPointer = (diagnostic, pointer) => pointer === '' || pointer.startsWith('/components/')
   || pointerOf(diagnostic.path) === pointer || pointerOf(diagnostic.path).startsWith(`${pointer}/`);
+// An evaluation concerns a fragment when either contains the other; checks run at use sites, not in components.
+const evaluatedThere = (evaluation, pointer) => withinPointer(evaluation, pointer) || pointer.startsWith(`${pointerOf(evaluation.path)}/`);
+const appliesTo = (rule, version) => rule.applicability.protocolVersions === 'independent' || rule.applicability.protocolVersions[version] === 'applies';
+const statusesFor = { passes: ['passed'], error: ['failed'], warning: ['warning', 'failed'] };
 const weakMcpRequirement = (rule) => rule.owner === 'mcp' && ['should', 'may'].includes(rule.requirement);
 
 const ruleIds = new Set();
 const ruleTitles = new Set();
 const citedOutcomes = new Map();
-const outcomeCounts = { passes: 0, error: 0, warning: 0 };
+const outcomeCounts = { passes: 0, error: 0, warning: 0, 'not-applicable': 0 };
 const files = fs.readdirSync(rulesDirectory).filter((name) => /\.ya?ml$/.test(name)).sort();
 if (!files.length) fail(`${specificationRoot}/validation/rules: no registry files`);
 
@@ -255,13 +264,25 @@ for (const filename of files) {
         fail(`${where}: ${fixture} at ${JSON.stringify(pointer)} shows both ${[...severities].join(' and ')}; cite narrower fragments`);
         continue;
       }
-      const actual = severities.size ? [...severities][0] : 'passes';
+      const actual = severities.size
+        ? [...severities][0]
+        : reportForFixture(fixture).evaluations.some((evaluation) => evaluation.rule === rule.id
+          && evaluatedThere(evaluation, pointer)
+          && evaluation.protocolVersions.some((version) => appliesTo(rule, version)))
+          ? 'passes'
+          : 'not-applicable';
       if (outcome !== actual) {
-        fail(`${where}: ${fixture} at ${JSON.stringify(pointer)} is cited as ${outcome}, but the rule ${actual === 'passes' ? 'reports nothing there' : `reports ${actual}`}`);
+        const shown = { passes: 'ran there and reported nothing', 'not-applicable': 'did not run there for a protocol version it applies to' }[actual] ?? `reports ${actual}`;
+        fail(`${where}: ${fixture} at ${JSON.stringify(pointer)} is cited as ${outcome}, but the rule ${shown}`);
       }
-      // A document with errors can skip later checks, so passes is evidence only in an error-free fixture.
-      if (actual === 'passes' && diagnosticsForFixture(fixture).some((diagnostic) => diagnostic.severity === 'error')) {
-        fail(`${where}: ${fixture} has errors, so a passes outcome there does not show that the rule ran`);
+      // A document with errors can skip later checks, so silence is evidence only in an error-free fixture.
+      if (['passes', 'not-applicable'].includes(actual) && diagnosticsForFixture(fixture).some((diagnostic) => diagnostic.severity === 'error')) {
+        fail(`${where}: ${fixture} has errors, so a ${actual} outcome there does not show what the rule checks`);
+      }
+      // Rule results are the conformance contract: the citation also holds for the document's results (Proposal 0031).
+      const statuses = reportForFixture(fixture).results.filter((result) => result.rule === rule.id).map((result) => result.status);
+      if (statusesFor[outcome] && !statuses.some((status) => statusesFor[outcome].includes(status))) {
+        fail(`${where}: ${fixture} is cited as ${outcome}, but the rule results are ${[...new Set(statuses)].join(', ')}`);
       }
     }
   }
@@ -272,9 +293,41 @@ let attributed = 0;
 let schemaDiagnostics = 0;
 let rootSchemaDiagnostics = 0;
 const observedSeverities = new Map();
+const statusCounts = {};
+const evaluatedRules = new Set();
 for (const category of fs.readdirSync(fixtureRoot).filter((name) => name.startsWith('expected-')).sort()) {
   for (const name of fs.readdirSync(path.join(fixtureRoot, category)).filter((file) => /\.(?:json|ya?ml)$/.test(file)).sort()) {
     const fixture = `${category}/${name}`;
+    const { evaluations, stages, ...report } = reportForFixture(fixture);
+    if (validateResult && !validateResult(report)) {
+      for (const error of validateResult.errors ?? []) fail(`${fixture}: validation result ${error.instancePath || '/'} ${error.message}`);
+    }
+    const resultKeys = new Set();
+    for (const result of report.results) {
+      const key = `${result.rule} ${result.protocolVersion ?? ''}`;
+      if (resultKeys.has(key)) fail(`${fixture}: rule result ${key.trim()} is reported twice`);
+      resultKeys.add(key);
+      const status = result.reason ? `${result.status} (${result.reason})` : result.status;
+      statusCounts[status] = (statusCounts[status] ?? 0) + 1;
+      // passed comes from a check that ran, never from silence (Proposal 0031).
+      if (result.status === 'passed' && !evaluations.some((evaluation) => evaluation.rule === result.rule
+        && (!result.protocolVersion || evaluation.protocolVersions.includes(result.protocolVersion)))) {
+        fail(`${fixture}: ${key.trim()} is passed, but the candidate validator recorded no evaluation of it`);
+      }
+      // A check in a skipped stage did not run, so it is neither passed nor without a subject.
+      const stage = checkStage(result.rule);
+      if (stage && !stages[stage] && ['passed', 'not-applicable'].includes(result.status)
+        && (!result.protocolVersion || appliesTo(registeredRules.get(result.rule), result.protocolVersion))) {
+        fail(`${fixture}: ${key.trim()} is ${result.status}, but its ${stage} check did not run`);
+      }
+    }
+    for (const ruleId of registeredRules.keys()) {
+      if (registeredRules.get(ruleId).status !== 'retired' && !report.results.some((result) => result.rule === ruleId)) fail(`${fixture}: no rule result for ${ruleId}`);
+    }
+    for (const evaluation of evaluations) {
+      evaluatedRules.add(evaluation.rule);
+      if (!registeredRules.has(evaluation.rule)) fail(`${fixture}: the candidate validator evaluates unregistered rule ${evaluation.rule}`);
+    }
     for (const diagnostic of diagnosticsForFixture(fixture)) {
       if (diagnostic.code === 'schema-validation') {
         schemaDiagnostics += 1;
@@ -292,6 +345,9 @@ for (const category of fs.readdirSync(fixtureRoot).filter((name) => name.startsW
         fail(`${fixture}: diagnostic ${diagnostic.code} identifies retired rule ${diagnostic.rule}`);
       } else {
         if (weakMcpRequirement(rule) && diagnostic.severity === 'error') fail(`${fixture}: ${rule.requirement}-level mcp rule ${rule.id} reports an error`);
+        for (const version of diagnostic.protocolVersions ?? []) {
+          if (!appliesTo(rule, version)) fail(`${fixture}: ${rule.id} reports ${diagnostic.code} for MCP ${version}, which its applicability does not include`);
+        }
         const severities = observedSeverities.get(rule.id) ?? new Map();
         if (!severities.has(diagnostic.severity)) severities.set(diagnostic.severity, fixture);
         observedSeverities.set(rule.id, severities);
@@ -308,6 +364,10 @@ for (const reference of validatorRuleReferences) {
   const rule = registeredRules.get(reference);
   if (!rule) fail(`candidate validator references unregistered rule ${reference}`);
   else if (rule.status === 'retired') fail(`candidate validator references retired rule ${reference}`);
+}
+// Every semantic check the candidate validator declares records an evaluation in some fixture.
+for (const ruleId of declaredCheckRules()) {
+  if (!evaluatedRules.has(ruleId)) fail(`candidate validator declares a check for ${ruleId}, but no fixture records an evaluation of it`);
 }
 
 const mcpSchemasDirectory = path.join(validationRoot, 'mcp-schemas');
@@ -395,6 +455,7 @@ if (errors.length) {
   process.exit(1);
 }
 
-const citations = outcomeCounts.passes + outcomeCounts.error + outcomeCounts.warning;
-console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); ${citations} fixture citation(s) match their outcome (${outcomeCounts.passes} passes, ${outcomeCounts.error} error, ${outcomeCounts.warning} warning); ${attributed} fixture diagnostic(s) identify a rule with cited evidence of their severity; ${validatorRuleReferences.size} validator rule reference(s) resolve; ${citedAnchors.size} of ${anchorIds.size} requirement anchor(s) cited by a rule and ${uncheckedAnchors.size} listed as unchecked.`);
+const citations = Object.values(outcomeCounts).reduce((sum, count) => sum + count, 0);
+console.log(`Validation rule registry passed: ${ruleIds.size} rule(s) in ${files.length} file(s); ${citations} fixture citation(s) match their outcome and rule results (${outcomeCounts.passes} passes, ${outcomeCounts.error} error, ${outcomeCounts.warning} warning, ${outcomeCounts['not-applicable']} not-applicable); ${attributed} fixture diagnostic(s) identify a rule with cited evidence of their severity; ${validatorRuleReferences.size} validator rule reference(s) resolve; ${citedAnchors.size} of ${anchorIds.size} requirement anchor(s) cited by a rule and ${uncheckedAnchors.size} listed as unchecked.`);
+console.log(`Rule results: ${fixtureReports.size} fixture report(s) match the validation result schema with a result for every rule (${Object.entries(statusCounts).sort().map(([status, count]) => `${count} ${status}`).join(', ')}).`);
 console.log(`Catalog coverage: ${schemaOwners.size} document-schema location(s) owned; ${schemaDiagnostics - rootSchemaDiagnostics} of ${schemaDiagnostics} document-schema diagnostic(s) in fixtures attributed below the document root; ${rulesWithFailureEvidence} of ${ruleIds.size} rule(s) cite error or warning evidence; all ${obligations} obligation sentence(s) anchored.`);

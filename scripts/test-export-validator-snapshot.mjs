@@ -50,6 +50,7 @@ try {
     'scripts/validate-document.mjs',
     'scripts/validator-base.mjs',
     'scripts/document-schema-owners.mjs',
+    'scripts/rule-summaries.mjs',
     'scripts/candidate-specification.mjs',
     'scripts/decode-document.mjs',
     'specification-status.json',
@@ -118,6 +119,11 @@ try {
   assert.equal(runtime.validate(fixture('expected-invalid', 'invalid-mcp-header-value.json')).valid, false);
   assert.equal(runtime.validate(fixture('expected-invalid', 'invalid-mcp-header-placement.json')).valid, false);
   assert.equal(runtime.validate(fixture('expected-invalid', 'duplicate-mcp-header.json')).valid, false);
+  const headerResults = (document) => runtime.validate(document).results
+    .filter((result) => result.rule === 'mcp.tool.input-schema.x-mcp-header')
+    .map((result) => `${result.protocolVersion} ${result.status}`);
+  assert.deepEqual(headerResults(fixture('expected-invalid', 'invalid-mcp-header-value.json')), ['2026-07-28 failed']);
+  assert.deepEqual(headerResults(fixture('expected-valid', 'custom-tool-schema-keywords.json')), ['2025-11-25 not-applicable', '2026-07-28 passed']);
 
   if (hasProjectionFixtures) {
     const cases = fs.readdirSync(path.join(output, 'projection-fixtures')).filter((name) => name.endsWith('.json'));

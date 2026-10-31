@@ -10,6 +10,8 @@ import { fetchSchemaPublication, verifySchemaPublication } from './schema-public
 
 export const ruleFormatVersion = '1.2.0';
 export const ruleSchemaUrl = `https://mcpdesc.org/schema/validation-rule/${ruleFormatVersion}.json`;
+export const resultFormatVersion = '1.0.0';
+export const resultSchemaUrl = `https://mcpdesc.org/schema/validation-result/${resultFormatVersion}.json`;
 export const catalogIndexUrl = 'https://mcpdesc.org/validation/catalogs/index.json';
 const repository = 'https://github.com/mcpdesc/mcpdesc-specification';
 export const catalogDigest = (bytes) => createHash('sha256').update(bytes).digest('hex');
@@ -149,6 +151,8 @@ export function buildValidationCatalog(root, snapshot, commit) {
     }
   }
   const catalogBytes = jsonBytes(catalog);
+  const resultSchemaPath = `${identity.specificationPath}/validation/result.schema.json`;
+  const resultSchemaBytes = fs.existsSync(path.join(root, resultSchemaPath)) ? fs.readFileSync(resolveCatalogFile(root, resultSchemaPath)) : undefined;
   const manifest = {
     $schema: `${ruleSchemaUrl}#/$defs/catalog-manifest`,
     ruleFormatVersion,
@@ -157,12 +161,14 @@ export function buildValidationCatalog(root, snapshot, commit) {
     status: identity.status,
     source: { repository, tag: identity.tag, commit, specificationPath: identity.specificationPath },
     ruleSchema: { url: ruleSchemaUrl, sha256: catalogDigest(schemaBytes) },
+    ...(resultSchemaBytes ? { resultSchema: { url: resultSchemaUrl, sha256: catalogDigest(resultSchemaBytes) } } : {}),
     catalog: { url: identity.catalogUrl, sha256: catalogDigest(catalogBytes) },
     specificationBaseUrl: `${repository}/blob/${identity.tag}/${identity.specificationPath}/`,
     ruleCount: rules.length
   };
   const files = new Map([
     [artifactPath(ruleSchemaUrl), schemaBytes],
+    ...(resultSchemaBytes ? [[artifactPath(resultSchemaUrl), resultSchemaBytes]] : []),
     [artifactPath(identity.catalogUrl), catalogBytes],
     [artifactPath(identity.manifestUrl), jsonBytes(manifest)]
   ]);
@@ -196,16 +202,29 @@ export function validateCatalogBundle(files, snapshot) {
   assert.equal(manifest.ruleSchema.sha256, catalogDigest(bytes(ruleSchemaUrl)));
   assert.equal(manifest.catalog.sha256, catalogDigest(bytes(identity.catalogUrl)));
   assert.equal(manifest.ruleCount, catalog.rules.length);
+  if (manifest.resultSchema) {
+    assert.equal(manifest.resultSchema.url, resultSchemaUrl);
+    assert.equal(manifest.resultSchema.sha256, catalogDigest(bytes(resultSchemaUrl)));
+    const resultSchema = JSON.parse(bytes(resultSchemaUrl));
+    assert.equal(resultSchema.$id, resultSchemaUrl, 'Unexpected validation result format identity');
+    const ajv = new Ajv2020({ allErrors: true, strict: true });
+    addFormats(ajv);
+    ajv.compile(resultSchema);
+  }
   return { files, manifest, catalog, schema };
 }
 
+const bundleUrls = (manifest, identity, schemaOnly = false) => [
+  ruleSchemaUrl,
+  ...(manifest.resultSchema ? [resultSchemaUrl] : []),
+  ...(schemaOnly ? [] : [identity.catalogUrl, identity.manifestUrl])
+];
+
 export function readCatalogBundle(directory, snapshot) {
   const identity = catalogIdentity(snapshot);
-  const files = new Map([ruleSchemaUrl, identity.manifestUrl, identity.catalogUrl].map((url) => {
-    const relative = artifactPath(url);
-    return [relative, fs.readFileSync(resolveCatalogFile(directory, relative))];
-  }));
-  return validateCatalogBundle(files, snapshot);
+  const read = (url) => fs.readFileSync(resolveCatalogFile(directory, artifactPath(url)));
+  const manifest = JSON.parse(read(identity.manifestUrl));
+  return validateCatalogBundle(new Map(bundleUrls(manifest, identity).map((url) => [artifactPath(url), read(url)])), snapshot);
 }
 
 export function validateCatalogIndex(index, schema) {
@@ -247,7 +266,7 @@ export function emptyCatalogIndex() {
 
 export async function verifyCatalogPublication(bundle, fetchImpl = fetch, { schemaOnly = false } = {}) {
   const identity = catalogIdentity(bundle.manifest.snapshot);
-  for (const url of schemaOnly ? [ruleSchemaUrl] : [ruleSchemaUrl, identity.catalogUrl, identity.manifestUrl]) {
+  for (const url of bundleUrls(bundle.manifest, identity, schemaOnly)) {
     const expectedBytes = bundle.files.get(artifactPath(url));
     const expected = JSON.parse(expectedBytes);
     const result = await verifySchemaPublication({ requestedUrl: url, expectedBytes, expectedRootId: expected.$id, expectedDialect: expected.$schema, fetchImpl });
@@ -274,8 +293,10 @@ export async function verifyCatalogIndexPublication(schemaBytes, fetchImpl = fet
     assert.equal(manifest.catalog.url, catalogIdentity(entry.snapshot).catalogUrl);
     assert.equal(manifest.ruleSchema.url, ruleSchemaUrl);
     const catalogResponse = await fetchSchemaPublication(catalogIdentity(entry.snapshot).catalogUrl, { fetchImpl });
+    const resultSchemaResponse = manifest.resultSchema ? await fetchSchemaPublication(resultSchemaUrl, { fetchImpl }) : undefined;
     const files = new Map([
       [artifactPath(ruleSchemaUrl), schemaBytes],
+      ...(resultSchemaResponse ? [[artifactPath(resultSchemaUrl), resultSchemaResponse.bodyBytes]] : []),
       [artifactPath(entry.manifest), manifestResponse.bodyBytes],
       [artifactPath(catalogIdentity(entry.snapshot).catalogUrl), catalogResponse.bodyBytes]
     ]);
