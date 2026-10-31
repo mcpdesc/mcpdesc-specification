@@ -94,25 +94,32 @@ Every sentence stating an obligation (MUST, MUST NOT, SHALL, SHALL NOT,
 SHOULD, SHOULD NOT, REQUIRED, RECOMMENDED, NOT RECOMMENDED) starts with a
 requirement anchor `<a id="req-…"></a>` or follows one in the same paragraph,
 list item, or table row; an anchor therefore covers the sentences after it up
-to the next anchor. Every anchor is either:
+to the next anchor. Key words quoted as words, as in the RFC 2119
+boilerplate, state no obligation. Every anchor is either:
 
 - cited by a rule's `specification` locations; or
 - listed in `validation/unchecked-requirements.yaml` with a `reason` and a
   `note`:
   - `runtime`: behavior of MCP clients, servers, or consumers;
   - `processing`: behavior of MCP Description tools that document fixtures
-    cannot show, such as preservation, network access, or serialization;
+    cannot show, such as preservation, merge, or network access;
   - `guidance`: an authoring choice the document cannot decide.
 
 An anchor is never both. The catalog publishes the list as
 `uncheckedRequirements`, so consumers see what validation does not cover.
 
+Operation requirements are cited by rules when operation fixtures show them.
+Besides native projection cases, a rule may cite a file under
+`serialization-fixtures/`, whole and with the empty pointer: its outcome is
+`passes` when decoding accepts the file and `error` when decoding rejects it.
+The new rule `mcpdesc.serialization.conforming` cites them for the JSON and
+restricted YAML requirements of Section 15.
+
 ### 4. Coverage reporting
 
 `scripts/test-validation-rules.mjs` fails when a canonical schema definition
 has no owner, a pointer is owned twice or does not resolve, an anchor is
-neither cited nor listed, or an obligation in a classified section has no
-anchor. It reports the owned schema locations, the share of document-schema
+neither cited nor listed, or an obligation sentence has no anchor. It reports the owned schema locations, the share of document-schema
 failures attributed below the document root, the rules with error or warning
 evidence, and the anchored obligations.
 
@@ -147,16 +154,16 @@ and generic JSON values only.
 
 ### 6. Phasing
 
-The 0.9.0 working draft first owns every schema location and classifies
-Sections 3, 7, 9, and 12, which hold the example results and content,
-security, Tool, and elicitation requirements that produced most catch-all
-failures. The remaining sections follow; whether Sections 14, 15, and 17 are
-classified in the same draft is decided after the first changes.
+The 0.9.0 working draft owns every schema location and classifies every
+section in one draft. Sections 3, 7, 9, and 12, which hold the example
+results and content, security, Tool, and elicitation requirements that
+produced most catch-all failures, were classified first.
 
 ## Schema impact
 
 None for MCP Description documents. The rule format becomes `1.2.0`: rule
-records gain `documentSchema`, the catalog gains `uncheckedRequirements`, and
+records gain `documentSchema`, the catalog gains `uncheckedRequirements`,
+fixture citations may name serialization fixtures, and
 `$defs/unchecked-requirements` validates the new registry file.
 
 ## Compatibility
@@ -192,7 +199,7 @@ None.
 
 ## Open questions
 
-- Whether Sections 14, 15, and 17 are classified in the same draft.
+None.
 
 ## Implementation and validation plan
 
@@ -208,3 +215,5 @@ None.
 - 2026-10-30: Maintainer approved schema ownership in rule records, object-level
   rules, attribution of failed alternatives to their container, the anchor
   plus unchecked-registry classification, and this proposal (issue #96).
+- 2026-10-31: Maintainer chose rule format `1.2.0` over `2.0.0` and the
+  classification of every section in the same draft.
