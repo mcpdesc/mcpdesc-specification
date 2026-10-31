@@ -66,8 +66,11 @@ document-schema failure belongs to the rule owning the longest listed pointer
 that contains the failing schema location. The catalog lists each pointer at
 most once, and the root `#` and every `$defs` entry are owned.
 
-The rule-format schema of the rule records is closed, so the new field
-requires a major rule-format version: `2.0.0`.
+The rule-format schema of the rule records is closed, so the new field would
+require a major rule-format version under the compatibility policy. Because
+no later format has shipped and Draft 4 catalogs are the first to use the new
+fields, the format becomes `1.2.0`, recorded as a versioning exception in the
+rule-format changelog.
 
 ### 2. Failed alternatives
 
@@ -152,7 +155,7 @@ classified in the same draft is decided after the first changes.
 
 ## Schema impact
 
-None for MCP Description documents. The rule format becomes `2.0.0`: rule
+None for MCP Description documents. The rule format becomes `1.2.0`: rule
 records gain `documentSchema`, the catalog gains `uncheckedRequirements`, and
 `$defs/unchecked-requirements` validates the new registry file.
 
@@ -160,7 +163,7 @@ records gain `documentSchema`, the catalog gains `uncheckedRequirements`, and
 
 - Documents: no change in validity or diagnostics other than the `rule` of
   document-schema failures, which now names a specific rule.
-- Rule-catalog consumers: adopt rule format `2.0.0`; `documentSchema` and
+- Rule-catalog consumers: adopt rule format `1.2.0`; `documentSchema` and
   `uncheckedRequirements` are new.
 - Validators: attribute document-schema failures from the catalog's
   ownership. The exported validator snapshot carries the ownership map in its
@@ -193,12 +196,12 @@ None.
 
 ## Implementation and validation plan
 
-- Rule format `2.0.0`, ownership on every rule record, the new rules, the
+- Rule format `1.2.0`, ownership on every rule record, the new rules, the
   unchecked registry, anchors in the classified sections, coverage checks,
   and fixtures for rules without failure evidence.
 - `@mcpdesc/core` attributes document-schema failures from the ownership map
   at its intake of the draft that includes this proposal.
-- The website imports rule format `2.0.0` and shows unchecked requirements.
+- The website imports rule format `1.2.0` and shows unchecked requirements.
 
 ## Decision record
 
