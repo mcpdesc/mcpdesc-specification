@@ -117,6 +117,10 @@ but do not participate in active applicability checks. Records no longer list
 `error`, or `warning`), and diagnostic codes come from the producer that
 emits them.
 
+Draft 4 introduces rule-format `2.0.0`. Rule records may list the canonical
+schema locations they own in `documentSchema`, and the catalog lists the
+requirements no rule checks in `uncheckedRequirements`, each with a reason.
+
 Discover catalogs through the publication index, then pin an immutable
 manifest. Resolve evidence and description links from its
 `specificationBaseUrl`, not a moving branch. See the
@@ -156,6 +160,11 @@ Other output changes:
   which 0.8.0 accepted.
 - The `completion-example-version-mismatch` message for MCP 2024-11-05 says the
   revision is not supported by MCP Description.
+- From Draft 4, `schema-validation` diagnostics name the rule that owns the
+  failing schema location, for example `mcpdesc.tool.members` or
+  `mcp.content.members`, instead of `mcpdesc.document.schema`, which now
+  reports only failures of the document root. The diagnostics themselves are
+  unchanged.
 
 ## Recommended algorithm
 

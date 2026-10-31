@@ -18,7 +18,43 @@ documentation corrections use a new patch-version URL. Published versioned
 URLs retain their exact bytes; older catalogs and specification snapshots are
 not rewritten. The `1.1.0` entry records the only exceptions so far.
 
-## [1.1.0] — Unreleased
+## [2.0.0] — Unreleased
+
+Rule format for the MCP Description 0.9.0 Draft 4 working tree, implementing
+review-stage
+[Proposal 0033](../proposal-snapshots/0033-complete-validation-catalog.md).
+The schema identity is
+`https://mcpdesc.org/schema/validation-rule/2.0.0.json`; it is a publication
+target until deployment is verified.
+
+### Record Format
+
+- Added optional `documentSchema` to rule records: JSON Pointer fragments into
+  the canonical MCP Description schema whose failures the rule reports. A
+  failure belongs to the rule owning the longest pointer that contains the
+  failing schema location. The record schema is closed, so this addition is a
+  major version under the compatibility policy.
+
+### Catalog
+
+- Added optional `uncheckedRequirements` to the aggregate catalog: requirement
+  anchors that no rule checks, each with `location`, `reason` (`runtime`,
+  `processing`, or `guidance`), and `note`. `#/$defs/unchecked-requirements`
+  validates the authored `validation/unchecked-requirements.yaml`.
+
+### Publication Contract
+
+- Manifest and index envelopes declare `$schema` with the `2.0.0` URL and its
+  fragments, and manifests declare `ruleFormatVersion` `2.0.0`. Draft 3
+  catalogs keep `1.1.0`.
+
+### Consumer Migration
+
+- Pin `2.0.0` for Draft 4 catalogs. Use `documentSchema` to attribute
+  document-schema failures, and show `uncheckedRequirements` as the
+  requirements validation does not cover.
+
+## [1.1.0] — 2026-10-29 (Draft 3)
 
 Rule format of the first catalogs, implemented for the MCP Description 0.9.0
 Draft 3 working tree under review-stage
