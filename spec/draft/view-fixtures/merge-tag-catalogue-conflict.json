@@ -1,0 +1,9 @@
+{
+  "description": "Inputs with different root tag catalogues fail to merge.",
+  "operation": "merge",
+  "inputs": [
+    "inputs/tags-a-2025-11-25.json",
+    "inputs/tags-b-2026-07-28.json"
+  ],
+  "expectedFailure": "req-tags-merge"
+}

@@ -1,0 +1,9 @@
+{
+  "description": "Projection preserves omitted security, security: [], and security: [{}] on primitives, keeps the variant scoped to the revision, and does not copy a transport's security onto a primitive.",
+  "operation": "view",
+  "inputs": [
+    "inputs/security-forms.json"
+  ],
+  "revision": "2025-11-25",
+  "expected": "expected/view-security-forms-2025-11-25.json"
+}

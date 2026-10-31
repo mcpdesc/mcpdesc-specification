@@ -102,7 +102,7 @@ boilerplate, state no obligation. Every anchor is either:
   `note`:
   - `runtime`: behavior of MCP clients, servers, or consumers;
   - `processing`: behavior of MCP Description tools that document fixtures
-    cannot show, such as preservation, merge, or network access;
+    cannot show, such as network access or resource limits;
   - `guidance`: an authoring choice the document cannot decide.
 
 An anchor is never both. The catalog publishes the list as
@@ -114,6 +114,15 @@ Besides native projection cases, a rule may cite a file under
 `passes` when decoding accepts the file and `error` when decoding rejects it.
 The new rule `mcpdesc.serialization.conforming` cites them for the JSON and
 restricted YAML requirements of Section 15.
+
+A rule may also cite an Effective Protocol View or merge case under
+`view-fixtures/`. A case names its operation, its inputs, the revision of a
+view, and either the exact expected document or the requirement anchor of the
+expected failure; its outcome is `passes` when it expects a document and
+`error` when it expects a failure, whose anchor the citing rule must cite.
+The new delegated rules `mcpdesc.view.projection` and `mcpdesc.view.merge`
+cite these cases for the view, merge, and preservation requirements of
+Sections 3 to 17 (issue #102).
 
 ### 4. Coverage reporting
 
@@ -163,7 +172,8 @@ produced most catch-all failures, were classified first.
 
 None for MCP Description documents. The rule format becomes `1.2.0`: rule
 records gain `documentSchema`, the catalog gains `uncheckedRequirements`,
-fixture citations may name serialization fixtures, and
+fixture citations may name serialization fixtures and view or merge cases,
+and
 `$defs/unchecked-requirements` validates the new registry file.
 
 ## Compatibility
@@ -207,7 +217,8 @@ None.
   unchecked registry, anchors in the classified sections, coverage checks,
   and fixtures for rules without failure evidence.
 - `@mcpdesc/core` attributes document-schema failures from the ownership map
-  at its intake of the draft that includes this proposal.
+  at its intake of the draft that includes this proposal, and passes the view
+  and merge cases with its view and merge operations.
 - The website imports rule format `1.2.0` and shows unchecked requirements.
 
 ## Decision record
@@ -217,3 +228,5 @@ None.
   plus unchecked-registry classification, and this proposal (issue #96).
 - 2026-10-31: Maintainer chose rule format `1.2.0` over `2.0.0` and the
   classification of every section in the same draft.
+- 2026-10-31: Maintainer approved view and merge cases cited by delegated
+  rules for the projection, merge, and preservation requirements (issue #102).

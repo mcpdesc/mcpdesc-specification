@@ -1,0 +1,9 @@
+{
+  "description": "Projection preserves the selected Resource and Resource Template example maps.",
+  "operation": "view",
+  "inputs": [
+    "../fixtures/expected-valid/named-resource-examples.json"
+  ],
+  "revision": "2026-07-28",
+  "expected": "expected/view-resource-examples-2026-07-28.json"
+}

@@ -8,9 +8,6 @@ uncheckedRequirements:
   - location: sections/03-document-structure.md#req-omission-not-absence
     reason: runtime
     note: "Constrains how consumers interpret an absent property."
-  - location: sections/03-document-structure.md#req-security-empties-preserved
-    reason: processing
-    note: "Preservation by tools is not shown by a document fixture."
   - location: sections/03-document-structure.md#req-primitive-absence
     reason: runtime
     note: "Constrains how consumers interpret an absent collection."
@@ -20,12 +17,6 @@ uncheckedRequirements:
   - location: sections/07-security.md#req-security-schemes-omission
     reason: runtime
     note: "Constrains how consumers interpret absent security schemes."
-  - location: sections/07-security.md#req-security-empty-distinction
-    reason: processing
-    note: "Preservation by tools is not shown by a document fixture."
-  - location: sections/07-security.md#req-security-projection
-    reason: processing
-    note: "Protocol-version projection is checked by repository tests, not by catalog fixtures."
   - location: sections/07-security.md#req-security-transport-variants
     reason: guidance
     note: "An authoring choice that a document cannot show."
@@ -56,15 +47,9 @@ uncheckedRequirements:
   - location: sections/09-tools.md#req-tool-example-untrusted
     reason: runtime
     note: "Constrains how consumers use example content."
-  - location: sections/09-tools.md#req-tool-example-views-preserved
-    reason: processing
-    note: "Protocol-version projection is checked by repository tests, not by catalog fixtures."
   - location: sections/09-tools.md#req-interaction-step-not-wire
     reason: runtime
     note: "Concerns MCP connections, not documents."
-  - location: sections/09-tools.md#req-interaction-views-preserved
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/09-tools.md#req-interaction-no-secrets
     reason: guidance
     note: "Whether a value is a secret cannot be decided from the document."
@@ -116,27 +101,6 @@ uncheckedRequirements:
   - location: sections/04-versioning.md#req-version-support
     reason: processing
     note: "Concerns implementation claims."
-  - location: sections/04-versioning.md#req-view-projection
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/04-versioning.md#req-view-projection-transports
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/04-versioning.md#req-merge-inputs
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/04-versioning.md#req-merge-algorithm
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/04-versioning.md#req-merge-equivalence
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/04-versioning.md#req-merge-security
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/04-versioning.md#req-merge-collections
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/05-info-object.md#req-info-trust
     reason: runtime
     note: "Constrains how consumers interpret Info values."
@@ -170,9 +134,6 @@ uncheckedRequirements:
   - location: sections/08-capabilities.md#req-capability-independence
     reason: processing
     note: "Concerns tool transformations, not document values."
-  - location: sections/08-capabilities.md#req-client-requirements-views
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/10-resources.md#req-resource-annotations-hints
     reason: runtime
     note: "Constrains how consumers use annotations."
@@ -182,18 +143,12 @@ uncheckedRequirements:
   - location: sections/10-resources.md#req-resource-example-tooling
     reason: processing
     note: "Concerns documentation and mock tooling."
-  - location: sections/10-resources.md#req-resource-example-views
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/10-resources.md#req-resource-example-no-secrets
     reason: guidance
     note: "Whether a value is a secret cannot be decided from the document."
   - location: sections/10-resources.md#req-resource-example-untrusted
     reason: runtime
     note: "Constrains how consumers use example content."
-  - location: sections/10-resources.md#req-template-completion-views
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/11-prompts.md#req-prompt-example-tooling
     reason: processing
     note: "Concerns documentation and mock tooling."
@@ -203,21 +158,9 @@ uncheckedRequirements:
   - location: sections/11-prompts.md#req-prompt-example-untrusted
     reason: runtime
     note: "Constrains how consumers use example content."
-  - location: sections/11-prompts.md#req-prompt-example-views
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/11-prompts.md#req-prompt-completion-views
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/13-tags.md#req-tags-display-order
     reason: runtime
     note: "Concerns how user interfaces present tags."
-  - location: sections/13-tags.md#req-tags-views
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/13-tags.md#req-tags-merge
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/16-conformance.md#req-conforming-implementation
     reason: processing
     note: "Concerns implementation behavior; its checkable parts are separate requirements."
@@ -248,12 +191,6 @@ uncheckedRequirements:
   - location: sections/14-specification-extensions.md#req-extension-schema-unavailable
     reason: processing
     note: "Concerns optional extension validation by tools."
-  - location: sections/14-specification-extensions.md#req-extension-views
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/14-specification-extensions.md#req-extension-merge
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/14-specification-extensions.md#req-extension-documentation
     reason: guidance
     note: "Concerns extension publication, outside the document."
@@ -287,9 +224,6 @@ uncheckedRequirements:
   - location: sections/15-serialization.md#req-serialization-numbers
     reason: processing
     note: "Concerns implementation number handling."
-  - location: sections/15-serialization.md#req-serialization-empty-values-preserved
-    reason: processing
-    note: "Preservation by tools is not shown by a document fixture."
   - location: sections/15-serialization.md#req-serialization-schema-property
     reason: guidance
     note: "An authoring recommendation; $schema is optional."
@@ -299,15 +233,6 @@ uncheckedRequirements:
   - location: sections/15-serialization.md#req-serialization-untrusted
     reason: processing
     note: "Resource limits of tools cannot be shown by a document fixture."
-  - location: sections/17-components.md#req-component-pruning
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/17-components.md#req-component-merge
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/17-components.md#req-component-merge-extensions
-    reason: processing
-    note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
   - location: sections/17-components.md#req-component-limits
     reason: processing
     note: "Resource limits of tools cannot be shown by a document fixture."

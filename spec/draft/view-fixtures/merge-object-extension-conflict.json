@@ -1,0 +1,9 @@
+{
+  "description": "Corresponding Tools of the same revision with different x-* values cannot be kept as non-overlapping variants, so the merge fails.",
+  "operation": "merge",
+  "inputs": [
+    "inputs/extension-2026-07-28.json",
+    "inputs/extension-other-2026-07-28.json"
+  ],
+  "expectedFailure": "req-extension-merge"
+}

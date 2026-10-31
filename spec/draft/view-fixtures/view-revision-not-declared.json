@@ -1,0 +1,9 @@
+{
+  "description": "Projection to a revision absent from root protocolVersions fails.",
+  "operation": "view",
+  "inputs": [
+    "../fixtures/expected-valid/protocol-scoped-primitives.json"
+  ],
+  "revision": "2024-11-05",
+  "expectedFailure": "req-view-projection"
+}

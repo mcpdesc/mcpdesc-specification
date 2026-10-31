@@ -1,0 +1,9 @@
+{
+  "description": "Projection preserves the selected Prompt example maps and retains the components they reference.",
+  "operation": "view",
+  "inputs": [
+    "../fixtures/expected-valid/named-prompt-examples.json"
+  ],
+  "revision": "2026-07-28",
+  "expected": "expected/view-prompt-examples-2026-07-28.json"
+}

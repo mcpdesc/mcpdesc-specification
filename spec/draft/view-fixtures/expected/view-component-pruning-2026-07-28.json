@@ -1,0 +1,41 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "view-and-merge-cases",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "view-and-merge-cases"
+    }
+  ],
+  "components": {
+    "x-example-registry": "shared",
+    "schemas": {
+      "CurrentInput": {
+        "$componentRef": "#/components/schemas/BaseInput"
+      },
+      "BaseInput": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "search",
+      "inputSchema": {
+        "$componentRef": "#/components/schemas/CurrentInput"
+      }
+    }
+  ]
+}

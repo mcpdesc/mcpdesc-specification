@@ -1,0 +1,9 @@
+{
+  "description": "Merging the two single-revision views of a document collapses equivalent declarations and keeps differing ones as disjoint scoped variants; empty collections stay omitted.",
+  "operation": "merge",
+  "inputs": [
+    "expected/view-protocol-scoped-primitives-2025-11-25.json",
+    "expected/view-protocol-scoped-primitives-2026-07-28.json"
+  ],
+  "expected": "expected/merge-protocol-scoped-primitives.json"
+}

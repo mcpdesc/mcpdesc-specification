@@ -1,0 +1,9 @@
+{
+  "description": "The other revision of the same document: declarations scoped only to MCP 2025-11-25 are removed, and the root tag catalogue stays complete.",
+  "operation": "view",
+  "inputs": [
+    "../fixtures/expected-valid/protocol-scoped-primitives.json"
+  ],
+  "revision": "2026-07-28",
+  "expected": "expected/view-protocol-scoped-primitives-2026-07-28.json"
+}

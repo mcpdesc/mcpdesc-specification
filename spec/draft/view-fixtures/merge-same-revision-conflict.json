@@ -1,0 +1,9 @@
+{
+  "description": "Inputs covering the same revision with different Effective Protocol Views fail to merge.",
+  "operation": "merge",
+  "inputs": [
+    "inputs/extension-2026-07-28.json",
+    "inputs/description-other-2026-07-28.json"
+  ],
+  "expectedFailure": "req-merge-equivalence"
+}

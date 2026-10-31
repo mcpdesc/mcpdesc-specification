@@ -37,6 +37,10 @@ target until deployment is verified.
 - Fixture citations may name files under `serialization-fixtures/`, cited
   whole with the empty pointer; the outcome is `passes` when decoding accepts
   the file and `error` when it rejects it.
+- Fixture citations may name Effective Protocol View and merge cases under
+  `view-fixtures/`; the outcome is `passes` when the case expects a document
+  and `error` when it expects a failure, whose requirement anchor the citing
+  rule must cite.
 
 ### Catalog
 
