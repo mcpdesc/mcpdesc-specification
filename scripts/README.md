@@ -59,7 +59,8 @@ Proposal 0030 adds these scripts and npm entry points:
 | [`check-rule-catalog-publication.mjs`](check-rule-catalog-publication.mjs) | `npm run rules:check-publication -- <snapshot> <bundle> [--schema-only \| --check-index \| --index-out <new-file>]`; opt-in networked checks, never deployment |
 
 The bundle contains deployment-relative paths for the versioned rule schema,
-catalog aggregate, and manifest. The schema validates the existing YAML
+the validation result schema when the snapshot defines one, the catalog
+aggregate, and the manifest. The schema validates the existing YAML
 registry-file shape and the aggregate; its manifest and index schemas are
 under `$defs`. The generator does not alter source records or publish anything.
 It checks complete membership, source references, fixture pointers, full
@@ -72,8 +73,9 @@ npm run rules:export -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-preview --prepare
 ```
 
 `--prepare` permits an untagged commit for schema deployment and review. It is
-explicitly not a catalog publication. Deploy only the rule-format schema bytes
-and check them before tagging:
+explicitly not a catalog publication. Deploy only the rule-format schema bytes,
+and the validation result schema bytes when the bundle includes them, and
+check them before tagging:
 
 ```bash
 npm run rules:check-publication -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-preview --schema-only
