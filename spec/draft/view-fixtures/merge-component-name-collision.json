@@ -1,0 +1,9 @@
+{
+  "description": "Components with the same name and different values are renamed deterministically, and every affected reference is rewritten.",
+  "operation": "merge",
+  "inputs": [
+    "inputs/component-a-2025-11-25.json",
+    "inputs/component-b-2026-07-28.json"
+  ],
+  "expected": "expected/merge-component-name-collision.json"
+}

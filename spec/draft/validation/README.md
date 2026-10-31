@@ -200,6 +200,13 @@ neither performs nor reports them. This repository checks only that their
 projection cases are consistent, with `scripts/test-projection-fixtures.mjs`;
 implementations such as `@mcpdesc/core` must pass those cases.
 
+Effective Protocol View projection and merge are checked the same way by
+`mcpdesc.view.projection` and `mcpdesc.view.merge`. Their cases in
+[`../view-fixtures/`](../view-fixtures/) give the exact expected document or
+the requirement anchor of the expected failure, and
+`scripts/test-view-fixtures.mjs` recomputes them with the reference operations
+of `scripts/mcpdesc-views.mjs`.
+
 ### Layout
 
 | Path | Content | Status |
@@ -376,7 +383,7 @@ Each validation rule has a permanent identifier and a record:
 | `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `enforcement` | `internal` for a check of the candidate validator, `official-schema`, or `external` for a check that another operation performs, such as native projection in `@mcpdesc/core`; the candidate validator neither performs nor reports external checks |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
-| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, or `warning`. The path is relative to `fixtures/`, names a native projection case under `projection-fixtures/`, or names a file under `serialization-fixtures/`, cited whole with the pointer `""`: `passes` when decoding accepts it and `error` when decoding rejects it |
+| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, or `warning`. The path is relative to `fixtures/`, names a native projection case under `projection-fixtures/`, names a view or merge case under `view-fixtures/`, or names a file under `serialization-fixtures/`, cited whole with the pointer `""`: `passes` when decoding accepts it and `error` when decoding rejects it |
 | `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
 | `notes` | Optional maintainer information, such as implementation and testing remarks |
 
@@ -414,23 +421,24 @@ needs. When the fragment is a reusable component, the pointer selects the
 component value under `/components/`, because diagnostics are reported at use
 sites. The outcome states what the rule reports within the fragment:
 
-| Outcome | Validation fixture | Native projection case |
+| Outcome | Validation fixture | Projection, view, or merge case |
 | --- | --- | --- |
-| `passes` | The rule reports nothing there | The case expects a value |
+| `passes` | The rule reports nothing there | The case expects a value or document |
 | `error` | The rule reports an error there | The case expects a failure |
 | `warning` | The rule reports a warning there | Not used |
 
 A fragment showing both severities is cited as narrower fragments. A cited
-`expected-invalid` fixture shows what the rule reports. A projection case that
-expects a failure is cited by the rule whose requirement defines that failure.
+`expected-invalid` fixture shows what the rule reports. A projection, view, or
+merge case that expects a failure is cited by the rule whose requirement
+defines that failure.
 
 A `passes` outcome is cited only in a fixture without errors. A document with
 errors can stop later checks: the candidate validator skips semantic checks
 when the document schema fails, so silence there would not show that a rule
 ran. For a preservation rule, such as `mcp.tool.schema-keywords.preserve`,
 `passes` shows only that the document is accepted. Whether software keeps that
-information is tested by operations such as projection and merge
-(`scripts/test-views.mjs`), not by validating a document.
+information is tested by the view and merge cases in
+[`../view-fixtures/`](../view-fixtures/), not by validating a document.
 
 `scripts/test-validation-rules.mjs` resolves every location, anchor, and
 pointer, checks every outcome against the candidate validator or the
@@ -553,7 +561,8 @@ such as `delegated` or `arbitrated`.
 
 Resolve relative specification and source locations and Markdown description
 links from that base. Ordinary fixture paths resolve under its `fixtures/`;
-`projection-fixtures/` paths resolve directly from the base. JSON Pointers
+`projection-fixtures/`, `view-fixtures/`, and `serialization-fixtures/` paths
+resolve directly from the base. JSON Pointers
 select fixture data, not Markdown headings, and must not be used as invented
 browser anchors. Existing vendored schema line references and requirement
 anchors retain their own meanings.

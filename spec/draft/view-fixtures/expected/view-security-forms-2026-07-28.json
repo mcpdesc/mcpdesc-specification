@@ -1,0 +1,74 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "view-and-merge-cases",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "streamable-http",
+      "url": "https://example.com/mcp",
+      "security": [
+        {}
+      ]
+    }
+  ],
+  "securitySchemes": {
+    "api-key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  },
+  "security": [
+    {
+      "api-key": []
+    }
+  ],
+  "tools": [
+    {
+      "name": "health",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "security": []
+    },
+    {
+      "name": "status",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "security": [
+        {},
+        {
+          "api-key": []
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "description": "Search the catalogue.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "q": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "audit",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      }
+    }
+  ]
+}

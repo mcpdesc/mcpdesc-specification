@@ -1,0 +1,9 @@
+{
+  "description": "Different values of the same Components Object extension fail to merge.",
+  "operation": "merge",
+  "inputs": [
+    "inputs/component-a-2025-11-25.json",
+    "inputs/component-extension-other-2026-07-28.json"
+  ],
+  "expectedFailure": "req-component-merge-extensions"
+}

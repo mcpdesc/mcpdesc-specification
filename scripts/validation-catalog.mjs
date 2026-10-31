@@ -134,7 +134,7 @@ export function buildValidationCatalog(root, snapshot, commit) {
     }
     for (const match of rule.description.matchAll(/\]\(([^)\s]+)\)/g)) checkReference(root, identity.specificationPath, match[1]);
     for (const fixture of rule.fixtures) {
-      const relative = `${/^(?:projection|serialization)-fixtures\//.test(fixture.path) ? '' : 'fixtures/'}${fixture.path}`;
+      const relative = `${/^(?:projection|view|serialization)-fixtures\//.test(fixture.path) ? '' : 'fixtures/'}${fixture.path}`;
       const file = resolveCatalogFile(root, `${identity.specificationPath}/${relative}`);
       // A serialization fixture may be undecodable by design; it is cited as a whole.
       if (fixture.path.startsWith('serialization-fixtures/')) {

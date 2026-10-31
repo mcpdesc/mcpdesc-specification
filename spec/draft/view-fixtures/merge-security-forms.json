@@ -1,0 +1,9 @@
+{
+  "description": "Merging preserves the distinction among omitted security, security: [], and security: [{}], and restores the scoped variants.",
+  "operation": "merge",
+  "inputs": [
+    "expected/view-security-forms-2025-11-25.json",
+    "expected/view-security-forms-2026-07-28.json"
+  ],
+  "expected": "expected/merge-security-forms.json"
+}

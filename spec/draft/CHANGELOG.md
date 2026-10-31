@@ -26,6 +26,12 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ### Community Working Draft 4 — Unreleased
 
+#### View and merge cases — 2026-10-31
+
+- Added [`view-fixtures/`](view-fixtures/): 23 Effective Protocol View and merge cases giving the exact expected document or the requirement anchor of the expected failure, with authored inputs under `view-fixtures/inputs/`, expected documents under `view-fixtures/expected/`, and the case format in `view-fixtures/schema/view-case.schema.json`. They cover protocol-scoped primitives, security forms and empty values, tool, interaction, resource, completion, and prompt examples, client requirements, tags, specification extensions, component pruning and renaming, and every merge failure. Tracked in [issue #102](https://github.com/mcpdesc/mcpdesc-specification/issues/102); no normative wording changes.
+- New delegated rules `mcpdesc.view.projection` and `mcpdesc.view.merge` cite the cases and the 25 projection, merge, and preservation anchors previously listed as unchecked; 79 of the 341 anchors remain unchecked. Rule fixtures may now cite `view-fixtures/` cases.
+- `@mcpdesc/core` must pass the cases with its view and merge operations; exported validator snapshots include `view-fixtures/`.
+
 #### Resource URIs — 2026-10-31
 
 - Section 10.1.2: a Resource `uri` MUST be an RFC 3986 URI with a scheme; custom schemes remain allowed. The previous SHOULD contradicted Section 15, which requires URI values to conform to RFC 3986, and MCP, whose `schema.ts` annotates `Resource.uri` with `@format uri`. Documents with a relative or free-text Resource `uri` become invalid; previously their native projection failed the postcondition.
@@ -38,7 +44,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 - Schema ownership: rule records list the canonical schema locations they own in `documentSchema`; every definition and the document root have exactly one owner. 17 new object-level rules own the remaining definitions, for example `mcpdesc.tool.members`, `mcpdesc.example.members`, `mcp.content.members`, and `mcp.interaction-message.members`; existing rules own the locations they already covered. In the fixtures, 251 of 259 document-schema failures are now attributed below the document root, against 24 of 245 in Draft 3. Failures of a `oneOf` or `anyOf` alternative other than the best-matching one belong to the owner of the alternatives.
 - Requirement classification: every obligation sentence of the specification is covered by a requirement anchor, and every anchor is cited by a rule or listed in the new [`validation/unchecked-requirements.yaml`](validation/unchecked-requirements.yaml) with a reason (`runtime`, `processing`, or `guidance`). 240 anchors were added, without changing normative wording; 105 of the 341 anchors are listed as unchecked. Key words quoted as words, as in the RFC 2119 boilerplate, state no obligation.
 - New rule `mcpdesc.serialization.conforming` cites the serialization fixtures for the JSON and restricted YAML requirements of Section 15; rule fixtures may now cite `serialization-fixtures/` files, whose outcome is whether decoding accepts them.
-- Rule format `1.2.0`: `documentSchema` on rule records, `uncheckedRequirements` in the catalog, and serialization fixture citations; see the [rule-format changelog](validation/CHANGELOG.md).
+- Rule format `1.2.0`: `documentSchema` on rule records, `uncheckedRequirements` in the catalog, and serialization and view fixture citations; see the [rule-format changelog](validation/CHANGELOG.md).
 - New fixtures for rules without failure evidence: `expected-invalid/malformed-info-transport-tag-resource.json` and `expected-invalid/malformed-sampling-step.json`.
 - Version conversion profile: any target error at or next to a blocker location is a consequence of that blocker, whatever its rule.
 - `@mcpdesc/core` must attribute document-schema failures from the ownership map at its intake of the next draft; exported validator snapshots carry the map in their runtime.

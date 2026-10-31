@@ -60,6 +60,9 @@ try {
   const projectionFixtures = `${candidate.specificationRoot}/projection-fixtures`;
   const hasProjectionFixtures = fs.existsSync(path.join(root, projectionFixtures));
   if (hasProjectionFixtures) copy(projectionFixtures);
+  const viewFixtures = `${candidate.specificationRoot}/view-fixtures`;
+  const hasViewFixtures = fs.existsSync(path.join(root, viewFixtures));
+  if (hasViewFixtures) copy(viewFixtures);
   const conversion = `${candidate.specificationRoot}/conversion`;
   const hasConversion = fs.existsSync(path.join(root, conversion));
   if (hasConversion) {
@@ -123,6 +126,16 @@ try {
       const { document } = JSON.parse(fs.readFileSync(path.join(output, 'projection-fixtures', name), 'utf8'));
       if (typeof document === 'string') {
         assert.ok(fs.existsSync(path.join(output, 'projection-fixtures', document)), `${name}: ${document} resolves in the bundle`);
+      }
+    }
+  }
+  if (hasViewFixtures) {
+    const cases = fs.readdirSync(path.join(output, 'view-fixtures')).filter((name) => name.endsWith('.json'));
+    assert.ok(cases.length > 0, 'view fixtures are exported');
+    for (const name of cases) {
+      const { inputs, expected } = JSON.parse(fs.readFileSync(path.join(output, 'view-fixtures', name), 'utf8'));
+      for (const relative of [...inputs, expected].filter(Boolean)) {
+        assert.ok(fs.existsSync(path.join(output, 'view-fixtures', relative)), `${name}: ${relative} resolves in the bundle`);
       }
     }
   }

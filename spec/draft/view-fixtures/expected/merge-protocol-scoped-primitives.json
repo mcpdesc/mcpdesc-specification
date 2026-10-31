@@ -1,0 +1,63 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "jobs",
+    "version": "2.0.0"
+  },
+  "tags": [
+    {
+      "name": "queued",
+      "description": "Operations using the 2025 task model."
+    },
+    {
+      "name": "stateless",
+      "description": "Operations using the 2026 stateless model."
+    },
+    {
+      "name": "reserved",
+      "description": "A document-wide category not used in either projected view."
+    }
+  ],
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "jobs"
+    }
+  ],
+  "tools": [
+    {
+      "name": "run_job",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "execution": {
+        "taskSupport": "optional"
+      },
+      "tags": [
+        "queued"
+      ],
+      "protocolVersions": [
+        "2025-11-25"
+      ]
+    },
+    {
+      "name": "run_job",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "tags": [
+        "stateless"
+      ],
+      "protocolVersions": [
+        "2026-07-28"
+      ]
+    }
+  ]
+}

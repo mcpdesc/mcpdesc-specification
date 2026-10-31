@@ -349,8 +349,8 @@
                 ]
               },
               "path": {
-                "description": "A validation fixture relative to fixtures/, a native projection case under projection-fixtures/, or a serialization fixture under serialization-fixtures/.",
-                "pattern": "^(expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)|projection-fixtures/[a-z0-9-]+\\.json|serialization-fixtures/(expected-(valid|invalid)|equivalent)/[a-z0-9-]+\\.(json|ya?ml))$",
+                "description": "A validation fixture relative to fixtures/, a native projection case under projection-fixtures/, an Effective Protocol View or merge case under view-fixtures/, or a serialization fixture under serialization-fixtures/.",
+                "pattern": "^(expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml)|(projection|view)-fixtures/[a-z0-9-]+\\.json|serialization-fixtures/(expected-(valid|invalid)|equivalent)/[a-z0-9-]+\\.(json|ya?ml))$",
                 "type": "string"
               },
               "pointer": {
