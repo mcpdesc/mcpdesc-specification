@@ -24,7 +24,10 @@ try {
   }
   const fetchImpl = (url, options) => fetch(url, { ...options, signal: AbortSignal.timeout(15000) });
   await verifyCatalogPublication(bundle, fetchImpl, { schemaOnly: flags.includes('--schema-only') });
-  const schemaBytes = bundle.files.get(new URL(ruleSchemaUrl).pathname.slice(1));
+  const schemaBytes = bundle.files.get(new URL(bundle.manifest.ruleSchema.url).pathname.slice(1));
+  if (flags.includes('--check-index') || indexOutput) {
+    assert.equal(bundle.manifest.ruleSchema.url, ruleSchemaUrl, 'Index checks and updates require a catalog in the current rule format');
+  }
   if (flags.includes('--check-index')) {
     const index = await verifyCatalogIndexPublication(schemaBytes, fetchImpl);
     assert.ok(index.catalogs.some((entry) => entry.manifest === catalogIdentity(snapshot).manifestUrl), 'Published index must list this catalog');
@@ -32,7 +35,8 @@ try {
   if (indexOutput) {
     assert.ok(!fs.existsSync(indexOutput), 'Index output must be a new file');
     const response = await fetchImpl(catalogIndexUrl, { redirect: 'manual' });
-    const previous = response.status === 404 ? emptyCatalogIndex() : await verifyCatalogIndexPublication(schemaBytes, fetchImpl);
+    // The live index may still declare an earlier rule format; the update re-declares it in the current one.
+    const previous = response.status === 404 ? emptyCatalogIndex() : await verifyCatalogIndexPublication(schemaBytes, fetchImpl, { allowEarlierFormat: true });
     const next = extendCatalogIndex(previous, bundle, true);
     fs.mkdirSync(path.dirname(path.resolve(indexOutput)), { recursive: true });
     fs.writeFileSync(indexOutput, formatCanonicalJson(next));

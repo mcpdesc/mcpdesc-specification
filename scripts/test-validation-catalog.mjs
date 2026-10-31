@@ -10,7 +10,7 @@ import { formatCanonicalJson } from './canonical-json.mjs';
 import { candidateSpecification } from './candidate-specification.mjs';
 import { validateDocument } from './validate-document.mjs';
 import {
-  buildValidationCatalog, catalogIdentity, catalogIndexUrl, checkRuleApplicability, emptyCatalogIndex,
+  buildValidationCatalog, catalogDigest, catalogIdentity, catalogIndexUrl, checkRuleApplicability, emptyCatalogIndex,
   extendCatalogIndex, readCatalogBundle, resolveCatalogFile, resultSchemaUrl, ruleSchemaUrl,
   validateCatalogBundle, validateCatalogIndex, verifyCatalogIndexPublication,
   verifyCatalogPublication
@@ -146,6 +146,50 @@ for (const options of [
 ]) await assert.rejects(() => verifyCatalogPublication(bundle, makeFetch(options)));
 await assert.rejects(() => verifyCatalogIndexPublication(schemaBytes, makeFetch({ headers: { 'cache-control': 'public, max-age=31536000, immutable' } })));
 await assert.rejects(() => verifyCatalogIndexPublication(schemaBytes, makeFetch({ headers: { 'cache-control': 'public, max-age=600' } })));
+
+// A catalog published in an earlier rule format stays verifiable, and an index declared in that format
+// is re-declared in the current one when extended.
+const earlierFormat = (bytes) => Buffer.from(bytes.toString('utf8').replaceAll(`validation-rule/${bundle.manifest.ruleFormatVersion}.json`, 'validation-rule/1.1.0.json')
+  .replaceAll(`"const": "${bundle.manifest.ruleFormatVersion}"`, '"const": "1.1.0"'));
+const earlierSnapshot = '0.9.0-draft.3';
+const earlierIdentity = catalogIdentity(earlierSnapshot);
+const earlierSchemaUrl = 'https://mcpdesc.org/schema/validation-rule/1.1.0.json';
+const earlierSchemaBytes = earlierFormat(schemaBytes);
+const { resultSchema, ...earlierManifestBase } = bundle.manifest;
+const earlierManifest = {
+  ...earlierManifestBase,
+  $schema: `${earlierSchemaUrl}#/$defs/catalog-manifest`,
+  ruleFormatVersion: '1.1.0',
+  snapshot: earlierSnapshot,
+  source: { ...bundle.manifest.source, tag: earlierIdentity.tag },
+  ruleSchema: { url: earlierSchemaUrl, sha256: catalogDigest(earlierSchemaBytes) },
+  catalog: { url: earlierIdentity.catalogUrl, sha256: bundle.manifest.catalog.sha256 },
+  specificationBaseUrl: bundle.manifest.specificationBaseUrl.replace(catalogIdentity(snapshot).tag, earlierIdentity.tag)
+};
+const earlierFiles = new Map([
+  [new URL(earlierSchemaUrl).pathname.slice(1), earlierSchemaBytes],
+  [new URL(earlierIdentity.manifestUrl).pathname.slice(1), Buffer.from(formatCanonicalJson(earlierManifest))],
+  [new URL(earlierIdentity.catalogUrl).pathname.slice(1), bundle.files.get(rulesPath)]
+]);
+const earlierBundle = validateCatalogBundle(earlierFiles, earlierSnapshot);
+const earlierIndex = {
+  $schema: `${earlierSchemaUrl}#/$defs/catalog-index`,
+  catalogs: [{ manifest: earlierIdentity.manifestUrl, mcpdescVersion: earlierBundle.manifest.mcpdescVersion, snapshot: earlierSnapshot, status: 'draft' }],
+  currentStable: null,
+  currentDraft: earlierIdentity.manifestUrl
+};
+assert.throws(() => validateCatalogIndex(earlierIndex, bundle.schema), 'An earlier-format index is not current');
+assert.throws(() => validateCatalogIndex({ ...earlierIndex, $schema: 'https://mcpdesc.org/schema/validation-rule/9.0.0.json#/$defs/catalog-index' }, bundle.schema, { allowEarlierFormat: true }), 'A later format is never accepted');
+const upgraded = extendCatalogIndex(earlierIndex, bundle, true);
+assert.equal(upgraded.$schema, `${ruleSchemaUrl}#/$defs/catalog-index`);
+assert.deepEqual(upgraded.catalogs.map((entry) => entry.snapshot), [earlierSnapshot, snapshot].sort());
+assert.equal(upgraded.currentDraft, catalogIdentity(snapshot).manifestUrl);
+for (const [relative, bytes] of earlierFiles) responses.set(`https://mcpdesc.org/${relative}`, bytes);
+responses.set(catalogIndexUrl, Buffer.from(formatCanonicalJson(earlierIndex)));
+await assert.rejects(() => verifyCatalogIndexPublication(schemaBytes, makeFetch()), 'A published index must declare the current format');
+assert.deepEqual(await verifyCatalogIndexPublication(schemaBytes, makeFetch(), { allowEarlierFormat: true }), earlierIndex);
+responses.set(catalogIndexUrl, Buffer.from(formatCanonicalJson(upgraded)));
+assert.deepEqual(await verifyCatalogIndexPublication(schemaBytes, makeFetch()), upgraded, 'Index lists catalogs in earlier and current formats');
 
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'mcpdesc-catalog-test-'));
 try {

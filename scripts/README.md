@@ -103,8 +103,13 @@ Index preparation fetches and verifies the existing index and its referenced
 catalogs, or starts with empty pointers if the endpoint returns 404. It adds
 the verified catalog and updates only the appropriate current pointer; the
 stable pointer remains null when only drafts exist. It refuses to overwrite a
-local output file or redefine an existing catalog entry. Publish that reviewed
-index at `/validation/catalogs/index.json` last, then verify it:
+local output file or redefine an existing catalog entry. Each indexed catalog
+is verified against the rule format its own manifest declares, so catalogs
+published in an earlier format stay listed. When the existing index declares an
+earlier rule format, the update re-declares it in the current format; only
+the catalog being added must use the current format. Publish that reviewed
+index at `/validation/catalogs/index.json` last, then verify it (the published
+index must declare the current format):
 
 ```bash
 npm run rules:check-publication -- 0.9.0-draft.3 /tmp/mcpdesc-catalog-final --check-index

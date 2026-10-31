@@ -32,14 +32,23 @@ export function catalogIdentity(snapshot) {
 }
 
 function schemaValidators(schema) {
-  assert.equal(schema.$id, ruleSchemaUrl, 'Unexpected rule-format identity');
+  assert.ok(ruleFormatOf(schema.$id), 'Unexpected rule-format identity');
   const ajv = new Ajv2020({ allErrors: true, strict: true });
   addFormats(ajv);
   ajv.addSchema(schema);
-  return Object.fromEntries(['', '#/$defs/catalog-manifest', '#/$defs/catalog-index', '#/$defs/unchecked-requirements'].map((fragment) => {
-    const validate = ajv.getSchema(`${ruleSchemaUrl}${fragment}`);
-    return [fragment || 'rules', (value) => assert.ok(validate(value), ajv.errorsText(validate.errors))];
+  // Earlier formats lack some fragments, such as unchecked-requirements before 1.2.0.
+  return Object.fromEntries(['', '#/$defs/catalog-manifest', '#/$defs/catalog-index', '#/$defs/unchecked-requirements'].flatMap((fragment) => {
+    const validate = ajv.getSchema(`${schema.$id}${fragment}`);
+    return validate ? [[fragment || 'rules', (value) => assert.ok(validate(value), ajv.errorsText(validate.errors))]] : [];
   }));
+}
+
+const formatOrder = (version) => version.split('.').map(Number).reduce((total, part) => total * 1000 + part, 0);
+
+// The version of a published rule format no later than the current one, from its schema URL.
+function ruleFormatOf(url) {
+  const version = /^https:\/\/mcpdesc\.org\/schema\/validation-rule\/(\d+\.\d+\.\d+)\.json$/.exec(url ?? '')?.[1];
+  return version && formatOrder(version) <= formatOrder(ruleFormatVersion) ? version : undefined;
 }
 
 export function resolveCatalogFile(root, relative) {
@@ -175,6 +184,7 @@ export function buildValidationCatalog(root, snapshot, commit) {
   return validateCatalogBundle(files, snapshot);
 }
 
+// A catalog is checked against the rule format its own manifest declares, so earlier catalogs stay verifiable.
 export function validateCatalogBundle(files, snapshot) {
   const identity = catalogIdentity(snapshot);
   const bytes = (url) => {
@@ -182,14 +192,16 @@ export function validateCatalogBundle(files, snapshot) {
     assert.ok(value, `Missing artifact: ${url}`);
     return value;
   };
-  const schema = JSON.parse(bytes(ruleSchemaUrl));
   const manifest = JSON.parse(bytes(identity.manifestUrl));
+  const format = ruleFormatOf(manifest.ruleSchema?.url);
+  assert.ok(format && format === manifest.ruleFormatVersion, `Unsupported rule format: ${manifest.ruleFormatVersion}`);
+  const schema = JSON.parse(bytes(manifest.ruleSchema.url));
+  assert.equal(schema.$id, manifest.ruleSchema.url, 'Unexpected rule-format identity');
   const catalog = JSON.parse(bytes(identity.catalogUrl));
   const validate = schemaValidators(schema);
   validate['#/$defs/catalog-manifest'](manifest);
   validate.rules(catalog);
   checkRecords(catalog);
-  assert.equal(manifest.ruleFormatVersion, ruleFormatVersion);
   assert.equal(manifest.snapshot, snapshot);
   assert.equal(manifest.mcpdescVersion, identity.mcpdescVersion);
   assert.equal(manifest.status, identity.status);
@@ -198,15 +210,14 @@ export function validateCatalogBundle(files, snapshot) {
   assert.equal(manifest.source.specificationPath, identity.specificationPath);
   assert.equal(manifest.specificationBaseUrl, `${repository}/blob/${identity.tag}/${identity.specificationPath}/`);
   assert.equal(manifest.catalog.url, identity.catalogUrl);
-  assert.equal(manifest.ruleSchema.url, ruleSchemaUrl);
-  assert.equal(manifest.ruleSchema.sha256, catalogDigest(bytes(ruleSchemaUrl)));
+  assert.equal(manifest.ruleSchema.sha256, catalogDigest(bytes(manifest.ruleSchema.url)));
   assert.equal(manifest.catalog.sha256, catalogDigest(bytes(identity.catalogUrl)));
   assert.equal(manifest.ruleCount, catalog.rules.length);
   if (manifest.resultSchema) {
-    assert.equal(manifest.resultSchema.url, resultSchemaUrl);
-    assert.equal(manifest.resultSchema.sha256, catalogDigest(bytes(resultSchemaUrl)));
-    const resultSchema = JSON.parse(bytes(resultSchemaUrl));
-    assert.equal(resultSchema.$id, resultSchemaUrl, 'Unexpected validation result format identity');
+    assert.match(manifest.resultSchema.url, /^https:\/\/mcpdesc\.org\/schema\/validation-result\/\d+\.\d+\.\d+\.json$/);
+    assert.equal(manifest.resultSchema.sha256, catalogDigest(bytes(manifest.resultSchema.url)));
+    const resultSchema = JSON.parse(bytes(manifest.resultSchema.url));
+    assert.equal(resultSchema.$id, manifest.resultSchema.url, 'Unexpected validation result format identity');
     const ajv = new Ajv2020({ allErrors: true, strict: true });
     addFormats(ajv);
     ajv.compile(resultSchema);
@@ -215,8 +226,8 @@ export function validateCatalogBundle(files, snapshot) {
 }
 
 const bundleUrls = (manifest, identity, schemaOnly = false) => [
-  ruleSchemaUrl,
-  ...(manifest.resultSchema ? [resultSchemaUrl] : []),
+  manifest.ruleSchema.url,
+  ...(manifest.resultSchema ? [manifest.resultSchema.url] : []),
   ...(schemaOnly ? [] : [identity.catalogUrl, identity.manifestUrl])
 ];
 
@@ -227,8 +238,12 @@ export function readCatalogBundle(directory, snapshot) {
   return validateCatalogBundle(new Map(bundleUrls(manifest, identity).map((url) => [artifactPath(url), read(url)])), snapshot);
 }
 
-export function validateCatalogIndex(index, schema) {
-  schemaValidators(schema)['#/$defs/catalog-index'](index);
+// schema is the current rule format. An index declared with an earlier format is accepted only
+// when allowEarlierFormat is set, and only if it also validates under the current format.
+export function validateCatalogIndex(index, schema, { allowEarlierFormat = false } = {}) {
+  const declared = /^(.*)#\/\$defs\/catalog-index$/.exec(index?.$schema ?? '')?.[1];
+  const earlier = allowEarlierFormat && declared !== schema.$id && ruleFormatOf(declared);
+  schemaValidators(schema)['#/$defs/catalog-index'](earlier ? { ...index, $schema: `${schema.$id}#/$defs/catalog-index` } : index);
   const snapshots = new Set();
   const manifests = new Set();
   for (const entry of index.catalogs) {
@@ -249,7 +264,8 @@ export function validateCatalogIndex(index, schema) {
 }
 
 export function extendCatalogIndex(index, bundle, makeCurrent = false) {
-  const next = structuredClone(validateCatalogIndex(index, bundle.schema));
+  const next = structuredClone(validateCatalogIndex(index, bundle.schema, { allowEarlierFormat: true }));
+  next.$schema = `${bundle.schema.$id}#/$defs/catalog-index`;
   const manifest = bundle.manifest;
   const entry = { mcpdescVersion: manifest.mcpdescVersion, snapshot: manifest.snapshot, status: manifest.status, manifest: catalogIdentity(manifest.snapshot).manifestUrl };
   const existing = next.catalogs.find((item) => item.snapshot === entry.snapshot);
@@ -274,7 +290,7 @@ export async function verifyCatalogPublication(bundle, fetchImpl = fetch, { sche
   }
 }
 
-export async function verifyCatalogIndexPublication(schemaBytes, fetchImpl = fetch) {
+export async function verifyCatalogIndexPublication(schemaBytes, fetchImpl = fetch, { allowEarlierFormat = false } = {}) {
   const schema = JSON.parse(schemaBytes);
   const result = await fetchSchemaPublication(catalogIndexUrl, { fetchImpl });
   assert.equal(result.status, 200);
@@ -284,21 +300,19 @@ export async function verifyCatalogIndexPublication(schemaBytes, fetchImpl = fet
   const cache = result.headers.get('cache-control') ?? '';
   assert.ok(!/\bimmutable\b/i.test(cache), 'Catalog index must not be immutable');
   assert.ok(/\bno-cache\b|\bno-store\b/i.test(cache) || /\bmax-age=(\d+)\b/i.test(cache) && Number(cache.match(/\bmax-age=(\d+)\b/i)[1]) <= 300, 'Catalog index cache lifetime must be at most 300 seconds or revalidate');
-  const index = validateCatalogIndex(JSON.parse(result.bodyBytes), schema);
+  const index = validateCatalogIndex(JSON.parse(result.bodyBytes), schema, { allowEarlierFormat });
   for (const entry of index.catalogs) {
     const manifestResponse = await fetchSchemaPublication(entry.manifest, { fetchImpl });
     assert.equal(manifestResponse.status, 200, `Missing indexed manifest: ${entry.manifest}`);
     const manifest = JSON.parse(manifestResponse.bodyBytes);
-    schemaValidators(schema)['#/$defs/catalog-manifest'](manifest);
-    assert.equal(manifest.catalog.url, catalogIdentity(entry.snapshot).catalogUrl);
-    assert.equal(manifest.ruleSchema.url, ruleSchemaUrl);
-    const catalogResponse = await fetchSchemaPublication(catalogIdentity(entry.snapshot).catalogUrl, { fetchImpl });
-    const resultSchemaResponse = manifest.resultSchema ? await fetchSchemaPublication(resultSchemaUrl, { fetchImpl }) : undefined;
+    assert.equal(manifest.catalog?.url, catalogIdentity(entry.snapshot).catalogUrl);
+    assert.ok(ruleFormatOf(manifest.ruleSchema?.url), `Unsupported rule format in ${entry.manifest}`);
+    const fetched = async (url) => (url === schema.$id ? schemaBytes : (await fetchSchemaPublication(url, { fetchImpl })).bodyBytes);
     const files = new Map([
-      [artifactPath(ruleSchemaUrl), schemaBytes],
-      ...(resultSchemaResponse ? [[artifactPath(resultSchemaUrl), resultSchemaResponse.bodyBytes]] : []),
+      [artifactPath(manifest.ruleSchema.url), await fetched(manifest.ruleSchema.url)],
+      ...(manifest.resultSchema ? [[artifactPath(manifest.resultSchema.url), await fetched(manifest.resultSchema.url)]] : []),
       [artifactPath(entry.manifest), manifestResponse.bodyBytes],
-      [artifactPath(catalogIdentity(entry.snapshot).catalogUrl), catalogResponse.bodyBytes]
+      [artifactPath(catalogIdentity(entry.snapshot).catalogUrl), (await fetchSchemaPublication(catalogIdentity(entry.snapshot).catalogUrl, { fetchImpl })).bodyBytes]
     ]);
     const bundle = validateCatalogBundle(files, entry.snapshot);
     await verifyCatalogPublication(bundle, fetchImpl);
