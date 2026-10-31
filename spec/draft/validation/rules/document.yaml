@@ -49,6 +49,13 @@ rules:
       - path: expected-invalid/empty-tag-catalog-reference.json
         pointer: "/tags"
         outcome: error
+      - path: expected-valid/optional-schema-omitted.json
+        pointer: ""
+        outcome: passes
+    notes: >-
+      The optional root $schema does not select the schema used for
+      validation: optional-schema-omitted.json omits it and validates against
+      the schema for its mcpdesc version.
 
   - id: mcp.declaration.field.revision-availability
     title: "Keep fields within their supported protocol scope"
