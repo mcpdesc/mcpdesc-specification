@@ -206,8 +206,8 @@ implementations such as `@mcpdesc/core` must pass those cases.
 | --- | --- | --- |
 | [How validation works](../guides/understanding-mcp-protocol-versions.md) | Structural and semantic checks, protocol scopes, Effective Protocol Views, native projection, and field comparisons | Informative guide |
 | [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
-| [`rule.schema.json`](rule.schema.json) | Rule-format `2.0.0`: registry files, aggregate catalog, unchecked requirements, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
-| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `2.0.0` unreleased, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
+| [`rule.schema.json`](rule.schema.json) | Rule-format `1.2.0`: registry files, aggregate catalog, unchecked requirements, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
+| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.2.0` unreleased, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
 | [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records cite fixtures with checked outcomes; `scripts/test-validation-rules.mjs` checks them and reports the counts |
 | [`unchecked-requirements.yaml`](unchecked-requirements.yaml) | Requirement anchors that no rule checks, each with a reason (`runtime`, `processing`, or `guidance`) and a note | Pilot: published in the catalog as `uncheckedRequirements` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported revision (`<revision>/schema.ts`, `<revision>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
@@ -525,13 +525,13 @@ changes; the [specification changelog](../CHANGELOG.md) records rule-content
 changes by draft.
 Format `1.1.0` is the format of the Draft 3 catalog. Format `1.0.0` was
 published first but is used by no catalog; neither is a retroactive name for
-the schemas in earlier drafts. Format `2.0.0`, for Draft 4, adds
+the schemas in earlier drafts. Format `1.2.0`, for Draft 4, adds
 `documentSchema` and `uncheckedRequirements`. No 0.8.0 catalog is published by
 this work.
 
 | Resource | Publication target |
 | --- | --- |
-| Rule-format schema | `https://mcpdesc.org/schema/validation-rule/2.0.0.json` (Draft 3: `1.1.0.json`) |
+| Rule-format schema | `https://mcpdesc.org/schema/validation-rule/1.2.0.json` (Draft 3: `1.1.0.json`) |
 | Draft 3 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/manifest.json` |
 | Draft 3 aggregate | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/rules.json` |
 | Mutable discovery index | `https://mcpdesc.org/validation/catalogs/index.json` |
@@ -576,7 +576,8 @@ Schema documentation corrections use a new patch-version URL. No per-rule
 specification-version range is added: snapshot membership supplies that scope.
 Two recorded exceptions predate every catalog: `1.1.0` uses a minor number for
 changes incompatible with `1.0.0`, and its first deployed bytes, whose envelope
-constants still named `1.0.0`, are replaced once; see the
+constants still named `1.0.0`, are replaced once. `1.2.0` likewise uses a minor
+number for fields that the closed `1.1.0` record schema rejects; see the
 [rule-format changelog](CHANGELOG.md).
 
 See the [catalog publication procedure](../../../scripts/README.md#validation-catalog-publication)

@@ -117,7 +117,7 @@ but do not participate in active applicability checks. Records no longer list
 `error`, or `warning`), and diagnostic codes come from the producer that
 emits them.
 
-Draft 4 introduces rule-format `2.0.0`. Rule records may list the canonical
+Draft 4 introduces rule-format `1.2.0`. Rule records may list the canonical
 schema locations they own in `documentSchema`, and the catalog lists the
 requirements no rule checks in `uncheckedRequirements`, each with a reason.
 

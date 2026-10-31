@@ -270,7 +270,7 @@ const draftProposalSnapshots = [
   ['0029-integer-mcp-numbers.md', 'f6ce500cdbe3e051abbf219d1005fca212c87f96', 'proposals/0029-integer-mcp-numbers.md', 'be901a5ad909e9c30ff373928f61aa31bdb4954e23307161e34631ba4bea1127'],
   ['0030-readable-and-complete-rule-records.md', '7633f147faf5800e35c21c55411609a9db637eba', 'proposals/0030-readable-and-complete-rule-records.md', 'df8da81c56cab87817291135147f355e34d46b43b7bbcbb38ee9d615343c6a75'],
   ['0032-dialect-governed-tool-schemas.md', 'e344a04ae9b6f1d4a8dd03f685c3877f6af6f40a', 'proposals/0032-dialect-governed-tool-schemas.md', '353dce36f35e9c7df63821e32d054d676ae09eb6a5ae9727357e5aeb5d0ec5f5'],
-  ['0033-complete-validation-catalog.md', 'ab50aaf6a0367a4fce50e338d864bd29b397fbe1', 'proposals/0033-complete-validation-catalog.md', '3ab8bdcd2a622378b7914bff6852331222e9edabe5b0eb2b5a86f814f5b88b66']
+  ['0033-complete-validation-catalog.md', '3abbf1100bb153b249b29d388a177fbb1af47f01', 'proposals/0033-complete-validation-catalog.md', '24944e0a8cfcd1267216049ba9078df4ab4cd1c54c37bbf03b2335d9dc02502d']
 ];
 
 function checkProposalSnapshots(specificationPath, snapshots) {
