@@ -26,6 +26,10 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ### Community Working Draft 4 — Unreleased
 
+#### Documents without `$schema` — 2026-10-31
+
+- Added `expected-valid/optional-schema-omitted.json`, a conforming document without the optional root `$schema`, cited as `passes` by `mcpdesc.document.schema`: validation selects the schema from `mcpdesc`, not from `$schema` (Section 4.3). Tracked in [issue #66](https://github.com/mcpdesc/mcpdesc-specification/issues/66); no normative change.
+
 #### Rule-level validation results — 2026-10-31
 
 - Implemented review-stage [Proposal 0031](proposal-snapshots/0031-rule-level-validation-results.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #93](https://github.com/mcpdesc/mcpdesc-specification/issues/93). Document validity is unchanged. Review-stage content may still change incompatibly or be removed.
