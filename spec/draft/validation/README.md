@@ -147,8 +147,9 @@ The normative requirements are those of the specification sections. The rule
 catalog is a pilot registry implementing review-stage
 [Proposal 0024](../proposal-snapshots/0024-validation-rule-identity-and-provenance.md),
 extended by review-stage
-[Proposal 0030](../proposal-snapshots/0030-readable-and-complete-rule-records.md).
-Neither proposal is accepted. The pilot registry documents and tests the
+[Proposal 0030](../proposal-snapshots/0030-readable-and-complete-rule-records.md)
+and [Proposal 0033](../proposal-snapshots/0033-complete-validation-catalog.md).
+None of these proposals is accepted. The pilot registry documents and tests the
 requirements; its reader fields are informative and it is not a separate
 document-conformance specification.
 
@@ -205,9 +206,10 @@ implementations such as `@mcpdesc/core` must pass those cases.
 | --- | --- | --- |
 | [How validation works](../guides/understanding-mcp-protocol-versions.md) | Structural and semantic checks, protocol scopes, Effective Protocol Views, native projection, and field comparisons | Informative guide |
 | [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
-| [`rule.schema.json`](rule.schema.json) | Rule-format `1.1.0`: registry files, aggregate catalog, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
-| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.1.0` unreleased, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
+| [`rule.schema.json`](rule.schema.json) | Rule-format `1.2.0`: registry files, aggregate catalog, unchecked requirements, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
+| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.2.0` unreleased, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
 | [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records cite fixtures with checked outcomes; `scripts/test-validation-rules.mjs` checks them and reports the counts |
+| [`unchecked-requirements.yaml`](unchecked-requirements.yaml) | Requirement anchors that no rule checks, each with a reason (`runtime`, `processing`, or `guidance`) and a note | Pilot: published in the catalog as `uncheckedRequirements` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported revision (`<revision>/schema.ts`, `<revision>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
 
 The folder is part of the versioned specification: it is frozen with each
@@ -366,6 +368,7 @@ Each validation rule has a permanent identifier and a record:
 | `summary` | Required informative statement of the precise requirement; not shortened to fit navigation |
 | `description` | Required informative Markdown explanation for authors, at most 800 characters and three short paragraphs; relative links resolve from the specification folder |
 | `surface`, `path` | Native type and field the rule applies to |
+| `documentSchema` | Optional locations in the canonical MCP Description schema whose failures the rule reports, as JSON Pointer fragments such as `#/$defs/tool`; see [Rules in diagnostics](#rules-in-diagnostics) |
 | `kind` | structural, semantic, preservation, embedded-standard, mcpdesc-semantic, completeness, or interoperability |
 | `requirement` | Requirement level of the source: must, should, or may |
 | `applicability` | Required for active rules, not inferred from owner. `protocolVersions` is either `independent` or a complete protocol-version map (`applies`, `opaque`, `not-applicable`, or an explained custom behavior). Optional `schemaDialects` lists canonical dialect URIs separately. A check can depend on both dimensions. Retired records may omit applicability. |
@@ -373,7 +376,7 @@ Each validation rule has a permanent identifier and a record:
 | `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `enforcement` | `internal` for a check of the candidate validator, `official-schema`, or `external` for a check that another operation performs, such as native projection in `@mcpdesc/core`; the candidate validator neither performs nor reports external checks |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
-| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, or `warning`. The path is relative to `fixtures/`, or names a native projection case under `projection-fixtures/` |
+| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, or `warning`. The path is relative to `fixtures/`, names a native projection case under `projection-fixtures/`, or names a file under `serialization-fixtures/`, cited whole with the pointer `""`: `passes` when decoding accepts it and `error` when decoding rejects it |
 | `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
 | `notes` | Optional maintainer information, such as implementation and testing remarks |
 
@@ -390,9 +393,21 @@ Locations are immutable and relative to the specification folder:
 Every rule cites at least one MCP Description requirement: a `specification`
 location at a requirement anchor. A requirement anchor is an
 `<a id="req-<topic>"></a>` element placed in the section source immediately
-before the requirement sentence. Its identifier names the requirement, not a
-rule, and is permanent: one sentence can be checked by several rules, and one
-rule can check several sentences.
+before the requirement sentence. It covers that sentence and the following
+sentences of the same paragraph, list item, or table row, up to the next
+anchor. Its identifier names the requirement, not a rule, and is permanent:
+one requirement can be checked by several rules, and one rule can check
+several requirements.
+
+Every anchor is either cited by a rule or listed in
+[`unchecked-requirements.yaml`](unchecked-requirements.yaml), never both. An
+unchecked requirement has a `reason`: `runtime` for behavior of MCP clients,
+servers, or consumers; `processing` for behavior of MCP Description tools that
+document fixtures cannot show, such as preservation or network access; or
+`guidance` for an authoring choice the document cannot decide. Every
+obligation sentence (MUST, SHALL, SHOULD, REQUIRED, RECOMMENDED, and their
+negations) is covered by an anchor (Proposal 0033); key words quoted as words,
+as in the RFC 2119 boilerplate, state no obligation.
 
 Fixture pointers select the fragment of the fixture document that a reader
 needs. When the fragment is a reusable component, the pointer selects the
@@ -419,7 +434,9 @@ information is tested by operations such as projection and merge
 
 `scripts/test-validation-rules.mjs` resolves every location, anchor, and
 pointer, checks every outcome against the candidate validator or the
-projection case, and reports how many requirement anchors rules cite.
+projection case, checks that every anchor is cited or listed as unchecked, that
+every obligation sentence is anchored, and that every canonical
+schema definition has exactly one owner, and reports the catalog coverage.
 
 Rules are anchored to the MCP type, not to where MCP Description carries it.
 For example, one rule covers `Annotations.lastModified` wherever annotations
@@ -478,12 +495,20 @@ another implementation, so rule records do not list codes. Each producer owns
 its mapping from codes to rules. Draft
 [Proposal 0031](https://github.com/mcpdesc/mcpdesc-specification/pull/94)
 and [issue #93](https://github.com/mcpdesc/mcpdesc-specification/issues/93)
-target Draft 4: they make `code` optional, add a result for every rule
-(passed, failed, warning, not applicable, not evaluated, or delegated), and
-narrow the catch-all rule below. Every candidate-validator diagnostic
-identifies a registered rule. A `schema-validation` diagnostic identifies a
-specific rule where the failing schema location does, otherwise
-`mcpdesc.document.schema`.
+target Draft 4: they make `code` optional and add a result for every rule
+(passed, failed, warning, not applicable, not evaluated, or delegated). Every
+candidate-validator diagnostic identifies a registered rule.
+
+A document-schema failure belongs to the rule whose `documentSchema` lists the
+longest JSON Pointer containing the failing schema location (Proposal 0033).
+Every canonical schema definition and the document root have exactly one
+owner; `mcpdesc.document.schema` owns only the root and generic JSON values.
+When a value fails a `oneOf` or `anyOf`, failures in the alternative that best
+matches the value belong to the owners of their own locations, and failures in
+the other alternatives to the owner of the location offering the
+alternatives. Which alternative matches best is implementation-defined; the
+candidate validator chooses the one whose failures reach deepest into the
+value, then the one with the fewest failures, then the first.
 
 `scripts/test-validation-rules.mjs` checks that every fixture diagnostic
 identifies a registered, active rule, that every severity a rule reports in
@@ -498,20 +523,24 @@ identifies the specification requirements and documentation published together.
 The [rule-format changelog](CHANGELOG.md) records format and publication-contract
 changes; the [specification changelog](../CHANGELOG.md) records rule-content
 changes by draft.
-Format `1.1.0` is the format of the first catalogs. Format `1.0.0` was
+Format `1.1.0` is the format of the Draft 3 catalog. Format `1.0.0` was
 published first but is used by no catalog; neither is a retroactive name for
-the schemas in earlier drafts. No 0.8.0 catalog is published by this work.
+the schemas in earlier drafts. Format `1.2.0`, for Draft 4, adds
+`documentSchema` and `uncheckedRequirements`. No 0.8.0 catalog is published by
+this work.
 
 | Resource | Publication target |
 | --- | --- |
-| Rule-format schema | `https://mcpdesc.org/schema/validation-rule/1.1.0.json` |
+| Rule-format schema | `https://mcpdesc.org/schema/validation-rule/1.2.0.json` (Draft 3: `1.1.0.json`) |
 | Draft 3 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/manifest.json` |
 | Draft 3 aggregate | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/rules.json` |
 | Mutable discovery index | `https://mcpdesc.org/validation/catalogs/index.json` |
 
-The schema's root validates `{ "rules": [...] }`, both in authored YAML files
-and in the generated JSON aggregate. The fragments `#/$defs/catalog-manifest`
-and `#/$defs/catalog-index` validate the other two resources. The exporter
+The schema's root validates `{ "rules": [...] }` in authored YAML files and
+the generated JSON aggregate, which also carries `uncheckedRequirements`. The
+fragments `#/$defs/catalog-manifest`, `#/$defs/catalog-index`, and
+`#/$defs/unchecked-requirements` validate the manifest, the index, and
+`unchecked-requirements.yaml`. The exporter
 sorts all records by permanent ID, preserving every field, including
 preservation, delegated, and retired records if any are present.
 
@@ -547,7 +576,8 @@ Schema documentation corrections use a new patch-version URL. No per-rule
 specification-version range is added: snapshot membership supplies that scope.
 Two recorded exceptions predate every catalog: `1.1.0` uses a minor number for
 changes incompatible with `1.0.0`, and its first deployed bytes, whose envelope
-constants still named `1.0.0`, are replaced once; see the
+constants still named `1.0.0`, are replaced once. `1.2.0` likewise uses a minor
+number for fields that the closed `1.1.0` record schema rejects; see the
 [rule-format changelog](CHANGELOG.md).
 
 See the [catalog publication procedure](../../../scripts/README.md#validation-catalog-publication)

@@ -142,8 +142,7 @@ function analyze(conversion, document, where) {
   }
   for (const diagnostic of targetErrors) {
     if (conversion.explained.has(diagnostic.rule)) continue;
-    const consequence = diagnostic.rule === 'mcpdesc.document.schema'
-      && explained.some((cause) => isPrefix(diagnostic.path.slice(0, -1), cause.path));
+    const consequence = explained.some((cause) => isPrefix(diagnostic.path.slice(0, -1), cause.path));
     if (!consequence) fail(`${where}: undeclared incompatibility ${diagnostic.code} (${diagnostic.rule}) at ${pointer(diagnostic.path)}: ${diagnostic.message}`);
   }
   return [...blockers.values()];

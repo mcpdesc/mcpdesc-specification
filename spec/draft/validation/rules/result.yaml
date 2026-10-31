@@ -50,6 +50,7 @@ rules:
           examples for this revision: it is old and the use case is narrow.
         resolution: not-fixed
         reference: "Maintainer decision on issue #72, 2026-10-25"
+
   - id: mcp.result.additional-properties.preserve
     title: "Preserve fields on open results with a warning"
     description: >-
@@ -116,6 +117,7 @@ rules:
     notes: >-
       The warnings of this rule for a document equal the union of its warnings
       for each per-revision Effective Protocol View (scripts/test-views.mjs).
+
   - id: mcp.input-response.closed
     title: "Keep newer client input responses closed"
     description: >-
@@ -156,6 +158,7 @@ rules:
       - path: expected-invalid/closed-step-responses-2026.json
         pointer: /tools/0/interactionExamples/approved/steps/0/response
         outcome: error
+
   - id: mcp.root.meta.revision-availability
     title: "Use root metadata only where supported"
     description: >-
@@ -199,6 +202,7 @@ rules:
       - path: expected-warning/open-step-responses-before-2026.json
         pointer: /tools/0/interactionExamples/approved/steps/0/response/roots/0
         outcome: passes
+
   - id: mcp.meta.reserved-key-context
     title: "Place reserved metadata in its defined context"
     description: >-
@@ -245,6 +249,7 @@ rules:
       their content, interaction step responses, and roots. MCP 2024-11-05 and
       2025-03-26 do not define reserved keys; Section 16.2 limits validation
       for those revisions.
+
   - id: mcp.completion.result-closed
     title: "Keep completion result members within MCP fields"
     description: >-
@@ -259,6 +264,8 @@ rules:
     surface: CompleteResult
     path: completion
     kind: structural
+    documentSchema:
+      - "#/$defs/completionResult"
     requirement: must
     applicability:
       protocolVersions: independent
@@ -301,6 +308,8 @@ rules:
     surface: CacheableResult
     path: ttlMs
     kind: structural
+    documentSchema:
+      - "#/$defs/completedReadResourceResultExample/properties/ttlMs"
     requirement: must
     applicability:
       protocolVersions: independent

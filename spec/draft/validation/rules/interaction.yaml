@@ -155,3 +155,108 @@ rules:
       - path: expected-invalid/invalid-tool-interaction-example-semantics.json
         pointer: /tools/0/interactionExamples/broken/steps/3/response/roots/0
         outcome: error
+
+  - id: mcpdesc.tool.interaction.members
+    title: "Shape Tool interaction examples and steps"
+    description: >-
+      A Tool interaction example has input, ordered steps, and a result. Each
+      step is an elicitation, sampling, or roots step with its request and
+      response, and accepts only its defined properties.
+    owner: mcpdesc
+    summary: >-
+      Interaction examples and steps have their required members, a known step
+      type, and no unknown properties.
+    surface: Tool interaction example
+    kind: structural
+    documentSchema:
+      - "#/$defs/toolInteractionExamples"
+      - "#/$defs/toolInteractionExample"
+      - "#/$defs/toolInteractionStep"
+      - "#/$defs/toolInteractionElicitationStep"
+      - "#/$defs/toolInteractionSamplingStep"
+      - "#/$defs/toolInteractionRootsStep"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.4
+        locations:
+          - sections/09-tools.md#req-interaction-example-fields
+          - sections/09-tools.md#req-interaction-step-fields
+          - sections/09-tools.md#req-interaction-examples-map
+          - sections/09-tools.md#req-interaction-step-closed
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-sampling-step.json
+        pointer: "/tools/0/interactionExamples/summary/steps/0/request"
+        outcome: error
+      - path: expected-invalid/malformed-tool-interaction-examples.json
+        pointer: "/tools/0/interactionExamples/broken/description"
+        outcome: error
+
+  - id: mcp.interaction-message.members
+    title: "Use MCP shapes in interaction requests and responses"
+    description: >-
+      Interaction steps carry MCP values: elicitation requests and results,
+      sampling requests, messages, and results, and roots lists. Each has the
+      members its MCP type requires and defines.
+    owner: mcp
+    summary: >-
+      Elicitation, sampling, and roots requests and responses in interaction
+      steps have the members and member types of their MCP types.
+    surface: ElicitRequest, ElicitResult, CreateMessageRequest, CreateMessageResult, ListRootsResult, Root
+    kind: structural
+    documentSchema:
+      - "#/$defs/elicitationInteractionRequest"
+      - "#/$defs/elicitationInteractionFormRequest"
+      - "#/$defs/elicitationInteractionUrlRequest"
+      - "#/$defs/elicitationInteractionResponse"
+      - "#/$defs/elicitationInteractionAcceptedResponse"
+      - "#/$defs/elicitationInteractionDeclinedResponse"
+      - "#/$defs/samplingCreateMessageRequest"
+      - "#/$defs/samplingCreateMessageResult"
+      - "#/$defs/samplingMessage"
+      - "#/$defs/samplingMessageContent"
+      - "#/$defs/samplingContentBlock"
+      - "#/$defs/samplingModelHint"
+      - "#/$defs/samplingModelPreferences"
+      - "#/$defs/samplingRequestTool"
+      - "#/$defs/samplingToolChoice"
+      - "#/$defs/samplingToolResultContent"
+      - "#/$defs/samplingToolUseContent"
+      - "#/$defs/rootsListRequest"
+      - "#/$defs/rootsListResult"
+      - "#/$defs/rootDeclaration"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 3.6 and 9.4
+        locations:
+          - sections/03-document-structure.md#req-carried-defined-fields
+          - sections/09-tools.md#req-interaction-revision-valid
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, CreateMessageRequestParams, SamplingMessage, CreateMessageResult, ElicitRequestFormParams, ElicitResult, ListRootsResult, and Root"
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1578-L1622
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1681-L1688
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1656-L1674
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2155-L2178
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2471-L2486
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2107-L2109
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2116-L2136
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2104-L2152
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2245-L2249
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2210-L2228
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2788-L2811
+          - validation/mcp-schemas/2026-07-28/schema.ts#L3134-L3149
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2742-L2744
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2758-L2775
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-sampling-step.json
+        pointer: "/tools/0/interactionExamples/summary/steps/0/request"
+        outcome: error

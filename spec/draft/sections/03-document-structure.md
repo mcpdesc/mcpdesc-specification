@@ -4,13 +4,13 @@
 
 An MCP Description document is a JSON-compatible data model composed only of objects whose property names are strings, arrays, strings, finite JSON numbers, booleans, and null. Its semantic meaning is defined by this data model independently of whether it is serialized as JSON or YAML.
 
-An MCP Description document MUST use one of the conforming serializations defined in Section 15. JSON and restricted YAML are equally conforming serializations; neither has greater semantic or conformance status.
+<a id="req-conforming-serialization"></a>An MCP Description document MUST use one of the conforming serializations defined in Section 15. JSON and restricted YAML are equally conforming serializations; neither has greater semantic or conformance status.
 
-Property ordering is not significant unless an individual field explicitly defines array ordering semantics. Mapping serialization order MUST NOT affect conformance.
+Property ordering is not significant unless an individual field explicitly defines array ordering semantics. <a id="req-serialization-order"></a>Mapping serialization order MUST NOT affect conformance.
 
 ### 3.2 Root Object
 
-The root of an MCP Description document is an object with the following structure:
+<a id="req-root-fields"></a>The root of an MCP Description document is an object with the following structure:
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -36,23 +36,23 @@ The optional `$schema` property selects a JSON Schema resource for structural va
 
 Only `mcpdesc`, `info`, and non-empty `protocolVersions` are required at the document root. Omission of any optional section means that the document makes no declaration for that section.
 
-Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
+<a id="req-omission-not-absence"></a>Unless a property's definition explicitly states otherwise, omission MUST NOT be interpreted as proof that the server does not support, expose, or use the corresponding runtime behavior.
 
-An optional ordinary declaration collection MUST contain at least one entry when present.
+<a id="req-ordinary-collections-non-empty"></a>An optional ordinary declaration collection MUST contain at least one entry when present.
 
-A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection.
+<a id="req-ordinary-collections-omitted"></a>A producer MUST omit such a property when it has no entries, and a consumer MUST reject a present empty collection.
 
 This rule applies to root `transports`, `securitySchemes`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, and `tags`; the outer `components` object and each present component namespace map; icon, primitive tag-reference, Elicitation Declaration, Prompt Argument, and extension-capability collections; named Tool, Resource, Resource Template, and Prompt example maps; and Prompt and Resource Template `completionExamples` maps.
 
 It does not constrain embedded JSON Schemas, specification-extension values, arbitrary literal example values, transport invocation values, or protocol-native content and annotation collections, which follow their own rules.
 
-An empty collection remains valid when its property definition assigns distinct semantics to emptiness. In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
+An empty collection remains valid when its property definition assigns distinct semantics to emptiness. <a id="req-security-empties-preserved"></a>In particular, implementations MUST preserve `security: []`, `security: [{}]`, and empty scope arrays in Security Requirement Objects.
 
 ### 3.4 Zero-Primitive Descriptions
 
 A document MAY omit all of `tools`, `resources`, `resourceTemplates`, and `prompts`. Such a document can describe a server under development, a legitimately empty server, or an authorization-scoped observation.
 
-Absence of a primitive collection MUST NOT be interpreted as proof that no other runtime context exposes primitives of that kind.
+<a id="req-primitive-absence"></a>Absence of a primitive collection MUST NOT be interpreted as proof that no other runtime context exposes primitives of that kind.
 
 ### 3.5 MCP `_meta`
 
@@ -77,13 +77,13 @@ JSON-RPC envelope fields and non-completed workflow fields are governed by the e
 
 Every result type carried by examples extends the open MCP `Result` in every supported revision. Sampling, elicitation, and roots responses extend `Result` through MCP 2025-11-25; in MCP 2026-07-28 they are closed input responses, and only the sampling response defines `_meta`. <a id="req-carried-nested-closed"></a>Nested objects such as content blocks, resource contents, roots, and the `completion` object of a completion result are closed.
 
-Example `result` values are completed results. When present, in every revision, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative integer, and `cacheScope` MUST be `"public"` or `"private"`.
+Example `result` values are completed results. <a id="req-completed-result-fields"></a>When present, in every revision, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative integer, and `cacheScope` MUST be `"public"` or `"private"`.
 
 A declaration covering several revisions MAY use one example map even when a field is defined by only some of them; authors MAY instead split the declaration into protocol-scoped variants to avoid the warnings. Because each warning is attributed to one revision, the warnings defined here for a document equal the union of those for its per-revision Effective Protocol Views.
 
 ### 3.7 Property Ordering
 
-Property ordering within objects is not significant. Implementations MUST NOT depend on property or mapping serialization order.
+Property ordering within objects is not significant. <a id="req-property-order"></a>Implementations MUST NOT depend on property or mapping serialization order.
 
 ### 3.8 Specification Extensions
 

@@ -167,3 +167,79 @@ rules:
       - path: expected-invalid/elicitation-form-semantics.json
         pointer: /prompts/0/elicitations/1
         outcome: error
+
+  - id: mcpdesc.elicitation.members
+    title: "Declare elicitations with their mode fields"
+    description: >-
+      An elicitation declaration has a name, a mode, and a message. Form mode
+      requires requestedSchema and forbids url; URL mode requires url and forbids
+      requestedSchema. Unknown properties are rejected.
+    owner: mcpdesc
+    summary: >-
+      An Elicitation Declaration has its required fields, the fields of its
+      mode only, and no unknown properties.
+    surface: Elicitation Declaration
+    kind: structural
+    documentSchema:
+      - "#/$defs/elicitationDeclaration"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 12.2
+        locations:
+          - sections/12-elicitation.md#req-elicitation-declaration-fields
+          - sections/12-elicitation.md#req-elicitation-name-format
+          - sections/12-elicitation.md#req-elicitation-message
+          - sections/12-elicitation.md#req-elicitation-documentation-fields
+          - sections/12-elicitation.md#req-elicitation-form-schema-required
+          - sections/12-elicitation.md#req-elicitation-form-no-url
+          - sections/12-elicitation.md#req-elicitation-url-no-schema
+          - sections/12-elicitation.md#req-elicitation-url-syntax
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/component-contextual-schemas.json
+        pointer: "/tools/0/elicitations/0/requestedSchema/$componentRef"
+        outcome: error
+      - path: expected-invalid/elicitation-branch-mixing.json
+        pointer: "/resources/0/elicitations/0"
+        outcome: error
+
+  - id: mcp.elicitation.form-schema.members
+    title: "Use MCP primitive schemas in elicitation forms"
+    description: >-
+      A form-mode requestedSchema is a flat object whose properties are MCP
+      primitive schemas: string, number, integer, boolean, or enumeration, with
+      only the keywords MCP defines for them.
+    owner: mcp
+    summary: >-
+      requestedSchema is an object schema of MCP primitive property schemas with
+      their defined keywords only.
+    surface: ElicitRequest requestedSchema
+    kind: structural
+    documentSchema:
+      - "#/$defs/elicitationFormSchema"
+      - "#/$defs/elicitationFormProperty"
+      - "#/$defs/elicitationFormOption"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 12.3
+        locations:
+          - sections/12-elicitation.md#req-elicitation-form-shape
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 and 2026-07-28 schema.ts, ElicitRequestFormParams and PrimitiveSchemaDefinition"
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2155-L2178
+          - validation/mcp-schemas/2025-11-25/schema.ts#L2234-L2235
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2788-L2811
+          - validation/mcp-schemas/2026-07-28/schema.ts#L2867-L2868
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/component-contextual-schemas.json
+        pointer: "/tools/0/elicitations/0/requestedSchema"
+        outcome: error

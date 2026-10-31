@@ -1,0 +1,59 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "malformed-sampling-step",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "tools": [
+    {
+      "name": "summarize_release",
+      "inputSchema": {
+        "type": "object"
+      },
+      "clientRequirements": {
+        "sampling": {}
+      },
+      "interactionExamples": {
+        "summary": {
+          "input": {},
+          "steps": [
+            {
+              "type": "sampling",
+              "request": {
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": {
+                      "type": "text",
+                      "text": "Summarize the release plan."
+                    }
+                  }
+                ]
+              },
+              "response": {
+                "role": "assistant",
+                "content": {
+                  "type": "text",
+                  "text": "Run smoke tests first."
+                },
+                "model": "example-model"
+              }
+            }
+          ],
+          "result": {
+            "content": [
+              {
+                "type": "text",
+                "text": "Run smoke tests first."
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

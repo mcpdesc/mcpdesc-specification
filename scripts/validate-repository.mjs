@@ -269,7 +269,8 @@ const draftProposalSnapshots = [
   ['0028-version-conversion.md', '192e5580270d94607f9d90ad1f97236b70c318a8', 'proposals/0028-version-conversion.md', '4ca5c8876ec115ba814f81456de88d32cc27cb4f0e48df1fa771e0958d108c4a'],
   ['0029-integer-mcp-numbers.md', 'f6ce500cdbe3e051abbf219d1005fca212c87f96', 'proposals/0029-integer-mcp-numbers.md', 'be901a5ad909e9c30ff373928f61aa31bdb4954e23307161e34631ba4bea1127'],
   ['0030-readable-and-complete-rule-records.md', '7633f147faf5800e35c21c55411609a9db637eba', 'proposals/0030-readable-and-complete-rule-records.md', 'df8da81c56cab87817291135147f355e34d46b43b7bbcbb38ee9d615343c6a75'],
-  ['0032-dialect-governed-tool-schemas.md', 'e344a04ae9b6f1d4a8dd03f685c3877f6af6f40a', 'proposals/0032-dialect-governed-tool-schemas.md', '353dce36f35e9c7df63821e32d054d676ae09eb6a5ae9727357e5aeb5d0ec5f5']
+  ['0032-dialect-governed-tool-schemas.md', 'e344a04ae9b6f1d4a8dd03f685c3877f6af6f40a', 'proposals/0032-dialect-governed-tool-schemas.md', '353dce36f35e9c7df63821e32d054d676ae09eb6a5ae9727357e5aeb5d0ec5f5'],
+  ['0033-complete-validation-catalog.md', 'bc47ec059d65b4d6e3216fa6ad3c7df17cad7360', 'proposals/0033-complete-validation-catalog.md', 'ec32d9fa385b8d06513c47fbb69d62b155520d5f3bd2f03d26a2da239b6d399b']
 ];
 
 function checkProposalSnapshots(specificationPath, snapshots) {

@@ -2,7 +2,7 @@
 
 ## Appendix A: Icon Object
 
-The Icon object is used throughout the specification for UI display.
+<a id="req-icon-fields"></a>The Icon object is used throughout the specification for UI display.
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
@@ -11,7 +11,7 @@ The Icon object is used throughout the specification for UI display.
 | `sizes` | array\<string\> | No | Sizes at which the icon can be used (e.g., `"48x48"`, `"96x96"`, `"any"`). |
 | `theme` | string | No | Theme this icon is designed for: `"light"` or `"dark"`. |
 
-Clients MUST support `image/png` and `image/jpeg`. Clients SHOULD also support `image/svg+xml` and `image/webp`.
+<a id="req-icon-client-formats"></a>Clients MUST support `image/png` and `image/jpeg`. Clients SHOULD also support `image/svg+xml` and `image/webp`.
 
 ---
 

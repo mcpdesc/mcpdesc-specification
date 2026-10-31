@@ -7,6 +7,7 @@ import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { readDocumentSchemaOwners } from './document-schema-owners.mjs';
 
 const root = process.cwd();
 const selector = process.argv[2];
@@ -105,7 +106,13 @@ semantic = replaceRequired(
   "} from './base.js';",
   'candidate semantic base import',
 );
-if (semantic.includes('../schemas/') || semantic.includes('validator-base.mjs')) {
+semantic = replaceRequired(
+  semantic,
+  "import { documentSchemaOwners } from './document-schema-owners.mjs';",
+  `const documentSchemaOwners = ${JSON.stringify(readDocumentSchemaOwners(root))};`,
+  'document-schema ownership import',
+);
+if (semantic.includes('../schemas/') || semantic.includes('validator-base.mjs') || semantic.includes('document-schema-owners.mjs')) {
   die('semantic validator retains mutable repository imports');
 }
 
