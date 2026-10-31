@@ -1144,7 +1144,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
-| `uri` | string | **Yes** | Resource URI. |
+| `uri` | string (URI) | **Yes** | Resource URI. |
 | `name` | string | **Yes** | Programmatic resource name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable resource description. |
@@ -1164,7 +1164,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 
 #### 10.1.2 Resource URI
 
-The `uri` property identifies the resource. <a id="req-resource-uri-syntax"></a>It SHOULD be a valid URI. The URI scheme is not constrained — servers MAY use custom URI schemes appropriate to their domain.
+The `uri` property identifies the resource. <a id="req-resource-uri-syntax"></a>It MUST be a URI as defined by [RFC 3986](https://www.rfc-editor.org/rfc/rfc3986), with a scheme, not a relative reference. The URI scheme is not constrained — servers MAY use custom URI schemes appropriate to their domain.
 
 ### 10.2 Resource Templates
 

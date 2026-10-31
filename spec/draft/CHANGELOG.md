@@ -26,6 +26,12 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ### Community Working Draft 4 — Unreleased
 
+#### Resource URIs — 2026-10-31
+
+- Section 10.1.2: a Resource `uri` MUST be an RFC 3986 URI with a scheme; custom schemes remain allowed. The previous SHOULD contradicted Section 15, which requires URI values to conform to RFC 3986, and MCP, whose `schema.ts` annotates `Resource.uri` with `@format uri`. Documents with a relative or free-text Resource `uri` become invalid; previously their native projection failed the postcondition.
+- Canonical schema: `format: "uri"` on Resource `uri`, as on every other URI field. New rule `mcp.resource.uri` owns that location; fixture `expected-invalid/invalid-resource-uri.json`.
+- Version conversion: new rule `mcpdesc.conversion.0-8-to-0-9.resource-uri-checked` blocks such values without a fix; case `relative-resource-uri.json`.
+
 #### Complete validation catalog — 2026-10-30
 
 - Implemented review-stage [Proposal 0033](proposal-snapshots/0033-complete-validation-catalog.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #96](https://github.com/mcpdesc/mcpdesc-specification/issues/96). Document validity and diagnostics are unchanged except for the `rule` of document-schema failures. Review-stage content may still change incompatibly or be removed.

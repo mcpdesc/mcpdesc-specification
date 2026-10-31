@@ -156,6 +156,48 @@ rules:
         pointer: /resourceTemplates/0
         outcome: passes
 
+  - id: mcp.resource.uri
+    title: "Identify resources with absolute URIs"
+    description: >-
+      A Resource uri is a URI as defined by RFC 3986, with a scheme; a relative
+      reference or free text is invalid. Any scheme is allowed, including
+      custom ones. MCP types the field as a URI, so a value that is not one
+      cannot be projected to a native MCP Resource.
+    owner: mcp
+    summary: >-
+      Resource uri is an RFC 3986 URI with a scheme.
+    surface: Resource
+    path: uri
+    kind: structural
+    documentSchema:
+      - "#/$defs/resource/properties/uri"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 10.1.2 and 15
+        locations:
+          - sections/10-resources.md#req-resource-uri-syntax
+          - sections/15-serialization.md#req-serialization-value-formats
+    sources:
+      - tier: 1
+        reference: "MCP 2024-11-05 to 2026-07-28 schema.ts, interface Resource, uri (@format uri)"
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L419-L423
+          - validation/mcp-schemas/2025-03-26/schema.ts#L447-L451
+          - validation/mcp-schemas/2025-06-18/schema.ts#L528-L532
+          - validation/mcp-schemas/2025-11-25/schema.ts#L804-L808
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1443-L1447
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/invalid-resource-uri.json
+        pointer: /resources/0/uri
+        outcome: error
+      - path: expected-invalid/invalid-resource-uri.json
+        pointer: /resources/1/uri
+        outcome: error
+
   - id: mcp.resource.size
     title: "Express resource sizes as integers"
     description: >-

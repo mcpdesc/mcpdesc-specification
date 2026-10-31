@@ -57,6 +57,15 @@ example result `ttlMs` are integers (Sections 3.6, 10.1.1, and 10.4.4), as in
 the JSON Schema MCP generates. Replace a fractional value with the intended
 integer; `1024.0` is already an integer.
 
+## Resource URIs
+
+A Resource `uri` must be an RFC 3986 URI with a scheme (Section 10.1.2), as
+MCP types it and as Section 15 already required of URI values; 0.8.0 accepted
+any string. Custom schemes remain valid. Replace a relative reference or free
+text with the absolute URI the server uses, for example `file:///docs/readme.md`
+instead of `docs/readme.md`. Version conversion reports such a value as
+blocked rather than guessing the URI.
+
 ## Tool schema dialects
 
 For MCP 2025-11-25 and later, a Tool `inputSchema` or `outputSchema` that

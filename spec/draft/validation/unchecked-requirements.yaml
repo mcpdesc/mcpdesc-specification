@@ -173,9 +173,6 @@ uncheckedRequirements:
   - location: sections/08-capabilities.md#req-client-requirements-views
     reason: processing
     note: "Protocol-version projection and merge are checked by repository tests, not by catalog fixtures."
-  - location: sections/10-resources.md#req-resource-uri-syntax
-    reason: guidance
-    note: "Custom URI schemes are allowed and URI syntax is only recommended, so validation does not check it."
   - location: sections/10-resources.md#req-resource-annotations-hints
     reason: runtime
     note: "Constrains how consumers use annotations."

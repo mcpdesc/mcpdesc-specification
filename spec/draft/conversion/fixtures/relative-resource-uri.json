@@ -1,0 +1,18 @@
+{
+  "description": "A Resource uri that is a relative reference blocks conversion; only the author knows the intended absolute URI.",
+  "document": "documents/relative-resource-uri.json",
+  "expectedDiagnostics": [
+    {
+      "code": "conversion-blocked",
+      "path": [
+        "resources",
+        0,
+        "uri"
+      ],
+      "rule": "mcpdesc.conversion.0-8-to-0-9.resource-uri-checked"
+    }
+  ],
+  "expectedStatus": "blocked",
+  "from": "0.8.0",
+  "to": "0.9.0"
+}
