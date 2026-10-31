@@ -256,7 +256,7 @@ rules:
         pointer: /tools/0/examples/listing/result/content/0/size
         outcome: error
       - path: expected-valid/named-resource-examples.json
-        pointer: /resources/0
+        pointer: /resources/2/size
         outcome: passes
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]

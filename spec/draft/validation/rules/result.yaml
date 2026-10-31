@@ -344,7 +344,7 @@ rules:
         pointer: /resources/1/examples/invalid/result/ttlMs
         outcome: error
       - path: expected-valid/named-resource-examples.json
-        pointer: /resources/0
+        pointer: /resources/1/examples/two-files/result/ttlMs
         outcome: passes
     notes: >-
       MCP defines ttlMs from 2026-07-28 only. In earlier revisions it is a

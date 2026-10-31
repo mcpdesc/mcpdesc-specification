@@ -89,7 +89,7 @@ rules:
         outcome: error
       - path: expected-valid/protocol-coverage-and-tool-schemas.json
         pointer: /tools/3/outputSchema
-        outcome: passes
+        outcome: not-applicable
       - path: expected-warning/tool-schema-mcp-type-mismatch.json
         pointer: /tools/3/outputSchema
         outcome: passes
@@ -167,11 +167,8 @@ rules:
     enforcement: internal
     status: arbitrated
     fixtures:
-      - path: expected-valid/custom-tool-schema-keywords.json
-        pointer: /tools/0/inputSchema
-        outcome: passes
-      - path: expected-valid/revision-inapplicable-mcp-header.json
-        pointer: /tools/0/inputSchema
+      - path: view-fixtures/view-tool-schema-keywords-2025-11-25.json
+        pointer: /expected
         outcome: passes
     arbitrations:
       - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
@@ -321,7 +318,7 @@ rules:
     fixtures:
       - path: expected-valid/revision-inapplicable-mcp-header.json
         pointer: /tools/0/inputSchema
-        outcome: passes
+        outcome: not-applicable
       - path: expected-valid/custom-tool-schema-keywords.json
         pointer: /tools/0/inputSchema/properties/region
         outcome: passes

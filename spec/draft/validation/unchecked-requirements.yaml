@@ -176,6 +176,15 @@ uncheckedRequirements:
   - location: sections/16-conformance.md#req-conformance-claim
     reason: processing
     note: "Concerns implementation claims."
+  - location: sections/16-conformance.md#req-diagnostic-rule
+    reason: processing
+    note: "Concerns validator output; scripts/test-validation-rules.mjs checks it for the candidate validator on every fixture."
+  - location: sections/16-conformance.md#req-rule-results
+    reason: processing
+    note: "Concerns validator output; scripts/test-validation-rules.mjs checks the candidate validator's rule results against the validation result schema and every fixture citation."
+  - location: sections/16-conformance.md#req-rule-results-executed
+    reason: processing
+    note: "Concerns validator behavior; scripts/test-validation-rules.mjs checks that every passed result of the candidate validator has a recorded evaluation."
   - location: sections/14-specification-extensions.md#req-extension-naming-convention
     reason: guidance
     note: "A naming convention; any name matching ^x- is valid."

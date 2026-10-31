@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { readDocumentSchemaOwners } from './document-schema-owners.mjs';
+import { readRuleSummaries } from './rule-summaries.mjs';
 
 const root = process.cwd();
 const selector = process.argv[2];
@@ -114,7 +115,13 @@ semantic = replaceRequired(
   `const documentSchemaOwners = ${JSON.stringify(readDocumentSchemaOwners(root))};`,
   'document-schema ownership import',
 );
-if (semantic.includes('../schemas/') || semantic.includes('validator-base.mjs') || semantic.includes('document-schema-owners.mjs')) {
+semantic = replaceRequired(
+  semantic,
+  "import { ruleSummaries } from './rule-summaries.mjs';",
+  `const ruleSummaries = ${JSON.stringify(readRuleSummaries(root))};`,
+  'rule summaries import',
+);
+if (semantic.includes('../schemas/') || semantic.includes('validator-base.mjs') || semantic.includes('document-schema-owners.mjs') || semantic.includes('rule-summaries.mjs')) {
   die('semantic validator retains mutable repository imports');
 }
 
@@ -148,7 +155,7 @@ const schema = fs.readFileSync(path.join(runtimeTarget, 'schema.json'));
 const schemaDigest = createHash('sha256').update(schema).digest('hex');
 fs.writeFileSync(
   path.join(runtimeTarget, 'index.js'),
-  `import {\n  supportedProtocolVersions,\n  validateDocument\n} from './semantic.js';\n\nexport const specification = '${selector}';\nexport const snapshotTag = '${snapshotTag}';\nexport const schemaSha256 = '${schemaDigest}';\nexport { supportedProtocolVersions };\n\nexport function validate(document) {\n  const diagnostics = validateDocument(document);\n  return {\n    valid: !diagnostics.some((diagnostic) => diagnostic.severity === 'error'),\n    diagnostics\n  };\n}\n`,
+  `import {\n  supportedProtocolVersions,\n  validateDocumentWithResults\n} from './semantic.js';\n\nexport const specification = '${selector}';\nexport const snapshotTag = '${snapshotTag}';\nexport const schemaSha256 = '${schemaDigest}';\nexport { supportedProtocolVersions };\n\nexport function validate(document) {\n  return validateDocumentWithResults(document);\n}\n`,
 );
 
 function filesUnder(directory, prefix) {

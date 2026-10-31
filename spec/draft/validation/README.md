@@ -63,12 +63,15 @@ specification requirements.
 A validator reports each issue with a severity, a location, and the `rule` it
 breaks. It may also report its own diagnostic codes and messages; those belong
 to the validator, can differ between tools, and are not part of the catalog.
+A validator can also report a result for every rule, so you can tell a check
+that ran and passed from one that never ran; see [Rule results](#rule-results).
 
 Each rule cites fixtures: complete example documents in the specification,
 with a pointer to the relevant fragment and its outcome. The outcome is
-`passes` when the rule reports nothing there, or `error` or `warning` for what
-the rule reports. The specification's tests check every outcome, so the
-fixtures show how a rule behaves.
+`passes` when the rule ran there and reported nothing, `error` or `warning`
+for what the rule reports, or `not-applicable` when the rule does not run
+there for the protocol versions the fragment applies to. The specification's
+tests check every outcome, so the fixtures show how a rule behaves.
 
 To act on a diagnostic:
 
@@ -116,7 +119,8 @@ reports this error (its own diagnostic `code` is omitted here):
   "severity": "error",
   "message": "tools[0].outputSchema must have type \"object\" when it applies to MCP 2025-11-25",
   "path": ["tools", 0, "outputSchema", "type"],
-  "rule": "mcp.tool.output-schema.object-root"
+  "rule": "mcp.tool.output-schema.object-root",
+  "protocolVersions": ["2025-11-25"]
 }
 ```
 
@@ -132,8 +136,9 @@ reports this error (its own diagnostic `code` is omitted here):
    [invalid fixture](../fixtures/expected-invalid/non-object-output-schema-before-2026.json)
    whose `/tools/0/outputSchema` has outcome `error` for MCP 2025-11-25, and a
    [valid fixture](../fixtures/expected-valid/protocol-coverage-and-tool-schemas.json)
-   whose `/tools/3/outputSchema` passes because that Tool is scoped to MCP
-   2026-07-28 only.
+   whose `/tools/3/outputSchema` has outcome `not-applicable` because that
+   Tool is scoped to MCP 2026-07-28 only. The rule results of the invalid
+   fixture show `failed` for 2025-11-25.
 4. Correct the description to match the server. If only MCP 2026-07-28 returns
    an array, scope that variant to `["2026-07-28"]` and retain the object-output
    variant for 2025-11-25, as in the guide. If both versions return an object,
@@ -147,8 +152,9 @@ The normative requirements are those of the specification sections. The rule
 catalog is a pilot registry implementing review-stage
 [Proposal 0024](../proposal-snapshots/0024-validation-rule-identity-and-provenance.md),
 extended by review-stage
-[Proposal 0030](../proposal-snapshots/0030-readable-and-complete-rule-records.md)
-and [Proposal 0033](../proposal-snapshots/0033-complete-validation-catalog.md).
+[Proposal 0030](../proposal-snapshots/0030-readable-and-complete-rule-records.md),
+[Proposal 0033](../proposal-snapshots/0033-complete-validation-catalog.md),
+and [Proposal 0031](../proposal-snapshots/0031-rule-level-validation-results.md).
 None of these proposals is accepted. The pilot registry documents and tests the
 requirements; its reader fields are informative and it is not a separate
 document-conformance specification.
@@ -195,8 +201,9 @@ projection checks that the projected value validates against the MCP schema for
 the requested protocol version. A failure is reported by the projection
 operation, not by the document validator. The catalog calls these checks
 *delegated* and records `enforcement: external`; see
-[`rules/projection.yaml`](rules/projection.yaml). The candidate validator
-neither performs nor reports them. This repository checks only that their
+[`rules/projection.yaml`](rules/projection.yaml). The candidate validator does
+not perform them, and its rule results report them as `delegated`. This
+repository checks only that their
 projection cases are consistent, with `scripts/test-projection-fixtures.mjs`;
 implementations such as `@mcpdesc/core` must pass those cases.
 
@@ -214,6 +221,8 @@ of `scripts/mcpdesc-views.mjs`.
 | [How validation works](../guides/understanding-mcp-protocol-versions.md) | Structural and semantic checks, protocol scopes, Effective Protocol Views, native projection, and field comparisons | Informative guide |
 | [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol revisions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
 | [`rule.schema.json`](rule.schema.json) | Rule-format `1.2.0`: registry files, aggregate catalog, unchecked requirements, manifest, and discovery index schemas | Pilot; versioned publication is verified separately |
+| [`result.schema.json`](result.schema.json) | Validation result format `1.0.0`: validity, diagnostics, and rule results (Proposal 0031) | Pilot; published with the catalog, verified separately |
+| [`result-format-changelog.md`](result-format-changelog.md) | Validation result format versions and consumer migration | `1.0.0` unreleased |
 | [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.2.0` unreleased, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
 | [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records cite fixtures with checked outcomes; `scripts/test-validation-rules.mjs` checks them and reports the counts |
 | [`unchecked-requirements.yaml`](unchecked-requirements.yaml) | Requirement anchors that no rule checks, each with a reason (`runtime`, `processing`, or `guidance`) and a note | Pilot: published in the catalog as `uncheckedRequirements` |
@@ -383,7 +392,7 @@ Each validation rule has a permanent identifier and a record:
 | `sources` | External evidence, such as MCP's schema and specification text, by authority tier, each with precise `locations`; optional for `mcpdesc` rules |
 | `enforcement` | `internal` for a check of the candidate validator, `official-schema`, or `external` for a check that another operation performs, such as native projection in `@mcpdesc/core`; the candidate validator neither performs nor reports external checks |
 | `status` | internal, externally-verified, delegated, arbitrated, or retired |
-| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, or `warning`. The path is relative to `fixtures/`, names a native projection case under `projection-fixtures/`, names a view or merge case under `view-fixtures/`, or names a file under `serialization-fixtures/`, cited whole with the pointer `""`: `passes` when decoding accepts it and `error` when decoding rejects it |
+| `fixtures` | Evidence for each revision boundary: a fixture `path`, a JSON `pointer` to the fragment that illustrates the rule (`""` for the whole document), and its checked `outcome`: `passes`, `error`, `warning`, or `not-applicable`. The path is relative to `fixtures/`, names a native projection case under `projection-fixtures/`, names a view or merge case under `view-fixtures/`, or names a file under `serialization-fixtures/`, cited whole with the pointer `""`: `passes` when decoding accepts it and `error` when decoding rejects it |
 | `gaps` | Known differences from current validator behavior: `planned` for correction, or `not-fixed` for historical revisions |
 | `notes` | Optional maintainer information, such as implementation and testing remarks |
 
@@ -423,28 +432,38 @@ sites. The outcome states what the rule reports within the fragment:
 
 | Outcome | Validation fixture | Projection, view, or merge case |
 | --- | --- | --- |
-| `passes` | The rule reports nothing there | The case expects a value or document |
+| `passes` | The rule runs there and reports nothing | The case expects a value or document |
 | `error` | The rule reports an error there | The case expects a failure |
 | `warning` | The rule reports a warning there | Not used |
+| `not-applicable` | The rule does not run there for a protocol version it applies to, for example because the fragment is scoped to other versions | Not used |
 
 A fragment showing both severities is cited as narrower fragments. A cited
 `expected-invalid` fixture shows what the rule reports. A projection, view, or
 merge case that expects a failure is cited by the rule whose requirement
 defines that failure.
 
-A `passes` outcome is cited only in a fixture without errors. A document with
-errors can stop later checks: the candidate validator skips semantic checks
-when the document schema fails, so silence there would not show that a rule
-ran. For a preservation rule, such as `mcp.tool.schema-keywords.preserve`,
-`passes` shows only that the document is accepted. Whether software keeps that
-information is tested by the view and merge cases in
-[`../view-fixtures/`](../view-fixtures/), not by validating a document.
+Outcomes are checked against the candidate validator's
+[rule results](#rule-results) and the evaluations behind them. `passes` needs
+an evaluation of the rule within the fragment, or containing it, for a
+protocol version the rule applies to, and a `passed` result for the document;
+`error` and `warning` need a matching result. A `passes` or `not-applicable`
+outcome is cited only in a fixture without errors: the candidate validator
+skips semantic checks when the document schema fails, so silence there would
+not show what a rule checks. A preservation rule, such as
+`mcp.tool.schema-keywords.preserve`, concerns what software does with a
+document later, so it cites the view and merge cases in
+[`../view-fixtures/`](../view-fixtures/) instead of validation fixtures.
 
 `scripts/test-validation-rules.mjs` resolves every location, anchor, and
 pointer, checks every outcome against the candidate validator or the
 projection case, checks that every anchor is cited or listed as unchecked, that
 every obligation sentence is anchored, and that every canonical
-schema definition has exactly one owner, and reports the catalog coverage.
+schema definition has exactly one owner, and reports the catalog coverage. It
+also validates the candidate validator's result for every fixture against
+[`result.schema.json`](result.schema.json) and checks the rule results: one
+per rule and declared version, `passed` only with a recorded evaluation, no
+`passed` or `not-applicable` for a check in a skipped stage, and diagnostic
+protocol versions within the rule's applicability.
 
 Rules are anchored to the MCP type, not to where MCP Description carries it.
 For example, one rule covers `Annotations.lastModified` wherever annotations
@@ -483,9 +502,10 @@ is recorded as a gap), or `retired`.
 
 ### Rules in diagnostics
 
-A diagnostic of this repository's candidate validator carries the identifier
-of the rule it reports in a `rule` property, next to its own `code`,
-`severity`, `message`, and `path`:
+A diagnostic identifies the rule it reports in a `rule` property, with its
+`severity` and `path` ([Section 16.5](../sections/16-conformance.md#req-diagnostic-rule)).
+When the finding depends on MCP protocol versions, `protocolVersions` lists
+them. The candidate validator also reports its own `code` and a `message`:
 
 ```json
 {
@@ -497,15 +517,13 @@ of the rule it reports in a `rule` property, next to its own `code`,
 }
 ```
 
-`rule` names the requirement. `code` belongs to the producer: it categorizes
-that validator's output, can be shared by several rules, and can differ in
-another implementation, so rule records do not list codes. Each producer owns
-its mapping from codes to rules. Draft
-[Proposal 0031](https://github.com/mcpdesc/mcpdesc-specification/pull/94)
-and [issue #93](https://github.com/mcpdesc/mcpdesc-specification/issues/93)
-target Draft 4: they make `code` optional and add a result for every rule
-(passed, failed, warning, not applicable, not evaluated, or delegated). Every
-candidate-validator diagnostic identifies a registered rule.
+`rule` names the requirement and is the interoperable contract. `code` belongs
+to the producer: it is optional, categorizes that validator's output, can be
+shared by several rules, and can differ in another implementation, so rule
+records do not list codes. A producer that keeps codes may publish its own
+mapping from codes to rules and test it against the fixtures
+([Proposal 0031](../proposal-snapshots/0031-rule-level-validation-results.md)).
+Every candidate-validator diagnostic identifies a registered rule.
 
 A document-schema failure belongs to the rule whose `documentSchema` lists the
 longest JSON Pointer containing the failing schema location (Proposal 0033).
@@ -524,6 +542,53 @@ the fixtures is backed by a citation with that outcome, that `should`- and
 `may`-level MCP rules report no errors, and that every rule identifier the
 candidate validator references is registered.
 
+### Rule results
+
+Diagnostics show only what failed. Rule results also show what was checked
+([Section 16.5](../sections/16-conformance.md#req-rule-results)): one entry per
+rule and protocol version declared by the document, or one entry for a rule
+whose applicability is `independent`. The
+[validation result format](result.schema.json)
+(`https://mcpdesc.org/schema/validation-result/1.0.0.json`) defines the shape:
+
+```json
+{
+  "valid": false,
+  "diagnostics": [],
+  "results": [
+    { "rule": "mcp.tool.output-schema.object-root", "protocolVersion": "2025-11-25", "status": "failed" },
+    { "rule": "mcp.tool.output-schema.object-root", "protocolVersion": "2026-07-28", "status": "not-applicable" },
+    { "rule": "mcpdesc.tags.references", "status": "passed" },
+    { "rule": "mcp.tool.schema-keywords.preserve", "protocolVersion": "2025-11-25", "status": "not-evaluated", "reason": "operation" },
+    { "rule": "mcpdesc.projection.native-schema", "protocolVersion": "2025-11-25", "status": "delegated" }
+  ]
+}
+```
+
+| Status | Meaning |
+| --- | --- |
+| `passed` | The check ran for that version and found nothing |
+| `failed` | The check reported at least one error |
+| `warning` | The check reported warnings but no error |
+| `not-applicable` | The rule does not apply to that version, or the document contains nothing it checks |
+| `not-evaluated` | The check applies but did not run; the optional `reason` is `earlier-stage-failed`, `not-implemented`, or `operation` (another operation, such as projection or merge, checks it) |
+| `delegated` | Another operation, such as decoding or native projection, performs the check |
+
+A status comes from the checks that ran, never from silence. Read
+`not-applicable` and `not-evaluated` as "not confirmed", never as passed. For
+legacy compatibility revisions, checks the validator does not apply are never
+`passed`. Rule results do not change validity, which errors alone determine.
+Finer results, such as per declaration or path, are each implementation's
+choice.
+
+The candidate validator records an evaluation each time a check examines a
+subject: JSON Schema validation records the instances evaluated at every
+location a rule owns, and each semantic check records the subject and
+versions it examined. A rule is `passed` for a version only when an evaluation
+concerns that version, so a `passes` fixture citation shows that the rule ran
+within the cited fragment. Its exported validator snapshot returns the
+result with `results` from `validate()`.
+
 ### Catalog publication and discovery
 
 The rule-format version describes the data structure; the catalog snapshot
@@ -534,12 +599,16 @@ changes by draft.
 Format `1.1.0` is the format of the Draft 3 catalog. Format `1.0.0` was
 published first but is used by no catalog; neither is a retroactive name for
 the schemas in earlier drafts. Format `1.2.0`, for Draft 4, adds
-`documentSchema` and `uncheckedRequirements`. No 0.8.0 catalog is published by
+`documentSchema` and `uncheckedRequirements`, and Draft 4 manifests list the
+validation result schema as `resultSchema`; the
+[result-format changelog](result-format-changelog.md) records its versions.
+No 0.8.0 catalog is published by
 this work.
 
 | Resource | Publication target |
 | --- | --- |
 | Rule-format schema | `https://mcpdesc.org/schema/validation-rule/1.2.0.json` (Draft 3: `1.1.0.json`) |
+| Validation result schema | `https://mcpdesc.org/schema/validation-result/1.0.0.json` (from Draft 4) |
 | Draft 3 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/manifest.json` |
 | Draft 3 aggregate | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/rules.json` |
 | Mutable discovery index | `https://mcpdesc.org/validation/catalogs/index.json` |
@@ -554,7 +623,8 @@ preservation, delegated, and retired records if any are present.
 
 The manifest records `ruleFormatVersion`, `mcpdescVersion`, `snapshot`,
 publication `status`, source repository/tag/commit/specification path,
-`ruleCount`, and schema/catalog URLs and SHA-256 digests. Its
+`ruleCount`, and schema/catalog URLs and SHA-256 digests, including the
+validation result schema when the snapshot defines one. Its
 `specificationBaseUrl` points at the immutable tagged specification folder.
 The manifest's publication status is separate from individual rule statuses
 such as `delegated` or `arbitrated`.

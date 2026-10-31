@@ -1,0 +1,40 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.3.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "custom-tool-schema-keywords",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25"
+  ],
+  "tools": [
+    {
+      "name": "custom_schema_annotations",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "x-acme-account-id": true,
+            "database-field-id": 123
+          },
+          "region": {
+            "type": "string",
+            "x-mcp-header": "Region"
+          }
+        }
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "string",
+            "x-acme-result-id": true,
+            "database-field-id": 456
+          }
+        }
+      }
+    }
+  ]
+}

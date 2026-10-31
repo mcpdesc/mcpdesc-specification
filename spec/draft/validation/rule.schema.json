@@ -120,6 +120,10 @@
         "mcpdescVersion": {
           "$ref": "#/$defs/version"
         },
+        "resultSchema": {
+          "$ref": "#/$defs/artifact",
+          "description": "The validation result schema published with this catalog, when the specification defines one (Proposal 0031)."
+        },
         "ruleCount": {
           "minimum": 1,
           "type": "integer"
@@ -341,11 +345,12 @@
             "additionalProperties": false,
             "properties": {
               "outcome": {
-                "description": "What the cited fragment demonstrates for this rule, as checked by the specification's tests: passes when the rule reports nothing there, error or warning for the severity of what the rule reports. For a native projection case, passes when a value is expected and error when the operation fails.",
+                "description": "What the cited fragment demonstrates for this rule, as checked by the specification's tests against the candidate validator's rule results (Proposal 0031): passes when the rule ran there and reported nothing, error or warning for the severity of what the rule reports, and not-applicable when the rule did not run there for any MCP protocol version it applies to. For a native projection, view, or merge case, passes when a result is expected and error when the operation fails; for a serialization fixture, passes when decoding accepts it and error when decoding rejects it.",
                 "enum": [
                   "passes",
                   "error",
-                  "warning"
+                  "warning",
+                  "not-applicable"
                 ]
               },
               "path": {

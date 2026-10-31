@@ -533,8 +533,8 @@ rules:
           - sections/15-serialization.md#req-serialization-yaml-aliases
           - sections/15-serialization.md#req-serialization-yaml-merge-keys
           - sections/15-serialization.md#req-serialization-yaml-validation
-    enforcement: internal
-    status: internal
+    enforcement: external
+    status: delegated
     fixtures:
       - path: serialization-fixtures/equivalent/document.json
         pointer: ""
@@ -567,6 +567,8 @@ rules:
         pointer: ""
         outcome: error
     notes: >-
+      Checked when a serialization is decoded, before document validation, so
+      a validator that receives decoded data reports this rule as delegated.
       Checked by decoding the serialization fixtures; scripts/test-serializations.mjs
       also checks that the equivalent JSON and YAML documents decode and
       validate identically.

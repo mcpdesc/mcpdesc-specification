@@ -174,6 +174,16 @@ Other output changes:
   `mcp.content.members`, instead of `mcpdesc.document.schema`, which now
   reports only failures of the document root. The diagnostics themselves are
   unchanged.
+- From Draft 4, a diagnostic whose finding depends on MCP protocol versions
+  lists them in `protocolVersions`. `rule`, `severity`, and `path` are the
+  interoperable contract; `code` and `message` are optional producer output
+  ([Section 16.5](../sections/16-conformance.md#req-diagnostic-rule)). Compare
+  diagnostics by `rule`, not by `code`.
+- From Draft 4, the exported validator's `validate()` also returns `results`:
+  one status per rule and declared protocol version, in the
+  [validation result format](../validation/result.schema.json). Treat
+  `not-applicable` and `not-evaluated` as not confirmed, never as passed.
+  Validity is unchanged.
 
 ## Recommended algorithm
 
