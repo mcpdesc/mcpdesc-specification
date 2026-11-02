@@ -127,7 +127,7 @@ but do not participate in active applicability checks. Records no longer list
 emits them.
 
 Draft 4 introduced rule-format `1.2.0` and validation result format `1.0.0`.
-RC1 introduces rule-format and validation result format `2.0.0` to normalize
+RC1 introduces rule-format and validation result format `1.3.0` to normalize
 MCP protocol-version terminology. Rule records now use
 `protocolVersions` for arbitration and gap scopes, and `$defs/protocol-version`
 in both schemas. Rule IDs, requirement anchors, fixture paths, and the
