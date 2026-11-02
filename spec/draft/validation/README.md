@@ -166,8 +166,8 @@ Catalogs belong to exact MCP Description snapshots, not validator package
 versions. Once deployed, the [catalog discovery index](https://mcpdesc.org/validation/catalogs/index.json)
 lists the published manifests, with separate stable and draft pointers. The
 Draft 3 and Draft 4 catalogs and rule formats `1.1.0` and `1.2.0`, and
-validation result format `1.0.0`, are published. Rule format `2.0.0` and
-validation result format `2.0.0` are RC1 publication targets until deployment
+validation result format `1.0.0`, are published. Rule format `1.3.0` and
+validation result format `1.3.0` are RC1 publication targets until deployment
 is verified; this working tree does not imply they are live. See
 [catalog publication and discovery](#catalog-publication-and-discovery).
 
@@ -225,10 +225,10 @@ of `scripts/mcpdesc-views.mjs`.
 | --- | --- | --- |
 | [How validation works](../guides/understanding-mcp-protocol-versions.md) | Structural and semantic checks, protocol scopes, Effective Protocol Views, native projection, and field comparisons | Informative guide |
 | [`rule-history-0.8.md`](rule-history-0.8.md) | How rules relate to MCP Description versions and protocol versions, and how each rule compares with the 0.8.0 requirements | Informative investigation |
-| [`rule.schema.json`](rule.schema.json) | Rule-format `2.0.0`: registry files, aggregate catalog, unchecked requirements, manifest, and discovery index schemas | RC1 target; versioned publication is verified separately |
-| [`result.schema.json`](result.schema.json) | Validation result format `2.0.0`: validity, diagnostics, and rule results (Proposal 0031) | RC1 target; published with the catalog, verified separately |
-| [`result-format-changelog.md`](result-format-changelog.md) | Validation result format versions and consumer migration | `2.0.0` for RC1; `1.0.0` published for Draft 4 |
-| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `2.0.0` for RC1, `1.2.0` published for Draft 4, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
+| [`rule.schema.json`](rule.schema.json) | Rule-format `1.3.0`: registry files, aggregate catalog, unchecked requirements, manifest, and discovery index schemas | RC1 target; versioned publication is verified separately |
+| [`result.schema.json`](result.schema.json) | Validation result format `1.3.0`: validity, diagnostics, and rule results (Proposal 0031) | RC1 target; published with the catalog, verified separately |
+| [`result-format-changelog.md`](result-format-changelog.md) | Validation result format versions and consumer migration | `1.3.0` for RC1; `1.0.0` published for Draft 4 |
+| [`CHANGELOG.md`](CHANGELOG.md) | Rule-format versions, publication-contract compatibility, and consumer migration | `1.3.0` for RC1, `1.2.0` published for Draft 4, `1.1.0` published for Draft 3, `1.0.0` superseded before use; catalog content history stays in the specification changelog |
 | [`rules/`](rules/) | Validation rule records in YAML, one file per surface | Pilot: the records cite fixtures with checked outcomes; `scripts/test-validation-rules.mjs` checks them and reports the counts |
 | [`unchecked-requirements.yaml`](unchecked-requirements.yaml) | Requirement anchors that no rule checks, each with a reason (`runtime`, `processing`, or `guidance`) and a note | Pilot: published in the catalog as `uncheckedRequirements` |
 | `mcp-schemas/` | Byte-identical copies of the official MCP schemas, one folder per supported protocol version (`<protocol-version>/schema.ts`, `<protocol-version>/schema.json`), the upstream `LICENSE`, and `manifest.json` recording repository, commit, source paths, and SHA-256 digests | Pinned at upstream commit `dae694f61a31f7a3ec2af3aff709e11f70f61e48`; digests checked by `scripts/test-validation-rules.mjs` |
@@ -554,7 +554,7 @@ Diagnostics show only what failed. Rule results also show what was checked
 rule and protocol version declared by the document, or one entry for a rule
 whose applicability is `independent`. The
 [validation result format](result.schema.json)
-(`https://mcpdesc.org/schema/validation-result/2.0.0.json`) defines the shape:
+(`https://mcpdesc.org/schema/validation-result/1.3.0.json`) defines the shape:
 
 ```json
 {
@@ -605,15 +605,15 @@ Format `1.1.0` is the Draft 3 catalog format; `1.2.0` is the Draft 4 format.
 Format `1.0.0` was published first but is used by no rule catalog. These
 versioned schemas remain unchanged. Format `1.2.0` added `documentSchema` and
 `uncheckedRequirements`, and Draft 4 manifests list the validation result
-schema as `resultSchema`. Format `2.0.0` uses protocol-version terminology in
+schema as `resultSchema`. Format `1.3.0` uses protocol-version terminology in
 record fields and schema definitions; the
 [result-format changelog](result-format-changelog.md) records its versions.
 No 0.8.0 catalog is published by this work.
 
 | Resource | Publication target |
 | --- | --- |
-| Rule-format schema | `https://mcpdesc.org/schema/validation-rule/2.0.0.json` (Draft 4: `1.2.0.json`; Draft 3: `1.1.0.json`) |
-| Validation result schema | `https://mcpdesc.org/schema/validation-result/2.0.0.json` (Draft 4: `1.0.0.json`) |
+| Rule-format schema | `https://mcpdesc.org/schema/validation-rule/1.3.0.json` (Draft 4: `1.2.0.json`; Draft 3: `1.1.0.json`) |
+| Validation result schema | `https://mcpdesc.org/schema/validation-result/1.3.0.json` (Draft 4: `1.0.0.json`) |
 | Draft 3 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/manifest.json` |
 | Draft 3 aggregate | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/rules.json` |
 | Draft 4 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.4/manifest.json` |

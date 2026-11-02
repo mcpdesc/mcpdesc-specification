@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/validation-result/2.0.0.json",
+  "$id": "https://mcpdesc.org/schema/validation-result/1.3.0.json",
   "title": "MCP Description validation result",
-  "description": "Validation result format 2.0.0 (Proposal 0031): document validity, diagnostics that identify the registered rule they report, and optional rule results with one status per rule and declared MCP protocol version. Producers may add properties to the result and to diagnostics; rule results are closed.",
+  "description": "Validation result format 1.3.0 (Proposal 0031): document validity, diagnostics that identify the registered rule they report, and optional rule results with one status per rule and declared MCP protocol version. Producers may add properties to the result and to diagnostics; rule results are closed.",
   "type": "object",
   "required": [
     "valid",
