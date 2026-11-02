@@ -1,7 +1,6 @@
 {
   "description": "The variant scoped to MCP 2024-11-05 and 2025-03-26 is selected.",
   "document": "documents/resources-and-prompts.json",
-  "revision": "2025-03-26",
   "kind": "prompt",
   "identifier": "greet",
   "expected": {
@@ -12,5 +11,6 @@
         "required": true
       }
     ]
-  }
+  },
+  "protocolVersion": "2025-03-26"
 }

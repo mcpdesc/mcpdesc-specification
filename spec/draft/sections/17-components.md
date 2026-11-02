@@ -36,7 +36,7 @@ Local-only resolution is a separate design constraint, not a consequence of usin
 
 Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; Resource Template `examples` values MAY reference `resourceTemplateExamples`; and Prompt `examples` values MAY reference `promptExamples`.
 
-Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. <a id="req-component-contextual-validation"></a>A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output revision rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
+Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. <a id="req-component-contextual-validation"></a>A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output protocol version rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
 
 ### 17.4 Resolution
 

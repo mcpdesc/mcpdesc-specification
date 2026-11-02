@@ -57,7 +57,7 @@ rules:
       validation: optional-schema-omitted.json omits it and validates against
       the schema for its mcpdesc version.
 
-  - id: mcp.declaration.field.revision-availability
+  - id: mcp.declaration.field.protocol-version
     title: "Keep fields within their supported protocol scope"
     description: >-
       A declaration must be valid in every protocol version in its effective
@@ -66,7 +66,7 @@ rules:
       field or describe disjoint scoped variants.
     owner: mcp
     summary: >-
-      A declaration field is used only in revisions whose MCP type defines it:
+      A declaration field is used only in protocol versions whose MCP type defines it:
       title and _meta from 2025-06-18, Tool annotations from 2025-03-26, icons
       and Tool schema $schema from 2025-11-25, Tool execution only in
       2025-11-25, and the completions capability from 2025-03-26.
@@ -83,7 +83,7 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
         locations:
-          - sections/04-versioning.md#req-field-revision-availability
+          - sections/04-versioning.md#req-field-protocol-version-availability
           - sections/09-tools.md#req-tool-schema-dialect-keyword
     sources:
       - tier: 1
@@ -127,10 +127,10 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/revision-inapplicable-execution.json
+      - path: expected-invalid/protocol-version-inapplicable-execution.json
         pointer: /tools/0
         outcome: error
-      - path: expected-invalid/revision-inapplicable-tool-schema-dialect.json
+      - path: expected-invalid/protocol-version-inapplicable-tool-schema-dialect.json
         pointer: /tools/0/inputSchema
         outcome: error
     notes: >-
@@ -307,7 +307,7 @@ rules:
         pointer: /components/schemas
         outcome: error
 
-  - id: mcpdesc.legacy-revisions.validation-scope
+  - id: mcpdesc.legacy-protocol.validation-scope
     title: "Limited validation for early MCP protocol versions"
     description: >-
       MCP 2024-11-05 and 2025-03-26 receive structural and selected checks,
@@ -331,7 +331,7 @@ rules:
     kind: mcpdesc-semantic
     requirement: must
     specification:
-      - reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1 (revision tiers)
+      - reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1
         locations:
           - sections/16-conformance.md#req-legacy-validation-scope
           - proposal-snapshots/0024-validation-rule-identity-and-provenance.md
@@ -368,7 +368,7 @@ rules:
           - sections/05-info-object.md#req-contact-fields
           - sections/05-info-object.md#req-license-fields
           - sections/04-versioning.md#req-info-unscoped
-          - sections/05-info-object.md#req-info-revision-independent
+          - sections/05-info-object.md#req-info-protocol-version-independent
           - sections/05-info-object.md#req-info-name-non-empty
           - sections/05-info-object.md#req-info-version-non-empty
           - sections/15-serialization.md#req-serialization-value-formats
@@ -380,14 +380,14 @@ rules:
         outcome: error
 
   - id: mcpdesc.protocol-versions.values
-    title: "List supported MCP revisions in protocol scopes"
+    title: "List supported MCP protocol versions in protocol scopes"
     description: >-
       Root and declaration protocolVersions arrays are non-empty, contain no
-      duplicates, and name only MCP revisions this specification supports.
+      duplicates, and name only MCP protocol versions this specification supports.
     owner: mcpdesc
     summary: >-
       A protocolVersions array is non-empty, has unique values, and contains
-      only supported MCP revision identifiers.
+      only supported MCP protocol-version identifiers.
     surface: Document, scoped declarations
     kind: structural
     documentSchema:

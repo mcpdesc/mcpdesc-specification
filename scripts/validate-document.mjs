@@ -74,23 +74,23 @@ function semanticDiagnostic(code, severity, message, path, rule, protocolVersion
 }
 
 declareChecks('semantic', [
-  'mcp.annotations.last-modified.revision-availability',
+  'mcp.annotations.last-modified.protocol-version',
   'mcp.client-capabilities.deprecated',
-  'mcp.client-capabilities.revision-shape',
-  'mcp.completion.context.revision-availability',
-  'mcp.completion.revision-availability',
-  'mcp.content-block.revision-availability',
-  'mcp.elicitation.revision-availability',
+  'mcp.client-capabilities.protocol-shape',
+  'mcp.completion.context.protocol-version',
+  'mcp.completion.protocol-version',
+  'mcp.content-block.protocol-version',
+  'mcp.elicitation.protocol-version',
   'mcp.input-response.closed',
-  'mcp.resource-contents.meta.revision-availability',
+  'mcp.resource-contents.meta.protocol-version',
   'mcp.result.additional-properties.preserve',
-  'mcp.root.meta.revision-availability',
+  'mcp.root.meta.protocol-version',
   'mcp.root.uri.file-scheme',
-  'mcp.sampling.tools.revision-availability',
+  'mcp.sampling.tools.protocol-version',
   'mcpdesc.completion-example.target',
   'mcpdesc.components.references',
   'mcpdesc.example.completed-result-form',
-  'mcpdesc.example.result.revision-fidelity',
+  'mcpdesc.example.result.protocol-fidelity',
   'mcpdesc.extensions.catalogue-maturity',
   'mcpdesc.prompt.example.arguments',
   'mcpdesc.tool.interaction.client-requirements-consistency',
@@ -347,18 +347,18 @@ function structuralRule(error, errors) {
 // by several rules are attributed where they are emitted.
 const ruleForCode = new Map([
   ['result-field-not-defined-by-version', 'mcp.result.additional-properties.preserve'],
-  ['completion-example-version-mismatch', 'mcp.completion.revision-availability'],
+  ['completion-example-version-mismatch', 'mcp.completion.protocol-version'],
   ['meta-reserved-key-context', 'mcp.meta.reserved-key-context'],
   ['meta-reserved-key-value', 'mcp.meta.reserved-key-context'],
   ['invalid-x-mcp-header', 'mcp.tool.input-schema.x-mcp-header'],
   ['duplicate-x-mcp-header', 'mcp.tool.input-schema.x-mcp-header'],
-  ['tool-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
-  ['resource-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
-  ['resource-example-cache-fields-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
-  ['prompt-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
-  ['completion-example-result-version-mismatch', 'mcpdesc.example.result.revision-fidelity'],
-  ['resource-example-content-version-mismatch', 'mcp.resource-contents.meta.revision-availability'],
-  ['resource-annotation-not-supported-by-version', 'mcp.annotations.last-modified.revision-availability'],
+  ['tool-example-result-version-mismatch', 'mcpdesc.example.result.protocol-fidelity'],
+  ['resource-example-result-version-mismatch', 'mcpdesc.example.result.protocol-fidelity'],
+  ['resource-example-cache-fields-version-mismatch', 'mcpdesc.example.result.protocol-fidelity'],
+  ['prompt-example-result-version-mismatch', 'mcpdesc.example.result.protocol-fidelity'],
+  ['completion-example-result-version-mismatch', 'mcpdesc.example.result.protocol-fidelity'],
+  ['resource-example-content-version-mismatch', 'mcp.resource-contents.meta.protocol-version'],
+  ['resource-annotation-not-supported-by-version', 'mcp.annotations.last-modified.protocol-version'],
   ['tool-example-schema-mismatch', 'mcpdesc.tool.example.schema-conformance'],
   ['incomplete-tool-example-validation', 'mcpdesc.tool.example.schema-conformance'],
   ['missing-tool-example-structured-content', 'mcp.tool.structured-content.output-schema'],
@@ -377,7 +377,7 @@ const ruleForCode = new Map([
   ['invalid-legacy-tool-schema-shape', 'mcp.tool.schema.legacy-shape'],
   ['tool-input-schema-not-object', 'mcp.tool.input-schema.object-root'],
   ['tool-schema-mcp-type-mismatch', 'mcp.tool.schema.native-shape'],
-  ['completion-example-context-version-mismatch', 'mcp.completion.context.revision-availability'],
+  ['completion-example-context-version-mismatch', 'mcp.completion.context.protocol-version'],
   ['prompt-completion-example-unknown-argument', 'mcpdesc.completion-example.target'],
   ['prompt-completion-example-context-unknown-argument', 'mcpdesc.completion-example.target'],
   ['resource-template-completion-example-unknown-variable', 'mcpdesc.completion-example.target'],
@@ -392,8 +392,8 @@ const ruleForCode = new Map([
   ['resource-example-size-mismatch', 'mcpdesc.resource.example.consistency'],
   ['resource-template-example-invalid-expansion', 'mcpdesc.resource-template.example.expansion'],
   ['duplicate-elicitation-name', 'mcpdesc.elicitation.name-unique'],
-  ['elicitation-mode-not-supported-by-version', 'mcp.elicitation.revision-availability'],
-  ['elicitation-form-schema-version-mismatch', 'mcp.elicitation.form-schema.revision-shape'],
+  ['elicitation-mode-not-supported-by-version', 'mcp.elicitation.protocol-version'],
+  ['elicitation-form-schema-version-mismatch', 'mcp.elicitation.form-schema.protocol-shape'],
   ['elicitation-form-required-property-unknown', 'mcpdesc.elicitation.form-schema.consistency'],
   ['elicitation-form-enum-names-mismatch', 'mcpdesc.elicitation.form-schema.consistency'],
   ['elicitation-form-default-outside-enum', 'mcpdesc.elicitation.form-schema.consistency'],
@@ -408,17 +408,17 @@ const ruleForCode = new Map([
   ['primitive-scope-overlap', 'mcpdesc.protocol-scope.consistency'],
   ['protocol-scope-outside-parent', 'mcpdesc.protocol-scope.consistency'],
   ['transport-coverage-gap', 'mcpdesc.transports.coverage'],
-  ['client-requirement-version-mismatch', 'mcp.client-capabilities.revision-shape'],
-  ['invalid-client-requirement-value', 'mcp.client-capabilities.revision-shape'],
+  ['client-requirement-version-mismatch', 'mcp.client-capabilities.protocol-shape'],
+  ['invalid-client-requirement-value', 'mcp.client-capabilities.protocol-shape'],
   ['deprecated-client-requirement', 'mcp.client-capabilities.deprecated'],
-  ['extensions-not-supported-by-version', 'mcp.capabilities.extensions.revision-availability'],
+  ['extensions-not-supported-by-version', 'mcp.capabilities.extensions.protocol-version'],
   ['experimental-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
   ['unknown-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
-  ['tasks-core-not-valid-in-2026', 'mcp.capabilities.tasks.revision-availability'],
+  ['tasks-core-not-valid-in-2026', 'mcp.capabilities.tasks.protocol-version'],
   ['logging-deprecated-in-2026', 'mcp.capabilities.logging.deprecated'],
-  ['transport-not-supported-by-version', 'mcp.transport.streamable-http.revision-availability'],
+  ['transport-not-supported-by-version', 'mcp.transport.streamable-http.protocol-version'],
   ['legacy-sse-for-modern-version', 'mcp.transport.legacy-sse.deprecated'],
-  ['legacy-protocol-validation-incomplete', 'mcpdesc.legacy-revisions.validation-scope'],
+  ['legacy-protocol-validation-incomplete', 'mcpdesc.legacy-protocol.validation-scope'],
   ['duplicate-root-tag', 'mcpdesc.tags.references'],
   ['unknown-tag-reference', 'mcpdesc.tags.references'],
   ['unknown-security-scheme', 'mcpdesc.security.requirements'],
@@ -621,14 +621,14 @@ function validateToolInteractionExamples(document) {
 
           evaluated('mcpdesc.tool.interaction.elicitation-consistency', stepPath);
           for (const version of scope) {
-            evaluated('mcp.elicitation.revision-availability', [...stepPath, 'type'], version);
+            evaluated('mcp.elicitation.protocol-version', [...stepPath, 'type'], version);
             if (protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
               diagnostics.push(semanticDiagnostic(
                 'interaction-example-version-mismatch',
                 'error',
                 `${stepLocation}.type is not defined for MCP ${version}`,
                 [...stepPath, 'type'],
-                'mcp.elicitation.revision-availability',
+                'mcp.elicitation.protocol-version',
                 version
               ));
             }
@@ -638,7 +638,7 @@ function validateToolInteractionExamples(document) {
                 'error',
                 `${stepLocation}.request.mode "url" is not defined for MCP ${version}`,
                 [...stepPath, 'request', 'mode'],
-                'mcp.elicitation.revision-availability',
+                'mcp.elicitation.protocol-version',
                 version
               ));
             }
@@ -719,7 +719,7 @@ function validateToolInteractionExamples(document) {
         if (step.type === 'sampling') {
           for (const version of scope) {
             if (Object.hasOwn(step.request, 'tools') || Object.hasOwn(step.request, 'toolChoice')) {
-              evaluated('mcp.sampling.tools.revision-availability', [...stepPath, 'request'], version);
+              evaluated('mcp.sampling.tools.protocol-version', [...stepPath, 'request'], version);
             }
             if ((Object.hasOwn(step.request, 'tools') || Object.hasOwn(step.request, 'toolChoice'))
               && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
@@ -728,7 +728,7 @@ function validateToolInteractionExamples(document) {
                 'error',
                 `${stepLocation}.request uses sampling Tool fields that are not defined for MCP ${version}`,
                 [...stepPath, 'request', Object.hasOwn(step.request, 'tools') ? 'tools' : 'toolChoice'],
-                'mcp.sampling.tools.revision-availability',
+                'mcp.sampling.tools.protocol-version',
                 version
               ));
             }
@@ -738,14 +738,14 @@ function validateToolInteractionExamples(document) {
         if (step.type === 'roots') {
           for (const [rootIndex, root] of (step.response.roots ?? []).entries()) {
             for (const version of scope) {
-              if (Object.hasOwn(root, '_meta')) evaluated('mcp.root.meta.revision-availability', [...stepPath, 'response', 'roots', rootIndex, '_meta'], version);
+              if (Object.hasOwn(root, '_meta')) evaluated('mcp.root.meta.protocol-version', [...stepPath, 'response', 'roots', rootIndex, '_meta'], version);
               if (Object.hasOwn(root, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
                 diagnostics.push(semanticDiagnostic(
                   'interaction-example-version-mismatch',
                   'error',
                   `${stepLocation}.response.roots[${rootIndex}]._meta is not defined for MCP ${version}`,
                   [...stepPath, 'response', 'roots', rootIndex, '_meta'],
-                  'mcp.root.meta.revision-availability',
+                  'mcp.root.meta.protocol-version',
                   version
                 ));
               }
@@ -834,7 +834,7 @@ function validateClientRequirements(document) {
         const available = clientCapabilitiesByVersion[version] ?? new Set();
         for (const [capability, value] of Object.entries(requirements)) {
           if (capability.startsWith('x-')) continue;
-          if (knownClientCapabilities.has(capability)) evaluated('mcp.client-capabilities.revision-shape', [...basePath, capability], version);
+          if (knownClientCapabilities.has(capability)) evaluated('mcp.client-capabilities.protocol-shape', [...basePath, capability], version);
           if (knownClientCapabilities.has(capability) && !available.has(capability)) {
             diagnostics.push(semanticDiagnostic(
               'client-requirement-version-mismatch',
@@ -914,26 +914,26 @@ function validateClientRequirements(document) {
 }
 
 function validatePromptContentVersion(content, contentLocation, contentPath, version, diagnostics) {
-  evaluated('mcp.content-block.revision-availability', contentPath, version);
-  if (content.type === 'resource') evaluated('mcp.resource-contents.meta.revision-availability', [...contentPath, 'resource'], version);
-  if (content.annotations?.lastModified !== undefined) evaluated('mcp.annotations.last-modified.revision-availability', [...contentPath, 'annotations', 'lastModified'], version);
+  evaluated('mcp.content-block.protocol-version', contentPath, version);
+  if (content.type === 'resource') evaluated('mcp.resource-contents.meta.protocol-version', [...contentPath, 'resource'], version);
+  if (content.annotations?.lastModified !== undefined) evaluated('mcp.annotations.last-modified.protocol-version', [...contentPath, 'annotations', 'lastModified'], version);
   if (content.type === 'audio' && protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability', version));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.protocol-version', version));
   }
   if (content.type === 'resource_link' && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability', version));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.protocol-version', version));
   }
   if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.revision-availability', version));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.protocol-version', version));
   }
   if (content.type === 'resource' && Object.hasOwn(content.resource ?? {}, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.revision-availability', version));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.protocol-version', version));
   }
   if (content.type === 'resource_link' && Array.isArray(content.icons) && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.revision-availability', version));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.protocol-version', version));
   }
   if (content.annotations?.lastModified !== undefined && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.revision-availability', version));
+    diagnostics.push(semanticDiagnostic('prompt-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.protocol-version', version));
   }
 }
 
@@ -993,7 +993,7 @@ function validatePromptExamples(document) {
 
       for (const version of scope) {
         const resultLocation = `${exampleLocation}.result`;
-        evaluated('mcpdesc.example.result.revision-fidelity', resultPath, version);
+        evaluated('mcpdesc.example.result.protocol-fidelity', resultPath, version);
         if (version === '2026-07-28' && result.resultType !== 'complete') {
           diagnostics.push(semanticDiagnostic('prompt-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType'], undefined, version));
         }
@@ -1024,7 +1024,7 @@ function validateCompletionExampleResult(result, exampleLocation, examplePath, v
   const resultLocation = `${exampleLocation}.result`;
   const resultPath = [...examplePath, 'result'];
   evaluated('mcpdesc.example.completed-result-form', resultPath);
-  evaluated('mcpdesc.example.result.revision-fidelity', resultPath, version);
+  evaluated('mcpdesc.example.result.protocol-fidelity', resultPath, version);
 
   for (const envelopeField of ['jsonrpc', 'id', 'error']) {
     if (Object.hasOwn(result, envelopeField)) {
@@ -1132,7 +1132,7 @@ function validateCompletionExamples(document) {
 
         const result = example.result ?? {};
         for (const version of scope) {
-          evaluated('mcp.completion.revision-availability', examplePath, version);
+          evaluated('mcp.completion.protocol-version', examplePath, version);
           if (protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
             diagnostics.push(semanticDiagnostic(
               'completion-example-version-mismatch',
@@ -1144,7 +1144,7 @@ function validateCompletionExamples(document) {
             ));
             continue;
           }
-          if (Object.hasOwn(example, 'context')) evaluated('mcp.completion.context.revision-availability', [...examplePath, 'context'], version);
+          if (Object.hasOwn(example, 'context')) evaluated('mcp.completion.context.protocol-version', [...examplePath, 'context'], version);
           if (Object.hasOwn(example, 'context') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
             diagnostics.push(semanticDiagnostic(
               'completion-example-context-version-mismatch',
@@ -1166,7 +1166,7 @@ function validateCompletionExamples(document) {
 
 export function evaluateClientRequirements(requirements, clientCapabilities, version) {
   if (!supportedProtocolVersions.includes(version)) {
-    throw new Error(`Unsupported MCP protocol revision ${JSON.stringify(version)}`);
+    throw new Error(`Unsupported MCP protocol version ${JSON.stringify(version)}`);
   }
   if (requirements === undefined) {
     return { status: 'satisfied', declared: false, unsatisfied: [], indeterminate: [] };

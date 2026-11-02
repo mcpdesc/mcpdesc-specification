@@ -1,5 +1,5 @@
 rules:
-  - id: mcp.elicitation.revision-availability
+  - id: mcp.elicitation.protocol-version
     title: "Use elicitation only where the version supports it"
     description: >-
       Elicitation forms and URL flows are not available in every MCP protocol
@@ -24,8 +24,8 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Sections 9.4 and 12.5
         locations:
-          - sections/12-elicitation.md#req-elicitation-revisions
-          - sections/09-tools.md#req-interaction-revision-valid
+          - sections/12-elicitation.md#req-elicitation-protocol-versions
+          - sections/09-tools.md#req-interaction-protocol-version-valid
     sources:
       - tier: 1
         reference: MCP 2025-03-26 schema.ts (no elicitation/create); MCP 2025-06-18 schema.ts, ElicitRequest (form only); MCP 2025-11-25 and 2026-07-28 schema.ts, ElicitRequestURLParams (mode "url")
@@ -47,7 +47,7 @@ rules:
       Elicitation Declarations scoped before MCP 2025-06-18 are outside the
       complete semantic checks (Section 16.2).
 
-  - id: mcp.elicitation.form-schema.revision-shape
+  - id: mcp.elicitation.form-schema.protocol-shape
     title: "Use the applicable elicitation form vocabulary"
     description: >-
       The allowed form-schema vocabulary depends on the MCP protocol version.

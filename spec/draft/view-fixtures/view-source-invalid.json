@@ -4,6 +4,6 @@
   "inputs": [
     "../fixtures/expected-invalid/missing-tool-input-schema.json"
   ],
-  "revision": "2026-07-28",
-  "expectedFailure": "req-view-projection"
+  "expectedFailure": "req-view-projection",
+  "protocolVersion": "2026-07-28"
 }

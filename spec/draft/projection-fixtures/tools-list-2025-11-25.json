@@ -1,7 +1,6 @@
 {
   "description": "The Tool list contains every Tool of the Effective Protocol View, in document order.",
   "document": "documents/tools.json",
-  "revision": "2025-11-25",
   "kind": "tool",
   "expected": [
     {
@@ -53,5 +52,6 @@
         "taskSupport": "optional"
       }
     }
-  ]
+  ],
+  "protocolVersion": "2025-11-25"
 }

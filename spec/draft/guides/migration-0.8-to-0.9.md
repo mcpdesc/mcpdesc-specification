@@ -4,14 +4,14 @@ MCP Description 0.9.0 is a community working draft. This guide follows the
 draft and changes with it; see the [changelog](../CHANGELOG.md) for the status
 of each change and the proposal that introduced it.
 
-Version 0.9.0 measures carried MCP values against each revision's TypeScript
+Version 0.9.0 measures carried MCP values against each protocol version's TypeScript
 schema. Most 0.8.0 documents need only a version change. Documents that put
 extra properties on closed MCP types must move them.
 
 ## Version and schema identity
 
 Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
-`https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json`; the stable
+`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`; the stable
 identifier is assigned at release.
 
 ## Annotations
@@ -25,7 +25,7 @@ blocks, accept only the properties MCP defines (Sections 9.6 and 10.3):
 | Resource Annotations | `audience`, `priority`, `lastModified` (from MCP 2025-06-18) |
 
 Remove other properties, including `x-*` keys. Server-defined metadata belongs
-in the declaration's `_meta` where the revision defines it (from MCP
+in the declaration's `_meta` where the protocol version defines it (from MCP
 2025-06-18). MCP Description metadata belongs in `x-*` properties on the
 declaration itself.
 
@@ -41,7 +41,7 @@ declaration itself.
 ## Client capability requirements
 
 A `clientRequirements` object names only client capabilities that the
-applicable MCP revisions define (Section 8.5). Move custom requirements into
+applicable MCP protocol versions define (Section 8.5). Move custom requirements into
 `experimental` or, for MCP 2026-07-28, into `extensions`:
 
 ```json
@@ -79,19 +79,19 @@ For MCP 2025-11-25 and later, the dialect also decides the schema's shape
 (Section 9.2). 0.8.0 required a literal `"type": "object"` at every
 `inputSchema` root; 0.9.0 requires it only before MCP 2025-11-25 and otherwise
 rejects only a declared root `type` that excludes `"object"`. No 0.8.0 document
-becomes invalid. A schema that the MCP `Tool` type of an applicable revision
+becomes invalid. A schema that the MCP `Tool` type of an applicable protocol version
 rejects, such as a root in `$ref` or a boolean `properties` value for MCP
 2025-11-25, stays valid with the new warning `tool-schema-mcp-type-mismatch`,
-because native projection fails for that revision. Write `{}` instead of
+because native projection fails for that protocol version. Write `{}` instead of
 `true`, `{ "not": {} }` instead of `false`, or `"type": "object"` beside
 `$ref` or `allOf`, or narrow the Tool's `protocolVersions`.
 
 ## Example results
 
 Example results and Tool Interaction step responses are checked against each
-applicable revision's MCP type (Section 3.6):
+applicable protocol version's MCP type (Section 3.6):
 
-- A field that an open MCP result type allows but the revision does not define
+- A field that an open MCP result type allows but the protocol version does not define
   is accepted and preserved with the warning
   `result-field-not-defined-by-version`. For example, `resultType` in a result
   shared by MCP 2025-11-25 and MCP 2026-07-28 no longer requires splitting the
@@ -102,7 +102,7 @@ applicable revision's MCP type (Section 3.6):
   `_meta`.
 - For MCP 2026-07-28, sampling, elicitation, and roots step responses are
   closed: remove unknown fields, and keep `_meta` only on sampling responses.
-- Result `_meta` is accepted in every revision. Root `_meta` in roots responses
+- Result `_meta` is accepted in every protocol version. Root `_meta` in roots responses
   is accepted from MCP 2025-06-18.
 - Reserved `_meta` keys are checked in example results, their content, step
   responses, and roots.
@@ -126,11 +126,13 @@ but do not participate in active applicability checks. Records no longer list
 `error`, or `warning`), and diagnostic codes come from the producer that
 emits them.
 
-Draft 4 introduces rule-format `1.2.0`. Rule records may list the canonical
-schema locations they own in `documentSchema`, and the catalog lists the
-requirements no rule checks in `uncheckedRequirements`, each with a reason.
-Fixture citations may also have the outcome `not-applicable`, and manifests
-list the validation result schema as `resultSchema`.
+Draft 4 introduced rule-format `1.2.0` and validation result format `1.0.0`.
+RC1 introduces rule-format and validation result format `2.0.0` to normalize
+MCP protocol-version terminology. Rule records now use
+`protocolVersions` for arbitration and gap scopes, and `$defs/protocol-version`
+in both schemas. Rule IDs, requirement anchors, fixture paths, and the
+projection failure identifier are also renamed; see the RC1 migration section
+of the validation rule-format changelog.
 
 Discover catalogs through the publication index, then pin an immutable
 manifest. Resolve evidence and description links from its
@@ -170,7 +172,7 @@ Other output changes:
   malformed `uriTemplate` once, also on Resource Templates without examples,
   which 0.8.0 accepted.
 - The `completion-example-version-mismatch` message for MCP 2024-11-05 says the
-  revision is not supported by MCP Description.
+  protocol version is not supported by MCP Description.
 - From Draft 4, `schema-validation` diagnostics name the rule that owns the
   failing schema location, for example `mcpdesc.tool.members` or
   `mcp.content.members`, instead of `mcpdesc.document.schema`, which now
@@ -192,7 +194,7 @@ Other output changes:
 1. Validate the 0.8.0 source.
 2. Set `mcpdesc` to `0.9.0` and update `$schema` when emitted.
 3. Remove unknown annotation properties, moving server-defined metadata to
-   `_meta` only where the revision defines it.
+   `_meta` only where the protocol version defines it.
 4. Move unknown client capability requirements into `experimental` or
    `extensions`.
 5. Move extra fields out of completion `completion` objects.

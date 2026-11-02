@@ -6,7 +6,7 @@
 // validity the case expects, every case selects what it claims to select, and
 // every expected MCP value validates against its pinned MCP type and equals
 // its declaration without MCP Description fields. Validation already rejects
-// fields a revision does not define, so every other declaration field must be
+// fields a protocol version does not define, so every other declaration field must be
 // present and unchanged. A postcondition case must select a declaration whose
 // value, built the same way, fails its pinned MCP type.
 
@@ -44,17 +44,17 @@ const collection = { tool: 'tools', resource: 'resources', resourceTemplate: 're
 const identifierField = { tool: 'name', resource: 'uri', resourceTemplate: 'uriTemplate', prompt: 'name' };
 // Section 4.14: declaration fields that never reach an MCP value.
 const descriptionOnlyFields = new Set(['protocolVersions', 'examples', 'interactionExamples', 'completionExamples', 'tags', 'elicitations', 'deprecated', 'security', 'clientRequirements']);
-const projectionErrors = ['projection-source-invalid', 'projection-revision-not-declared', 'projection-declaration-not-applicable'];
+const projectionErrors = ['projection-source-invalid', 'projection-protocol-version-not-declared', 'projection-declaration-not-applicable'];
 const postconditionError = 'projection-postcondition-failed';
 
 const mcpValidators = new Map();
-function mcpTypeValidator(revision, type) {
-  const key = `${revision}/${type}`;
+function mcpTypeValidator(protocolVersion, type) {
+  const key = `${protocolVersion}/${type}`;
   if (!mcpValidators.has(key)) {
-    const schema = JSON.parse(fs.readFileSync(path.join(specificationDirectory, 'validation', 'mcp-schemas', revision, 'schema.json'), 'utf8'));
+    const schema = JSON.parse(fs.readFileSync(path.join(specificationDirectory, 'validation', 'mcp-schemas', protocolVersion, 'schema.json'), 'utf8'));
     const ajv = schema.$schema?.includes('2020-12') ? new Ajv2020({ allErrors: true, strict: false }) : new Ajv({ allErrors: true, strict: false });
     addFormats(ajv);
-    const id = `https://mcp-schema.invalid/${revision}/schema.json`;
+    const id = `https://mcp-schema.invalid/${protocolVersion}/schema.json`;
     ajv.addSchema(schema, id);
     mcpValidators.set(key, ajv.getSchema(`${id}#/${schema.$defs ? '$defs' : 'definitions'}/${type}`));
   }
@@ -71,10 +71,10 @@ function nativeValue(declaration) {
     .map(([key, child]) => [key, (key === 'arguments' || key === 'icons') && Array.isArray(child) ? child.map(withoutExtensions) : child]));
 }
 
-function checkValue(where, declaration, value, kind, revision) {
-  const validate = mcpTypeValidator(revision, mcpType[kind]);
+function checkValue(where, declaration, value, kind, protocolVersion) {
+  const validate = mcpTypeValidator(protocolVersion, mcpType[kind]);
   if (!validate(value)) {
-    for (const error of validate.errors ?? []) fail(`${where}: not a valid MCP ${revision} ${mcpType[kind]}: ${error.instancePath || '/'} ${error.message}`);
+    for (const error of validate.errors ?? []) fail(`${where}: not a valid MCP ${protocolVersion} ${mcpType[kind]}: ${error.instancePath || '/'} ${error.message}`);
   }
   for (const key of Object.keys(declaration)) {
     if (!isDescriptionOnly(key) && !Object.hasOwn(value, key)) fail(`${where}: MCP field ${key} of the declaration is missing`);
@@ -112,7 +112,7 @@ function loadDocument(caseFile, document) {
   return decodeDocumentSource(fs.readFileSync(full, 'utf8'), documentFormatForPath(full), document);
 }
 
-const coverage = new Map(Object.keys(mcpType).map((kind) => [kind, { revisions: new Set(), codes: new Set(), list: false }]));
+const coverage = new Map(Object.keys(mcpType).map((kind) => [kind, { protocolVersions: new Set(), codes: new Set(), list: false }]));
 const referencedDocuments = new Set();
 let postconditionCases = 0;
 const caseFiles = fs.readdirSync(fixtureDirectory).filter((name) => name.endsWith('.json')).sort();
@@ -125,7 +125,7 @@ for (const name of caseFiles) {
     for (const error of validateCase.errors ?? []) fail(`${where}: ${error.instancePath || '/'} ${error.message}`);
     continue;
   }
-  const { document, revision, kind, identifier, expected, expectedError } = testCase;
+  const { document, protocolVersion, kind, identifier, expected, expectedError } = testCase;
   if (typeof document === 'string') {
     const full = path.join(fixtureDirectory, document);
     if (!fs.existsSync(full)) {
@@ -137,7 +137,7 @@ for (const name of caseFiles) {
   const kindCoverage = coverage.get(kind);
   if (expectedError) kindCoverage.codes.add(expectedError);
   else if (identifier === undefined) kindCoverage.list = true;
-  else kindCoverage.revisions.add(revision);
+  else kindCoverage.protocolVersions.add(protocolVersion);
 
   const source = loadDocument(caseFile, document);
   const sourceErrors = validateDocument(source).filter((diagnostic) => diagnostic.severity === 'error');
@@ -149,49 +149,49 @@ for (const name of caseFiles) {
     fail(`${where}: source document has validation errors: ${sourceErrors.map((diagnostic) => diagnostic.code).join(', ')}`);
     continue;
   }
-  if (!supportedProtocolVersions.includes(revision)) {
-    fail(`${where}: MCP ${revision} is not supported`);
+  if (!supportedProtocolVersions.includes(protocolVersion)) {
+    fail(`${where}: MCP protocol version ${protocolVersion} is not supported`);
     continue;
   }
-  const declared = source.protocolVersions.includes(revision);
-  if (expectedError === 'projection-revision-not-declared') {
-    if (declared) fail(`${where}: expects projection-revision-not-declared, but MCP ${revision} is in root protocolVersions`);
+  const declared = source.protocolVersions.includes(protocolVersion);
+  if (expectedError === 'projection-protocol-version-not-declared') {
+    if (declared) fail(`${where}: expects projection-protocol-version-not-declared, but MCP ${protocolVersion} is in root protocolVersions`);
     continue;
   }
   if (!declared) {
-    fail(`${where}: MCP ${revision} is not in root protocolVersions`);
+    fail(`${where}: MCP protocol version ${protocolVersion} is not in root protocolVersions`);
     continue;
   }
 
-  const view = resolveComponentReferences(projectProtocolView(source, revision)).document;
+  const view = resolveComponentReferences(projectProtocolView(source, protocolVersion)).document;
   const declarations = view[collection[kind]] ?? [];
   const select = (id) => declarations.find((declaration) => declaration[identifierField[kind]] === id);
   if (expectedError === 'projection-declaration-not-applicable') {
-    if (select(identifier)) fail(`${where}: expects projection-declaration-not-applicable, but ${identifier} is in the MCP ${revision} view`);
+    if (select(identifier)) fail(`${where}: expects projection-declaration-not-applicable, but ${identifier} is in the MCP ${protocolVersion} view`);
     continue;
   }
   if (expectedError === postconditionError) {
     postconditionCases += 1;
     const selected = identifier === undefined ? declarations : [select(identifier)].filter(Boolean);
-    if (!selected.length) fail(`${where}: expects ${postconditionError}, but selects no declaration in the MCP ${revision} view`);
-    else if (selected.every((declaration) => mcpTypeValidator(revision, mcpType[kind])(nativeValue(declaration)))) {
-      fail(`${where}: expects ${postconditionError}, but every selected value validates against the pinned MCP ${revision} ${mcpType[kind]}`);
+    if (!selected.length) fail(`${where}: expects ${postconditionError}, but selects no declaration in the MCP ${protocolVersion} view`);
+    else if (selected.every((declaration) => mcpTypeValidator(protocolVersion, mcpType[kind])(nativeValue(declaration)))) {
+      fail(`${where}: expects ${postconditionError}, but every selected value validates against the pinned MCP ${protocolVersion} ${mcpType[kind]}`);
     }
     continue;
   }
   if (identifier !== undefined) {
     const declaration = select(identifier);
-    if (!declaration) fail(`${where}: ${identifier} is not in the MCP ${revision} view`);
-    else checkValue(where, declaration, expected, kind, revision);
+    if (!declaration) fail(`${where}: ${identifier} is not in the MCP ${protocolVersion} view`);
+    else checkValue(where, declaration, expected, kind, protocolVersion);
     continue;
   }
   if (expected.length !== declarations.length) {
-    fail(`${where}: the MCP ${revision} view has ${declarations.length} ${collection[kind]}, the list case ${expected.length}`);
+    fail(`${where}: the MCP ${protocolVersion} view has ${declarations.length} ${collection[kind]}, the list case ${expected.length}`);
     continue;
   }
   expected.forEach((value, index) => {
     if (value[identifierField[kind]] !== declarations[index][identifierField[kind]]) fail(`${where}: entry ${index} is not in document order`);
-    else checkValue(`${where} [${index}]`, declarations[index], value, kind, revision);
+    else checkValue(`${where} [${index}]`, declarations[index], value, kind, protocolVersion);
   });
 }
 
@@ -200,9 +200,9 @@ for (const name of fs.existsSync(documentsDirectory) ? fs.readdirSync(documentsD
   if (!referencedDocuments.has(path.join('documents', name))) fail(`${fixtureRel}/documents/${name} is not used by any case`);
 }
 
-for (const [kind, { revisions, codes, list }] of coverage) {
-  for (const revision of supportedProtocolVersions) {
-    if (!revisions.has(revision)) fail(`${fixtureRel}: no ${kind} case projects a declaration for MCP ${revision}`);
+for (const [kind, { protocolVersions, codes, list }] of coverage) {
+  for (const protocolVersion of supportedProtocolVersions) {
+    if (!protocolVersions.has(protocolVersion)) fail(`${fixtureRel}: no ${kind} case projects a declaration for MCP ${protocolVersion}`);
   }
   for (const code of projectionErrors) {
     if (!codes.has(code)) fail(`${fixtureRel}: no ${kind} case expects ${code}`);
@@ -217,4 +217,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Projection fixtures passed: ${caseFiles.length} case(s) cover ${Object.keys(mcpType).length} kinds, every supported revision, every projection error, a list per kind, and ${postconditionCases} postcondition failure case(s).`);
+console.log(`Projection fixtures passed: ${caseFiles.length} case(s) cover ${Object.keys(mcpType).length} kinds, every supported protocol version, every projection error, a list per kind, and ${postconditionCases} postcondition failure case(s).`);

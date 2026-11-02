@@ -1,9 +1,9 @@
 {
-  "description": "The other revision of the same document, with the other variant of the audit Tool.",
+  "description": "The other protocol version of the same document, with the other variant of the audit Tool.",
   "operation": "view",
   "inputs": [
     "inputs/security-forms.json"
   ],
-  "revision": "2026-07-28",
-  "expected": "expected/view-security-forms-2026-07-28.json"
+  "expected": "expected/view-security-forms-2026-07-28.json",
+  "protocolVersion": "2026-07-28"
 }

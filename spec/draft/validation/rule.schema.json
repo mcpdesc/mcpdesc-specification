@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/validation-rule/1.2.0.json",
+  "$id": "https://mcpdesc.org/schema/validation-rule/2.0.0.json",
   "title": "MCP Description validation rule registry file",
   "description": "Structure of each YAML file under validation/rules/ and of the aggregate catalog, which also lists the unchecked requirements. See Proposals 0024, 0030, and 0033, and validation/README.md.",
   "type": "object",
@@ -74,7 +74,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.2.0.json#/$defs/catalog-index"
+          "const": "https://mcpdesc.org/schema/validation-rule/2.0.0.json#/$defs/catalog-index"
         },
         "catalogs": {
           "items": {
@@ -112,7 +112,7 @@
       "additionalProperties": false,
       "properties": {
         "$schema": {
-          "const": "https://mcpdesc.org/schema/validation-rule/1.2.0.json#/$defs/catalog-manifest"
+          "const": "https://mcpdesc.org/schema/validation-rule/2.0.0.json#/$defs/catalog-manifest"
         },
         "catalog": {
           "$ref": "#/$defs/artifact"
@@ -129,7 +129,7 @@
           "type": "integer"
         },
         "ruleFormatVersion": {
-          "const": "1.2.0"
+          "const": "2.0.0"
         },
         "ruleSchema": {
           "$ref": "#/$defs/artifact"
@@ -193,7 +193,7 @@
       ],
       "type": "object"
     },
-    "revision": {
+    "protocol-version": {
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
       "type": "string"
     },
@@ -235,7 +235,7 @@
                   },
                   "minProperties": 1,
                   "propertyNames": {
-                    "$ref": "#/$defs/revision"
+                    "$ref": "#/$defs/protocol-version"
                   },
                   "type": "object"
                 }
@@ -274,6 +274,14 @@
                 "minLength": 1,
                 "type": "string"
               },
+              "protocolVersions": {
+                "items": {
+                  "$ref": "#/$defs/protocol-version"
+                },
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
               "rationale": {
                 "minLength": 1,
                 "type": "string"
@@ -281,14 +289,6 @@
               "reviewTrigger": {
                 "minLength": 1,
                 "type": "string"
-              },
-              "revisions": {
-                "items": {
-                  "$ref": "#/$defs/revision"
-                },
-                "minItems": 1,
-                "type": "array",
-                "uniqueItems": true
               },
               "status": {
                 "enum": [
@@ -303,7 +303,7 @@
               }
             },
             "required": [
-              "revisions",
+              "protocolVersions",
               "conflict",
               "authority",
               "behavior",
@@ -383,6 +383,14 @@
                 "minLength": 1,
                 "type": "string"
               },
+              "protocolVersions": {
+                "items": {
+                  "$ref": "#/$defs/protocol-version"
+                },
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
               "reference": {
                 "minLength": 1,
                 "type": "string"
@@ -392,14 +400,6 @@
                   "not-fixed",
                   "planned"
                 ]
-              },
-              "revisions": {
-                "items": {
-                  "$ref": "#/$defs/revision"
-                },
-                "minItems": 1,
-                "type": "array",
-                "uniqueItems": true
               }
             },
             "required": [

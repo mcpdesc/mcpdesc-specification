@@ -1,5 +1,5 @@
 rules:
-  - id: mcpdesc.example.result.revision-fidelity
+  - id: mcpdesc.example.result.protocol-fidelity
     title: "Match example results to every applicable version"
     description: >-
       A completed example result must contain the fields each applicable MCP
@@ -8,8 +8,8 @@ rules:
       undefined on open result types are handled separately as warnings.
     owner: mcpdesc
     summary: >-
-      An example result contains every field that each applicable MCP revision
-      requires, and every field a revision defines has a valid value.
+      An example result contains every field that each applicable MCP protocol
+      version requires, and every field a protocol version defines has a valid value.
     surface: Example result
     kind: mcpdesc-semantic
     applicability:
@@ -53,14 +53,14 @@ rules:
       - path: expected-warning/legacy-result-meta.json
         pointer: /resources/0/examples/with-result-meta/result
         outcome: passes
-      - path: expected-warning/open-results-shared-across-revisions.json
+      - path: expected-warning/open-results-shared-across-protocol-versions.json
         pointer: /tools/0/examples/paris/result
         outcome: passes
     notes: >-
-      Fields a revision does not define are governed by
+      Fields an MCP protocol version does not define are governed by
       mcp.result.additional-properties.preserve (accepted with a warning).
       When present, resultType must be "complete", ttlMs non-negative, and
-      cacheScope "public" or "private" in every revision (document schema).
+      cacheScope "public" or "private" in every applicable protocol version (document schema).
 
   - id: mcpdesc.example.completed-result-form
     title: "Show completed results without message envelopes"
@@ -115,7 +115,7 @@ rules:
       fields are task, inputRequests, and requestState. They are excluded from
       the field classification of mcp.result.additional-properties.preserve.
 
-  - id: mcp.completion.context.revision-availability
+  - id: mcp.completion.context.protocol-version
     title: "Use completion context only where supported"
     description: >-
       Completion context was added in MCP 2025-06-18. A completion example
@@ -140,8 +140,8 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4
         locations:
-          - sections/10-resources.md#req-template-completion-context-revision
-          - sections/11-prompts.md#req-prompt-completion-context-revision
+          - sections/10-resources.md#req-template-completion-context-protocol-version
+          - sections/11-prompts.md#req-prompt-completion-context-protocol-version
     sources:
       - tier: 1
         reference: MCP 2025-03-26 schema.ts, interface CompleteRequest (no context); MCP 2025-06-18 to 2026-07-28 schema.ts, CompleteRequest params context
@@ -156,7 +156,7 @@ rules:
       - path: expected-invalid/invalid-completion-example-semantics.json
         pointer: /prompts/1/completionExamples/context-too-early
         outcome: error
-    notes: MCP Description does not support completion examples for MCP 2024-11-05 (mcp.completion.revision-availability).
+    notes: MCP Description does not support completion examples for MCP 2024-11-05 (mcp.completion.protocol-version).
 
   - id: mcpdesc.completion-example.target
     title: "Complete a declared argument or template variable"

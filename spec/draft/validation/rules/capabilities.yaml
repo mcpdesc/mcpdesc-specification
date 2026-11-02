@@ -9,7 +9,7 @@ rules:
     owner: mcp
     summary: >-
       A server Capabilities Object contains only the capabilities the
-      applicable MCP revision defines; custom capabilities go in experimental
+      applicable MCP protocol version defines; custom capabilities go in experimental
       and, from MCP 2026-07-28, in extensions.
     surface: ServerCapabilities
     kind: structural
@@ -63,7 +63,7 @@ rules:
       x-* properties are MCP Description specification extensions, not
       capabilities; native projection removes them.
     arbitrations:
-      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
+      - protocolVersions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
         conflict: >-
           The TypeScript type declares a fixed set of members and no index
           signature, while its doc comment says the set is not closed and any
@@ -78,7 +78,7 @@ rules:
           structural source of truth governs. Closing is also the reversible
           choice: opening the object later invalidates no document, while
           closing it later would.
-        reviewTrigger: Resolution of MCP issue 1898, an upstream clarification of the doc comment, or a later MCP revision adding an index signature.
+        reviewTrigger: Resolution of MCP issue 1898, an upstream clarification of the doc comment, or a later MCP protocol version adding an index signature.
         upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1898
         status: active
 
@@ -93,7 +93,7 @@ rules:
     owner: mcp
     summary: >-
       A Client Capability Requirements Object names only client capabilities
-      the applicable MCP revision defines; custom requirements go in
+      the applicable MCP protocol version defines; custom requirements go in
       experimental and, from MCP 2026-07-28, in extensions.
     surface: ClientCapabilities
     path: clientRequirements
@@ -141,7 +141,7 @@ rules:
         pointer: /prompts/0/clientRequirements
         outcome: passes
     arbitrations:
-      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
+      - protocolVersions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
         conflict: >-
           The TypeScript type declares a fixed set of members and no index
           signature, while its doc comment says the set is not closed and any
@@ -155,11 +155,11 @@ rules:
           Same reading as mcp.server-capabilities.members, so one document
           does not treat the two capability types differently. Closing is the
           reversible choice.
-        reviewTrigger: Resolution of MCP issue 1898, an upstream clarification of the doc comment, or a later MCP revision adding an index signature.
+        reviewTrigger: Resolution of MCP issue 1898, an upstream clarification of the doc comment, or a later MCP protocol version adding an index signature.
         upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1898
         status: active
 
-  - id: mcp.client-capabilities.revision-shape
+  - id: mcp.client-capabilities.protocol-shape
     title: "Match client requirements to the protocol version"
     description: >-
       Client capabilities and their settings change across MCP protocol
@@ -169,7 +169,7 @@ rules:
     owner: mcp
     summary: >-
       Each client capability requirement and nested member exists in every
-      applicable revision's ClientCapabilities type, with object values and a
+      applicable protocol version's ClientCapabilities type, with object values and a
       boolean listChanged.
     surface: ClientCapabilities
     path: clientRequirements
@@ -185,12 +185,12 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Section 8.5
         locations:
-          - sections/08-capabilities.md#req-client-requirements-revision-valid
+          - sections/08-capabilities.md#req-client-requirements-protocol-version-valid
           - sections/08-capabilities.md#req-client-requirements-values
           - sections/08-capabilities.md#req-client-requirements-extensions
     sources:
       - tier: 1
-        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (members and nested members per revision)
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interface ClientCapabilities (members and nested members per protocol version)
         locations:
           - validation/mcp-schemas/2024-11-05/schema.ts#L182-L203
           - validation/mcp-schemas/2025-03-26/schema.ts#L202-L223
@@ -200,7 +200,7 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/revision-incompatible-client-capability-requirements.json
+      - path: expected-invalid/protocol-version-incompatible-client-capability-requirements.json
         pointer: /tools/0/clientRequirements
         outcome: error
       - path: expected-invalid/invalid-client-requirement-value.json
@@ -219,7 +219,7 @@ rules:
       rather than assuming an older advertisement model still applies.
     owner: mcp
     summary: >-
-      A client capability requirement that the applicable revision deprecates
+      A client capability requirement that the applicable protocol version deprecates
       is reported.
     surface: ClientCapabilities
     path: clientRequirements
@@ -253,7 +253,7 @@ rules:
         pointer: /prompts/0/clientRequirements
         outcome: warning
 
-  - id: mcp.capabilities.extensions.revision-availability
+  - id: mcp.capabilities.extensions.protocol-version
     title: "Recognize pre-standard extension advertisements"
     description: >-
       MCP Description accepts server extension advertisements before their
@@ -264,7 +264,7 @@ rules:
     owner: mcp
     summary: >-
       Server capabilities.extensions is defined from MCP 2026-07-28; for
-      earlier revisions a pre-standard extensions map is preserved with a
+      earlier protocol versions a pre-standard extensions map is preserved with a
       warning.
     surface: ServerCapabilities
     path: extensions
@@ -297,15 +297,16 @@ rules:
         pointer: /capabilities/0
         outcome: warning
     arbitrations:
-      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
+      - protocolVersions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
         conflict: >-
           ServerCapabilities is closed and has no extensions member before MCP
           2026-07-28, so mcp.server-capabilities.members would reject it, but
           deployed servers advertise extensions with a pre-standard convention.
         authority: MCP Description decision (Proposal 0021)
         behavior: >-
-          Accept and preserve a server extensions map for earlier revisions
-          with a warning; client requirements stay revision-strict.
+          Accept and preserve a server extensions map for earlier protocol
+          versions with a warning; check client requirements against each
+          protocol version separately.
         rationale: >-
           Rejecting it would make descriptions of deployed servers inaccurate.
           The warning keeps the departure from the type visible.
@@ -354,7 +355,7 @@ rules:
       The pinned catalogue lists no experimental identifiers, so no document
       currently produces the experimental-identifier warning.
 
-  - id: mcp.capabilities.tasks.revision-availability
+  - id: mcp.capabilities.tasks.protocol-version
     title: "Keep task capabilities in their protocol version"
     description: >-
       Task capabilities from MCP 2025-11-25 and extension advertisements in
@@ -380,7 +381,7 @@ rules:
       - reference: MCP Description 0.9.0, Section 8.3
         locations:
           - sections/08-capabilities.md#req-capabilities-tasks-distinct
-          - sections/04-versioning.md#req-field-revision-availability
+          - sections/04-versioning.md#req-field-protocol-version-availability
     sources:
       - tier: 1
         reference: MCP 2025-11-25 schema.ts, ServerCapabilities tasks; MCP 2025-06-18 and 2026-07-28 schema.ts, ServerCapabilities (no tasks)

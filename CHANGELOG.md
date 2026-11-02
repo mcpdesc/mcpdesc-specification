@@ -4,6 +4,7 @@ This changelog records repository governance, release-process, and project-tooli
 
 ## Unreleased
 
+- Preparing 0.9.0 RC.1: migrate MCP revision terminology to protocol-version terminology across rule IDs, anchors, fixture paths/case fields, schemas, scripts, and active editorial docs. Rule and result formats move to 2.0.0. Migration inventory and downstream actions are tracked in issue #109.
 - Catalog publication tooling handles a rule-format change: each indexed catalog is verified against the rule format its own manifest declares, and `rules:check-publication --index-out` accepts a live index declared in an earlier format and re-declares it in the current one. `--check-index` still requires the current format. Previously the Draft 4 index update failed on the live `1.1.0` index and its Draft 3 catalog.
 - `rules:check-publication --schema-only` reports the validation result schema when the bundle includes it, and the publication recipe in `scripts/README.md` lists it with the rule schema.
 - Prepared the `v0.9.0-draft.4` snapshot dated 2026-10-31, with review-stage Proposals 0031, 0032, and 0033, Effective Protocol View and merge cases (#102), the Resource `uri` requirement, and a fixture without `$schema` (#66).

@@ -114,7 +114,7 @@ try {
   const fixture = (group, filename) => JSON.parse(
     fs.readFileSync(path.join(output, 'fixtures', group, filename), 'utf8')
   );
-  assert.equal(runtime.validate(fixture('expected-valid', 'revision-inapplicable-mcp-header.json')).valid, true);
+  assert.equal(runtime.validate(fixture('expected-valid', 'protocol-version-inapplicable-mcp-header.json')).valid, true);
   assert.equal(runtime.validate(fixture('expected-valid', 'custom-tool-schema-keywords.json')).valid, true);
   assert.equal(runtime.validate(fixture('expected-invalid', 'invalid-mcp-header-value.json')).valid, false);
   assert.equal(runtime.validate(fixture('expected-invalid', 'invalid-mcp-header-placement.json')).valid, false);

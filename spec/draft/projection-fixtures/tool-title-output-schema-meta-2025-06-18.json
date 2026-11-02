@@ -1,7 +1,6 @@
 {
   "description": "title, outputSchema, and _meta appear from MCP 2025-06-18; examples are omitted.",
   "document": "documents/tools.json",
-  "revision": "2025-06-18",
   "kind": "tool",
   "identifier": "report",
   "expected": {
@@ -30,5 +29,6 @@
     "_meta": {
       "example.com/team": "reports"
     }
-  }
+  },
+  "protocolVersion": "2025-06-18"
 }

@@ -4,6 +4,6 @@
   "inputs": [
     "inputs/component-pruning.json"
   ],
-  "revision": "2026-07-28",
-  "expected": "expected/view-component-pruning-2026-07-28.json"
+  "expected": "expected/view-component-pruning-2026-07-28.json",
+  "protocolVersion": "2026-07-28"
 }

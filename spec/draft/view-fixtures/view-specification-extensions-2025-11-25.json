@@ -4,6 +4,6 @@
   "inputs": [
     "../fixtures/expected-valid/object-level-specification-extensions.json"
   ],
-  "revision": "2025-11-25",
-  "expected": "expected/view-specification-extensions-2025-11-25.json"
+  "expected": "expected/view-specification-extensions-2025-11-25.json",
+  "protocolVersion": "2025-11-25"
 }

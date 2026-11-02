@@ -1,7 +1,6 @@
 {
   "description": "icons appear from MCP 2025-11-25.",
   "document": "documents/resources-and-prompts.json",
-  "revision": "2026-07-28",
   "kind": "resource",
   "identifier": "file:///etc/app.json",
   "expected": {
@@ -15,5 +14,6 @@
         "mimeType": "image/svg+xml"
       }
     ]
-  }
+  },
+  "protocolVersion": "2026-07-28"
 }

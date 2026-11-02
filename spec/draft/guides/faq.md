@@ -1,6 +1,6 @@
 # Frequently Asked Questions
 
-This FAQ explains MCP Description. It does not restate or modify MCP runtime requirements. For runtime behavior, use the normative MCP specification for the applicable protocol revision. MCP Description complements those specifications with a static, portable description format.
+This FAQ explains MCP Description. It does not restate or modify MCP runtime requirements. For runtime behavior, use the normative MCP specification for the applicable protocol version. MCP Description complements those specifications with a static, portable description format.
 
 ## Purpose
 
@@ -12,23 +12,23 @@ It supports offline discovery, documentation, design review, governance, testing
 
 ### Does MCP Description override the MCP specification?
 
-No. The normative MCP specification for each declared protocol revision defines MCP types, runtime behavior, negotiation, requests, responses, and security requirements. MCP Description governs only the description document and its projection, merge, validation, and supplemental static metadata.
+No. The normative MCP specification for each declared protocol version defines MCP types, runtime behavior, negotiation, requests, responses, and security requirements. MCP Description governs only the description document and its projection, merge, validation, and supplemental static metadata.
 
-When MCP Description reuses an MCP field or type, that field retains the semantics and revision applicability defined by MCP. If a description conflicts with the applicable MCP specification or with observed runtime behavior, the description does not change the protocol or the server; it is inaccurate and should be corrected.
+When MCP Description reuses an MCP field or type, that field retains the semantics and protocol version applicability defined by MCP. If a description conflicts with the applicable MCP specification or with observed runtime behavior, the description does not change the protocol or the server; it is inaccurate and should be corrected.
 
 See [Relationship to MCP](relationship-to-mcp.md).
 
 ### Why not inherit and extend Tool, Resource, and Prompt definitions from the MCP schema?
 
 MCP Description aligns with the MCP primitive types, but the two schemas serve different purposes:
-- An MCP schema defines runtime values for one protocol revision;
-- an MCP Description can describe several revisions, adds static metadata such as security, tags, examples, and client requirements, and permits local reusable components.
+- An MCP schema defines runtime values for one protocol version;
+- an MCP Description can describe several protocol versions, adds static metadata such as security, tags, examples, and client requirements, and permits local reusable components.
 
 Some differences are alternatives rather than additions: for example, mcpdesc Tool schemas may use a `$componentRef`, which cannot satisfy MCP's required inline `inputSchema` merely by composing the schemas with `allOf`.
 
 Keeping the schemas independent also gives each stable mcpdesc release an immutable, offline-usable validation contract.
 
-New MCP fields are reviewed for static meaning, revision applicability, projection, and compatibility instead of being accepted automatically.
+New MCP fields are reviewed for static meaning, protocol version applicability, projection, and compatibility instead of being accepted automatically.
 
 Stronger machine-verifiable alignment remains valuable, especially through upstream schema-diff checks and validation of projected native MCP values against pinned MCP schemas.
 
@@ -36,21 +36,21 @@ See [Relationship to the MCP Primitive Schemas](relationship-to-mcp-schemas.md) 
 
 ### Why not just use OpenAPI?
 
-OpenAPI describes HTTP APIs. MCP Description describes MCP servers using MCP-native concepts such as Tools, Resources, Resource Templates, Prompts, capabilities, and protocol-revision scopes. It also supports MCP transports that are not HTTP APIs.
+OpenAPI describes HTTP APIs. MCP Description describes MCP servers using MCP-native concepts such as Tools, Resources, Resource Templates, Prompts, capabilities, and protocol-version scopes. It also supports MCP transports that are not HTTP APIs.
 
 MCP Description adopts familiar description patterns where they fit, including server identity, reusable security schemes, and extensions, but it is not an OpenAPI replacement or profile. Use the format that describes the interface being documented; a service exposing both HTTP APIs and MCP may publish both. See [Comparison with OpenAPI](comparison-with-openapi.md).
 
 ### Is an MCP Description guaranteed to be complete or current?
 
-No. A description represents its declared server surface and may be authored from design metadata, generated from a runtime observation, or assembled from both. An observation can cover only the protocol revision, authorization context, and server state that were actually observed.
+No. A description represents its declared server surface and may be authored from design metadata, generated from a runtime observation, or assembled from both. An observation can cover only the protocol version, authorization context, and server state that were actually observed.
 
-Omitted primitives do not prove that no other revision or runtime context exposes them. Producers may use documented specification extensions to identify generation or observation metadata, while consumers assess freshness or authority under external policy.
+Omitted primitives do not prove that no other protocol version or runtime context exposes them. Producers may use documented specification extensions to identify generation or observation metadata, while consumers assess freshness or authority under external policy.
 
 ## Versions and Views
 
 ### What is the difference between `mcpdesc` and `protocolVersions`?
 
-`mcpdesc` selects the MCP Description specification used to validate the document. `protocolVersions` lists the MCP protocol revisions described by the document. These are independent version dimensions.
+`mcpdesc` selects the MCP Description specification used to validate the document. `protocolVersions` lists the MCP protocol versions described by the document. These are independent version dimensions.
 
 For example, one document conforming to MCP Description 0.9.0 can describe both MCP 2025-11-25 and MCP 2026-07-28.
 
@@ -60,27 +60,27 @@ For example, one document conforming to MCP Description 0.9.0 can describe both 
 
 For a stable release such as v0.8.0, the `$schema` value is `https://mcpdesc.org/schema/mcp-description/0.8.0.json`.
 
-### How can one document describe multiple MCP revisions?
+### How can one document describe multiple MCP protocol versions?
 
 The root `protocolVersions` declares total coverage. Transports, Capabilities Objects, Tools, Resources, Resource Templates, and Prompts can narrow their applicability with their own `protocolVersions`.
 
-Omitting a declaration-level scope means that the declaration applies to its complete parent scope; it does not mean that applicability is unknown. When a field or primitive differs between MCP revisions, use separate declarations with disjoint scopes rather than combining incompatible shapes.
+Omitting a declaration-level scope means that the declaration applies to its complete parent scope; it does not mean that applicability is unknown. When a field or primitive differs between MCP protocol versions, use separate declarations with disjoint scopes rather than combining incompatible shapes.
 
 ### How should a consumer use a multi-version description?
 
-Select one declared MCP revision and produce its Effective Protocol View. The view retains only declarations applicable to that revision, removes redundant declaration scopes, and is validated as an ordinary single-version MCP Description.
+Select one declared MCP protocol version and produce its Effective Protocol View. The view retains only declarations applicable to that protocol version, removes redundant declaration scopes, and is validated as an ordinary single-version MCP Description.
 
-An Effective Protocol View is still a static description. It does not perform MCP runtime version negotiation and does not replace the selected revision's MCP rules.
+An Effective Protocol View is still a static description. It does not perform MCP runtime version negotiation and does not replace the selected protocol version's MCP rules.
 
-### Can descriptions from different revisions be merged?
+### Can descriptions from different protocol versions be merged?
 
-Yes, when they describe compatible views of the same logical server. Merge tooling should compare per-revision Effective Protocol Views, preserve differing declarations as disjoint variants, and report conflicts rather than guess. Inputs covering the same revision must be semantically equivalent for that revision.
+Yes, when they describe compatible views of the same logical server. Merge tooling should compare per-protocol-version Effective Protocol Views, preserve differing declarations as disjoint variants, and report conflicts rather than guess. Inputs covering the same protocol version must be semantically equivalent for that protocol version.
 
 ## Creating Documents
 
 ### What is the minimum valid document?
 
-A document needs `mcpdesc`, `info` with `name` and `version`, and a non-empty `protocolVersions` array. Transports and Tool, Resource, Resource Template, and Prompt collections are optional. When transports are present, they collectively cover every declared revision. See [the minimal example](../examples/minimal.yaml).
+A document needs `mcpdesc`, `info` with `name` and `version`, and a non-empty `protocolVersions` array. Transports and Tool, Resource, Resource Template, and Prompt collections are optional. When transports are present, they collectively cover every declared protocol version. See [the minimal example](../examples/minimal.yaml).
 
 ### Do I have to write it by hand?
 
@@ -91,13 +91,13 @@ No. An MCP Description may be:
 - captured from a running server; or
 - assembled from multiple authoritative sources.
 
-Generation does not make a description complete or authoritative. Generators must not infer unobserved protocol revisions, primitives, authorization policy, or behavior.
+Generation does not make a description complete or authoritative. Generators must not infer unobserved protocol versions, primitives, authorization policy, or behavior.
 
 ### How is an MCP Description validated?
 
-Use the schema for the declared `mcpdesc` version and apply that version's semantic validation rules. Schema validation alone cannot enforce cross-object rules such as protocol coverage, scoped uniqueness, revision-specific fields, security references, or example consistency.
+Use the schema for the declared `mcpdesc` version and apply that version's semantic validation rules. Schema validation alone cannot enforce cross-object rules such as protocol coverage, scoped uniqueness, protocol-version-specific fields, security references, or example consistency.
 
-For MCP Description 0.9.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json"` for editor support and use a conforming semantic validator for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional. See [Known Implementations](../../implementations.md) for available libraries and tools.
+For MCP Description 0.9.0, add `"$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json"` for editor support and use a conforming semantic validator for complete validation. Offline validators may bundle that canonical schema locally; network retrieval is optional. See [Known Implementations](../../implementations.md) for available libraries and tools.
 
 ### Should a consumer automatically retrieve any `$schema` URL it sees?
 
@@ -113,7 +113,7 @@ The recommended media types are `application/mcp-description+json` and `applicat
 
 ### Why is the Capabilities Object closed when MCP `ServerCapabilities` is open?
 
-MCP keeps `ServerCapabilities` open so runtime clients can tolerate capabilities introduced by later protocol revisions or other implementations. MCP Description is a static documentation and contract format: accepting arbitrary capability properties would leave their schema, meaning, revision applicability, and compatibility behavior undefined.
+MCP keeps `ServerCapabilities` open so runtime clients can tolerate capabilities introduced by later protocol versions or other implementations. MCP Description is a static documentation and contract format: accepting arbitrary capability properties would leave their schema, meaning, protocol version applicability, and compatibility behavior undefined.
 
 The MCP Description Capabilities Object therefore defines a closed set of properties with explicit extension mechanisms. Use `experimental` for experimental non-standard MCP capabilities, `extensions` for namespaced MCP protocol extensions, and eligible `x-*` properties for MCP Description metadata. These mechanisms let tooling preserve extension data without treating an unknown property as a documented, interoperable capability.
 
@@ -127,9 +127,9 @@ Within MCP Description, a primitive `security` value replaces a selected transpo
 
 ### What does `clientRequirements` mean?
 
-It is a non-empty, revision-specific declaration of unconditional minimum client capabilities needed to call a Tool, read a Resource or concrete Resource Template URI, or get a Prompt. All entries are required together. It does not apply to listing, inherit from root server capabilities, follow automatically from an Elicitation Declaration, or satisfy authorization.
+It is a non-empty, protocol-version-specific declaration of unconditional minimum client capabilities needed to call a Tool, read a Resource or concrete Resource Template URI, or get a Prompt. All entries are required together. It does not apply to listing, inherit from root server capabilities, follow automatically from an Elicitation Declaration, or satisfy authorization.
 
-Use protocol-scoped primitive variants when requirements differ by MCP revision. Unknown or experimental requirements are preserved; generic tooling should report compatibility as indeterminate when it lacks matching semantics rather than assuming support.
+Use protocol-scoped primitive variants when requirements differ by MCP protocol version. Unknown or experimental requirements are preserved; generic tooling should report compatibility as indeterminate when it lacks matching semantics rather than assuming support.
 
 ### Do Tool, Resource, or Prompt examples define runtime behavior?
 

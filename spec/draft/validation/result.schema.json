@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/validation-result/1.0.0.json",
+  "$id": "https://mcpdesc.org/schema/validation-result/2.0.0.json",
   "title": "MCP Description validation result",
-  "description": "Validation result format 1.0.0 (Proposal 0031): document validity, diagnostics that identify the registered rule they report, and optional rule results with one status per rule and declared MCP protocol version. Producers may add properties to the result and to diagnostics; rule results are closed.",
+  "description": "Validation result format 2.0.0 (Proposal 0031): document validity, diagnostics that identify the registered rule they report, and optional rule results with one status per rule and declared MCP protocol version. Producers may add properties to the result and to diagnostics; rule results are closed.",
   "type": "object",
   "required": [
     "valid",
@@ -57,7 +57,7 @@
         "protocolVersions": {
           "description": "MCP protocol versions the finding concerns, when it depends on the version.",
           "items": {
-            "$ref": "#/$defs/revision"
+            "$ref": "#/$defs/protocol-version"
           },
           "minItems": 1,
           "type": "array",
@@ -80,7 +80,7 @@
       ],
       "type": "object"
     },
-    "revision": {
+    "protocol-version": {
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
       "type": "string"
     },
@@ -103,7 +103,7 @@
       "description": "The status of one rule for one declared MCP protocol version, or for the document when the rule's applicability is independent. A status comes from checks the validator executed: passed is never inferred from the absence of diagnostics.",
       "properties": {
         "protocolVersion": {
-          "$ref": "#/$defs/revision"
+          "$ref": "#/$defs/protocol-version"
         },
         "reason": {
           "description": "Why a check was not evaluated; only with status not-evaluated, and optional. earlier-stage-failed: an earlier validation stage failed. not-implemented: the validator does not implement the check. operation: another operation, such as projection or merge, checks the requirement.",

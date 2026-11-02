@@ -1,7 +1,6 @@
 {
   "description": "A component inputSchema is resolved with its x-mcp-header kept; an array-rooted outputSchema is copied unchanged; a specification extension on an icon is omitted.",
   "document": "documents/tools.json",
-  "revision": "2026-07-28",
   "kind": "tool",
   "identifier": "report",
   "expected": {
@@ -32,5 +31,6 @@
         "theme": "light"
       }
     ]
-  }
+  },
+  "protocolVersion": "2026-07-28"
 }

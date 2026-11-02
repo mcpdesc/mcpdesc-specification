@@ -21,7 +21,7 @@ Every Transport Object MAY contain `protocolVersions` and `security`. `protocolV
 | `type` | `"streamable-http"` | **Yes** | Transport type identifier |
 | `url` | string (URI) | **Yes** | MCP endpoint URL |
 
-The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. <a id="req-transport-streamable-http-revisions"></a>It is defined for MCP 2025-03-26 and later and is the RECOMMENDED transport for remote MCP servers in those revisions.
+The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. <a id="req-transport-streamable-http-protocol-versions"></a>It is defined for MCP 2025-03-26 and later and is the RECOMMENDED transport for remote MCP servers in those protocol versions.
 
 ```json
 {
@@ -122,9 +122,9 @@ This mechanism allows a single MCP Description document to declare different sec
 
 ### 6.5 Protocol Coverage
 
-<a id="req-transport-coverage"></a>When `transports` is present, the union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one revision.
+<a id="req-transport-coverage"></a>When `transports` is present, the union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one protocol version.
 
-A document with `transports` is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage. <a id="req-transport-coverage-omitted"></a>When `transports` is omitted, transport coverage validation does not apply: validators MUST NOT infer a transport or report uncovered root revisions.
+A document with `transports` is invalid when any root protocol version has no applicable transport or when a transport scope contains a protocol version outside root coverage. <a id="req-transport-coverage-omitted"></a>When `transports` is omitted, transport coverage validation does not apply: validators MUST NOT infer a transport or report uncovered root protocol versions.
 
 ### 6.6 Extensibility
 

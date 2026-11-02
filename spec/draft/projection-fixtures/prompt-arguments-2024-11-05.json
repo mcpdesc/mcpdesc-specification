@@ -1,7 +1,6 @@
 {
   "description": "Arguments keep only their PromptArgument fields, so a specification extension on an argument is omitted; an argument without required stays without it; tags and a declaration extension are omitted.",
   "document": "documents/resources-and-prompts.json",
-  "revision": "2024-11-05",
   "kind": "prompt",
   "identifier": "summarize",
   "expected": {
@@ -17,5 +16,6 @@
         "name": "style"
       }
     ]
-  }
+  },
+  "protocolVersion": "2024-11-05"
 }

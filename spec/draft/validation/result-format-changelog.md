@@ -14,6 +14,28 @@ properties and new status values, which consumers must be able to interpret.
 Compatible additions are minor. Editorial schema documentation corrections use
 a new patch-version URL. Published versioned URLs retain their exact bytes.
 
+## [2.0.0] — 2026-11-02 (0.9.0 RC.1)
+
+Breaking terminology migration for MCP protocol versions. The schema identity
+is `https://mcpdesc.org/schema/validation-result/2.0.0.json`; deployment must be
+verified before publishing the RC.1 catalog.
+
+### Format
+
+- Renamed `#/$defs/revision` to `#/$defs/protocol-version`. The
+  `protocolVersion` diagnostic and rule-result properties remain unchanged.
+- Rule identifiers inside results change to the protocol-version terminology
+  listed in issue #109.
+- The schema is a new immutable URL; `validation-result/1.0.0.json` remains
+  unchanged.
+
+### Consumer Migration
+
+- Update schema pins to `validation-result/2.0.0.json` and replace any
+  `$defs/revision` references with `$defs/protocol-version`.
+- Update rule IDs consumed from diagnostics and rule results using the issue
+  #109 mapping.
+
 ## [1.0.0] — 2026-10-31 (Draft 4)
 
 First format, for the MCP Description 0.9.0 Draft 4 working tree,

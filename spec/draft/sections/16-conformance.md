@@ -7,11 +7,11 @@
 1. Decode from one conforming JSON or restricted YAML serialization to the JSON-compatible MCP Description data model (Sections 3.1 and 15).
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
-4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.9.0 (Section 4).
+4. Include non-empty root `protocolVersions` containing only protocol versions supported by mcpdesc 0.9.0 (Section 4).
 5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
 6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
 7. <a id="req-document-schema"></a>Validate against the JSON Schema for the declared `mcpdesc` version.
-8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, component-reference, protocol version-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
 ### 16.2 Implementation Conformance
@@ -29,11 +29,11 @@
 9. Apply reasonable document-size, nesting-depth, scalar-length, and collection-size limits to supported input serializations.
 10. Resolve `$componentRef` only within the same parsed document, without network access, before contextual semantic validation.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, protocol version applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. <a id="req-stricter-profile"></a>An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
-Complete revision-specific `_meta` validation begins with MCP 2025-06-18. <a id="req-legacy-validation-scope"></a>For the recognized legacy compatibility revisions MCP 2024-11-05 and MCP 2025-03-26, validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
+Complete protocol-version-specific `_meta` validation begins with MCP 2025-06-18. <a id="req-legacy-validation-scope"></a>For the recognized legacy compatibility protocol versions MCP 2024-11-05 and MCP 2025-03-26, validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
 
 <a id="req-implementation-recommendations"></a>A conforming implementation SHOULD:
 
@@ -57,4 +57,4 @@ Validation rules identify the requirements that validators check (Section 2.3). 
 
 <a id="req-rule-results"></a>A validator MAY report rule results. A validator that claims conformance with this specification's validation fixtures MUST report them: one status for each rule and each protocol version declared by the document, or one status for a rule whose applicability does not depend on the protocol version. A status is `passed`, `failed`, `warning`, `not-applicable`, `not-evaluated`, or `delegated`. Rule results do not change document validity, which errors alone determine.
 
-<a id="req-rule-results-executed"></a>A rule result MUST come from the checks the validator executed. A validator MUST NOT report `passed` for a rule that it did not check for that protocol version, including when an earlier validation stage failed, when it does not implement the check, or when the check is not applied to a legacy compatibility revision.
+<a id="req-rule-results-executed"></a>A rule result MUST come from the checks the validator executed. A validator MUST NOT report `passed` for a rule that it did not check for that protocol version, including when an earlier validation stage failed, when it does not implement the check, or when the check is not applied to a legacy compatibility protocol version.

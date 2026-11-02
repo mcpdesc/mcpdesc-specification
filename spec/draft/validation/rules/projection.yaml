@@ -16,7 +16,7 @@ rules:
     owner: mcpdesc
     summary: >-
       Native projection starts from a document without validation errors and
-      from a revision in its root protocolVersions.
+      from a protocol version in its root protocolVersions.
     surface: Native projection
     kind: mcpdesc-semantic
     requirement: must
@@ -24,17 +24,17 @@ rules:
       - reference: MCP Description 0.9.0, Section 4.14, steps 1 and 2
         locations:
           - sections/04-versioning.md#req-native-projection-source-valid
-          - sections/04-versioning.md#req-native-projection-revision-declared
+          - sections/04-versioning.md#req-native-projection-protocol-version-declared
     enforcement: external
     status: delegated
     fixtures:
       - path: projection-fixtures/tool-source-invalid.json
         pointer: /expectedError
         outcome: error
-      - path: projection-fixtures/tool-revision-not-declared.json
+      - path: projection-fixtures/tool-protocol-version-not-declared.json
         pointer: /expectedError
         outcome: error
-      - path: projection-fixtures/prompt-revision-not-declared.json
+      - path: projection-fixtures/prompt-protocol-version-not-declared.json
         pointer: /expectedError
         outcome: error
     notes: >-
@@ -58,7 +58,7 @@ rules:
     owner: mcpdesc
     summary: >-
       Native projection selects one declaration of the requested kind and
-      identifier in the Effective Protocol View of the revision.
+      identifier in the Effective Protocol View for the protocol version.
     surface: Native projection
     kind: mcpdesc-semantic
     requirement: must
@@ -87,7 +87,7 @@ rules:
       schema. It does not repair values or invent defaults. A postcondition
       failure returns no projected value. It is an implementation or
       specification defect, unless validation warned about the Tool schema
-      under mcp.tool.schema.native-shape for that revision.
+      under mcp.tool.schema.native-shape for that protocol version.
     applicability:
       protocolVersions:
         "2024-11-05": applies
@@ -98,8 +98,8 @@ rules:
     owner: mcpdesc
     summary: >-
       A native projection keeps exactly the declaration fields that the MCP
-      type defines in the revision, unchanged after reference resolution, and
-      the value validates against the pinned MCP schema of the revision.
+      type defines in the protocol version, unchanged after reference resolution, and
+      the value validates against the pinned MCP schema for that protocol version.
     surface: Tool, Resource, ResourceTemplate, Prompt
     kind: mcpdesc-semantic
     requirement: must
@@ -159,17 +159,17 @@ rules:
       expected value passes it.
 
   - id: mcpdesc.view.projection
-    title: "Project a document to one protocol revision"
+    title: "Project a document to one MCP protocol version"
     description: >-
       A single-version projection validates the source, keeps the declarations
-      whose effective scope includes the revision, removes their scopes, and
+      whose effective scope includes the protocol version, removes their scopes, and
       keeps everything else unchanged: security forms, examples, client
       requirements, tags, extensions, and the components still referenced.
     applicability:
       protocolVersions: independent
     owner: mcpdesc
     summary: >-
-      An Effective Protocol View is a valid document for one revision that keeps
+      An Effective Protocol View is a valid document for one protocol version that keeps
       the applicable declarations and preserves their content, security
       semantics, and referenced components.
     surface: Effective Protocol View
@@ -218,7 +218,7 @@ rules:
       - path: view-fixtures/view-resource-examples-2026-07-28.json
         pointer: /expected
         outcome: passes
-      - path: view-fixtures/view-revision-not-declared.json
+      - path: view-fixtures/view-protocol-version-not-declared.json
         pointer: /expectedFailure
         outcome: error
       - path: view-fixtures/view-security-forms-2025-11-25.json
@@ -245,14 +245,14 @@ rules:
     title: "Merge protocol views without guessing"
     description: >-
       A merge validates every input, requires equivalent views for a shared
-      revision and equal unscoped metadata, collapses equivalent declarations,
+      protocol version and equal unscoped metadata, collapses equivalent declarations,
       keeps differing ones as disjoint variants, renames colliding components,
       and fails rather than guess when inputs conflict.
     applicability:
       protocolVersions: independent
     owner: mcpdesc
     summary: >-
-      A merge result is valid, preserves every input revision view, and fails
+      A merge result is valid, preserves every input protocol-version view, and fails
       on any conflict it cannot represent faithfully.
     surface: Effective Protocol View
     kind: mcpdesc-semantic
@@ -290,7 +290,7 @@ rules:
       - path: view-fixtures/merge-protocol-scoped-primitives.json
         pointer: /expected
         outcome: passes
-      - path: view-fixtures/merge-same-revision-conflict.json
+      - path: view-fixtures/merge-same-protocol-version-conflict.json
         pointer: /expectedFailure
         outcome: error
       - path: view-fixtures/merge-security-forms.json

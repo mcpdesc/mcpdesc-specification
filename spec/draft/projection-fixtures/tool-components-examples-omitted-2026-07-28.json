@@ -1,7 +1,6 @@
 {
   "description": "A component inputSchema reached through an alias and a component outputSchema are resolved; examples and elicitations are omitted.",
   "document": "../fixtures/expected-valid/reusable-components.json",
-  "revision": "2026-07-28",
   "kind": "tool",
   "identifier": "search",
   "expected": {
@@ -29,5 +28,6 @@
         "count"
       ]
     }
-  }
+  },
+  "protocolVersion": "2026-07-28"
 }

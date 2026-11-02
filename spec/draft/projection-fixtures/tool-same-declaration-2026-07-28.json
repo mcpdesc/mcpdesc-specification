@@ -1,7 +1,6 @@
 {
   "description": "An unscoped declaration projects to the same value in MCP 2026-07-28 as in MCP 2024-11-05.",
   "document": "documents/tools.json",
-  "revision": "2026-07-28",
   "kind": "tool",
   "identifier": "search",
   "expected": {
@@ -18,5 +17,6 @@
         "query"
       ]
     }
-  }
+  },
+  "protocolVersion": "2026-07-28"
 }

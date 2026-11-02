@@ -17,12 +17,12 @@ Think of it as **OpenAPI for MCP servers**: a static description that enables di
 
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
-| 0.9.0 | Community Working Draft 4 (`v0.9.0-draft.4`; unreleased) | [`draft/`](draft/) | [`../schemas/mcp-description/0.9.0.json`](../schemas/mcp-description/0.9.0.json) |
+| 0.9.0 | Release Candidate 1 (`v0.9.0-rc.1`; prerelease) | [`draft/`](draft/) | [`../schemas/mcp-description/0.9.0.json`](../schemas/mcp-description/0.9.0.json) |
 | 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) |
 | 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
-The exact proposal revisions represented by 0.8.0 are recorded in its [`0.8.0/PROPOSALS.md`](0.8.0/PROPOSALS.md) manifest.
+The exact proposal protocol versions represented by 0.8.0 are recorded in its [`0.8.0/PROPOSALS.md`](0.8.0/PROPOSALS.md) manifest.
 
 ## Quick Example
 
@@ -65,7 +65,7 @@ Versioned JSON Schemas live at the repository root under
 
 - **MCP-native** — tools, resources, and prompts use MCP protocol structures directly
 - **OpenAPI-aligned** — familiar `info`, `security`, and metadata patterns
-- **Multi-revision** — one document can describe deterministic views for multiple MCP revisions
+- **Multi-protocol version** — one document can describe deterministic views for multiple MCP protocol versions
 - **Client-aware** — primitives can declare required client capabilities and elicitation behavior
 - **Reusable** — typed local components reduce duplication across schemas and examples
 - **Example-rich** — named results, completions, and Tool interaction scenarios document behavior

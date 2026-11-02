@@ -1,7 +1,6 @@
 {
   "description": "completionExamples are omitted.",
   "document": "../fixtures/expected-valid/named-completion-examples.json",
-  "revision": "2025-11-25",
   "kind": "prompt",
   "identifier": "team_lead",
   "expected": {
@@ -16,5 +15,6 @@
         "required": true
       }
     ]
-  }
+  },
+  "protocolVersion": "2025-11-25"
 }

@@ -1,7 +1,7 @@
 // Build and combine Effective Protocol Views for the candidate MCP Description version.
 //
-// This module projects a multi-revision description to one protocol revision,
-// merges compatible revision-specific views, and compares descriptions using
+// This module projects a multi-version description to one protocol version,
+// merges compatible protocol-version-specific views, and compares descriptions using
 // semantic normalization. Public operations validate their inputs and outputs
 // with both the candidate structural schema and its semantic rules.
 
@@ -200,7 +200,7 @@ function projectUnchecked(document, version, pruneUnusedComponents = true) {
 export function projectProtocolView(document, version) {
   const rootScope = document?.protocolVersions;
   if (!Array.isArray(rootScope) || !rootScope.includes(version)) {
-    throw new Error(`Cannot project MCP protocol revision ${JSON.stringify(version)} because it is absent from root protocolVersions`);
+    throw new Error(`Cannot project MCP protocol version ${JSON.stringify(version)} because it is absent from root protocolVersions`);
   }
   assertConforming(document, 'Projection source');
   const result = projectUnchecked(document, version);

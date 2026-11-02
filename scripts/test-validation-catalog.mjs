@@ -161,6 +161,7 @@ const earlierManifest = {
   $schema: `${earlierSchemaUrl}#/$defs/catalog-manifest`,
   ruleFormatVersion: '1.1.0',
   snapshot: earlierSnapshot,
+  status: earlierIdentity.status,
   source: { ...bundle.manifest.source, tag: earlierIdentity.tag },
   ruleSchema: { url: earlierSchemaUrl, sha256: catalogDigest(earlierSchemaBytes) },
   catalog: { url: earlierIdentity.catalogUrl, sha256: bundle.manifest.catalog.sha256 },

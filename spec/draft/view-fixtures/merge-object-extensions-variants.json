@@ -1,5 +1,5 @@
 {
-  "description": "Tools with the same name and different x-* values in different revisions stay distinct scoped variants.",
+  "description": "Tools with the same name and different x-* values in different protocol versions stay distinct scoped variants.",
   "operation": "merge",
   "inputs": [
     "inputs/extension-2025-11-25.json",
