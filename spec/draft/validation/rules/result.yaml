@@ -1,5 +1,5 @@
 rules:
-  - id: mcp.completion.revision-availability
+  - id: mcp.completion.protocol-version
     title: "Check completion example protocol support"
     description: >-
       MCP Description does not support completion examples for MCP 2024-11-05,
@@ -9,7 +9,7 @@ rules:
       advertisement.
     owner: mcp
     summary: >-
-      Completion examples are available in every revision that defines
+      Completion examples are available in every protocol version that defines
       completion/complete and CompleteResult.
     surface: CompleteResult
     kind: structural
@@ -23,8 +23,8 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Sections 10.4.6 and 11.4 (no completion examples for MCP 2024-11-05)
         locations:
-          - sections/10-resources.md#req-template-completion-revisions
-          - sections/11-prompts.md#req-prompt-completion-revisions
+          - sections/10-resources.md#req-template-completion-protocol-versions
+          - sections/11-prompts.md#req-prompt-completion-protocol-versions
     sources:
       - tier: 1
         reference: "MCP 2024-11-05 schema.ts, interfaces CompleteRequest (method completion/complete) and CompleteResult; the ServerCapabilities.completions capability is added in MCP 2025-03-26"
@@ -42,12 +42,12 @@ rules:
         pointer: /resourceTemplates/0/completionExamples/issue-prefix
         outcome: passes
     gaps:
-      - revisions: ["2024-11-05"]
+      - protocolVersions: ["2024-11-05"]
         behavior: >-
           Completion examples are rejected with
           completion-example-version-mismatch, although MCP 2024-11-05 defines
           completion/complete. MCP Description does not support completion
-          examples for this revision: it is old and the use case is narrow.
+          examples for this protocol version: it is old and the use case is narrow.
         resolution: not-fixed
         reference: "Maintainer decision on issue #72, 2026-10-25"
 
@@ -60,9 +60,9 @@ rules:
       or split protocol variants if the warning is not intended.
     owner: mcp
     summary: >-
-      A field that an open MCP result type allows but the revision does not
+      A field that an open MCP result type allows but the MCP protocol version does not
       define is accepted and preserved without meaning, with a warning
-      attributed to that revision.
+      attributed to that protocol version.
     surface: Result
     kind: preservation
     requirement: may
@@ -105,7 +105,7 @@ rules:
       - path: expected-warning/open-result-unknown-properties.json
         pointer: /tools/0/examples/traced/result
         outcome: warning
-      - path: expected-warning/open-results-shared-across-revisions.json
+      - path: expected-warning/open-results-shared-across-protocol-versions.json
         pointer: /prompts/0/examples/default/result
         outcome: warning
       - path: expected-warning/open-step-responses-before-2026.json
@@ -116,7 +116,7 @@ rules:
         outcome: warning
     notes: >-
       The warnings of this rule for a document equal the union of its warnings
-      for each per-revision Effective Protocol View (scripts/test-views.mjs).
+      for each protocol-version-specific Effective Protocol View (scripts/test-views.mjs).
 
   - id: mcp.input-response.closed
     title: "Keep newer client input responses closed"
@@ -143,7 +143,7 @@ rules:
       - reference: MCP Description 0.9.0, Sections 3.6 and 9.4
         locations:
           - sections/03-document-structure.md#req-carried-closed-reject
-          - sections/09-tools.md#req-interaction-revision-valid
+          - sections/09-tools.md#req-interaction-protocol-version-valid
     sources:
       - tier: 1
         reference: "MCP 2026-07-28 schema.ts, type InputResponse (CreateMessageResult, ListRootsResult, ElicitResult); none extends Result; only CreateMessageResult defines _meta, through SamplingMessage"
@@ -159,7 +159,7 @@ rules:
         pointer: /tools/0/interactionExamples/approved/steps/0/response
         outcome: error
 
-  - id: mcp.root.meta.revision-availability
+  - id: mcp.root.meta.protocol-version
     title: "Use root metadata only where supported"
     description: >-
       Root entries acquire _meta from MCP 2025-06-18. This is different from
@@ -182,8 +182,8 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Sections 3.5, 3.6, and 9.4
         locations:
-          - sections/03-document-structure.md#req-meta-revision-availability
-          - sections/09-tools.md#req-interaction-revision-valid
+          - sections/03-document-structure.md#req-meta-protocol-version-availability
+          - sections/09-tools.md#req-interaction-protocol-version-valid
     sources:
       - tier: 1
         reference: MCP 2024-11-05 and 2025-03-26 schema.ts, interface Root (uri, name); MCP 2025-06-18 to 2026-07-28 schema.ts, interface Root (adds _meta)
@@ -213,7 +213,7 @@ rules:
     owner: mcp
     summary: >-
       A reserved _meta key appears only in the message context, and with the
-      value, that the revision defines for it.
+      value, that the MCP protocol version defines for it.
     surface: _meta
     kind: semantic
     requirement: must
@@ -248,7 +248,7 @@ rules:
       Checked on declarations and on every carried value: example results,
       their content, interaction step responses, and roots. MCP 2024-11-05 and
       2025-03-26 do not define reserved keys; Section 16.2 limits validation
-      for those revisions.
+      for those protocol versions.
 
   - id: mcp.completion.result-closed
     title: "Keep completion result members within MCP fields"
@@ -347,12 +347,12 @@ rules:
         pointer: /resources/1/examples/two-files/result/ttlMs
         outcome: passes
     notes: >-
-      MCP defines ttlMs from 2026-07-28 only. In earlier revisions it is a
-      field not defined by the revision (mcp.result.additional-properties.preserve),
+      MCP defines ttlMs from 2026-07-28 only. In earlier protocol versions it is a
+      field not defined by the MCP protocol version (mcp.result.additional-properties.preserve),
       and Section 3.6 keeps the same value constraint so that one example can
-      serve several revisions.
+      serve several protocol versions.
     arbitrations:
-      - revisions: ["2026-07-28"]
+      - protocolVersions: ["2026-07-28"]
         conflict: >-
           schema.ts declares ttlMs as number, which TypeScript cannot restrict
           to integers; the generated schema.json types it as integer.

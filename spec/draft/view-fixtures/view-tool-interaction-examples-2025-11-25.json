@@ -4,6 +4,6 @@
   "inputs": [
     "../fixtures/expected-valid/named-tool-interaction-examples.json"
   ],
-  "revision": "2025-11-25",
-  "expected": "expected/view-tool-interaction-examples-2025-11-25.json"
+  "expected": "expected/view-tool-interaction-examples-2025-11-25.json",
+  "protocolVersion": "2025-11-25"
 }

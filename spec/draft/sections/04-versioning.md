@@ -36,7 +36,7 @@ The schema document's root `$id` identifies that schema resource and establishes
 The `$schema` value does not change the MCP Description conformance version: community working draft documents remain `mcpdesc: 0.9.0`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json
 mcpdesc: 0.9.0
 ```
 
@@ -78,7 +78,7 @@ The repository file `schemas/latest.json` and, when an active draft exists, `sch
 
 <a id="req-schema-retrieval-policy"></a>Consumers MUST NOT automatically retrieve an arbitrary `$schema` URI from an untrusted document without an explicit network policy. Implementations that permit retrieval SHOULD restrict schemes and destinations, bound redirects and response sizes, validate media type and schema structure, and mitigate SSRF and cache-poisoning risks.
 
-The `$schema` property assists structural schema selection and editor integration. It does not make a structurally valid document semantically conforming and does not supersede protocol-revision or cross-object validation.
+The `$schema` property assists structural schema selection and editor integration. It does not make a structurally valid document semantically conforming and does not supersede protocol-version or cross-object validation.
 
 ### 4.8 Version Compatibility
 
@@ -91,7 +91,7 @@ Implementations MAY support multiple MCP Description versions. <a id="req-versio
 
 ### 4.9 MCP Protocol Coverage
 
-The root `protocolVersions` array identifies the MCP protocol revisions described by the document. <a id="req-protocol-versions-values"></a>It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
+The root `protocolVersions` array identifies the MCP protocol versions described by the document. <a id="req-protocol-versions-values"></a>It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
 - `2024-11-05`
 - `2025-03-26`
@@ -99,9 +99,9 @@ The root `protocolVersions` array identifies the MCP protocol revisions describe
 - `2025-11-25`
 - `2026-07-28`
 
-An unknown or later MCP revision is invalid under mcpdesc 0.9.0 because this specification cannot validate its semantics. Supporting a later revision requires a later mcpdesc specification version.
+An unknown or later MCP protocol version is invalid under mcpdesc 0.9.0 because this specification cannot validate its semantics. Supporting a later protocol version requires a later mcpdesc specification version.
 
-Root coverage states which revisions the document describes. It does not prove that the server supports no other revisions.
+Root coverage states which protocol versions the document describes. It does not prove that the server supports no other protocol versions.
 
 ### 4.10 Protocol Scopes and Inheritance
 
@@ -115,7 +115,7 @@ For a nested scoped declaration, the effective scope is its explicit `protocolVe
 
 Omission therefore means the complete effective parent scope; it does not mean unknown applicability.
 
-<a id="req-field-revision-availability"></a>As a consequence, a field that this specification marks as available since an MCP revision, or for one MCP revision only, MUST NOT appear in a declaration whose effective scope includes a revision outside that range.
+<a id="req-field-protocol-version-availability"></a>As a consequence, a field that this specification marks as available since an MCP protocol version, or for one MCP protocol version only, MUST NOT appear in a declaration whose effective scope includes a protocol version outside that range.
 
 ### 4.11 Relationship Between Version Fields
 
@@ -123,7 +123,7 @@ The `mcpdesc` version identifies this description format. Root and declaration-l
 
 ### 4.12 Effective Protocol Views and Projection
 
-For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration. It preserves the complete Info Object unchanged.
+For protocol version `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration. It preserves the complete Info Object unchanged.
 
 <a id="req-view-projection"></a>A conforming single-version projection tool MUST:
 
@@ -144,7 +144,7 @@ A merge tool MAY construct an aggregate from single-version or multi-version des
 
 <a id="req-merge-algorithm"></a>A conforming merge algorithm SHOULD project inputs into individual protocol views, require compatible logical server identity and unscoped metadata, union root protocol sets, collapse equivalent declarations by unioning their scopes, retain differing declarations as disjoint scoped variants, and validate the aggregate result.
 
-<a id="req-merge-equivalence"></a>When inputs cover the same revision, their Effective Protocol Views MUST be semantically equivalent or merge MUST fail. Conflicting `info`, `instructions`, root extension values, security declarations, or other unscoped values also cause failure.
+<a id="req-merge-equivalence"></a>When inputs cover the same protocol version, their Effective Protocol Views MUST be semantically equivalent or merge MUST fail. Conflicting `info`, `instructions`, root extension values, security declarations, or other unscoped values also cause failure.
 
 For every merged source view `D_V`, this round-trip invariant applies:
 
@@ -158,12 +158,12 @@ Omission contributes no entries to an ordinary declaration collection during mer
 
 ### 4.14 Native MCP Projection
 
-Native projection produces the MCP values that a server returns from `tools/list`, `resources/list`, `resources/templates/list`, and `prompts/list` for one MCP revision. Unlike the Effective Protocol View (Section 4.12), its result is not an MCP Description document.
+Native projection produces the MCP values that a server returns from `tools/list`, `resources/list`, `resources/templates/list`, and `prompts/list` for one MCP protocol version. Unlike the Effective Protocol View (Section 4.12), its result is not an MCP Description document.
 
-Native projection `N_V(D, k, i)` takes a document `D`, an MCP revision `V`, a primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an identifier `i`: the Tool `name`, Resource `uri`, Resource Template `uriTemplate`, or Prompt `name`, which is unique within `P_V(D)` (Sections 9.5, 10.5, and 11.5). <a id="req-native-projection-steps"></a>A conforming native projection implementation MUST:
+Native projection `N_V(D, k, i)` takes a document `D`, an MCP protocol version `V`, a primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an identifier `i`: the Tool `name`, Resource `uri`, Resource Template `uriTemplate`, or Prompt `name`, which is unique within `P_V(D)` (Sections 9.5, 10.5, and 11.5). <a id="req-native-projection-steps"></a>A conforming native projection implementation MUST:
 
 1. <a id="req-native-projection-source-valid"></a>validate `D` and fail with `projection-source-invalid` when validation reports an error;
-2. <a id="req-native-projection-revision-declared"></a>require `V` to occur in root `protocolVersions`, otherwise fail with `projection-revision-not-declared`;
+2. <a id="req-native-projection-protocol-version-declared"></a>require `V` to occur in root `protocolVersions`, otherwise fail with `projection-protocol-version-not-declared`;
 3. <a id="req-native-projection-declaration-applicable"></a>select the declaration of kind `k` with identifier `i` in `P_V(D)`, otherwise fail with `projection-declaration-not-applicable`;
 4. <a id="req-native-projection-references-resolved"></a>resolve every Reference Object in Tool `inputSchema` and `outputSchema` (Section 17);
 5. <a id="req-native-projection-fields"></a>build the value from the declaration fields that the MCP type of `k` defines in `V`, copying each value unchanged, where Prompt `arguments` entries and `icons` entries keep only the fields that MCP `PromptArgument` and `Icon` define in `V`; and
@@ -175,7 +175,7 @@ Because validation already rejects fields that `V` does not define, step 5 remov
 
 <a id="req-native-projection-lists"></a>The list projection of kind `k` for `V` is the sequence of `N_V(D, k, i)` for every declaration of kind `k` in `P_V(D)`, in document order. A failure for any declaration fails the whole list.
 
-<a id="req-native-projection-no-repair"></a>A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation, except for a Tool and revision for which validation reports the warning of [Section 9.2](#req-tool-schema-native-shape): there it reflects a restriction of the MCP `Tool` type that this specification reports but does not enforce. In both cases implementations MUST NOT repair the value.
+<a id="req-native-projection-no-repair"></a>A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation, except for a Tool and protocol version for which validation reports the warning of [Section 9.2](#req-tool-schema-native-shape): there it reflects a restriction of the MCP `Tool` type that this specification reports but does not enforce. In both cases implementations MUST NOT repair the value.
 
-The `projection-fixtures/` folder of this specification gives, for each kind and supported revision, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
+The `projection-fixtures/` folder of this specification gives, for each kind and supported protocol version, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
 

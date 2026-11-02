@@ -19,9 +19,9 @@ While borrowing patterns from OpenAPI, the specification uses **MCP protocol str
 - Tools use MCP's `inputSchema` / `outputSchema` format (not OpenAPI's Operation Object)
 - Resources use MCP's `uri` / `mimeType` pattern
 - Prompts use MCP's `arguments` array format
-- Capabilities preserve durable MCP server semantics across supported protocol revisions
+- Capabilities preserve durable MCP server semantics across supported protocol versions
 
-Runtime observations can populate MCP-native declarations, but generators must not infer unobserved revisions, primitives, or authorization policy.
+Runtime observations can populate MCP-native declarations, but generators must not infer unobserved protocol versions, primitives, or authorization policy.
 
 ## 3. Explicit Capability Declarations
 
@@ -89,6 +89,6 @@ The specification minimizes required fields:
 
 - `mcpdesc` — which MCP Description specification version
 - `info.name` + `info.version` — server identity
-- `protocolVersions` — which MCP revisions are described
+- `protocolVersions` — which MCP protocol versions are described
 
 Everything else is optional, including transports and primitive collections. Zero-primitive descriptions are valid, including descriptions of servers under development or authorization-scoped observations.

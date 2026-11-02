@@ -1,7 +1,6 @@
 {
   "description": "deprecated is omitted; annotations are copied.",
   "document": "documents/resources-and-prompts.json",
-  "revision": "2024-11-05",
   "kind": "resourceTemplate",
   "identifier": "file:///logs/{date}.log",
   "expected": {
@@ -14,5 +13,6 @@
         "assistant"
       ]
     }
-  }
+  },
+  "protocolVersion": "2024-11-05"
 }

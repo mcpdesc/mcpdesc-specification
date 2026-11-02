@@ -1,5 +1,5 @@
 rules:
-  - id: mcp.transport.streamable-http.revision-availability
+  - id: mcp.transport.streamable-http.protocol-version
     title: "Use Streamable HTTP only where supported"
     description: >-
       Streamable HTTP is not defined by the earliest supported MCP protocol
@@ -21,7 +21,7 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Section 6.2
         locations:
-          - sections/06-transports.md#req-transport-streamable-http-revisions
+          - sections/06-transports.md#req-transport-streamable-http-protocol-versions
     sources:
       - tier: 1
         reference: MCP 2025-03-26 specification, Basic, Transports, Streamable HTTP (replaces HTTP+SSE from 2024-11-05)
@@ -30,7 +30,7 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/revision-inapplicable-streamable-http.json
+      - path: expected-invalid/protocol-version-inapplicable-streamable-http.json
         pointer: /transports/0
         outcome: error
 
@@ -67,7 +67,7 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-warning/legacy-sse-modern-revision.json
+      - path: expected-warning/legacy-sse-modern-protocol-version.json
         pointer: /transports/0
         outcome: warning
 

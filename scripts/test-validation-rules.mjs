@@ -1,7 +1,7 @@
 // Check the validation rule registry under <specification>/validation/.
 //
 // Validates registry files against rule.schema.json and checks identifier
-// ownership, revision applicability, source tiers, the revision support-tier
+// ownership, protocol-version applicability, source tiers, the protocol-version support-tier
 // policy for gaps, and fixture evidence. Each fixture citation's outcome must
 // match what the candidate validator or projection case shows, every fixture
 // diagnostic must identify a registered rule that cites a fixture with that
@@ -21,8 +21,8 @@ import { evaluateDocument, supportedProtocolVersions } from './validate-document
 import { checkRuleApplicability } from './validation-catalog.mjs';
 import { checkStage, declaredCheckRules } from './validator-base.mjs';
 
-// Revisions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
-const historicalRevisions = new Set(['2024-11-05', '2025-03-26']);
+// Protocol versions whose defects may be left uncorrected as not-fixed gaps (Proposal 0024, Section 4.1).
+const historicalProtocolVersions = new Set(['2024-11-05', '2025-03-26']);
 
 const root = process.cwd();
 const { specificationRoot, schemaPath } = candidateSpecification(root);
@@ -187,11 +187,11 @@ for (const filename of files) {
     if (rule.status === 'retired') continue;
 
     for (const gap of rule.gaps ?? []) {
-      for (const revision of gap.revisions ?? []) {
-        if (!supportedProtocolVersions.includes(revision)) fail(`${where}: gap names unsupported revision ${revision}`);
+      for (const protocolVersion of gap.protocolVersions ?? []) {
+        if (!supportedProtocolVersions.includes(protocolVersion)) fail(`${where}: gap names unsupported protocol version ${protocolVersion}`);
       }
-      if (gap.resolution === 'not-fixed' && !(gap.revisions?.length && gap.revisions.every((revision) => historicalRevisions.has(revision)))) {
-        fail(`${where}: only historical revisions (${[...historicalRevisions].join(', ')}) may have not-fixed gaps`);
+      if (gap.resolution === 'not-fixed' && !(gap.protocolVersions?.length && gap.protocolVersions.every((protocolVersion) => historicalProtocolVersions.has(protocolVersion)))) {
+        fail(`${where}: only historical protocol versions (${[...historicalProtocolVersions].join(', ')}) may have not-fixed gaps`);
       }
     }
 
@@ -387,9 +387,9 @@ if (!fs.existsSync(path.join(mcpSchemasDirectory, 'manifest.json'))) {
       fail(`${mcpSchemasRel}/${entry.path}: SHA-256 differs from the manifest; vendored MCP files must stay byte-identical`);
     }
   }
-  for (const revision of supportedProtocolVersions) {
+  for (const protocolVersion of supportedProtocolVersions) {
     for (const file of ['schema.ts', 'schema.json']) {
-      if (!listed.has(`${revision}/${file}`)) fail(`${mcpSchemasRel}: manifest does not list ${revision}/${file}`);
+      if (!listed.has(`${protocolVersion}/${file}`)) fail(`${mcpSchemasRel}: manifest does not list ${protocolVersion}/${file}`);
     }
   }
   const present = fs.readdirSync(mcpSchemasDirectory, { recursive: true, withFileTypes: true })

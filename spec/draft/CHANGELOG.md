@@ -24,6 +24,18 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### Release Candidate 1 — 2026-11-02 (`v0.9.0-rc.1`)
+
+Pre-final terminology migration: normalize references to MCP protocol versions
+across active specification prose and the validation catalog. Rule IDs,
+requirement anchors, fixture paths and case fields, and the projection failure
+identifier use protocol-version terminology. Rule and result schema formats
+move to `2.0.0`, renaming arbitration/gap fields to `protocolVersions` and
+`$defs/revision` to `$defs/protocol-version`. Draft 4 (`v0.9.0-draft.4`) and
+its published catalog remain unchanged; RC.1 uses the migrated identifiers.
+See [issue #109](https://github.com/mcpdesc/mcpdesc-specification/issues/109)
+and the [validation format changelogs](validation/CHANGELOG.md).
+
 ### Community Working Draft 4 — 2026-10-31 (`v0.9.0-draft.4`)
 
 Fourth 0.9.0 snapshot, implementing review-stage Proposals 0031, 0032, and

@@ -103,7 +103,7 @@ rules:
       lastModified is defined from MCP 2025-06-18; that boundary is checked
       separately.
 
-  - id: mcp.annotations.last-modified.revision-availability
+  - id: mcp.annotations.last-modified.protocol-version
     title: "Use lastModified only where MCP defines it"
     description: >-
       Resource annotations exist in early MCP protocol versions, but

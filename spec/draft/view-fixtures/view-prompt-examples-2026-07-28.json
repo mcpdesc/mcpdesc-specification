@@ -4,6 +4,6 @@
   "inputs": [
     "../fixtures/expected-valid/named-prompt-examples.json"
   ],
-  "revision": "2026-07-28",
-  "expected": "expected/view-prompt-examples-2026-07-28.json"
+  "expected": "expected/view-prompt-examples-2026-07-28.json",
+  "protocolVersion": "2026-07-28"
 }

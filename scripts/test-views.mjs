@@ -1,6 +1,6 @@
 // Exercise projection, merge, and semantic-equivalence behavior.
 //
-// This executable uses repository fixtures to verify revision filtering,
+// This executable uses repository fixtures to verify protocol-version filtering,
 // scope removal and union, security semantics, conflict detection, extension
 // preservation, Tool-example preservation, unresolved-reference preservation,
 // and round trips. It is the
@@ -111,7 +111,7 @@ function errorCodes(document) {
     .map((diagnostic) => diagnostic.code);
 }
 
-const legacyMcpHeader = fixture('spec/draft/fixtures/expected-valid/revision-inapplicable-mcp-header.json');
+const legacyMcpHeader = fixture('spec/draft/fixtures/expected-valid/protocol-version-inapplicable-mcp-header.json');
 assert.deepEqual(errorCodes(legacyMcpHeader), []);
 
 const customKeywordSource = fixture('spec/draft/fixtures/expected-valid/custom-tool-schema-keywords.json');
@@ -475,10 +475,10 @@ assert.deepEqual(
   ['conflicting', 'legacy']
 );
 
-const sameRevisionExtensionConflict = structuredClone(mergeableObjectExtensionView2025);
-sameRevisionExtensionConflict.tools[0]['x-example-lifecycle'] = { status: 'conflicting' };
+const sameProtocolVersionExtensionConflict = structuredClone(mergeableObjectExtensionView2025);
+sameProtocolVersionExtensionConflict.tools[0]['x-example-lifecycle'] = { status: 'conflicting' };
 assert.throws(
-  () => mergeProtocolDescriptions([mergeableObjectExtensionView2025, sameRevisionExtensionConflict]),
+  () => mergeProtocolDescriptions([mergeableObjectExtensionView2025, sameProtocolVersionExtensionConflict]),
   /Conflicting Effective Protocol Views/
 );
 
@@ -686,7 +686,7 @@ assert.ok(componentProtocolDiagnostics.every(
     && diagnostic.path[1] === 0
 ));
 
-const sharedOpenResults = fixture('spec/draft/fixtures/expected-warning/open-results-shared-across-revisions.json');
+const sharedOpenResults = fixture('spec/draft/fixtures/expected-warning/open-results-shared-across-protocol-versions.json');
 function openResultWarnings(document) {
   return validateDocument(document)
     .filter(({ code }) => code === 'result-field-not-defined-by-version')
@@ -838,7 +838,7 @@ assert.throws(
 );
 
 const conflictingView = structuredClone(view2025);
-conflictingView.tools[0].description = 'A conflicting declaration for the same revision.';
+conflictingView.tools[0].description = 'A conflicting declaration for the same protocol version.';
 assert.throws(
   () => mergeProtocolDescriptions([view2025, conflictingView]),
   /Conflicting Effective Protocol Views/

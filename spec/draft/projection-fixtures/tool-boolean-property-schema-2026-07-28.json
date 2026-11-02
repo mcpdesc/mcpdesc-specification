@@ -1,7 +1,6 @@
 {
   "description": "The same boolean subschema projects unchanged for MCP 2026-07-28, whose Tool type accepts it.",
   "document": "documents/boolean-property-schema.json",
-  "revision": "2026-07-28",
   "kind": "tool",
   "identifier": "toggle",
   "expected": {
@@ -13,5 +12,6 @@
         "enabled": true
       }
     }
-  }
+  },
+  "protocolVersion": "2026-07-28"
 }

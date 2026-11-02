@@ -3,7 +3,7 @@
 // scripts/mcpdesc-views.mjs. A view or merge case expects either a result
 // document, compared by semantic equivalence, or a failure that a cited
 // requirement anchor mandates. Every merge result must also satisfy the
-// round-trip invariant of Section 4.13 for each input revision.
+// round-trip invariant of Section 4.13 for each input protocol version.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -67,7 +67,7 @@ for (const name of caseFiles) {
   let result;
   let failure;
   try {
-    result = testCase.operation === 'view' ? projectProtocolView(inputs[0], testCase.revision) : mergeProtocolDescriptions(inputs);
+    result = testCase.operation === 'view' ? projectProtocolView(inputs[0], testCase.protocolVersion) : mergeProtocolDescriptions(inputs);
   } catch (error) {
     failure = error;
   }
@@ -89,9 +89,9 @@ for (const name of caseFiles) {
   if (!semanticallyEquivalent(result, expected)) fail(`${where}: the ${testCase.operation} result is not semantically equivalent to ${testCase.expected}`);
   if (testCase.operation === 'merge') {
     inputs.forEach((input, index) => {
-      for (const revision of input.protocolVersions) {
-        if (!semanticallyEquivalent(resolved(projectProtocolView(result, revision)), resolved(projectProtocolView(input, revision)))) {
-          fail(`${where}: the merge result's MCP ${revision} view is not equivalent to input ${index + 1}'s (Section 4.13 round trip)`);
+      for (const protocolVersion of input.protocolVersions) {
+        if (!semanticallyEquivalent(resolved(projectProtocolView(result, protocolVersion)), resolved(projectProtocolView(input, protocolVersion)))) {
+          fail(`${where}: the merge result's MCP ${protocolVersion} view is not equivalent to input ${index + 1}'s (Section 4.13 round trip)`);
         }
       }
     });

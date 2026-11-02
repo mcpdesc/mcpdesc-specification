@@ -1,7 +1,6 @@
 {
-  "description": "Declarations scoped to other revisions are not listed.",
+  "description": "Declarations scoped to other protocol versions are not listed.",
   "document": "documents/tools.json",
-  "revision": "2024-11-05",
   "kind": "tool",
   "expected": [
     {
@@ -19,5 +18,6 @@
         ]
       }
     }
-  ]
+  ],
+  "protocolVersion": "2024-11-05"
 }

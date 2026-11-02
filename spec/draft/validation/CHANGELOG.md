@@ -19,6 +19,35 @@ URLs retain their exact bytes; older catalogs and specification snapshots are
 not rewritten. The `1.1.0` and `1.2.0` entries record the only exceptions so
 far.
 
+## [2.0.0] — 2026-11-02 (0.9.0 RC.1)
+
+Breaking terminology migration for MCP protocol versions. The schema identity
+is `https://mcpdesc.org/schema/validation-rule/2.0.0.json`; deployment must be
+verified before publishing the RC.1 catalog.
+
+### Record Format
+
+- Renamed `arbitrations[].revisions` and `gaps[].revisions` to
+  `protocolVersions`.
+- Renamed `#/$defs/revision` to `#/$defs/protocol-version`.
+- Rule IDs now use `protocol-version` or `protocol-shape` terminology where
+  they describe MCP protocol applicability or shape.
+- Requirement anchors and fixture paths use `protocol-version` terminology.
+
+### Publication Contract
+
+- Rule manifests and catalog indexes declare the `2.0.0` schema identity.
+- Existing 1.1.0, 1.2.0, and earlier schema URLs and published catalogs remain
+  immutable. The index may list catalogs using earlier rule formats.
+
+### Consumer Migration
+
+- Rename reads of arbitration and gap `revisions` to `protocolVersions`.
+- Update rule-ID mappings, requirement-anchor links, fixture paths, and schema
+  references using the mapping in issue #109.
+- Continue validating each catalog against the rule schema URL declared by its
+  manifest.
+
 ## [1.2.0] — 2026-10-31 (Draft 4)
 
 Rule format for the MCP Description 0.9.0 Draft 4 working tree, implementing

@@ -1,7 +1,6 @@
 {
   "description": "The Resource Template list contains every Resource Template of the Effective Protocol View, in document order.",
   "document": "documents/resources-and-prompts.json",
-  "revision": "2026-07-28",
   "kind": "resourceTemplate",
   "expected": [
     {
@@ -30,5 +29,6 @@
         }
       ]
     }
-  ]
+  ],
+  "protocolVersion": "2026-07-28"
 }

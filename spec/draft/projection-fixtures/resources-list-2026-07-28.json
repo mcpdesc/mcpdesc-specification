@@ -1,7 +1,6 @@
 {
   "description": "The Resource list contains every Resource of the Effective Protocol View, in document order.",
   "document": "documents/resources-and-prompts.json",
-  "revision": "2026-07-28",
   "kind": "resource",
   "expected": [
     {
@@ -34,5 +33,6 @@
       "name": "audit",
       "mimeType": "text/plain"
     }
-  ]
+  ],
+  "protocolVersion": "2026-07-28"
 }

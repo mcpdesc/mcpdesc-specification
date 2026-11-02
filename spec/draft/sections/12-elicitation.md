@@ -22,7 +22,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 | `url` | string (URI) | No | Static URL when known at description-authoring time. |
 | `onDecline` | string | No | Human-readable expected behavior after explicit decline. |
 | `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
-| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
+| `protocolVersions` | array\<string\> | No | MCP protocol versions to which this declaration applies. |
 
 <a id="req-elicitation-name-format"></a>`name` MUST match `^[A-Za-z0-9._-]+$`. <a id="req-elicitation-name-unique"></a>Names are case-sensitive and MUST be unique within the containing primitive declaration.
 
@@ -30,7 +30,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 
 <a id="req-elicitation-documentation-fields"></a>`when`, `onDecline`, and `onCancel`, when present, MUST be non-empty descriptive contract documentation. They are not executable expressions, client instructions, or statically provable guarantees.
 
-Although applicable MCP revisions permit omission of runtime `mode` for form elicitation, mcpdesc requires explicit `mode` to provide one canonical static representation.
+Although applicable MCP protocol versions permit omission of runtime `mode` for form elicitation, mcpdesc requires explicit `mode` to provide one canonical static representation.
 
 ### 12.3 Form Mode
 
@@ -38,7 +38,7 @@ For `mode: "form"`:
 
 - <a id="req-elicitation-form-schema-required"></a>`requestedSchema` is REQUIRED;
 - <a id="req-elicitation-form-no-url"></a>`url` MUST NOT appear; and
-- <a id="req-elicitation-form-shape"></a>`requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+- <a id="req-elicitation-form-shape"></a>`requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP protocol version.
 
 `requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. <a id="req-elicitation-schema-references-resolved"></a>The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 
@@ -46,7 +46,7 @@ The schema is limited to a flat object whose properties use MCP elicitation prim
 
 MCP 2025-06-18 supports string, number, integer, boolean, and legacy string-enum property schemas. It permits string length constraints and the `email`, `uri`, `date`, and `date-time` formats, numeric bounds, boolean defaults, and optional `enumNames` corresponding to enum values. It does not define `$schema`, defaults for strings, numbers, or enums, titled `oneOf` enums, or multi-select arrays.
 
-MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitive types, standard titled single-select enums, titled and untitled multi-select enums, and the legacy `enumNames` form. <a id="req-elicitation-form-vocabulary"></a>Validators MUST apply the vocabulary of every applicable protocol revision.
+MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitive types, standard titled single-select enums, titled and untitled multi-select enums, and the legacy `enumNames` form. <a id="req-elicitation-form-vocabulary"></a>Validators MUST apply the vocabulary of every applicable protocol version.
 
 <a id="req-elicitation-form-required"></a>A `required` entry MUST name a property declared in `properties`. <a id="req-elicitation-form-enum-names"></a>`enumNames`, when present, MUST contain one display name for every enum value. <a id="req-elicitation-form-defaults"></a>An enum default MUST be one of its declared values, and every multi-select default value MUST occur in its declared item choices. <a id="req-elicitation-form-ranges"></a>Minimum constraints MUST NOT exceed their corresponding maximum constraints.
 
@@ -58,7 +58,7 @@ For `mode: "url"`:
 - <a id="req-elicitation-url-syntax"></a>`url`, when present, MUST be a syntactically valid URI; and
 - omission of `url` means the concrete URL is generated or selected at runtime.
 
-A runtime URL-mode elicitation still supplies every field required by the applicable MCP revision. Omission in mcpdesc does not make the runtime URL optional.
+A runtime URL-mode elicitation still supplies every field required by the applicable MCP protocol version. Omission in mcpdesc does not make the runtime URL optional.
 
 Validation of `url` is syntax-only. <a id="req-elicitation-url-no-fetch"></a>Validators and other consumers MUST NOT retrieve, prefetch, dereference, or otherwise access it while processing a description. A conforming declaration does not assert that the target is currently available, trusted, immutable, controlled by the server, or suitable for automatic navigation.
 
@@ -66,19 +66,19 @@ Validation of `url` is syntax-only. <a id="req-elicitation-url-no-fetch"></a>Val
 
 An omitted Elicitation Declaration `protocolVersions` inherits the effective scope of its containing primitive. <a id="req-elicitation-scope"></a>An explicit scope MUST be non-empty and MUST be a subset of that containing scope.
 
-Complete revision-specific validation begins with MCP 2025-06-18:
+Complete protocol-version-specific validation begins with MCP 2025-06-18:
 
 - MCP 2025-06-18 supports form mode;
 - MCP 2025-11-25 supports form and URL modes; and
 - MCP 2026-07-28 supports form and URL modes.
 
-<a id="req-elicitation-revisions"></a>A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
+<a id="req-elicitation-protocol-versions"></a>A declaration spanning multiple protocol versions MUST satisfy every applicable protocol version. Authors MUST split materially incompatible declarations into disjoint scopes.
 
 MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.5. <a id="req-elicitation-legacy-incomplete"></a>Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
 
 ### 12.6 Static-Description Boundary
 
-The applicable MCP revision remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior. Static primitive `clientRequirements` may record an unconditional minimum elicitation capability without defining any of that choreography.
+The applicable MCP protocol version remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior. Static primitive `clientRequirements` may record an unconditional minimum elicitation capability without defining any of that choreography.
 
 A mock, gateway, documentation tool, or client MAY use a declaration to render its message, collect a form response matching `requestedSchema`, or present a known URL. The declaration alone does not define when a mock triggers the interaction, how it selects among declarations, how responses modify state, or which final primitive result follows.
 

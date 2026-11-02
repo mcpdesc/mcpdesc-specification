@@ -10,7 +10,7 @@
 # protocol contract changed, not because the server happens to ship two
 # unrelated product editions.
 
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json
 mcpdesc: 0.9.0
 
 info:
@@ -19,13 +19,13 @@ info:
   version: 2.0.0
   description: >
     Provides chess-engine analysis while exposing long-running work using the
-    task model appropriate to each supported MCP protocol revision.
+    task model appropriate to each supported MCP protocol version.
 
 protocolVersions:
 - '2025-11-25'
 - '2026-07-28'
 
-# The same stdio transport is valid for both protocol revisions, so it is
+# The same stdio transport is valid for both protocol versions, so it is
 # deliberately left unscoped.
 transports:
 - type: stdio
@@ -54,7 +54,8 @@ capabilities:
     io.modelcontextprotocol/tasks: {}
 
 tools:
-# This synchronous tool has identical MCP semantics in both revisions, so it
+# This synchronous tool has identical MCP semantics in both protocol versions,
+# so it
 # inherits the root protocolVersions and needs only one declaration.
 - name: get_position_evaluation
   title: Get Position Evaluation
@@ -79,7 +80,8 @@ tools:
     additionalProperties: false
 
 # 2025-11-25 variant:
-# Tool.execution is defined by MCP Description only for this MCP revision.
+# Tool.execution is defined by MCP Description only for this MCP protocol
+# version.
 # taskSupport: required means this operation is described as task-only here.
 - name: analyze_game
   title: Analyze Game

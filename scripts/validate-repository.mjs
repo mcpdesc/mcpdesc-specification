@@ -55,7 +55,7 @@ const expectedWarningCodesByFixture = new Map([
   ]],
   ['legacy-completion-examples.json', ['legacy-protocol-validation-incomplete']],
   ['legacy-result-meta.json', ['legacy-protocol-validation-incomplete']],
-  ['legacy-sse-modern-revision.json', [
+  ['legacy-sse-modern-protocol-version.json', [
     'legacy-protocol-validation-incomplete',
     'legacy-sse-for-modern-version'
   ]],
@@ -64,7 +64,7 @@ const expectedWarningCodesByFixture = new Map([
     'result-field-not-defined-by-version',
     'result-field-not-defined-by-version'
   ]],
-  ['open-results-shared-across-revisions.json', [
+  ['open-results-shared-across-protocol-versions.json', [
     'result-field-not-defined-by-version',
     'result-field-not-defined-by-version',
     'result-field-not-defined-by-version',

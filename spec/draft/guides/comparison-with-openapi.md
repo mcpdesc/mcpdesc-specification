@@ -142,7 +142,7 @@ OpenAPI models HTTP operations (GET, POST, etc.). MCP Description models tools:
 }
 ```
 
-MCP Tools avoid HTTP verbs, path parameters, and content negotiation. Beyond their required name and input schema, 0.9.0 Tools can declare output schemas, examples, interactions, elicitation, security, client requirements, tags, annotations, metadata, and protocol-revision scope.
+MCP Tools avoid HTTP verbs, path parameters, and content negotiation. Beyond their required name and input schema, 0.9.0 Tools can declare output schemas, examples, interactions, elicitation, security, client requirements, tags, annotations, metadata, and protocol-version scope.
 
 ### Security
 
@@ -172,7 +172,7 @@ MCP Description uses named scheme definitions and requirement arrays aligned wit
 | **Prompts** | Server-side prompt templates with arguments |
 | **Capabilities** | Feature flags (subscriptions, notifications, completions) |
 | **Tool Annotations** | Behavioral hints (readOnly, destructive, idempotent) |
-| **Protocol Revision Scopes** | One description can declare and project deterministic Effective Protocol Views for multiple MCP revisions |
+| **Protocol Version Scopes** | One description can declare and project deterministic Effective Protocol Views for multiple MCP protocol versions |
 | **MCP Extensions** | Formal extension capabilities and extension-aware client requirements |
 | **Client Requirements** | Primitive-level minimum client capabilities |
 | **Elicitation and Interaction Examples** | Declared user interaction plus Tool, completion, and multi-step examples |

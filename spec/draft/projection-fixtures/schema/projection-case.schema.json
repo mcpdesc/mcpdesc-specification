@@ -6,30 +6,50 @@
   "required": [
     "description",
     "document",
-    "revision",
+    "protocolVersion",
     "kind"
   ],
   "additionalProperties": false,
   "properties": {
     "description": {
-      "type": "string",
-      "minLength": 1
+      "minLength": 1,
+      "type": "string"
     },
     "document": {
       "description": "Source MCP Description document: a path relative to this file, or an inline document.",
       "oneOf": [
         {
-          "type": "string",
-          "pattern": "^(documents/[a-z0-9-]+\\.json|\\.\\./fixtures/expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml))$"
+          "pattern": "^(documents/[a-z0-9-]+\\.json|\\.\\./fixtures/expected-(valid|invalid|warning)/[a-z0-9-]+\\.(json|ya?ml))$",
+          "type": "string"
         },
         {
           "type": "object"
         }
       ]
     },
-    "revision": {
-      "type": "string",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    "expected": {
+      "description": "Exact MCP value, or the ordered list of MCP values for a list case; compared as canonical JSON.",
+      "items": {
+        "type": "object"
+      },
+      "type": [
+        "object",
+        "array"
+      ]
+    },
+    "expectedError": {
+      "description": "Failure identifier of Section 4.14 that the projection reports instead of returning a value.",
+      "enum": [
+        "projection-source-invalid",
+        "projection-protocol-version-not-declared",
+        "projection-declaration-not-applicable",
+        "projection-postcondition-failed"
+      ]
+    },
+    "identifier": {
+      "description": "Tool name, Resource uri, Resource Template uriTemplate, or Prompt name. Absent for a list case.",
+      "minLength": 1,
+      "type": "string"
     },
     "kind": {
       "enum": [
@@ -39,43 +59,11 @@
         "prompt"
       ]
     },
-    "identifier": {
-      "description": "Tool name, Resource uri, Resource Template uriTemplate, or Prompt name. Absent for a list case.",
-      "type": "string",
-      "minLength": 1
-    },
-    "expected": {
-      "description": "Exact MCP value, or the ordered list of MCP values for a list case; compared as canonical JSON.",
-      "type": [
-        "object",
-        "array"
-      ],
-      "items": {
-        "type": "object"
-      }
-    },
-    "expectedError": {
-      "description": "Failure identifier of Section 4.14 that the projection reports instead of returning a value.",
-      "enum": [
-        "projection-source-invalid",
-        "projection-revision-not-declared",
-        "projection-declaration-not-applicable",
-        "projection-postcondition-failed"
-      ]
+    "protocolVersion": {
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "type": "string"
     }
   },
-  "oneOf": [
-    {
-      "required": [
-        "expected"
-      ]
-    },
-    {
-      "required": [
-        "expectedError"
-      ]
-    }
-  ],
   "allOf": [
     {
       "if": {
@@ -112,6 +100,18 @@
           }
         }
       }
+    }
+  ],
+  "oneOf": [
+    {
+      "required": [
+        "expected"
+      ]
+    },
+    {
+      "required": [
+        "expectedError"
+      ]
     }
   ]
 }

@@ -1,12 +1,13 @@
 ---
 title: MCP Description Specification
 version: 0.9.0
-status: Community working draft 4
-draft-iteration: 4
-snapshot-tag: v0.9.0-draft.4
+status: Release candidate 1
+release-candidate-iteration: 1
+snapshot-tag: v0.9.0-rc.1
 released: false
 baseline: 0.8.0
-date: 2026-10-31
+baseline-snapshot: v0.9.0-draft.4
+date: 2026-11-02
 ---
 
 # MCP Description Specification
@@ -23,7 +24,7 @@ date: 2026-10-31
 
 This specification defines the **MCP Description** format — a portable, machine-readable document that describes the durable, externally relevant surface of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
 
-An MCP Description declares supported MCP protocol revisions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static, machine-readable document.
+An MCP Description declares supported MCP protocol versions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static, machine-readable document.
 
 It enables offline discovery, documentation generation, description validation, change analysis, testing, governance, and [interoperable tooling](../implementations.md) across the MCP ecosystem.
 
@@ -31,7 +32,7 @@ It enables offline discovery, documentation generation, description validation, 
 
 This document is Community Working Draft 4 of MCP Description v0.9.0, prepared for the prerelease tag `v0.9.0-draft.4`. It is not a stable release and may change incompatibly before release. The current stable release is MCP Description v0.8.0.
 
-The proposal revisions represented in this draft are recorded in the [proposal revision manifest](PROPOSALS.md).
+The proposal protocol versions represented in this draft are recorded in the [proposal protocol version manifest](PROPOSALS.md).
 
 ## 1. Introduction
 
@@ -106,7 +107,7 @@ The durable, externally relevant characteristics and behavior of an MCP server t
 The server surface represented by an MCP Description Document. It is not necessarily exhaustive of everything implemented or available in every runtime context.
 
 **Effective Protocol View**
-The projection of an MCP Description Document containing the declarations applicable to one MCP protocol revision.
+The projection of an MCP Description Document containing the declarations applicable to one MCP protocol version.
 
 **MCP Server**
 A server implementing the Model Context Protocol, exposing tools, resources, and/or prompts to MCP clients.
@@ -136,7 +137,7 @@ A property in an MCP Description document whose name begins with `x-` that provi
 A feature or behavior supported by an MCP server, declared in a Capabilities Object.
 
 **Protocol Applicability**
-The MCP protocol revisions to which a declaration applies, determined from its effective protocol scope.
+The MCP protocol versions to which a declaration applies, determined from its effective protocol scope.
 
 **Security Requirement**
 A declaration of one or more named security schemes and, where applicable, authorization scopes that must be satisfied to access a transport or primitive.
@@ -170,7 +171,7 @@ Property ordering is not significant unless an individual field explicitly defin
 | `$schema` | string | No | JSON Schema reference for IDE validation |
 | `mcpdesc` | string | **Yes** | Specification version (`"0.9.0"`) |
 | `info` | [Info Object](#5-info-object) | **Yes** | Server metadata |
-| `protocolVersions` | array\<string\> | **Yes** | MCP protocol revisions described by the document |
+| `protocolVersions` | array\<string\> | **Yes** | MCP protocol versions described by the document |
 | `instructions` | string | No | Durable natural-language guidance for using the server |
 | `transports` | non-empty array\<[Transport Object](#6-transports)\> | No | Declared transports |
 | `securitySchemes` | non-empty map\<string, [Security Scheme Object](#72-security-scheme-object)\> | No | Reusable named security schemes |
@@ -209,30 +210,30 @@ A document MAY omit all of `tools`, `resources`, `resourceTemplates`, and `promp
 
 ### 3.5 MCP `_meta`
 
-The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result, content, Tool Interaction step response, and root objects in named examples. <a id="req-meta-revision-availability"></a>It MAY appear only when every revision in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
+The `_meta` property allows additional metadata to be attached to a Tool, Resource, Resource Template, or Prompt declaration, and to supported result, content, Tool Interaction step response, and root objects in named examples. <a id="req-meta-protocol-version-availability"></a>It MAY appear only when every protocol version in the object's Effective Protocol View defines `_meta` for the corresponding MCP object.
 
 Metadata in a named example describes only that example. It does not define a reusable metadata schema or require a server to send the same metadata.
 
-<a id="req-meta-keys"></a>Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol revision. A recognized violation is a document-conformance error. <a id="req-meta-reserved-prefix"></a>A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A protocol-version projection MUST preserve `_meta` and MUST NOT combine metadata from variants that cover different protocol revisions.
+<a id="req-meta-keys"></a>Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol version. A recognized violation is a document-conformance error. <a id="req-meta-reserved-prefix"></a>A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A protocol-version projection MUST preserve `_meta` and MUST NOT combine metadata from variants that cover different protocol versions.
 
 
 ### 3.6 Carried MCP Values
 
-Named examples carry MCP values: Tool Example and Tool Interaction Example `result`, Tool Interaction step `response` values for sampling, elicitation, and roots, Resource and Resource Template Example `result`, Prompt Example `result`, and completion example `result`, including values reached through component references. A carried value is validated for every MCP revision in the containing declaration's effective protocol scope, using the type that revision defines for it. A type accepts fields it does not list only if its definition in the revision's TypeScript schema declares or inherits an index signature; such a type is open, and every other type is closed. <a id="req-mcp-integer-numbers"></a>A field that the revision's TypeScript schema declares as `number` is an integer unless the schema annotates it `@TJS-type number`, as in the JSON Schema that MCP generates from it.
+Named examples carry MCP values: Tool Example and Tool Interaction Example `result`, Tool Interaction step `response` values for sampling, elicitation, and roots, Resource and Resource Template Example `result`, Prompt Example `result`, and completion example `result`, including values reached through component references. A carried value is validated for every MCP protocol version in the containing declaration's effective protocol scope, using the type that protocol version defines for it. A type accepts fields it does not list only if its definition in the protocol version's TypeScript schema declares or inherits an index signature; such a type is open, and every other type is closed. <a id="req-mcp-integer-numbers"></a>A field that the protocol version's TypeScript schema declares as `number` is an integer unless the schema annotates it `@TJS-type number`, as in the JSON Schema that MCP generates from it.
 
-For each applicable revision and each field of a carried value:
+For each applicable protocol version and each field of a carried value:
 
-1. <a id="req-carried-defined-fields"></a>A field that the revision defines MUST satisfy its type, and a field that the revision requires MUST be present.
-2. <a id="req-carried-open-preserve"></a>A field that the revision does not define, on a type that is open in that revision, MUST be accepted and preserved. Implementations MUST NOT apply the meaning that another revision gives the same name. Validators MUST report the warning `result-field-not-defined-by-version`, identifying the field and the revision.
-3. <a id="req-carried-closed-reject"></a>A field that the revision does not define, on a type that is closed in that revision, MUST be rejected.
+1. <a id="req-carried-defined-fields"></a>A field that the protocol version defines MUST satisfy its type, and a field that the protocol version requires MUST be present.
+2. <a id="req-carried-open-preserve"></a>A field that the protocol version does not define, on a type that is open in that protocol version, MUST be accepted and preserved. Implementations MUST NOT apply the meaning that another protocol version gives the same name. Validators MUST report the warning `result-field-not-defined-by-version`, identifying the field and the protocol version.
+3. <a id="req-carried-closed-reject"></a>A field that the protocol version does not define, on a type that is closed in that protocol version, MUST be rejected.
 
 JSON-RPC envelope fields and non-completed workflow fields are governed by the example rules of Sections 9.3, 9.4, 10.4, and 11 instead.
 
-Every result type carried by examples extends the open MCP `Result` in every supported revision. Sampling, elicitation, and roots responses extend `Result` through MCP 2025-11-25; in MCP 2026-07-28 they are closed input responses, and only the sampling response defines `_meta`. <a id="req-carried-nested-closed"></a>Nested objects such as content blocks, resource contents, roots, and the `completion` object of a completion result are closed.
+Every result type carried by examples extends the open MCP `Result` in every supported protocol version. Sampling, elicitation, and roots responses extend `Result` through MCP 2025-11-25; in MCP 2026-07-28 they are closed input responses, and only the sampling response defines `_meta`. <a id="req-carried-nested-closed"></a>Nested objects such as content blocks, resource contents, roots, and the `completion` object of a completion result are closed.
 
-Example `result` values are completed results. <a id="req-completed-result-fields"></a>When present, in every revision, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative integer, and `cacheScope` MUST be `"public"` or `"private"`.
+Example `result` values are completed results. <a id="req-completed-result-fields"></a>When present, in every protocol version, `resultType` MUST be `"complete"`, `ttlMs` MUST be a non-negative integer, and `cacheScope` MUST be `"public"` or `"private"`.
 
-A declaration covering several revisions MAY use one example map even when a field is defined by only some of them; authors MAY instead split the declaration into protocol-scoped variants to avoid the warnings. Because each warning is attributed to one revision, the warnings defined here for a document equal the union of those for its per-revision Effective Protocol Views.
+A declaration covering several protocol versions MAY use one example map even when a field is defined by only some of them; authors MAY instead split the declaration into protocol-scoped variants to avoid the warnings. Because each warning is attributed to one protocol version, the warnings defined here for a document equal the union of those for its per-protocol-version Effective Protocol Views.
 
 ### 3.7 Property Ordering
 
@@ -252,7 +253,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json",
   "mcpdesc": "0.9.0",
   "info": {
     "name": "chess-rating-server",
@@ -302,7 +303,7 @@ The schema document's root `$id` identifies that schema resource and establishes
 The `$schema` value does not change the MCP Description conformance version: community working draft documents remain `mcpdesc: 0.9.0`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json
 mcpdesc: 0.9.0
 ```
 
@@ -344,7 +345,7 @@ The repository file `schemas/latest.json` and, when an active draft exists, `sch
 
 <a id="req-schema-retrieval-policy"></a>Consumers MUST NOT automatically retrieve an arbitrary `$schema` URI from an untrusted document without an explicit network policy. Implementations that permit retrieval SHOULD restrict schemes and destinations, bound redirects and response sizes, validate media type and schema structure, and mitigate SSRF and cache-poisoning risks.
 
-The `$schema` property assists structural schema selection and editor integration. It does not make a structurally valid document semantically conforming and does not supersede protocol-revision or cross-object validation.
+The `$schema` property assists structural schema selection and editor integration. It does not make a structurally valid document semantically conforming and does not supersede protocol-version or cross-object validation.
 
 ### 4.8 Version Compatibility
 
@@ -357,7 +358,7 @@ Implementations MAY support multiple MCP Description versions. <a id="req-versio
 
 ### 4.9 MCP Protocol Coverage
 
-The root `protocolVersions` array identifies the MCP protocol revisions described by the document. <a id="req-protocol-versions-values"></a>It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
+The root `protocolVersions` array identifies the MCP protocol versions described by the document. <a id="req-protocol-versions-values"></a>It MUST be non-empty, MUST contain unique values, and every value MUST be one of:
 
 - `2024-11-05`
 - `2025-03-26`
@@ -365,9 +366,9 @@ The root `protocolVersions` array identifies the MCP protocol revisions describe
 - `2025-11-25`
 - `2026-07-28`
 
-An unknown or later MCP revision is invalid under mcpdesc 0.9.0 because this specification cannot validate its semantics. Supporting a later revision requires a later mcpdesc specification version.
+An unknown or later MCP protocol version is invalid under mcpdesc 0.9.0 because this specification cannot validate its semantics. Supporting a later protocol version requires a later mcpdesc specification version.
 
-Root coverage states which revisions the document describes. It does not prove that the server supports no other revisions.
+Root coverage states which protocol versions the document describes. It does not prove that the server supports no other protocol versions.
 
 ### 4.10 Protocol Scopes and Inheritance
 
@@ -381,7 +382,7 @@ For a nested scoped declaration, the effective scope is its explicit `protocolVe
 
 Omission therefore means the complete effective parent scope; it does not mean unknown applicability.
 
-<a id="req-field-revision-availability"></a>As a consequence, a field that this specification marks as available since an MCP revision, or for one MCP revision only, MUST NOT appear in a declaration whose effective scope includes a revision outside that range.
+<a id="req-field-protocol-version-availability"></a>As a consequence, a field that this specification marks as available since an MCP protocol version, or for one MCP protocol version only, MUST NOT appear in a declaration whose effective scope includes a protocol version outside that range.
 
 ### 4.11 Relationship Between Version Fields
 
@@ -389,7 +390,7 @@ The `mcpdesc` version identifies this description format. Root and declaration-l
 
 ### 4.12 Effective Protocol Views and Projection
 
-For protocol revision `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration. It preserves the complete Info Object unchanged.
+For protocol version `V`, the Effective Protocol View `P_V(D)` of document `D` contains each scoped declaration whose effective scope includes `V` and excludes every other scoped declaration. It preserves the complete Info Object unchanged.
 
 <a id="req-view-projection"></a>A conforming single-version projection tool MUST:
 
@@ -410,7 +411,7 @@ A merge tool MAY construct an aggregate from single-version or multi-version des
 
 <a id="req-merge-algorithm"></a>A conforming merge algorithm SHOULD project inputs into individual protocol views, require compatible logical server identity and unscoped metadata, union root protocol sets, collapse equivalent declarations by unioning their scopes, retain differing declarations as disjoint scoped variants, and validate the aggregate result.
 
-<a id="req-merge-equivalence"></a>When inputs cover the same revision, their Effective Protocol Views MUST be semantically equivalent or merge MUST fail. Conflicting `info`, `instructions`, root extension values, security declarations, or other unscoped values also cause failure.
+<a id="req-merge-equivalence"></a>When inputs cover the same protocol version, their Effective Protocol Views MUST be semantically equivalent or merge MUST fail. Conflicting `info`, `instructions`, root extension values, security declarations, or other unscoped values also cause failure.
 
 For every merged source view `D_V`, this round-trip invariant applies:
 
@@ -424,12 +425,12 @@ Omission contributes no entries to an ordinary declaration collection during mer
 
 ### 4.14 Native MCP Projection
 
-Native projection produces the MCP values that a server returns from `tools/list`, `resources/list`, `resources/templates/list`, and `prompts/list` for one MCP revision. Unlike the Effective Protocol View (Section 4.12), its result is not an MCP Description document.
+Native projection produces the MCP values that a server returns from `tools/list`, `resources/list`, `resources/templates/list`, and `prompts/list` for one MCP protocol version. Unlike the Effective Protocol View (Section 4.12), its result is not an MCP Description document.
 
-Native projection `N_V(D, k, i)` takes a document `D`, an MCP revision `V`, a primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an identifier `i`: the Tool `name`, Resource `uri`, Resource Template `uriTemplate`, or Prompt `name`, which is unique within `P_V(D)` (Sections 9.5, 10.5, and 11.5). <a id="req-native-projection-steps"></a>A conforming native projection implementation MUST:
+Native projection `N_V(D, k, i)` takes a document `D`, an MCP protocol version `V`, a primitive kind `k` (Tool, Resource, Resource Template, or Prompt), and an identifier `i`: the Tool `name`, Resource `uri`, Resource Template `uriTemplate`, or Prompt `name`, which is unique within `P_V(D)` (Sections 9.5, 10.5, and 11.5). <a id="req-native-projection-steps"></a>A conforming native projection implementation MUST:
 
 1. <a id="req-native-projection-source-valid"></a>validate `D` and fail with `projection-source-invalid` when validation reports an error;
-2. <a id="req-native-projection-revision-declared"></a>require `V` to occur in root `protocolVersions`, otherwise fail with `projection-revision-not-declared`;
+2. <a id="req-native-projection-protocol-version-declared"></a>require `V` to occur in root `protocolVersions`, otherwise fail with `projection-protocol-version-not-declared`;
 3. <a id="req-native-projection-declaration-applicable"></a>select the declaration of kind `k` with identifier `i` in `P_V(D)`, otherwise fail with `projection-declaration-not-applicable`;
 4. <a id="req-native-projection-references-resolved"></a>resolve every Reference Object in Tool `inputSchema` and `outputSchema` (Section 17);
 5. <a id="req-native-projection-fields"></a>build the value from the declaration fields that the MCP type of `k` defines in `V`, copying each value unchanged, where Prompt `arguments` entries and `icons` entries keep only the fields that MCP `PromptArgument` and `Icon` define in `V`; and
@@ -441,9 +442,9 @@ Because validation already rejects fields that `V` does not define, step 5 remov
 
 <a id="req-native-projection-lists"></a>The list projection of kind `k` for `V` is the sequence of `N_V(D, k, i)` for every declaration of kind `k` in `P_V(D)`, in document order. A failure for any declaration fails the whole list.
 
-<a id="req-native-projection-no-repair"></a>A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation, except for a Tool and revision for which validation reports the warning of [Section 9.2](#req-tool-schema-native-shape): there it reflects a restriction of the MCP `Tool` type that this specification reports but does not enforce. In both cases implementations MUST NOT repair the value.
+<a id="req-native-projection-no-repair"></a>A `projection-postcondition-failed` failure indicates a defect in this specification, its validator, or the implementation, except for a Tool and protocol version for which validation reports the warning of [Section 9.2](#req-tool-schema-native-shape): there it reflects a restriction of the MCP `Tool` type that this specification reports but does not enforce. In both cases implementations MUST NOT repair the value.
 
-The `projection-fixtures/` folder of this specification gives, for each kind and supported revision, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
+The `projection-fixtures/` folder of this specification gives, for each kind and supported protocol version, the exact expected MCP value or failure, in the case format of `projection-fixtures/schema/projection-case.schema.json`. Values are compared as canonical JSON.
 
 ## 5. Info Object
 
@@ -451,7 +452,7 @@ The `info` object provides metadata about the MCP server. <a id="req-info-requir
 
 The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fields from the MCP `Implementation` type used for server identity. The MCP-sourced fields — `name`, `title`, `description`, `version`, `icons`, and `websiteUrl` — allow an MCP Description document to represent server identity metadata that may also be advertised at runtime.
 
-Info is unscoped, document-wide MCP Description metadata. Every property defined by this specification MAY appear regardless of the revisions listed in root `protocolVersions`. A mapping to MCP `Implementation` indicates that a producer MAY obtain or compare the value through runtime initialization when the negotiated revision defines that field. <a id="req-info-revision-independent"></a>It MUST NOT be interpreted as requiring a runtime origin or restricting the property's presence to those revisions. Validators MUST NOT emit a revision-applicability diagnostic solely because an Info property is unavailable on `Implementation` in an applicable MCP revision.
+Info is unscoped, document-wide MCP Description metadata. Every property defined by this specification MAY appear regardless of the protocol versions listed in root `protocolVersions`. A mapping to MCP `Implementation` indicates that a producer MAY obtain or compare the value through runtime initialization when the negotiated protocol version defines that field. <a id="req-info-protocol-version-independent"></a>It MUST NOT be interpreted as requiring a runtime origin or restricting the property's presence to those protocol versions. Validators MUST NOT emit a protocol version-applicability diagnostic solely because an Info property is unavailable on `Implementation` in an applicable MCP protocol version.
 
 A producer MAY obtain Info metadata from author input, configuration, package metadata, a registry, runtime discovery, or another source. <a id="req-info-trust"></a>This specification does not assign trust or precedence among those sources, and consumers MUST NOT infer that an Info value was asserted by a live server.
 
@@ -550,7 +551,7 @@ Every Transport Object MAY contain `protocolVersions` and `security`. `protocolV
 | `type` | `"streamable-http"` | **Yes** | Transport type identifier |
 | `url` | string (URI) | **Yes** | MCP endpoint URL |
 
-The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. <a id="req-transport-streamable-http-revisions"></a>It is defined for MCP 2025-03-26 and later and is the RECOMMENDED transport for remote MCP servers in those revisions.
+The streamable HTTP transport connects to an MCP server over HTTP with streaming response support. <a id="req-transport-streamable-http-protocol-versions"></a>It is defined for MCP 2025-03-26 and later and is the RECOMMENDED transport for remote MCP servers in those protocol versions.
 
 ```json
 {
@@ -651,9 +652,9 @@ This mechanism allows a single MCP Description document to declare different sec
 
 ### 6.5 Protocol Coverage
 
-<a id="req-transport-coverage"></a>When `transports` is present, the union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one revision.
+<a id="req-transport-coverage"></a>When `transports` is present, the union of all effective transport protocol scopes MUST equal root `protocolVersions`. Transport scopes MAY overlap because a server can expose multiple transports for one protocol version.
 
-A document with `transports` is invalid when any root revision has no applicable transport or when a transport scope contains a revision outside root coverage. <a id="req-transport-coverage-omitted"></a>When `transports` is omitted, transport coverage validation does not apply: validators MUST NOT infer a transport or report uncovered root revisions.
+A document with `transports` is invalid when any root protocol version has no applicable transport or when a transport scope contains a protocol version outside root coverage. <a id="req-transport-coverage-omitted"></a>When `transports` is omitted, transport coverage validation does not apply: validators MUST NOT infer a transport or report uncovered root protocol versions.
 
 ### 6.6 Extensibility
 
@@ -771,7 +772,7 @@ Completion examples on Prompt and Resource Template declarations are descriptive
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `protocolVersions` | array\<string\> | MCP revisions to which this object applies; inherits root coverage when omitted |
+| `protocolVersions` | array\<string\> | MCP protocol versions to which this object applies; inherits root coverage when omitted |
 | `tools` | object | Tool-related capabilities |
 | `tools.listChanged` | boolean | Whether the server sends `notifications/tools/list_changed` |
 | `resources` | object | Resource-related capabilities |
@@ -782,7 +783,7 @@ Completion examples on Prompt and Resource Template declarations are descriptive
 | `completions` | object | Present if the server supports argument autocompletion (MCP 2025-03-26+) |
 | `logging` | object | Present if the server supports sending log messages to the client |
 | `tasks` | object | Present if the server supports core task-augmented requests (MCP 2025-11-25 only) |
-| `extensions` | non-empty map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28); pre-standard server advertisements are preserved with a warning for earlier revisions |
+| `extensions` | non-empty map\<string, object\> | Formal MCP extension capabilities (MCP 2026-07-28); pre-standard server advertisements are preserved with a warning for earlier protocol versions |
 | `experimental` | object | Experimental, non-standard capabilities |
 
 ### 8.3 Tasks Capability
@@ -797,11 +798,11 @@ The `tasks` object, when present, indicates the server supports long-running tas
 
 ### 8.4 Extensibility
 
-Formal `extensions` capability negotiation begins with MCP 2026-07-28. <a id="req-capabilities-extensions-pre-standard"></a>When a server Capabilities Object containing `extensions` applies to an earlier revision, the map MUST satisfy the same structural requirements, MUST be accepted and preserved, and MUST NOT imply that the earlier MCP core revision defines the field or that the server supports MCP 2026-07-28. Validators SHOULD warn for each applicable earlier revision that its core schema does not define the field and that the description is preserving a deployed pre-standard extension negotiation convention. Implementations MAY escalate this warning under an explicit local policy.
+Formal `extensions` capability negotiation begins with MCP 2026-07-28. <a id="req-capabilities-extensions-pre-standard"></a>When a server Capabilities Object containing `extensions` applies to an earlier protocol version, the map MUST satisfy the same structural requirements, MUST be accepted and preserved, and MUST NOT imply that the earlier MCP core protocol version defines the field or that the server supports MCP 2026-07-28. Validators SHOULD warn for each applicable earlier protocol version that its core schema does not define the field and that the description is preserving a deployed pre-standard extension negotiation convention. Implementations MAY escalate this warning under an explicit local policy.
 
 <a id="req-extensions-identifier-form"></a>`extensions` keys MUST use the MCP mandatory-prefix metadata form `prefix/name`. A prefix whose second label is `modelcontextprotocol` or `mcp` is reserved for MCP use. Unknown syntactically valid extension identifiers are accepted and MUST be preserved. <a id="req-extensions-reserved-identifiers"></a>A validator SHOULD warn about an unrecognized identifier under a reserved prefix and MUST NOT treat absence from its local catalogue alone as proof of namespace misuse. Use known to be unauthorized is a semantic error.
 
-Protocol-version, identifier-authority, and identifier-maturity diagnostics are independent. <a id="req-extensions-not-reinterpreted"></a>Tooling MUST NOT move, copy, or reinterpret a pre-standard server extension map as `experimental`, `_meta`, an MCP Description `x-*` property, or a declaration for another protocol revision.
+Protocol-version, identifier-authority, and identifier-maturity diagnostics are independent. <a id="req-extensions-not-reinterpreted"></a>Tooling MUST NOT move, copy, or reinterpret a pre-standard server extension map as `experimental`, `_meta`, an MCP Description `x-*` property, or a declaration for another protocol version.
 
 For this purpose, an official MCP extension is recognized when the validator's extension catalogue identifies it from an authoritative MCP extension source. <a id="req-extensions-official-no-warning"></a>A validator SHOULD NOT emit an unknown-reserved-identifier warning for a catalogued official extension. <a id="req-extensions-catalogue-maturity"></a>It SHOULD identify a catalogued experimental extension as experimental rather than unknown and SHOULD warn that its maturity must be reviewed. Recognition establishes identifier authority and maturity only; it does not establish that an extension value satisfies extension-specific settings or semantics.
 
@@ -809,7 +810,7 @@ An extension catalogue is validator metadata rather than part of the MCP Descrip
 
 A validator MAY apply deeper extension-specific validation only through an explicitly selected profile or other configured trusted mechanism. <a id="req-extensions-profiles"></a>Such validation SHOULD identify an immutable or otherwise pinned extension specification version and MUST distinguish profile diagnostics from core MCP Description conformance. Failure to retrieve mutable extension material MUST NOT invalidate an otherwise conforming document.
 
-<a id="req-capabilities-tasks-distinct"></a>Core `tasks` in MCP 2025-11-25 and a Tasks extension in MCP 2026-07-28 are distinct declarations and MUST NOT be automatically reinterpreted as one another. <a id="req-capabilities-logging-deprecated"></a>`logging` remains representable for revisions that define it; validators SHOULD warn when it applies to MCP 2026-07-28, where it is deprecated.
+<a id="req-capabilities-tasks-distinct"></a>Core `tasks` in MCP 2025-11-25 and a Tasks extension in MCP 2026-07-28 are distinct declarations and MUST NOT be automatically reinterpreted as one another. <a id="req-capabilities-logging-deprecated"></a>`logging` remains representable for protocol versions that define it; validators SHOULD warn when it applies to MCP 2026-07-28, where it is deprecated.
 
 <a id="req-capabilities-closed"></a>The Capabilities Object and the MCP Description-defined `tools`, `resources`, and `prompts` capability declaration objects MAY carry `x-*` specification extensions. Other unknown properties on those objects are invalid. MCP-native capability payloads retain their own forward-compatibility rules. The `capabilities.extensions` map is a formal MCP protocol-extension namespace, not an MCP Description specification-extension location; tooling MUST NOT reinterpret or move values between these mechanisms.
 
@@ -817,26 +818,26 @@ A validator MAY apply deeper extension-specific validation only through an expli
 
 Tool, Resource, Resource Template, and Prompt Objects MAY contain a `clientRequirements` Client Capability Requirements Object. It describes an unconditional static precondition on the minimum MCP client capabilities required to use that primitive through `tools/call`, `resources/read`, or `prompts/get`. A Resource Template requirement applies to reading a concrete URI produced from the template. Requirements do not apply to listing or discovery, and this specification neither requires nor prohibits runtime filtering based on them.
 
-The object uses the `ClientCapabilities` structure of every MCP revision in the containing primitive's effective protocol scope. <a id="req-client-requirements-shape"></a>It MUST be non-empty, MUST NOT contain `protocolVersions`, and inherits no value from the root, a Transport Object, server `capabilities`, an Elicitation Declaration, or another primitive. <a id="req-client-requirements-revision-valid"></a>Every declared capability and nested capability member MUST be valid for every effective revision. The pre-standard server-advertisement preservation rule in Section 8.4 does not relax this requirement. When requirements differ materially between revisions, the primitive MUST be split into pairwise-disjoint protocol-scoped variants.
+The object uses the `ClientCapabilities` structure of every MCP protocol version in the containing primitive's effective protocol scope. <a id="req-client-requirements-shape"></a>It MUST be non-empty, MUST NOT contain `protocolVersions`, and inherits no value from the root, a Transport Object, server `capabilities`, an Elicitation Declaration, or another primitive. <a id="req-client-requirements-protocol-version-valid"></a>Every declared capability and nested capability member MUST be valid for every effective protocol version. The pre-standard server-advertisement preservation rule in Section 8.4 does not relax this requirement. When requirements differ materially between protocol versions, the primitive MUST be split into pairwise-disjoint protocol-scoped variants.
 
 All requirements are conjunctive. Satisfying them does not guarantee success or authorization. <a id="req-client-requirements-unconditional"></a>Authors MUST NOT declare a capability that is optional, opportunistic, input-dependent, or used only on some runtime paths as an unconditional requirement.
 
-The recognized core structure is revision-specific:
+The recognized core structure is protocol-version-specific:
 
-| Revision | Core client capability shape |
+| Protocol version | Core client capability shape |
 |----------|------------------------------|
 | MCP 2024-11-05 and MCP 2025-03-26 | `roots.listChanged`, `sampling`, and `experimental` |
 | MCP 2025-06-18 | The earlier shape plus `elicitation` |
 | MCP 2025-11-25 | `roots.listChanged`; `sampling.context` and `sampling.tools`; `elicitation.form` and `elicitation.url`; core `tasks.list`, `tasks.cancel`, `tasks.requests.sampling.createMessage`, and `tasks.requests.elicitation.create`; and `experimental` |
 | MCP 2026-07-28 | `elicitation.form` and `elicitation.url`; formal `extensions`; and `experimental`; Deprecated empty `roots`; deprecated `sampling.context` and `sampling.tools` |
 
-<a id="req-client-requirements-values"></a>Capability marker and settings values MUST be objects. MCP 2026-07-28 `roots` MUST be empty. <a id="req-client-requirements-deprecated"></a>Validators SHOULD warn when a requirement uses a capability or nested member deprecated in its applicable revision. MCP 2024-11-05 and MCP 2025-03-26 retain the legacy incomplete-validation treatment in Section 3.5: validators apply structural and selected sound checks and MUST NOT report complete MCP semantic conformance.
+<a id="req-client-requirements-values"></a>Capability marker and settings values MUST be objects. MCP 2026-07-28 `roots` MUST be empty. <a id="req-client-requirements-deprecated"></a>Validators SHOULD warn when a requirement uses a capability or nested member deprecated in its applicable protocol version. MCP 2024-11-05 and MCP 2025-03-26 retain the legacy incomplete-validation treatment in Section 3.5: validators apply structural and selected sound checks and MUST NOT report complete MCP semantic conformance.
 
-<a id="req-client-requirements-closed"></a>The object contains only the client capabilities that the applicable MCP revisions define. MCP's `ClientCapabilities` type declares no index signature in any supported revision, so other top-level members MUST NOT appear; custom requirements belong in `experimental` and, for MCP 2026-07-28, in `extensions`. Entries of `experimental` are accepted and MUST be preserved. Validators MUST NOT invent matching semantics for them. This Client Capability Requirements Object is an MCP Description-defined semantic object and MAY carry `x-*` specification extensions; those properties are MCP Description metadata, not client capabilities.
+<a id="req-client-requirements-closed"></a>The object contains only the client capabilities that the applicable MCP protocol versions define. MCP's `ClientCapabilities` type declares no index signature in any supported protocol version, so other top-level members MUST NOT appear; custom requirements belong in `experimental` and, for MCP 2026-07-28, in `extensions`. Entries of `experimental` are accepted and MUST be preserved. Validators MUST NOT invent matching semantics for them. This Client Capability Requirements Object is an MCP Description-defined semantic object and MAY carry `x-*` specification extensions; those properties are MCP Description metadata, not client capabilities.
 
 <a id="req-client-requirements-extensions"></a>For MCP 2026-07-28, `extensions` MUST be a non-empty map whose keys satisfy the same mandatory-prefix identifier grammar and reserved-prefix rules as `capabilities.extensions`, and whose values are objects. Unknown syntactically valid identifiers MUST be preserved. Validators SHOULD warn about an unrecognized identifier under an MCP-reserved prefix. <a id="req-client-requirements-extension-compatibility"></a>A generic compatibility checker MAY treat an empty extension requirement value as satisfied by presence of that identifier in the client's extension map. It MUST NOT claim a non-empty extension requirement is satisfied without understanding the extension-specific settings semantics.
 
-<a id="req-client-requirements-compatibility"></a>A compatibility tool comparing `clientRequirements` with a client capability profile for one revision SHOULD report `satisfied` when every requirement is known to be satisfied, `unsatisfied` when any requirement is known not to be satisfied, and `indeterminate` when none is known to fail but at least one cannot be evaluated. An omitted property means that the description makes no primitive-level hard-requirement claim; it does not prove that no runtime path can optionally use a capability.
+<a id="req-client-requirements-compatibility"></a>A compatibility tool comparing `clientRequirements` with a client capability profile for one protocol version SHOULD report `satisfied` when every requirement is known to be satisfied, `unsatisfied` when any requirement is known not to be satisfied, and `indeterminate` when none is known to fail but at least one cannot be evaluated. An omitted property means that the description makes no primitive-level hard-requirement claim; it does not prove that no runtime path can optionally use a capability.
 
 Server `capabilities`, primitive `clientRequirements`, Elicitation Declarations, Tool `interactionExamples`, and `security` are independent. <a id="req-capability-independence"></a>Tooling MUST NOT infer or copy one from another. In particular, a conditional elicitation or an illustrative interaction scenario does not imply an unconditional client-capability requirement, and capability compatibility is not an authorization decision.
 
@@ -844,7 +845,7 @@ Server `capabilities`, primitive `clientRequirements`, Elicitation Declarations,
 
 ### 8.6 Scope Uniqueness
 
-<a id="req-capability-scopes-disjoint"></a>Effective Capabilities Object scopes MUST be pairwise disjoint. At most one Capabilities Object may apply to a protocol revision.
+<a id="req-capability-scopes-disjoint"></a>Effective Capabilities Object scopes MUST be pairwise disjoint. At most one Capabilities Object may apply to a protocol version.
 
 ### 8.7 Example
 
@@ -879,7 +880,7 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
+| `protocolVersions` | array\<string\> | No | MCP protocol versions to which this declaration applies. |
 | `name` | string | **Yes** | Programmatic tool name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable tool description. |
@@ -907,17 +908,17 @@ The `tools` array declares the tools exposed by the MCP server. Each tool repres
 
 <a id="req-tool-output-schema-valid"></a>The `outputSchema` property, when present, MUST be a valid JSON Schema object describing the tool's structured output. For MCP 2025-11-25 and MCP 2026-07-28, it defaults to JSON Schema 2020-12 when no explicit `$schema` is provided.
 
-For MCP 2025-11-25 and MCP 2026-07-28, both schemas MAY include an explicit `$schema` property to declare the JSON Schema dialect. <a id="req-tool-schema-dialect-keyword"></a>Earlier revisions do not define that property on Tool schemas. <a id="req-tool-schema-vocabulary"></a>For MCP 2026-07-28, validators MUST accept the applicable JSON Schema 2020-12 vocabulary, including references, composition, and conditionals, plus MCP-defined annotations where valid. Earlier views MUST be checked according to their applicable MCP schema rules.
+For MCP 2025-11-25 and MCP 2026-07-28, both schemas MAY include an explicit `$schema` property to declare the JSON Schema dialect. <a id="req-tool-schema-dialect-keyword"></a>Earlier protocol versions do not define that property on Tool schemas. <a id="req-tool-schema-vocabulary"></a>For MCP 2026-07-28, validators MUST accept the applicable JSON Schema 2020-12 vocabulary, including references, composition, and conditionals, plus MCP-defined annotations where valid. Earlier views MUST be checked according to their applicable MCP schema rules.
 
-<a id="req-tool-schema-dialect-valid"></a>For MCP 2025-11-25 and MCP 2026-07-28, every embedded Tool schema MUST be valid under its declared or default dialect. Both revisions default to JSON Schema 2020-12. <a id="req-tool-schema-dialect-set"></a>A declared dialect MUST be JSON Schema 2020-12 (`https://json-schema.org/draft/2020-12/schema`) or JSON Schema draft-07 (`http://json-schema.org/draft-07/schema#`), with either `http` or `https` and with or without the empty fragment; a schema that declares any other dialect makes the MCP Description invalid. This set is fixed by this specification so that conformance does not depend on the validator. MCP requires implementations to support only JSON Schema 2020-12, so authors SHOULD prefer it.
+<a id="req-tool-schema-dialect-valid"></a>For MCP 2025-11-25 and MCP 2026-07-28, every embedded Tool schema MUST be valid under its declared or default dialect. Both protocol versions default to JSON Schema 2020-12. <a id="req-tool-schema-dialect-set"></a>A declared dialect MUST be JSON Schema 2020-12 (`https://json-schema.org/draft/2020-12/schema`) or JSON Schema draft-07 (`http://json-schema.org/draft-07/schema#`), with either `http` or `https` and with or without the empty fragment; a schema that declares any other dialect makes the MCP Description invalid. This set is fixed by this specification so that conformance does not depend on the validator. MCP requires implementations to support only JSON Schema 2020-12, so authors SHOULD prefer it.
 
-For MCP 2025-11-25 and MCP 2026-07-28, the dialect, not the TypeScript type of the MCP `Tool`, decides whether an embedded schema is valid. The MCP `Tool` type of these revisions also restricts schema syntax that the dialect allows: it requires `"type": "object"` at the `inputSchema` root in both revisions and, for MCP 2025-11-25, at the `outputSchema` root and an object as the value of every top-level `properties` entry of either schema. <a id="req-tool-schema-native-shape"></a>A Tool schema that is valid under its dialect but does not meet such a restriction for an applicable revision MUST NOT make the MCP Description invalid. Validators MUST report a warning for each such location, naming the revisions concerned, because native projection fails for them (Section 4.14). Authors SHOULD meet the restrictions, for example by writing `{}` instead of `true`, `{ "not": {} }` instead of `false`, or `"type": "object"` beside `$ref` or `allOf`, or SHOULD narrow the Tool's `protocolVersions`.
+For MCP 2025-11-25 and MCP 2026-07-28, the dialect, not the TypeScript type of the MCP `Tool`, decides whether an embedded schema is valid. The MCP `Tool` type of these protocol versions also restricts schema syntax that the dialect allows: it requires `"type": "object"` at the `inputSchema` root in both protocol versions and, for MCP 2025-11-25, at the `outputSchema` root and an object as the value of every top-level `properties` entry of either schema. <a id="req-tool-schema-native-shape"></a>A Tool schema that is valid under its dialect but does not meet such a restriction for an applicable protocol version MUST NOT make the MCP Description invalid. Validators MUST report a warning for each such location, naming the protocol versions concerned, because native projection fails for them (Section 4.14). Authors SHOULD meet the restrictions, for example by writing `{}` instead of `true`, `{ "not": {} }` instead of `false`, or `"type": "object"` beside `$ref` or `allOf`, or SHOULD narrow the Tool's `protocolVersions`.
 
-The supported revisions before MCP 2025-11-25 define an object-rooted Tool schema shape but do not state an embedded-schema dialect default. <a id="req-tool-schema-legacy-no-dialect"></a>For those revisions, validators MUST enforce the applicable shape without inferring a dialect solely from the enclosing generated MCP schema. <a id="req-tool-schema-legacy-shape"></a>`properties`, when present, MUST be an object whose values are objects, and `required`, when present, MUST be an array of strings. <a id="req-tool-schema-keywords-preserved"></a>Other keywords MUST be preserved and MUST NOT be rejected solely by applying an inferred meta-schema.
+The supported protocol versions before MCP 2025-11-25 define an object-rooted Tool schema shape but do not state an embedded-schema dialect default. <a id="req-tool-schema-legacy-no-dialect"></a>For those protocol versions, validators MUST enforce the applicable shape without inferring a dialect solely from the enclosing generated MCP schema. <a id="req-tool-schema-legacy-shape"></a>`properties`, when present, MUST be an object whose values are objects, and `required`, when present, MUST be an array of strings. <a id="req-tool-schema-keywords-preserved"></a>Other keywords MUST be preserved and MUST NOT be rejected solely by applying an inferred meta-schema.
 
 <a id="req-tool-schema-no-fetch"></a>An mcpdesc validator MUST NOT automatically retrieve an external `$ref` target from a network. It MAY resolve external references from an explicitly supplied trusted local catalogue or an explicitly enabled resolver that follows the applicable MCP security guidance. <a id="req-tool-schema-external-ref"></a>If a target remains unavailable, the `$ref` MUST be preserved and its presence alone MUST NOT make the containing MCP Description invalid. The validator SHOULD warn that complete embedded-schema validation was not possible and MUST NOT report a weakened or partial validation as complete. <a id="req-tool-schema-consumer-certainty"></a>Consumers that require executable schema certainty SHOULD require resolution or treat this warning as an error. <a id="req-tool-schema-self-contained"></a>Authors SHOULD prefer self-contained Tool schemas using local `$defs`.
 
-<a id="req-tool-output-schema-object-root"></a>Before MCP 2026-07-28, `outputSchema` MUST describe an object, because structured output is an object in those revisions. For MCP 2025-06-18 it MUST declare `"type": "object"`; for MCP 2025-11-25 a root that declares `type` MUST give `"object"` or an array that contains `"object"`. MCP 2026-07-28 permits any valid JSON Schema root for `outputSchema`.
+<a id="req-tool-output-schema-object-root"></a>Before MCP 2026-07-28, `outputSchema` MUST describe an object, because structured output is an object in those protocol versions. For MCP 2025-06-18 it MUST declare `"type": "object"`; for MCP 2025-11-25 a root that declares `type` MUST give `"object"` or an array that contains `"object"`. MCP 2026-07-28 permits any valid JSON Schema root for `outputSchema`.
 
 MCP 2026-07-28 `inputSchema` properties MAY use `x-mcp-header` to map an input to an HTTP header. <a id="req-tool-x-mcp-header"></a>The annotation value MUST be a non-empty HTTP field-name token and MUST be unique case-insensitively within that `inputSchema`. It is valid only on a `string`, `integer`, or `boolean` property that is statically reachable from the schema root through `properties` chains. It MUST NOT be used on a property reached through arrays, composition, conditionals, or `$ref`.
 
@@ -934,17 +935,17 @@ A Tool Object MAY contain `examples`, a map from a local example name to an inli
 
 <a id="req-tool-example-closed"></a>The Tool Example Object MUST NOT contain other additional properties. In particular, 0.9.0 does not define `summary`, `description`, or `externalValue`.
 
-<a id="req-tool-example-input-valid"></a>`input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol revision's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
+<a id="req-tool-example-input-valid"></a>`input` MUST be an object and MUST validate against the containing Tool's `inputSchema` under every applicable protocol version's schema rules. A no-argument invocation MUST use `input: {}`. Schema-invalid values belong in negative test material, not conforming Tool Examples.
 
-<a id="req-tool-example-result-shape"></a>`result` MUST contain `content` and MUST have the completed Tool Result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable revision does not define follow [Section 3.6](#36-carried-mcp-values). <a id="req-tool-example-completed-form"></a>Task, input-required, streaming, progress, JSON-RPC envelope, and JSON-RPC protocol-error forms are not Tool Examples. <a id="req-tool-example-content-revision"></a>Content blocks MAY use any text, image, audio, embedded-resource, or resource-link form supported by every applicable revision.
+<a id="req-tool-example-result-shape"></a>`result` MUST contain `content` and MUST have the completed Tool Result shape defined by every applicable protocol version. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable protocol version does not define follow [Section 3.6](#36-carried-mcp-values). <a id="req-tool-example-completed-form"></a>Task, input-required, streaming, progress, JSON-RPC envelope, and JSON-RPC protocol-error forms are not Tool Examples. <a id="req-tool-example-content-protocol-version"></a>Content blocks MAY use any text, image, audio, embedded-resource, or resource-link form supported by every applicable protocol version.
 
-Revision-supported `_meta` on the completed result, content blocks, and embedded Resource Contents is literal illustrative metadata governed by [Section 3.5](#35-mcp-_meta). It is not a schema or a request-metadata declaration. In MCP 2026-07-28, a result example MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid in these represented contexts.
+Protocol version-supported `_meta` on the completed result, content blocks, and embedded Resource Contents is literal illustrative metadata governed by [Section 3.5](#35-mcp-_meta). It is not a schema or a request-metadata declaration. In MCP 2026-07-28, a result example MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid in these represented contexts.
 
-<a id="req-tool-example-success"></a>A successful result MUST omit `isError` or set it to `false`. It MAY contain `structuredContent` only in revisions that support that field. <a id="req-tool-example-structured-content"></a>If the Tool declares `outputSchema`, a successful result MUST contain `structuredContent`, which MUST validate against that schema under the applicable schema rules. Unstructured `content` remains required when `structuredContent` is present. If the Tool has no `outputSchema`, a successful result MAY contain revision-supported `structuredContent`, but mcpdesc makes no schema-compatibility claim for that value.
+<a id="req-tool-example-success"></a>A successful result MUST omit `isError` or set it to `false`. It MAY contain `structuredContent` only in protocol versions that support that field. <a id="req-tool-example-structured-content"></a>If the Tool declares `outputSchema`, a successful result MUST contain `structuredContent`, which MUST validate against that schema under the applicable schema rules. Unstructured `content` remains required when `structuredContent` is present. If the Tool has no `outputSchema`, a successful result MAY contain protocol version-supported `structuredContent`, but mcpdesc makes no schema-compatibility claim for that value.
 
 <a id="req-tool-example-error-result"></a>A Tool execution-error result MUST set `isError` to `true`, MUST contain unstructured `content`, and MUST NOT contain `structuredContent`. `outputSchema` does not validate error content. JSON-RPC protocol errors and transport or intermediary failures that prevent a Tool Result are outside this model.
 
-Example compatibility is a semantic conformance requirement. <a id="req-tool-example-incomplete-validation"></a>For revisions before MCP 2025-11-25, validators MUST enforce constraints they can interpret without inventing an embedded-schema dialect, SHOULD warn when complete compatibility validation is impossible, and MUST NOT report incomplete validation as complete. An unresolved external `$ref` follows the policy in Section 9.2: validators preserve the schema and example, do not retrieve the target automatically, and warn that compatibility validation is incomplete. A schema-incompatible example is an error whenever complete evaluation is possible.
+Example compatibility is a semantic conformance requirement. <a id="req-tool-example-incomplete-validation"></a>For protocol versions before MCP 2025-11-25, validators MUST enforce constraints they can interpret without inventing an embedded-schema dialect, SHOULD warn when complete compatibility validation is impossible, and MUST NOT report incomplete validation as complete. An unresolved external `$ref` follows the policy in Section 9.2: validators preserve the schema and example, do not retrieve the target automatically, and warn that compatibility validation is incomplete. A schema-incompatible example is an error whenever complete evaluation is possible.
 
 Tool `examples` and JSON Schema `examples` annotations are independent. Schema annotations remain suitable for anonymous values at an instance location; Tool Examples pair named complete invocations with completed results. <a id="req-tool-example-not-inferred"></a>Producers MUST NOT infer an author-supplied Tool Example by combining unrelated schema annotations.
 
@@ -982,11 +983,11 @@ Tool `interactionExamples` are separate from completed Tool `examples`. <a id="r
 
 An `elicitation` step MAY contain `declaration`, naming an Elicitation Declaration on the same Tool. <a id="req-interaction-elicitation-declaration"></a>When present, the request mode and the request schema or known URL MUST be compatible with that declaration after local reference resolution. <a id="req-interaction-elicitation-response"></a>For `mode: "form"`, an accepted response MUST contain `content` conforming to the request schema; declined and cancelled responses MUST NOT contain `content`. For `mode: "url"`, the response MUST omit `content`.
 
-<a id="req-interaction-sampling-revision"></a>A `sampling` step request uses the native `sampling/createMessage` parameter field names and constraints of every MCP revision in the containing Tool's effective protocol scope, excluding JSON-RPC, transport, task, and MRTR framing. This includes required `messages` and `maxTokens`, and MAY include revision-supported model preferences, system prompt, context inclusion, stop sequences, temperature, metadata, and Tool-related fields. Its response uses the native completed sampling result field names and constraints of every applicable revision, excluding JSON-RPC and task framing.
+<a id="req-interaction-sampling-protocol-version"></a>A `sampling` step request uses the native `sampling/createMessage` parameter field names and constraints of every MCP protocol version in the containing Tool's effective protocol scope, excluding JSON-RPC, transport, task, and MRTR framing. This includes required `messages` and `maxTokens`, and MAY include protocol version-supported model preferences, system prompt, context inclusion, stop sequences, temperature, metadata, and Tool-related fields. Its response uses the native completed sampling result field names and constraints of every applicable protocol version, excluding JSON-RPC and task framing.
 
 A `roots` step request is an empty object. Its response contains the ordered native `roots` declarations returned by the client for this illustration. Roots are descriptive input only; they do not authorize filesystem access.
 
-The containing Tool's effective protocol scope controls validation. <a id="req-interaction-revision-valid"></a>Every represented semantic field MUST be valid in every applicable revision. A Tool spanning materially incompatible interaction shapes MUST be split into disjoint protocol-scoped variants. `interactionExamples` themselves do not carry `protocolVersions`.
+The containing Tool's effective protocol scope controls validation. <a id="req-interaction-protocol-version-valid"></a>Every represented semantic field MUST be valid in every applicable protocol version. A Tool spanning materially incompatible interaction shapes MUST be split into disjoint protocol-scoped variants. `interactionExamples` themselves do not carry `protocolVersions`.
 
 Tool `interactionExamples` do not add server capabilities, `clientRequirements`, or Elicitation Declarations. <a id="req-interaction-client-requirements-warning"></a>Validators SHOULD warn when a scenario contradicts an explicit primitive `clientRequirements` declaration, but MUST NOT infer a requirement when the Tool declares none.
 
@@ -996,7 +997,7 @@ Interaction scenarios are untrusted descriptive content. <a id="req-interaction-
 
 ### 9.5 Protocol Variants and Security
 
-<a id="req-tool-names-disjoint"></a>Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root revisions and overlaps every scoped Tool with the same name.
+<a id="req-tool-names-disjoint"></a>Tools with the same `name` MUST have pairwise-disjoint effective protocol scopes. Projection therefore yields at most one declaration for that name. An omitted scope covers all root protocol versions and overlaps every scoped Tool with the same name.
 
 Tool `security` describes statically known authorization required to call the Tool and replaces inherited transport or root security in full.
 
@@ -1016,7 +1017,7 @@ All Tool Annotation properties are advisory. They are not guaranteed to describe
 | `idempotentHint` | boolean | `false` | Repeated calls with same arguments have no additional effect |
 | `openWorldHint` | boolean | `true` | Tool may interact with external entities |
 
-<a id="req-tool-annotations-closed"></a>The Tool Annotations object contains only the properties above. MCP defines `ToolAnnotations` as a closed type in every supported revision, so other properties, including `x-*` keys, MUST NOT appear. Resource Annotation fields MUST NOT be used here.
+<a id="req-tool-annotations-closed"></a>The Tool Annotations object contains only the properties above. MCP defines `ToolAnnotations` as a closed type in every supported protocol version, so other properties, including `x-*` keys, MUST NOT appear. Resource Annotation fields MUST NOT be used here.
 
 ### 9.7 Execution Object
 
@@ -1143,7 +1144,7 @@ The `resources` array declares the static resources exposed by the MCP server. E
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
+| `protocolVersions` | array\<string\> | No | MCP protocol versions to which this declaration applies. |
 | `uri` | string (URI) | **Yes** | Resource URI. |
 | `name` | string | **Yes** | Programmatic resource name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
@@ -1176,7 +1177,7 @@ The `resourceTemplates` array declares parameterized resource definitions using 
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
+| `protocolVersions` | array\<string\> | No | MCP protocol versions to which this declaration applies. |
 | `uriTemplate` | string | **Yes** | URI template (RFC 6570). |
 | `name` | string | **Yes** | Programmatic template name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
@@ -1205,13 +1206,13 @@ Resource Annotations provide optional client hints about how a Resource, Resourc
 | `priority` | number | Relative importance from `0` (least important) through `1` (most important). |
 | `lastModified` | string | Resource modification time in ISO 8601 form. Since MCP 2025-06-18. |
 
-Resource Annotations have been available throughout the MCP revisions supported by this specification. <a id="req-resource-annotations-last-modified"></a>MCP 2024-11-05 and MCP 2025-03-26 define `audience` and `priority`; `lastModified` MUST NOT be used in an Effective Protocol View before MCP 2025-06-18.
+Resource Annotations have been available throughout the MCP protocol versions supported by this specification. <a id="req-resource-annotations-last-modified"></a>MCP 2024-11-05 and MCP 2025-03-26 define `audience` and `priority`; `lastModified` MUST NOT be used in an Effective Protocol View before MCP 2025-06-18.
 
-Resource Annotations are hints rather than access controls or integrity claims. <a id="req-resource-annotations-hints"></a>Consumers MUST NOT treat `audience` as authorization, `priority` as a mandatory processing order, or `lastModified` as proof of freshness. <a id="req-resource-annotations-closed"></a>The object contains only the properties above. MCP defines `Annotations` as a closed type in every supported revision, so other properties, including `x-*` keys and Tool Annotation fields, MUST NOT appear.
+Resource Annotations are hints rather than access controls or integrity claims. <a id="req-resource-annotations-hints"></a>Consumers MUST NOT treat `audience` as authorization, `priority` as a mandatory processing order, or `lastModified` as proof of freshness. <a id="req-resource-annotations-closed"></a>The object contains only the properties above. MCP defines `Annotations` as a closed type in every supported protocol version, so other properties, including `x-*` keys and Tool Annotation fields, MUST NOT appear.
 
 Annotations on a Resource describe the concrete Resource declaration returned by resource discovery. Annotations on a Resource Template describe the template declaration as a whole; they are not observations about one particular URI expansion. Named Resource examples instead represent completed `resources/read` results. <a id="req-resource-annotations-not-in-examples"></a>Their Resource Contents entries follow the applicable MCP Resource Contents type, which does not define `annotations`, so declaration annotations MUST NOT be moved into an example result. MCP Description 0.9.0 does not define per-example Resource Annotations.
 
-In MCP protocol values, the same Resource Annotations type also applies to supported content blocks, including text, image, audio, embedded-resource, and resource-link content where those block types are available in the applicable revision. <a id="req-content-annotations-distinct"></a>MCP Description fields that embed such protocol content MUST retain the distinction between Resource Annotations and Tool Annotations.
+In MCP protocol values, the same Resource Annotations type also applies to supported content blocks, including text, image, audio, embedded-resource, and resource-link content where those block types are available in the applicable protocol version. <a id="req-content-annotations-distinct"></a>MCP Description fields that embed such protocol content MUST retain the distinction between Resource Annotations and Tool Annotations.
 
 ### 10.4 Named Resource Examples
 
@@ -1244,7 +1245,7 @@ The object MAY carry `x-*` specification extensions; no other additional propert
 
 #### 10.4.4 Completed Resource Read Result
 
-The `result` value represents the value inside a successful JSON-RPC response's `result` member. <a id="req-resource-example-contents"></a>It MUST contain a non-empty `contents` array. <a id="req-resource-example-result-shape"></a>For MCP 2026-07-28 it MUST contain `resultType: "complete"`, non-negative integer `ttlMs`, and `cacheScope` equal to `"public"` or `"private"`; these are required fields of the MCP `CacheableResult` extended by `ReadResourceResult`. Earlier supported revisions do not define these fields; when present for those revisions they follow [Section 3.6](#36-carried-mcp-values), so a declaration whose examples span MCP 2026-07-28 and an earlier revision MAY share one example map. <a id="req-resource-contents-meta"></a>Result `_meta` is available in every supported revision, and Resource Contents `_meta` is available from MCP 2025-06-18; both are literal illustrative values governed by [Section 3.5](#35-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. <a id="req-resource-example-completed-form"></a>JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
+The `result` value represents the value inside a successful JSON-RPC response's `result` member. <a id="req-resource-example-contents"></a>It MUST contain a non-empty `contents` array. <a id="req-resource-example-result-shape"></a>For MCP 2026-07-28 it MUST contain `resultType: "complete"`, non-negative integer `ttlMs`, and `cacheScope` equal to `"public"` or `"private"`; these are required fields of the MCP `CacheableResult` extended by `ReadResourceResult`. Earlier supported protocol versions do not define these fields; when present for those protocol versions they follow [Section 3.6](#36-carried-mcp-values), so a declaration whose examples span MCP 2026-07-28 and an earlier protocol version MAY share one example map. <a id="req-resource-contents-meta"></a>Result `_meta` is available in every supported protocol version, and Resource Contents `_meta` is available from MCP 2025-06-18; both are literal illustrative values governed by [Section 3.5](#35-mcp-_meta), not reusable metadata contracts. In MCP 2026-07-28, result `_meta` MAY use `io.modelcontextprotocol/serverInfo` with an MCP Implementation value; request-only and notification-only reserved keys are invalid here. <a id="req-resource-example-completed-form"></a>JSON-RPC envelope fields, errors, task state, input-required state, and other non-completed workflows MUST NOT appear.
 
 <a id="req-resource-contents-fields"></a>Every `contents` entry MUST contain `uri` and exactly one of `text` or `blob`. <a id="req-resource-example-blob-base64"></a>A `blob` value MUST be valid base64. <a id="req-resource-example-order"></a>An example MAY contain multiple entries; consumers MUST preserve their order and MUST NOT assume every returned URI equals the requested URI.
 
@@ -1256,7 +1257,7 @@ Resource read errors are JSON-RPC errors and are not Resource Examples in 0.9.0.
 
 #### 10.4.5 Use, Projection, and Security
 
-Resource examples are illustrative, non-exhaustive snapshots. They do not assert live equality, freshness, immutability, cache validity, or complete coverage. Revision-supported metadata is part of the example and is not a guarantee about a live server. In particular, `ttlMs` and `cacheScope` reproduce the illustrated MCP 2026-07-28 result; they do not govern caching of the MCP Description document or authorize sharing captured or live content across authorization contexts.
+Resource examples are illustrative, non-exhaustive snapshots. They do not assert live equality, freshness, immutability, cache validity, or complete coverage. Protocol version-supported metadata is part of the example and is not a guarantee about a live server. In particular, `ttlMs` and `cacheScope` reproduce the illustrated MCP 2026-07-28 result; they do not govern caching of the MCP Description document or authorize sharing captured or live content across authorization contexts.
 
 <a id="req-resource-example-tooling"></a>Documentation tooling SHOULD preserve names, concrete template URIs, result fields, and content order. Mock and contract-test tooling MAY select an exact named example. It MUST NOT dereference example URIs or fetch a live Resource while loading or serving an inline or referenced example. This specification defines no default example, wildcard match, template fallback, dynamic behavior, or external value.
 
@@ -1278,9 +1279,9 @@ A Resource Template Object MAY contain `completionExamples`, a local non-empty m
 
 <a id="req-template-completion-example-closed"></a>The Completion Example Object MUST NOT contain other unprefixed properties. The `argument` object MUST contain required string properties `name` and `value`. <a id="req-template-completion-target"></a>`argument.name` MUST identify one RFC 6570 variable in the containing `uriTemplate`. Every `context.arguments` key MUST identify another RFC 6570 variable from the same template, and the completed argument MUST NOT also appear in context. Variable identity is determined by parsing RFC 6570 expressions: operators and modifiers do not change the variable name, so `{+path}` identifies `path`, `{id:3}` identifies `id`, and `{owner,repository}` identifies both `owner` and `repository`.
 
-`context` MAY be omitted. <a id="req-template-completion-context-shape"></a>When present, it MUST contain a non-empty `arguments` map whose values are strings. An empty context MUST be omitted rather than represented as an empty object. <a id="req-template-completion-context-revision"></a>MCP 2025-03-26 does not define completion context, so a Resource Template completion example spanning that revision and a later revision MUST be split into disjoint protocol-scoped Resource Template declarations when context is needed.
+`context` MAY be omitted. <a id="req-template-completion-context-shape"></a>When present, it MUST contain a non-empty `arguments` map whose values are strings. An empty context MUST be omitted rather than represented as an empty object. <a id="req-template-completion-context-protocol-version"></a>MCP 2025-03-26 does not define completion context, so a Resource Template completion example spanning that protocol version and a later protocol version MUST be split into disjoint protocol-scoped Resource Template declarations when context is needed.
 
-<a id="req-template-completion-result"></a>`result` MUST contain `completion.values`, an ordered array of string candidates. It MAY preserve native `completion.total`, `completion.hasMore`, and revision-supported result `_meta`. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable revision does not define follow [Section 3.6](#36-carried-mcp-values). JSON-RPC envelope fields, errors, and incomplete workflows are not completion examples. Resource Template completion examples are valid only in an effective protocol scope where MCP defines completion and every represented field. <a id="req-template-completion-revisions"></a>MCP Description does not support completion examples for MCP 2024-11-05.
+<a id="req-template-completion-result"></a>`result` MUST contain `completion.values`, an ordered array of string candidates. It MAY preserve native `completion.total`, `completion.hasMore`, and protocol version-supported result `_meta`. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable protocol version does not define follow [Section 3.6](#36-carried-mcp-values). JSON-RPC envelope fields, errors, and incomplete workflows are not completion examples. Resource Template completion examples are valid only in an effective protocol scope where MCP defines completion and every represented field. <a id="req-template-completion-protocol-versions"></a>MCP Description does not support completion examples for MCP 2024-11-05.
 
 Completion examples are illustrative and non-exhaustive. They do not create enums, defaults, authorization grants, or a promise that a future request yields the same candidates, ordering, total, or pagination state. <a id="req-template-completion-projection-omitted"></a>Projection to MCP Resource Template list values MUST omit `completionExamples` unless an independent MCP extension defines a destination. <a id="req-template-completion-views"></a>Effective Protocol View projection and round-tripping MUST preserve the selected declaration's `completionExamples` map and MUST NOT merge maps from disjoint protocol variants.
 
@@ -1414,7 +1415,7 @@ The `prompts` array declares the prompt templates exposed by the MCP server. Eac
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
+| `protocolVersions` | array\<string\> | No | MCP protocol versions to which this declaration applies. |
 | `name` | string | **Yes** | Programmatic prompt name (identifier). |
 | `title` | string | No | Human-readable display name for UI contexts. Since MCP 2025-06-18. |
 | `description` | string | No | Human-readable prompt description. |
@@ -1459,9 +1460,9 @@ A Prompt Object MAY contain `examples`, a map from a local example name to an in
 
 `arguments` MAY be omitted. <a id="req-prompt-example-arguments-shape"></a>When present, it MUST be an object whose values are strings. <a id="req-prompt-example-arguments"></a>Every key MUST identify an argument declared by the containing Prompt, and every declared argument with `required: true` MUST be present. Optional arguments MAY be omitted. <a id="req-prompt-example-completed-form"></a>The example MUST NOT contain transport metadata, JSON-RPC IDs, method names, or request `_meta`.
 
-<a id="req-prompt-example-result-shape"></a>`result` MUST preserve the ordered `messages` array and MUST have the completed Prompt result shape defined by every applicable protocol revision. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable revision does not define follow [Section 3.6](#36-carried-mcp-values). It MAY preserve the native result `description`. Task, input-required, streaming, partial, and JSON-RPC error forms are not Prompt Examples.
+<a id="req-prompt-example-result-shape"></a>`result` MUST preserve the ordered `messages` array and MUST have the completed Prompt result shape defined by every applicable protocol version. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable protocol version does not define follow [Section 3.6](#36-carried-mcp-values). It MAY preserve the native result `description`. Task, input-required, streaming, partial, and JSON-RPC error forms are not Prompt Examples.
 
-Revision-supported `_meta` on the completed result and message content is literal illustrative metadata governed by [Section 3.5](#35-mcp-_meta). It is not request metadata or a schema declaration. <a id="req-prompt-example-content-revision"></a>Message `content` MAY use any content-block form supported by every applicable revision.
+Protocol version-supported `_meta` on the completed result and message content is literal illustrative metadata governed by [Section 3.5](#35-mcp-_meta). It is not request metadata or a schema declaration. <a id="req-prompt-example-content-protocol-version"></a>Message `content` MAY use any content-block form supported by every applicable protocol version.
 
 Prompt examples are illustrative and non-exhaustive. They do not change Prompt arguments, capabilities, security, client requirements, or runtime behavior, and they do not guarantee deterministic or current output. <a id="req-prompt-example-tooling"></a>Documentation tooling SHOULD preserve example names and argument/result pairing. Mock or contract-test tooling MAY permit explicit selection by name but MUST NOT present an unnamed selection as a prediction of live behavior.
 
@@ -1483,9 +1484,9 @@ A Prompt Object MAY contain `completionExamples`, a local non-empty map from an 
 
 <a id="req-prompt-completion-example-closed"></a>The Completion Example Object MUST NOT contain other unprefixed properties. The `argument` object MUST contain required string properties `name` and `value`. <a id="req-prompt-completion-target"></a>`argument.name` MUST identify one declared Prompt Argument. Every `context.arguments` key MUST identify another declared Prompt Argument, and the completed argument MUST NOT also occur in context. Context MAY be partial: omission of a required Prompt argument means only that the illustrated completion request did not provide it.
 
-`context` MAY be omitted. <a id="req-prompt-completion-context-shape"></a>When present, it MUST contain a non-empty `arguments` map whose values are strings. An empty context MUST be omitted rather than represented as an empty object. <a id="req-prompt-completion-context-revision"></a>MCP 2025-03-26 does not define completion context, so a Prompt completion example spanning that revision and a later revision MUST be split into disjoint protocol-scoped Prompt declarations when context is needed.
+`context` MAY be omitted. <a id="req-prompt-completion-context-shape"></a>When present, it MUST contain a non-empty `arguments` map whose values are strings. An empty context MUST be omitted rather than represented as an empty object. <a id="req-prompt-completion-context-protocol-version"></a>MCP 2025-03-26 does not define completion context, so a Prompt completion example spanning that protocol version and a later protocol version MUST be split into disjoint protocol-scoped Prompt declarations when context is needed.
 
-<a id="req-prompt-completion-result"></a>`result` MUST contain `completion.values`, an ordered array of string candidates. It MAY preserve native `completion.total`, `completion.hasMore`, and revision-supported result `_meta`. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable revision does not define follow [Section 3.6](#36-carried-mcp-values). JSON-RPC envelope fields, errors, and incomplete workflows are not Prompt completion examples. Prompt completion examples are valid only in an effective protocol scope where MCP defines completion and every represented field. <a id="req-prompt-completion-revisions"></a>MCP Description does not support completion examples for MCP 2024-11-05.
+<a id="req-prompt-completion-result"></a>`result` MUST contain `completion.values`, an ordered array of string candidates. It MAY preserve native `completion.total`, `completion.hasMore`, and protocol version-supported result `_meta`. For MCP 2026-07-28 it MUST contain `resultType: "complete"`. Fields that an applicable protocol version does not define follow [Section 3.6](#36-carried-mcp-values). JSON-RPC envelope fields, errors, and incomplete workflows are not Prompt completion examples. Prompt completion examples are valid only in an effective protocol scope where MCP defines completion and every represented field. <a id="req-prompt-completion-protocol-versions"></a>MCP Description does not support completion examples for MCP 2024-11-05.
 
 Completion examples are illustrative and non-exhaustive. They do not change Prompt arguments, retrieval requirements, capabilities, security, or runtime behavior, and they do not convert candidates into enums, defaults, or claims of future availability. <a id="req-prompt-completion-projection-omitted"></a>Projection to an MCP Prompt list value MUST omit `completionExamples` unless an independently specified MCP extension defines a destination. <a id="req-prompt-completion-views"></a>MCP Description round-tripping and protocol-version projection MUST preserve each selected Prompt declaration's `completionExamples` map and MUST NOT merge maps from disjoint variants with the same Prompt name.
 
@@ -1581,7 +1582,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 | `url` | string (URI) | No | Static URL when known at description-authoring time. |
 | `onDecline` | string | No | Human-readable expected behavior after explicit decline. |
 | `onCancel` | string | No | Human-readable expected behavior after cancellation or dismissal. |
-| `protocolVersions` | array\<string\> | No | MCP revisions to which this declaration applies. |
+| `protocolVersions` | array\<string\> | No | MCP protocol versions to which this declaration applies. |
 
 <a id="req-elicitation-name-format"></a>`name` MUST match `^[A-Za-z0-9._-]+$`. <a id="req-elicitation-name-unique"></a>Names are case-sensitive and MUST be unique within the containing primitive declaration.
 
@@ -1589,7 +1590,7 @@ An Elicitation Declaration describes durable server behavior rather than the pro
 
 <a id="req-elicitation-documentation-fields"></a>`when`, `onDecline`, and `onCancel`, when present, MUST be non-empty descriptive contract documentation. They are not executable expressions, client instructions, or statically provable guarantees.
 
-Although applicable MCP revisions permit omission of runtime `mode` for form elicitation, mcpdesc requires explicit `mode` to provide one canonical static representation.
+Although applicable MCP protocol versions permit omission of runtime `mode` for form elicitation, mcpdesc requires explicit `mode` to provide one canonical static representation.
 
 ### 12.3 Form Mode
 
@@ -1597,7 +1598,7 @@ For `mode: "form"`:
 
 - <a id="req-elicitation-form-schema-required"></a>`requestedSchema` is REQUIRED;
 - <a id="req-elicitation-form-no-url"></a>`url` MUST NOT appear; and
-- <a id="req-elicitation-form-shape"></a>`requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP revision.
+- <a id="req-elicitation-form-shape"></a>`requestedSchema` MUST describe an object with only the property schemas allowed by every applicable MCP protocol version.
 
 `requestedSchema` MAY be a Reference Object targeting the `schemas` component namespace. <a id="req-elicitation-schema-references-resolved"></a>The referenced schema MUST be resolved before applying every restricted-vocabulary and effective-protocol-scope requirement in this section.
 
@@ -1605,7 +1606,7 @@ The schema is limited to a flat object whose properties use MCP elicitation prim
 
 MCP 2025-06-18 supports string, number, integer, boolean, and legacy string-enum property schemas. It permits string length constraints and the `email`, `uri`, `date`, and `date-time` formats, numeric bounds, boolean defaults, and optional `enumNames` corresponding to enum values. It does not define `$schema`, defaults for strings, numbers, or enums, titled `oneOf` enums, or multi-select arrays.
 
-MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitive types, standard titled single-select enums, titled and untitled multi-select enums, and the legacy `enumNames` form. <a id="req-elicitation-form-vocabulary"></a>Validators MUST apply the vocabulary of every applicable protocol revision.
+MCP 2025-11-25 and MCP 2026-07-28 additionally support defaults for all primitive types, standard titled single-select enums, titled and untitled multi-select enums, and the legacy `enumNames` form. <a id="req-elicitation-form-vocabulary"></a>Validators MUST apply the vocabulary of every applicable protocol version.
 
 <a id="req-elicitation-form-required"></a>A `required` entry MUST name a property declared in `properties`. <a id="req-elicitation-form-enum-names"></a>`enumNames`, when present, MUST contain one display name for every enum value. <a id="req-elicitation-form-defaults"></a>An enum default MUST be one of its declared values, and every multi-select default value MUST occur in its declared item choices. <a id="req-elicitation-form-ranges"></a>Minimum constraints MUST NOT exceed their corresponding maximum constraints.
 
@@ -1617,7 +1618,7 @@ For `mode: "url"`:
 - <a id="req-elicitation-url-syntax"></a>`url`, when present, MUST be a syntactically valid URI; and
 - omission of `url` means the concrete URL is generated or selected at runtime.
 
-A runtime URL-mode elicitation still supplies every field required by the applicable MCP revision. Omission in mcpdesc does not make the runtime URL optional.
+A runtime URL-mode elicitation still supplies every field required by the applicable MCP protocol version. Omission in mcpdesc does not make the runtime URL optional.
 
 Validation of `url` is syntax-only. <a id="req-elicitation-url-no-fetch"></a>Validators and other consumers MUST NOT retrieve, prefetch, dereference, or otherwise access it while processing a description. A conforming declaration does not assert that the target is currently available, trusted, immutable, controlled by the server, or suitable for automatic navigation.
 
@@ -1625,19 +1626,19 @@ Validation of `url` is syntax-only. <a id="req-elicitation-url-no-fetch"></a>Val
 
 An omitted Elicitation Declaration `protocolVersions` inherits the effective scope of its containing primitive. <a id="req-elicitation-scope"></a>An explicit scope MUST be non-empty and MUST be a subset of that containing scope.
 
-Complete revision-specific validation begins with MCP 2025-06-18:
+Complete protocol-version-specific validation begins with MCP 2025-06-18:
 
 - MCP 2025-06-18 supports form mode;
 - MCP 2025-11-25 supports form and URL modes; and
 - MCP 2026-07-28 supports form and URL modes.
 
-<a id="req-elicitation-revisions"></a>A declaration spanning multiple revisions MUST satisfy every applicable revision. Authors MUST split materially incompatible declarations into disjoint scopes.
+<a id="req-elicitation-protocol-versions"></a>A declaration spanning multiple protocol versions MUST satisfy every applicable protocol version. Authors MUST split materially incompatible declarations into disjoint scopes.
 
 MCP 2024-11-05 and MCP 2025-03-26 retain the legacy compatibility treatment in Section 3.5. <a id="req-elicitation-legacy-incomplete"></a>Validators apply structural and selected sound checks, issue the existing incomplete-validation diagnostic, and MUST NOT report complete MCP semantic conformance.
 
 ### 12.6 Static-Description Boundary
 
-The applicable MCP revision remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior. Static primitive `clientRequirements` may record an unconditional minimum elicitation capability without defining any of that choreography.
+The applicable MCP protocol version remains authoritative for execution. MCP Description does not model whether elicitation uses a server-initiated request or Multi Round-Trip Requests, nor lifecycle messages, identifiers, request state, retries, correlation, capability negotiation, or transport behavior. Static primitive `clientRequirements` may record an unconditional minimum elicitation capability without defining any of that choreography.
 
 A mock, gateway, documentation tool, or client MAY use a declaration to render its message, collect a form response matching `requestedSchema`, or present a known URL. The declaration alone does not define when a mock triggers the interaction, how it selects among declarations, how responses modify state, or which final primitive result follows.
 
@@ -1939,10 +1940,10 @@ If a JSON document and a YAML document decode to the same JSON-compatible data m
 
 <a id="req-serialization-schema-property"></a>MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
+For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json
 mcpdesc: 0.9.0
 ```
 
@@ -1961,11 +1962,11 @@ mcpdesc: 0.9.0
 1. Decode from one conforming JSON or restricted YAML serialization to the JSON-compatible MCP Description data model (Sections 3.1 and 15).
 2. Include the `mcpdesc` property with a recognized specification version (Section 4).
 3. Include the `info` object with at least `name` and `version` (Section 5).
-4. Include non-empty root `protocolVersions` containing only revisions supported by mcpdesc 0.9.0 (Section 4).
+4. Include non-empty root `protocolVersions` containing only protocol versions supported by mcpdesc 0.9.0 (Section 4).
 5. Contain at least one entry in every present ordinary declaration collection (Section 3.3).
 6. When `transports` is present, contain at least one Transport Object and provide complete root protocol coverage (Section 6).
 7. <a id="req-document-schema"></a>Validate against the JSON Schema for the declared `mcpdesc` version.
-8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, component-reference, revision-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
+8. Satisfy semantic scope, identifier, Elicitation Declaration, client-requirement, security-reference, tag-reference, component-reference, protocol version-applicability, embedded Tool schema and example, and `x-mcp-header` constraints.
 9. Not contain unknown properties on closed MCP Description-defined objects except specification extensions matching `^x-` at eligible locations.
 
 ### 16.2 Implementation Conformance
@@ -1983,11 +1984,11 @@ mcpdesc: 0.9.0
 9. Apply reasonable document-size, nesting-depth, scalar-length, and collection-size limits to supported input serializations.
 10. Resolve `$componentRef` only within the same parsed document, without network access, before contextual semantic validation.
 
-The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, revision applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
+The published JSON Schema expresses structural constraints only. JSON-Schema-only acceptance is insufficient for document conformance because protocol scope, protocol version applicability, Client Capability Requirements, Elicitation Declarations, security and component reference resolution, embedded Tool schemas and examples, extension namespace diagnostics, and other cross-object rules require semantic validation.
 
 A warning condition defined by this specification is non-fatal and does not by itself make a document non-conforming. <a id="req-stricter-profile"></a>An implementation MAY offer a stricter profile that promotes warnings to errors, but it MUST identify that profile separately from baseline mcpdesc conformance.
 
-Complete revision-specific `_meta` validation begins with MCP 2025-06-18. <a id="req-legacy-validation-scope"></a>For the recognized legacy compatibility revisions MCP 2024-11-05 and MCP 2025-03-26, validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
+Complete protocol-version-specific `_meta` validation begins with MCP 2025-06-18. <a id="req-legacy-validation-scope"></a>For the recognized legacy compatibility protocol versions MCP 2024-11-05 and MCP 2025-03-26, validators MUST apply sound structural and selected checks, SHOULD warn that validation is incomplete, and MUST NOT report partial validation as complete MCP semantic conformance.
 
 <a id="req-implementation-recommendations"></a>A conforming implementation SHOULD:
 
@@ -2011,7 +2012,7 @@ Validation rules identify the requirements that validators check (Section 2.3). 
 
 <a id="req-rule-results"></a>A validator MAY report rule results. A validator that claims conformance with this specification's validation fixtures MUST report them: one status for each rule and each protocol version declared by the document, or one status for a rule whose applicability does not depend on the protocol version. A status is `passed`, `failed`, `warning`, `not-applicable`, `not-evaluated`, or `delegated`. Rule results do not change document validity, which errors alone determine.
 
-<a id="req-rule-results-executed"></a>A rule result MUST come from the checks the validator executed. A validator MUST NOT report `passed` for a rule that it did not check for that protocol version, including when an earlier validation stage failed, when it does not implement the check, or when the check is not applied to a legacy compatibility revision.
+<a id="req-rule-results-executed"></a>A rule result MUST come from the checks the validator executed. A validator MUST NOT report `passed` for a rule that it did not check for that protocol version, including when an earlier validation stage failed, when it does not implement the check, or when the check is not applied to a legacy compatibility protocol version.
 
 ## 17. Reusable Components and Local References
 
@@ -2051,7 +2052,7 @@ Local-only resolution is a separate design constraint, not a consequence of usin
 
 Tool `inputSchema`, Tool `outputSchema`, and Elicitation Declaration `requestedSchema` MAY reference `#/components/schemas/<name>`. Tool `examples` values MAY reference `toolExamples`; Resource `examples` values MAY reference `resourceExamples`; Resource Template `examples` values MAY reference `resourceTemplateExamples`; and Prompt `examples` values MAY reference `promptExamples`.
 
-Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. <a id="req-component-contextual-validation"></a>A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output revision rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
+Resolution substitutes the referenced JSON value before every contextual structural and semantic rule at the use site. <a id="req-component-contextual-validation"></a>A reusable schema or example MUST therefore conform independently under every containing primitive and effective protocol scope that references it. Component storage does not weaken Tool input object-root rules, Tool output protocol version rules, restricted Elicitation schemas, example/schema compatibility, completed-result shapes, URI relationships, or any other inline requirement.
 
 ### 17.4 Resolution
 
@@ -2124,7 +2125,7 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.9.0.json](../../schemas/mcp-description/0.9.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json` for the current community working draft canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json` for the current community working draft canonical schema resource
 - `https://mcpdesc.org/schema/mcp-description/0.9.0.json` for the stable 0.9.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.

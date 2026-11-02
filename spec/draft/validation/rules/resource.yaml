@@ -259,7 +259,7 @@ rules:
         pointer: /resources/2/size
         outcome: passes
     arbitrations:
-      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
+      - protocolVersions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25", "2026-07-28"]
         conflict: >-
           schema.ts declares size as number, which TypeScript cannot restrict
           to integers; the generated schema.json types it as integer.

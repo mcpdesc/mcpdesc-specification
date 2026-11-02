@@ -32,15 +32,19 @@ const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 const previous = status.draft;
 const version = previous?.version;
 if (!version || !Number.isInteger(previous.iteration)) die('invalid prerelease status in specification-status.json');
-if (previous.status === 'release-candidate' && iteration <= previous.iteration) {
-  die(`iteration must be greater than current release candidate ${previous.iteration}`);
+if (previous.status === 'release-candidate'
+  && (iteration < previous.iteration || (iteration === previous.iteration && date !== previous.snapshotDate))) {
+  die(`iteration must be greater than current release candidate ${previous.iteration}, or reuse it with the same snapshot date`);
 }
 
 const baselineTag = previous.status === 'release-candidate' ? previous.baselineTag : previous.snapshotTag;
 if (!/^v\d+\.\d+\.\d+-draft\.\d+$/.test(baselineTag ?? '')) die('release candidate requires a draft snapshot baseline tag');
 const snapshotTag = `v${version}-rc.${iteration}`;
 const schemaId = `https://mcpdesc.org/schema/mcp-description/${snapshotTag.slice(1)}.json`;
-const previousSchemaId = manifest.schemaId;
+const previousSchemaIds = new Set([
+  manifest.schemaId,
+  `https://mcpdesc.org/schema/mcp-description/${baselineTag.slice(1)}.json`
+]);
 
 // A new candidate supersedes a release-candidate editorial edition, not the stable release's.
 if (status.editorialEdition?.target !== 'stable') delete status.editorialEdition;
@@ -62,7 +66,7 @@ section = section
 if (section.includes('baseline-snapshot:')) section = section.replace(/^baseline-snapshot: .+$/m, `baseline-snapshot: ${baselineTag}`);
 else section = section.replace(/^baseline: .+$/m, (line) => `${line}\nbaseline-snapshot: ${baselineTag}`);
 
-for (const directory of ['examples', 'fixtures', 'guides', 'sections']) {
+for (const directory of ['examples', 'fixtures', 'projection-fixtures', 'view-fixtures', 'conversion', 'guides', 'sections']) {
   const pending = [path.join(root, 'spec', 'draft', directory)];
   while (pending.length > 0) {
     const current = pending.pop();
@@ -71,7 +75,8 @@ for (const directory of ['examples', 'fixtures', 'guides', 'sections']) {
       if (entry.isDirectory()) pending.push(target);
       else if (/\.(?:json|md|ya?ml)$/.test(entry.name)) {
         const source = fs.readFileSync(target, 'utf8');
-        if (source.includes(previousSchemaId)) fs.writeFileSync(target, source.replaceAll(previousSchemaId, schemaId));
+        const updated = [...previousSchemaIds].reduce((content, previousSchemaId) => content.replaceAll(previousSchemaId, schemaId), source);
+        if (updated !== source) fs.writeFileSync(target, updated);
       }
     }
   }

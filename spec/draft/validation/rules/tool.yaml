@@ -1,12 +1,12 @@
 rules:
-  - id: mcp.tool.output-schema.revision-availability
+  - id: mcp.tool.output-schema.protocol-version
     title: "Declare output schemas only where MCP defines them"
     description: >-
       Tool outputSchema is available from MCP 2025-06-18. A Tool whose
       effective scope includes an earlier protocol version cannot carry it
       unchanged. Omit it for the earlier version or provide disjoint variants.
     owner: mcp
-    summary: A Tool declares outputSchema only for MCP revisions whose Tool type defines it.
+    summary: A Tool declares outputSchema only for MCP protocol versions whose Tool type defines it.
     surface: Tool
     path: outputSchema
     kind: structural
@@ -20,7 +20,7 @@ rules:
     specification:
       - reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table)
         locations:
-          - sections/04-versioning.md#req-field-revision-availability
+          - sections/04-versioning.md#req-field-protocol-version-availability
     sources:
       - tier: 1
         reference: MCP 2025-03-26 schema.ts, interface Tool (closed; no outputSchema)
@@ -94,7 +94,7 @@ rules:
         pointer: /tools/3/outputSchema
         outcome: passes
     arbitrations:
-      - revisions: ["2025-11-25"]
+      - protocolVersions: ["2025-11-25"]
         conflict: >-
           The specification validates the outputSchema under its declared or
           default dialect, while schema.ts requires the JSON Schema keyword and
@@ -114,11 +114,11 @@ rules:
         reviewTrigger: Resolution of MCP issue 3238 or an MCP erratum for 2025-11-25.
         status: active
     gaps:
-      - revisions: ["2024-11-05", "2025-03-26"]
+      - protocolVersions: ["2024-11-05", "2025-03-26"]
         behavior: >-
           The object-root check also runs where outputSchema is not defined, so a
           non-object outputSchema reports this error in addition to the
-          revision-availability error.
+          protocol-version applicability error.
         resolution: not-fixed
 
   - id: mcp.tool.schema-keywords.preserve
@@ -133,7 +133,7 @@ rules:
     summary: >-
       Tool inputSchema and outputSchema are JSON Schema objects; keywords beyond
       those MCP lists are permitted and preserved, and acquire MCP semantics
-      only where a revision defines them.
+      only where a protocol version defines them.
     surface: Tool
     path: inputSchema, outputSchema
     kind: preservation
@@ -171,19 +171,19 @@ rules:
         pointer: /expected
         outcome: passes
     arbitrations:
-      - revisions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
+      - protocolVersions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
         conflict: >-
           The TypeScript type of inputSchema (and outputSchema from 2025-06-18)
           lists only type, properties, required, and from 2025-11-25 $schema,
           with no index signature, while its doc comment defines the value as a
           JSON Schema object.
         authority: MCP schema.ts doc comment, consistent with MCP 2026-07-28
-        behavior: Accept and preserve any JSON Schema keyword in these revisions.
+        behavior: Accept and preserve any JSON Schema keyword in these protocol versions.
         rationale: >-
           A JSON Schema object admits any keyword. MCP 2026-07-28 makes this
           explicit with an index signature, and rejecting keywords such as $defs
           or $ref would reject Tools that MCP clients accept.
-        reviewTrigger: An upstream clarification or erratum for the earlier revisions.
+        reviewTrigger: An upstream clarification or erratum for the earlier protocol versions.
         status: active
 
   - id: mcp.tool.input-schema.object-root
@@ -256,7 +256,7 @@ rules:
         pointer: /tools/2/inputSchema
         outcome: passes
     arbitrations:
-      - revisions: ["2025-11-25", "2026-07-28"]
+      - protocolVersions: ["2025-11-25", "2026-07-28"]
         conflict: >-
           The specification validates embedded schemas under their declared or
           default dialect, while schema.ts requires the JSON Schema keyword and
@@ -272,9 +272,9 @@ rules:
           schema syntax of its TypeScript types (Proposal 0032): MCP
           Description enforces what MCP requires of the data and reports, but
           does not decide, the narrower TypeScript syntax. Replaces the Draft 3
-          decision to require a literal type "object" in every revision.
+          decision to require a literal type "object" in every protocol version.
         upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
-        reviewTrigger: Resolution of MCP issue 3238 or a later MCP revision that changes the inputSchema type.
+        reviewTrigger: Resolution of MCP issue 3238 or a later MCP protocol version that changes the inputSchema type.
         status: active
 
   - id: mcp.tool.input-schema.x-mcp-header
@@ -316,7 +316,7 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-valid/revision-inapplicable-mcp-header.json
+      - path: expected-valid/protocol-version-inapplicable-mcp-header.json
         pointer: /tools/0/inputSchema
         outcome: not-applicable
       - path: expected-valid/custom-tool-schema-keywords.json
@@ -411,8 +411,8 @@ rules:
       dialects, and because Tool examples cannot be checked against a schema
       in an unknown dialect (maintainer decision on issue #72, 2026-10-26).
       Unresolved external references differ: offline validation forbids
-      retrieving them, so they only warn. Earlier revisions define no embedded
-      dialect; mcp.tool.schema.legacy-shape applies there instead.
+      retrieving them, so they only warn. Earlier protocol versions define no embedded
+      dialect; mcp.tool.schema.legacy-shape applies to those protocol versions instead.
 
   - id: mcp.tool.schema.legacy-shape
     title: "Check early Tool schemas without inferring a dialect"
@@ -468,13 +468,13 @@ rules:
       literal type object at the inputSchema root, and for MCP 2025-11-25 at
       the outputSchema root and an object for each top-level properties value.
       A schema that misses a restriction stays valid and receives a warning
-      naming the revisions concerned, because its native projection for them
+      naming the protocol versions concerned, because its native projection for them
       fails. Use {} instead of true, {"not": {}} instead of false, add type
       object beside $ref or allOf, or narrow the Tool's protocolVersions.
     owner: mcp
     summary: >-
       A Tool schema that is valid under its dialect but misses a schema-syntax
-      restriction of the MCP Tool type of an applicable revision is accepted
+      restriction of the MCP Tool type for an applicable protocol version is accepted
       with a warning.
     surface: Tool
     path: inputSchema, outputSchema
@@ -543,7 +543,7 @@ rules:
         pointer: /tools/3/inputSchema
         outcome: passes
     arbitrations:
-      - revisions: ["2025-11-25", "2026-07-28"]
+      - protocolVersions: ["2025-11-25", "2026-07-28"]
         conflict: >-
           MCP validates embedded schemas under their declared or default
           dialect, JSON Schema 2020-12 by default, which allows boolean
@@ -553,7 +553,7 @@ rules:
           top-level properties value.
         authority: MCP specification text on schema dialects
         behavior: >-
-          Accept the schema, report a warning naming the revisions concerned,
+          Accept the schema, report a warning naming the protocol versions concerned,
           and let native projection fail its postcondition for them.
         rationale: >-
           The conflict is internal to MCP, so MCP Description reports it
@@ -627,7 +627,7 @@ rules:
     owner: mcpdesc
     summary: >-
       A Tool example input validates against inputSchema, and its
-      structuredContent against outputSchema, for every applicable revision;
+      structuredContent against outputSchema, for every applicable protocol version;
       incomplete validation is reported.
     surface: Tool example
     path: examples, interactionExamples

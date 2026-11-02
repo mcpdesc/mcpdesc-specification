@@ -4,6 +4,6 @@
   "inputs": [
     "../fixtures/expected-valid/custom-tool-schema-keywords.json"
   ],
-  "revision": "2025-11-25",
-  "expected": "expected/view-tool-schema-keywords-2025-11-25.json"
+  "expected": "expected/view-tool-schema-keywords-2025-11-25.json",
+  "protocolVersion": "2025-11-25"
 }

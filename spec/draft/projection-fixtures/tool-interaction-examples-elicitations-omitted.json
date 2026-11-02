@@ -1,7 +1,6 @@
 {
   "description": "interactionExamples and elicitations are omitted.",
   "document": "../fixtures/expected-valid/named-tool-interaction-examples.json",
-  "revision": "2026-07-28",
   "kind": "tool",
   "identifier": "prepare_release",
   "expected": {
@@ -30,5 +29,6 @@
       ],
       "additionalProperties": false
     }
-  }
+  },
+  "protocolVersion": "2026-07-28"
 }

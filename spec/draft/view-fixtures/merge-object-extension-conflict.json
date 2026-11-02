@@ -1,5 +1,5 @@
 {
-  "description": "Corresponding Tools of the same revision with different x-* values cannot be kept as non-overlapping variants, so the merge fails.",
+  "description": "Corresponding Tools of the same protocol version with different x-* values cannot be kept as non-overlapping variants, so the merge fails.",
   "operation": "merge",
   "inputs": [
     "inputs/extension-2026-07-28.json",

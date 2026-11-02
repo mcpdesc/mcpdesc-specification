@@ -1,7 +1,6 @@
 {
   "description": "A primitive security override is omitted.",
   "document": "../fixtures/expected-valid/security-root-and-override.json",
-  "revision": "2025-11-25",
   "kind": "tool",
   "identifier": "update_issue",
   "expected": {
@@ -21,5 +20,6 @@
       ],
       "additionalProperties": false
     }
-  }
+  },
+  "protocolVersion": "2025-11-25"
 }

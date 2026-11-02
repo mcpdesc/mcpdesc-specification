@@ -1,7 +1,6 @@
 {
   "description": "execution is copied for MCP 2025-11-25 and is not completed with defaults; tags are omitted.",
   "document": "../fixtures/expected-valid/protocol-scoped-primitives.json",
-  "revision": "2025-11-25",
   "kind": "tool",
   "identifier": "run_job",
   "expected": {
@@ -13,5 +12,6 @@
     "execution": {
       "taskSupport": "optional"
     }
-  }
+  },
+  "protocolVersion": "2025-11-25"
 }

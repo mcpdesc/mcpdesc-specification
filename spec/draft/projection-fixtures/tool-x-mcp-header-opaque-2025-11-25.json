@@ -1,7 +1,6 @@
 {
   "description": "x-mcp-header keywords, opaque before MCP 2026-07-28, are kept unchanged inside inputSchema.",
-  "document": "../fixtures/expected-valid/revision-inapplicable-mcp-header.json",
-  "revision": "2025-11-25",
+  "document": "../fixtures/expected-valid/protocol-version-inapplicable-mcp-header.json",
   "kind": "tool",
   "identifier": "early_header",
   "expected": {
@@ -33,5 +32,6 @@
         }
       ]
     }
-  }
+  },
+  "protocolVersion": "2025-11-25"
 }

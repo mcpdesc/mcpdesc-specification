@@ -8,7 +8,7 @@ An MCP Description provides a **structured declaration of the tools, resources, 
 
 The specification borrows design principles from **OpenAPI** — the successful standard for describing HTTP APIs — while using **MCP-native structures** directly for tools, resources, and prompts.
 
-This enables developers familiar with the API ecosystem to adopt the format quickly while preserving MCP-native semantics. Runtime observations can produce an Effective Protocol View, but tooling must not infer unobserved revisions, primitives, or authorization policy.
+This enables developers familiar with the API ecosystem to adopt the format quickly while preserving MCP-native semantics. Runtime observations can produce an Effective Protocol View, but tooling must not infer unobserved protocol versions, primitives, or authorization policy.
 
 ---
 
@@ -139,9 +139,9 @@ While borrowing patterns from OpenAPI, the specification uses **MCP protocol str
 * Tools use MCP's `inputSchema` / `outputSchema` format (not OpenAPI's Operation Object)
 * Resources use MCP's `uri` / `mimeType` pattern
 * Prompts use MCP's `arguments` array format
-* Capabilities preserve durable MCP server semantics across protocol revisions
+* Capabilities preserve durable MCP server semantics across protocol versions
 
-A runtime observation can populate MCP-native declarations for the protocol revision and authorization context actually observed.
+A runtime observation can populate MCP-native declarations for the protocol version and authorization context actually observed.
 
 ---
 

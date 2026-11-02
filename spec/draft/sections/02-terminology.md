@@ -16,7 +16,7 @@ The durable, externally relevant characteristics and behavior of an MCP server t
 The server surface represented by an MCP Description Document. It is not necessarily exhaustive of everything implemented or available in every runtime context.
 
 **Effective Protocol View**
-The projection of an MCP Description Document containing the declarations applicable to one MCP protocol revision.
+The projection of an MCP Description Document containing the declarations applicable to one MCP protocol version.
 
 **MCP Server**
 A server implementing the Model Context Protocol, exposing tools, resources, and/or prompts to MCP clients.
@@ -46,7 +46,7 @@ A property in an MCP Description document whose name begins with `x-` that provi
 A feature or behavior supported by an MCP server, declared in a Capabilities Object.
 
 **Protocol Applicability**
-The MCP protocol revisions to which a declaration applies, determined from its effective protocol scope.
+The MCP protocol versions to which a declaration applies, determined from its effective protocol scope.
 
 **Security Requirement**
 A declaration of one or more named security schemes and, where applicable, authorization scopes that must be satisfied to access a transport or primitive.

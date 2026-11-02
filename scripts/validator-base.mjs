@@ -1,7 +1,7 @@
 // Provide structural and semantic validation for MCP Description v0.8.0.
 //
 // The exported helpers complement the published JSON Schema with cross-object
-// rules for protocol scopes, revision applicability, security, tags, embedded
+// rules for protocol scopes, protocol-version applicability, security, tags, embedded
 // Tool schemas and examples, Resource examples, Elicitation Declarations,
 // transports, and extension namespaces. Diagnostics
 // distinguish fatal errors from nonfatal warnings. External schema references
@@ -152,37 +152,37 @@ export function recordEvaluations(run) {
 
 declareChecks('base', [
   'json-schema.tool-schema.valid',
-  'mcp.annotations.last-modified.revision-availability',
-  'mcp.capabilities.extensions.revision-availability',
+  'mcp.annotations.last-modified.protocol-version',
+  'mcp.capabilities.extensions.protocol-version',
   'mcp.capabilities.logging.deprecated',
-  'mcp.capabilities.tasks.revision-availability',
-  'mcp.content-block.revision-availability',
-  'mcp.declaration.field.revision-availability',
-  'mcp.elicitation.form-schema.revision-shape',
-  'mcp.elicitation.revision-availability',
+  'mcp.capabilities.tasks.protocol-version',
+  'mcp.content-block.protocol-version',
+  'mcp.declaration.field.protocol-version',
+  'mcp.elicitation.form-schema.protocol-shape',
+  'mcp.elicitation.protocol-version',
   'mcp.input-response.closed',
   'mcp.meta.key-format',
   'mcp.meta.reserved-key-context',
   'mcp.meta.reserved-prefix',
   'mcp.resource-contents.blob.base64',
-  'mcp.resource-contents.meta.revision-availability',
+  'mcp.resource-contents.meta.protocol-version',
   'mcp.resource-template.uri-template',
   'mcp.result.additional-properties.preserve',
   'mcp.tool.input-schema.object-root',
   'mcp.tool.input-schema.x-mcp-header',
   'mcp.tool.output-schema.object-root',
-  'mcp.tool.output-schema.revision-availability',
+  'mcp.tool.output-schema.protocol-version',
   'mcp.tool.schema.legacy-shape',
   'mcp.tool.schema.native-shape',
   'mcp.tool.structured-content.output-schema',
   'mcp.transport.legacy-sse.deprecated',
-  'mcp.transport.streamable-http.revision-availability',
+  'mcp.transport.streamable-http.protocol-version',
   'mcpdesc.elicitation.form-schema.consistency',
   'mcpdesc.elicitation.name-unique',
   'mcpdesc.example.completed-result-form',
-  'mcpdesc.example.result.revision-fidelity',
+  'mcpdesc.example.result.protocol-fidelity',
   'mcpdesc.extensions.catalogue-maturity',
-  'mcpdesc.legacy-revisions.validation-scope',
+  'mcpdesc.legacy-protocol.validation-scope',
   'mcpdesc.protocol-scope.consistency',
   'mcpdesc.resource-template.example.expansion',
   'mcpdesc.resource.example.consistency',
@@ -200,7 +200,7 @@ function isAtLeast(version, minimum) {
   return protocolOrder.get(version) >= protocolOrder.get(minimum);
 }
 
-// Top-level fields and openness of MCP types carried by examples, from each revision's schema.ts.
+// Top-level fields and openness of MCP types carried by examples, from each protocol version's schema.ts.
 function carriedTypeDefinition(type, version) {
   const current = version === '2026-07-28';
   switch (type) {
@@ -262,13 +262,13 @@ function validateMeta(document, rel, diagnostics) {
   const legacyVersions = rootScope.filter(
     (version) => protocolOrder.get(version) < protocolOrder.get(completeSemanticConformanceVersion)
   );
-  evaluated('mcpdesc.legacy-revisions.validation-scope', ['protocolVersions'], rootScope);
+  evaluated('mcpdesc.legacy-protocol.validation-scope', ['protocolVersions'], rootScope);
   if (legacyVersions.length) {
     diagnostics.push(
       makeDiagnostic(
         'legacy-protocol-validation-incomplete',
         'warning',
-        `MCP ${legacyVersions.join(', ')} are legacy compatibility revisions; structural and selected checks were applied, but complete MCP semantic conformance was not evaluated`,
+        `MCP ${legacyVersions.join(', ')} are legacy compatibility protocol versions; structural and selected checks were applied, but complete MCP semantic conformance was not evaluated`,
         ['protocolVersions'],
         undefined,
         legacyVersions
@@ -697,7 +697,7 @@ function validateElicitations(document, rel, diagnostics) {
 
   function validateFormSchema(schema, version, location, locationPath) {
     if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return;
-    evaluated('mcp.elicitation.form-schema.revision-shape', locationPath, version);
+    evaluated('mcp.elicitation.form-schema.protocol-shape', locationPath, version);
     evaluated('mcpdesc.elicitation.form-schema.consistency', locationPath);
     if (version === '2025-06-18' && Object.hasOwn(schema, '$schema')) {
       diagnostics.push(
@@ -837,7 +837,7 @@ function validateElicitations(document, rel, diagnostics) {
         const scope = effectiveScope(document, elicitation, parentScope);
         for (const version of scope) {
           if (protocolOrder.get(version) < protocolOrder.get(completeSemanticConformanceVersion)) continue;
-          evaluated('mcp.elicitation.revision-availability', [...locationPath, 'mode'], version);
+          evaluated('mcp.elicitation.protocol-version', [...locationPath, 'mode'], version);
           if (version === '2025-06-18' && elicitation.mode !== 'form') {
             diagnostics.push(
               makeDiagnostic(
@@ -862,7 +862,7 @@ function validateElicitations(document, rel, diagnostics) {
 function validateVersionSpecificSemantics(document, rel, diagnostics) {
   const rootScope = normalizeScope(document.protocolVersions ?? []);
 
-  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope, rule = 'mcp.declaration.field.revision-availability') {
+  function checkMinimumVersion(location, locationPath, object, fieldName, minimumVersion, scope, rule = 'mcp.declaration.field.protocol-version') {
     if (!(fieldName in object)) return;
     evaluated(rule, [...locationPath, fieldName], scope);
     for (const version of scope) {
@@ -883,7 +883,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
 
   function checkOnlyVersion(location, locationPath, object, fieldName, supportedVersion, scope) {
     if (!(fieldName in object)) return;
-    evaluated('mcp.declaration.field.revision-availability', [...locationPath, fieldName], scope);
+    evaluated('mcp.declaration.field.protocol-version', [...locationPath, fieldName], scope);
     for (const version of scope) {
       if (version !== supportedVersion) {
         diagnostics.push(
@@ -892,7 +892,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
             'error',
             `${location}.${fieldName} is defined only for MCP ${supportedVersion}, not MCP ${version}`,
             [...locationPath, fieldName],
-            'mcp.declaration.field.revision-availability',
+            'mcp.declaration.field.protocol-version',
             version
           )
         );
@@ -903,7 +903,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
   (document.transports ?? []).forEach((transport, index) => {
     const scope = effectiveScope(document, transport, rootScope);
     if (transport.type === 'streamable-http') {
-      evaluated('mcp.transport.streamable-http.revision-availability', ['transports', index, 'type'], scope);
+      evaluated('mcp.transport.streamable-http.protocol-version', ['transports', index, 'type'], scope);
       for (const version of scope) {
         if (protocolOrder.get(version) >= protocolOrder.get('2025-03-26')) continue;
         diagnostics.push(
@@ -940,7 +940,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
     const scope = effectiveScope(document, tool, rootScope);
     const toolPath = ['tools', index];
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'title', '2025-06-18', scope);
-    checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'outputSchema', '2025-06-18', scope, 'mcp.tool.output-schema.revision-availability');
+    checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'outputSchema', '2025-06-18', scope, 'mcp.tool.output-schema.protocol-version');
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, '_meta', '2025-06-18', scope);
     checkMinimumVersion(`tools[${index}]`, toolPath, tool, 'annotations', '2025-03-26', scope);
     checkOnlyVersion(`tools[${index}]`, toolPath, tool, 'execution', '2025-11-25', scope);
@@ -959,7 +959,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
       checkMinimumVersion(`${kind}[${index}]`, itemPath, item, '_meta', '2025-06-18', scope);
       checkMinimumVersion(`${kind}[${index}]`, itemPath, item, 'icons', '2025-11-25', scope);
       if (kind !== 'prompts' && item.annotations?.lastModified !== undefined) {
-        evaluated('mcp.annotations.last-modified.revision-availability', [...itemPath, 'annotations', 'lastModified'], scope);
+        evaluated('mcp.annotations.last-modified.protocol-version', [...itemPath, 'annotations', 'lastModified'], scope);
         for (const version of scope) {
           if (protocolOrder.get(version) >= protocolOrder.get('2025-06-18')) continue;
           diagnostics.push(
@@ -994,7 +994,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
     const capabilityPath = ['capabilities', index];
     if ('completions' in capability) checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'completions', '2025-03-26', scope);
     if ('tasks' in capability) {
-      checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'tasks', '2025-11-25', scope, 'mcp.capabilities.tasks.revision-availability');
+      checkMinimumVersion(`capabilities[${index}]`, capabilityPath, capability, 'tasks', '2025-11-25', scope, 'mcp.capabilities.tasks.protocol-version');
       if (scope.includes('2026-07-28')) {
         diagnostics.push(
           makeDiagnostic(
@@ -1009,7 +1009,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
       }
     }
     if ('extensions' in capability) {
-      evaluated('mcp.capabilities.extensions.revision-availability', [...capabilityPath, 'extensions'], scope);
+      evaluated('mcp.capabilities.extensions.protocol-version', [...capabilityPath, 'extensions'], scope);
       for (const version of scope) {
         if (protocolOrder.get(version) < protocolOrder.get('2026-07-28')) {
           diagnostics.push(
@@ -1196,7 +1196,7 @@ function validateLegacyToolSchemaShape(schema, location, locationPath, rel, diag
         makeDiagnostic(
           'invalid-legacy-tool-schema-shape',
           'error',
-          `${location}.properties must be an object for MCP revisions before ${toolSchemaDialectVersion}`,
+          `${location}.properties must be an object for MCP protocol versions before ${toolSchemaDialectVersion}`,
           [...locationPath, 'properties'],
           undefined,
           versions
@@ -1209,7 +1209,7 @@ function validateLegacyToolSchemaShape(schema, location, locationPath, rel, diag
           makeDiagnostic(
             'invalid-legacy-tool-schema-shape',
             'error',
-            `${location}.properties[${JSON.stringify(name)}] must be an object for MCP revisions before ${toolSchemaDialectVersion}`,
+            `${location}.properties[${JSON.stringify(name)}] must be an object for MCP protocol versions before ${toolSchemaDialectVersion}`,
             [...locationPath, 'properties', name],
             undefined,
             versions
@@ -1223,7 +1223,7 @@ function validateLegacyToolSchemaShape(schema, location, locationPath, rel, diag
       makeDiagnostic(
         'invalid-legacy-tool-schema-shape',
         'error',
-        `${location}.required must be an array of strings for MCP revisions before ${toolSchemaDialectVersion}`,
+        `${location}.required must be an array of strings for MCP protocol versions before ${toolSchemaDialectVersion}`,
         [...locationPath, 'required'],
         undefined,
         versions
@@ -1276,7 +1276,7 @@ function validateToolSchemas(document, rel, diagnostics) {
       const hasLegacyScope = scope.some((version) => protocolOrder.get(version) < protocolOrder.get(toolSchemaDialectVersion));
       const hasDialectAwareScope = scope.some((version) => protocolOrder.get(version) >= protocolOrder.get(toolSchemaDialectVersion));
       if (Object.hasOwn(schema, '$schema')) {
-        evaluated('mcp.declaration.field.revision-availability', [...locationPath, '$schema'], scope);
+        evaluated('mcp.declaration.field.protocol-version', [...locationPath, '$schema'], scope);
         for (const version of scope) {
           if (protocolOrder.get(version) >= protocolOrder.get(toolSchemaDialectVersion)) continue;
           diagnostics.push(
@@ -1285,7 +1285,7 @@ function validateToolSchemas(document, rel, diagnostics) {
               'error',
               `${location}.$schema is not defined for MCP ${version}; it requires ${toolSchemaDialectVersion} or later`,
               [...locationPath, '$schema'],
-              'mcp.declaration.field.revision-availability',
+              'mcp.declaration.field.protocol-version',
               version
             )
           );
@@ -1370,7 +1370,7 @@ function validateToolSchemas(document, rel, diagnostics) {
         );
       } else if (fieldName === 'inputSchema' && hasLegacyScope && schema.type !== 'object') {
         diagnostics.push(
-          makeDiagnostic('tool-input-schema-not-object', 'error', `${location} must declare type "object" for MCP revisions before ${toolSchemaDialectVersion}`, rootPath, undefined, legacyScope)
+          makeDiagnostic('tool-input-schema-not-object', 'error', `${location} must declare type "object" for MCP protocol versions before ${toolSchemaDialectVersion}`, rootPath, undefined, legacyScope)
         );
       }
       if (fieldName === 'outputSchema') {
@@ -1478,7 +1478,7 @@ function validateToolExamples(document, rel, diagnostics) {
 
       for (const version of scope) {
         const resultLocation = `${exampleLocation}.result`;
-        evaluated('mcpdesc.example.result.revision-fidelity', resultPath, version);
+        evaluated('mcpdesc.example.result.protocol-fidelity', resultPath, version);
         if (version === '2026-07-28' && result.resultType !== 'complete') {
           diagnostics.push(makeDiagnostic('tool-example-result-version-mismatch', 'error', `${resultLocation}.resultType must be "complete" for MCP ${version}`, [...resultPath, 'resultType'], undefined, version));
         }
@@ -1489,26 +1489,26 @@ function validateToolExamples(document, rel, diagnostics) {
         (result.content ?? []).forEach((content, contentIndex) => {
           const contentLocation = `${resultLocation}.content[${contentIndex}]`;
           const contentPath = [...resultPath, 'content', contentIndex];
-          evaluated('mcp.content-block.revision-availability', contentPath, version);
-          if (content.type === 'resource') evaluated('mcp.resource-contents.meta.revision-availability', [...contentPath, 'resource'], version);
-          if (content.annotations?.lastModified !== undefined) evaluated('mcp.annotations.last-modified.revision-availability', [...contentPath, 'annotations', 'lastModified'], version);
+          evaluated('mcp.content-block.protocol-version', contentPath, version);
+          if (content.type === 'resource') evaluated('mcp.resource-contents.meta.protocol-version', [...contentPath, 'resource'], version);
+          if (content.annotations?.lastModified !== undefined) evaluated('mcp.annotations.last-modified.protocol-version', [...contentPath, 'annotations', 'lastModified'], version);
           if (content.type === 'audio' && protocolOrder.get(version) < protocolOrder.get('2025-03-26')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability', version));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses audio content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.protocol-version', version));
           }
           if (content.type === 'resource_link' && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.revision-availability', version));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation} uses resource-link content, which is not defined for MCP ${version}`, [...contentPath, 'type'], 'mcp.content-block.protocol-version', version));
           }
           if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.revision-availability', version));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}._meta is not defined for MCP ${version}`, [...contentPath, '_meta'], 'mcp.content-block.protocol-version', version));
           }
           if (content.type === 'resource' && Object.hasOwn(content.resource ?? {}, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.revision-availability', version));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.resource._meta is not defined for MCP ${version}`, [...contentPath, 'resource', '_meta'], 'mcp.resource-contents.meta.protocol-version', version));
           }
           if (content.type === 'resource_link' && Array.isArray(content.icons) && protocolOrder.get(version) < protocolOrder.get('2025-11-25')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.revision-availability', version));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.icons is not defined for MCP ${version}`, [...contentPath, 'icons'], 'mcp.content-block.protocol-version', version));
           }
           if (content.annotations?.lastModified !== undefined && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
-            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.revision-availability', version));
+            diagnostics.push(makeDiagnostic('tool-example-content-version-mismatch', 'error', `${contentLocation}.annotations.lastModified is not defined for MCP ${version}`, [...contentPath, 'annotations', 'lastModified'], 'mcp.annotations.last-modified.protocol-version', version));
           }
         });
       }
@@ -1529,7 +1529,7 @@ function validateToolExamples(document, rel, diagnostics) {
           makeDiagnostic(
             'incomplete-tool-example-validation',
             'warning',
-            `${exampleLocation}.input compatibility could not be validated completely for MCP ${legacyVersions.join(', ')} because those revisions do not define an embedded Tool-schema dialect`,
+            `${exampleLocation}.input compatibility could not be validated completely for MCP ${legacyVersions.join(', ')} because those protocol versions do not define an embedded Tool-schema dialect`,
             [...examplePath, 'input'],
             undefined,
             legacyVersions
@@ -1547,7 +1547,7 @@ function validateToolExamples(document, rel, diagnostics) {
             makeDiagnostic(
               'incomplete-tool-example-validation',
               'warning',
-              `${exampleLocation}.result.structuredContent compatibility could not be validated completely for MCP ${legacyVersions.join(', ')} because those revisions do not define an embedded Tool-schema dialect`,
+              `${exampleLocation}.result.structuredContent compatibility could not be validated completely for MCP ${legacyVersions.join(', ')} because those protocol versions do not define an embedded Tool-schema dialect`,
               [...resultPath, 'structuredContent'],
               undefined,
               legacyVersions
@@ -1587,7 +1587,7 @@ function validateCompletedResourceResult(result, scope, location, locationPath, 
   }
 
   for (const version of scope) {
-    evaluated('mcpdesc.example.result.revision-fidelity', locationPath, version);
+    evaluated('mcpdesc.example.result.protocol-fidelity', locationPath, version);
     if (version === '2026-07-28' && result.resultType !== 'complete') {
       diagnostics.push(makeDiagnostic('resource-example-result-version-mismatch', 'error', `${location}.resultType must be "complete" for MCP ${version}`, [...locationPath, 'resultType'], undefined, version));
     }
@@ -1599,7 +1599,7 @@ function validateCompletedResourceResult(result, scope, location, locationPath, 
     }
     diagnostics.push(...classifyCarriedFields(result, 'ReadResourceResult', version, location, locationPath));
     (result.contents ?? []).forEach((content, contentIndex) => {
-      evaluated('mcp.resource-contents.meta.revision-availability', [...locationPath, 'contents', contentIndex], version);
+      evaluated('mcp.resource-contents.meta.protocol-version', [...locationPath, 'contents', contentIndex], version);
       if (Object.hasOwn(content, '_meta') && protocolOrder.get(version) < protocolOrder.get('2025-06-18')) {
         diagnostics.push(makeDiagnostic('resource-example-content-version-mismatch', 'error', `${location}.contents[${contentIndex}]._meta is not defined for MCP ${version}`, [...locationPath, 'contents', contentIndex, '_meta'], undefined, version));
       }

@@ -18,7 +18,7 @@ Create a file called `chess-coach.mcpdesc.yaml`:
 MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files use YAML 1.2.2 JSON-schema scalar resolution and exclude aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numbers.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-draft.4.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json
 mcpdesc: 0.9.0
 info:
   name: chess-rating-server
@@ -149,7 +149,7 @@ tools:
 
 Tool `examples` pair a named complete `tools/call` argument object with a completed Tool Result. Keep `content` even when `structuredContent` is present. Successful structured content must match `outputSchema`; execution errors use `isError: true` and omit `structuredContent`. For a no-argument Tool, write `input: {}` explicitly. Examples are untrusted, non-exhaustive documentation, not guarantees of live behavior; never include credentials or production data.
 
-When a Tool has an unconditional client capability precondition, add a revision-valid non-empty `clientRequirements` object. This applies to `tools/call`, not `tools/list`:
+When a Tool has an unconditional client capability precondition, add a protocol version-valid non-empty `clientRequirements` object. This applies to `tools/call`, not `tools/list`:
 
 ```yaml
 tools:
@@ -163,7 +163,7 @@ tools:
       io.modelcontextprotocol/tasks: {}
 ```
 
-Do not derive this field from server capabilities or conditional Elicitation Declarations. Split protocol-scoped variants when the requirement shape differs by MCP revision.
+Do not derive this field from server capabilities or conditional Elicitation Declarations. Split protocol-scoped variants when the requirement shape differs by MCP protocol version.
 
 When several declarations reuse a complete schema or named example, place it in the matching root `components` namespace and use a local `$componentRef`:
 
@@ -218,7 +218,7 @@ resourceTemplates:
 
 Resource `examples` use the declaration URI as their implicit read input. Resource Template examples add the exact concrete expanded `uri`. In both cases, copy only a completed `resources/read` result payload, preserve content order, and use exactly one of `text` or base64 `blob` per content entry. Examples are snapshots and do not guarantee live contents or freshness. Never dereference example URIs automatically or publish sensitive captured data.
 
-For MCP 2026-07-28, the copied result also requires `resultType: complete`, non-negative `ttlMs`, and `cacheScope: public` or `private`. Earlier revisions do not define those fields. A Resource that covers both revisions can keep one example with those fields; validators warn that they have no meaning for the earlier revision. To avoid the warnings, use disjoint protocol-scoped Resource variants with separate examples.
+For MCP 2026-07-28, the copied result also requires `resultType: complete`, non-negative `ttlMs`, and `cacheScope: public` or `private`. Earlier protocol versions do not define those fields. A Resource that covers both protocol versions can keep one example with those fields; validators warn that they have no meaning for the earlier protocol version. To avoid the warnings, use disjoint protocol-scoped Resource variants with separate examples.
 
 ## Step 5: Add Prompts
 
@@ -250,15 +250,15 @@ prompts:
             text: Summarize the game with key turning points.
 ```
 
-Prompt `examples` pair a complete `prompts/get` argument map with one completed Prompt result. When no arguments are supplied, either omit `arguments` or write `arguments: {}`. Keep only the payload from the JSON-RPC response's `result` member. For MCP 2026-07-28, include `resultType: complete`; earlier revisions do not define it, so validators warn when an example shared with them includes it. Examples are descriptive snapshots, not guarantees of deterministic live output.
+Prompt `examples` pair a complete `prompts/get` argument map with one completed Prompt result. When no arguments are supplied, either omit `arguments` or write `arguments: {}`. Keep only the payload from the JSON-RPC response's `result` member. For MCP 2026-07-28, include `resultType: complete`; earlier protocol versions do not define it, so validators warn when an example shared with them includes it. Examples are descriptive snapshots, not guarantees of deterministic live output.
 
-Tool `interactionExamples` are for the case where one Tool invocation needs more than a terminal result. Put the initial `tools/call` arguments in `input`, record each elicitation, sampling, or roots exchange as one ordered semantic step, and keep the terminal completed Tool Result in `result`. Do not copy JSON-RPC envelopes, `InputRequiredResult`, `requestState`, task handles, or other runtime correlation data. Split protocol-scoped Tool variants when one interaction shape uses revision-specific fields such as sampling Tool use or MCP 2026-07-28 result fields.
+Tool `interactionExamples` are for the case where one Tool invocation needs more than a terminal result. Put the initial `tools/call` arguments in `input`, record each elicitation, sampling, or roots exchange as one ordered semantic step, and keep the terminal completed Tool Result in `result`. Do not copy JSON-RPC envelopes, `InputRequiredResult`, `requestState`, task handles, or other runtime correlation data. Split protocol-scoped Tool variants when one interaction shape uses protocol-version-specific fields such as sampling Tool use or MCP 2026-07-28 result fields.
 
 ## Step 6: Validate
 
 Structural validation checks the document shape. Use any JSON Schema Draft 2020-12 implementation with the [0.9.0 schema](../../../schemas/mcp-description/0.9.0.json).
 
-Complete conformance also requires semantic validation of protocol scopes, transport coverage, security, tag and component references, revision-specific fields, and Tool-example compatibility with resolved embedded schemas. The `@mcpdesc/validator` library provides structural and semantic validation for applications. For command-line use, `mcpcontract validate` validates a document and selects its declared MCP Description version:
+Complete conformance also requires semantic validation of protocol scopes, transport coverage, security, tag and component references, protocol-version-specific fields, and Tool-example compatibility with resolved embedded schemas. The `@mcpdesc/validator` library provides structural and semantic validation for applications. For command-line use, `mcpcontract validate` validates a document and selects its declared MCP Description version:
 
 ```bash
 mcpcontract validate chess-coach.mcpdesc.yaml --schema mcpdesc --strict

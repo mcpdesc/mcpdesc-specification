@@ -18,7 +18,7 @@ rules:
     applicability:
       protocolVersions: independent
     specification:
-      - reference: MCP Description 0.9.0, Section 3.5 (the same grammar applies in every revision)
+      - reference: MCP Description 0.9.0, Section 3.5 (the same grammar applies in every protocol version)
         locations:
           - sections/03-document-structure.md#req-meta-keys
     sources:
@@ -47,7 +47,7 @@ rules:
       it as a recognized MCP feature.
     owner: mcp
     summary: >-
-      A _meta key under an MCP-reserved prefix that the revision does not
+      A _meta key under an MCP-reserved prefix that the MCP protocol version does not
       define is preserved with a warning.
     surface: _meta
     kind: semantic
@@ -76,4 +76,4 @@ rules:
       - path: expected-warning/unknown-reserved-meta-key.json
         pointer: /prompts/0/_meta
         outcome: warning
-    notes: A later MCP revision may define the key, so it is preserved rather than rejected.
+    notes: A later MCP protocol version may define the key, so it is preserved rather than rejected.
