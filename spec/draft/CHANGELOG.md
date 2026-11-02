@@ -30,7 +30,8 @@ Pre-final terminology migration: normalize references to MCP protocol versions
 across active specification prose and the validation catalog. Rule IDs,
 requirement anchors, fixture paths and case fields, and the projection failure
 identifier use protocol-version terminology. Rule and result schema formats
-move to `2.0.0`, renaming arbitration/gap fields to `protocolVersions` and
+move to `1.3.0` under the approved incompatible-minor exception, renaming
+arbitration/gap fields to `protocolVersions` and
 `$defs/revision` to `$defs/protocol-version`. Draft 4 (`v0.9.0-draft.4`) and
 its published catalog remain unchanged; RC.1 uses the migrated identifiers.
 See [issue #109](https://github.com/mcpdesc/mcpdesc-specification/issues/109)

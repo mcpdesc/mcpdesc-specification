@@ -19,10 +19,10 @@ URLs retain their exact bytes; older catalogs and specification snapshots are
 not rewritten. The `1.1.0` and `1.2.0` entries record the only exceptions so
 far.
 
-## [2.0.0] — 2026-11-02 (0.9.0 RC.1)
+## [1.3.0] — 2026-11-02 (0.9.0 RC.1)
 
 Breaking terminology migration for MCP protocol versions. The schema identity
-is `https://mcpdesc.org/schema/validation-rule/2.0.0.json`; deployment must be
+is `https://mcpdesc.org/schema/validation-rule/1.3.0.json`; deployment must be
 verified before publishing the RC.1 catalog.
 
 ### Record Format
@@ -36,9 +36,19 @@ verified before publishing the RC.1 catalog.
 
 ### Publication Contract
 
-- Rule manifests and catalog indexes declare the `2.0.0` schema identity.
+- Rule manifests and catalog indexes declare the `1.3.0` schema identity.
 - Existing 1.1.0, 1.2.0, and earlier schema URLs and published catalogs remain
   immutable. The index may list catalogs using earlier rule formats.
+
+### Versioning Exception
+
+- **Minor number for an incompatible change.** Format `1.2.0` is already
+  published and uses a closed record schema, so renaming `revisions` to
+  `protocolVersions` would normally require `2.0.0`. On 2026-11-02 the
+  maintainer approved `1.3.0` because MCP Description 0.9.0 has not reached its
+  final release and the terminology migration is intentionally made during
+  pre-final review. The published `1.2.0` URL and Draft 4 catalog remain
+  unchanged. Consumers validating the RC1 catalog must use `1.3.0`.
 
 ### Consumer Migration
 
