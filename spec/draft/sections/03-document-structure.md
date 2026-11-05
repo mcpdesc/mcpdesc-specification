@@ -8,6 +8,8 @@ An MCP Description document is a JSON-compatible data model composed only of obj
 
 Property ordering is not significant unless an individual field explicitly defines array ordering semantics. <a id="req-serialization-order"></a>Mapping serialization order MUST NOT affect conformance.
 
+Section 18 defines a recommended presentation order for producers; it does not change this rule.
+
 ### 3.2 Root Object
 
 <a id="req-root-fields"></a>The root of an MCP Description document is an object with the following structure:

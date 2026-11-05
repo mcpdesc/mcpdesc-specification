@@ -14,6 +14,21 @@ uncheckedRequirements:
   - location: sections/03-document-structure.md#req-property-order
     reason: processing
     note: "Concerns how tools read a serialization, not a document value."
+  - location: sections/18-document-ordering.md#req-document-ordering-default
+    reason: guidance
+    note: "Recommends an authoring and serialization presentation policy; property order does not affect document conformance."
+  - location: sections/18-document-ordering.md#req-document-ordering-algorithm
+    reason: processing
+    note: "Concerns how serializers organize output, not a document value."
+  - location: sections/18-document-ordering.md#req-document-ordering-collections
+    reason: processing
+    note: "Constrains preservation of arrays and named-map entries during serialization."
+  - location: sections/18-document-ordering.md#req-document-ordering-recognition
+    reason: processing
+    note: "Constrains serializer traversal and handling of unknown or opaque values."
+  - location: sections/18-document-ordering.md#req-document-ordering-preservation
+    reason: processing
+    note: "Constrains serializer behavior when applying the presentation profile."
   - location: sections/07-security.md#req-security-schemes-omission
     reason: runtime
     note: "Constrains how consumers interpret absent security schemes."
