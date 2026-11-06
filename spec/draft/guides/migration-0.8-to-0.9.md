@@ -113,26 +113,10 @@ MCP Description does not support completion examples for MCP 2024-11-05.
 
 ### Rule catalog consumers
 
-Draft 3 introduces rule-format `1.1.0`, separate from the `mcpdesc` version
-and the validator package release. Catalog consumers must accept required
-`title` and `description`, plus `applicability` for active rules, use the exact
-format schema, and select catalogs by specification snapshot. Within
-applicability, `protocolVersions` is `independent` or a protocol map, and
-`schemaDialects` is optional separate metadata. `summary` and permanent rule
-IDs keep their existing meanings. Named rulesets are removed; filters are
-catalog views, not validation profiles. Retired records remain discoverable
-but do not participate in active applicability checks. Records no longer list
-`diagnostics`: each fixture citation has a checked `outcome` (`passes`,
-`error`, or `warning`), and diagnostic codes come from the producer that
-emits them.
-
-Draft 4 introduced rule-format `1.2.0` and validation result format `1.0.0`.
-RC1 introduces rule-format and validation result format `1.3.0` to normalize
-MCP protocol-version terminology. Rule records now use
-`protocolVersions` for arbitration and gap scopes, and `$defs/protocol-version`
-in both schemas. Rule IDs, requirement anchors, fixture paths, and the
-projection failure identifier are also renamed; see the RC1 migration section
-of the validation rule-format changelog.
+0.9.0 introduces validation rule catalogs and rule-linked diagnostics; these
+are new to 0.9.0, not formats that 0.8.0 validators emitted. For changes to the
+catalog and validation result formats in RC.1, see the Release Candidate 1
+entry in the [0.9.0 changelog](../CHANGELOG.md).
 
 Discover catalogs through the publication index, then pin an immutable
 manifest. Resolve evidence and description links from its
@@ -173,17 +157,16 @@ Other output changes:
   which 0.8.0 accepted.
 - The `completion-example-version-mismatch` message for MCP 2024-11-05 says the
   protocol version is not supported by MCP Description.
-- From Draft 4, `schema-validation` diagnostics name the rule that owns the
-  failing schema location, for example `mcpdesc.tool.members` or
-  `mcp.content.members`, instead of `mcpdesc.document.schema`, which now
-  reports only failures of the document root. The diagnostics themselves are
-  unchanged.
-- From Draft 4, a diagnostic whose finding depends on MCP protocol versions
-  lists them in `protocolVersions`. `rule`, `severity`, and `path` are the
-  interoperable contract; `code` and `message` are optional producer output
+- `schema-validation` diagnostics name the rule that owns the failing schema
+  location, for example `mcpdesc.tool.members` or `mcp.content.members`,
+  instead of `mcpdesc.document.schema`, which reports only failures of the
+  document root.
+- A diagnostic whose finding depends on MCP protocol versions lists them in
+  `protocolVersions`. `rule`, `severity`, and `path` are the interoperable
+  contract; `code` and `message` are optional producer output
   ([Section 16.5](../sections/16-conformance.md#req-diagnostic-rule)). Compare
   diagnostics by `rule`, not by `code`.
-- From Draft 4, the exported validator's `validate()` also returns `results`:
+- The exported validator's `validate()` also returns `results`:
   one status per rule and declared protocol version, in the
   [validation result format](../validation/result.schema.json). Treat
   `not-applicable` and `not-evaluated` as not confirmed, never as passed.

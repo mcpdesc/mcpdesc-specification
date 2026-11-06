@@ -24,6 +24,12 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### In progress
+
+New document ordering profile
+
+- Added Section 18 with a recommended document-oriented property order for newly generated JSON and YAML descriptions. It leaves property order non-semantic and validation unchanged, while defining a shared presentation profile for downstream tooling. Source-preserving editors and converters retain source order unless the caller selects the profile. This is draft work for consideration in a future release candidate; no RC.2 has been issued.
+
 ### Release Candidate 1 — 2026-11-02 (`v0.9.0-rc.1`)
 
 Pre-final terminology migration: normalize references to MCP protocol versions
@@ -36,10 +42,6 @@ arbitration/gap fields to `protocolVersions` and
 its published catalog remain unchanged; RC.1 uses the migrated identifiers.
 See [issue #109](https://github.com/mcpdesc/mcpdesc-specification/issues/109)
 and the [validation format changelogs](validation/CHANGELOG.md).
-
-#### Candidate document ordering profile (post-RC.1 draft work)
-
-- Added Section 18 with a recommended document-oriented property order for newly generated JSON and YAML descriptions. It leaves property order non-semantic and validation unchanged, while defining a shared presentation profile for downstream tooling. Source-preserving editors and converters retain source order unless the caller selects the profile. This is draft work for consideration in a future release candidate; no RC.2 has been issued.
 
 ### Community Working Draft 4 — 2026-10-31 (`v0.9.0-draft.4`)
 
