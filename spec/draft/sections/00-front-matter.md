@@ -1,24 +1,24 @@
 ---
 title: MCP Description Specification
 version: 0.9.0
-status: Release candidate 1
-release-candidate-iteration: 1
-snapshot-tag: v0.9.0-rc.1
+status: Release candidate 2
+release-candidate-iteration: 2
+snapshot-tag: v0.9.0-rc.2
 released: false
 baseline: 0.8.0
 baseline-snapshot: v0.9.0-draft.4
-date: 2026-11-02
+date: 2026-11-06
 ---
 
 # MCP Description Specification
 
-**Version**: 0.9.0 (community working draft 4; `v0.9.0-draft.4`)
+**Version**: 0.9.0 (Release Candidate 2; `v0.9.0-rc.2`)
 
-**Status**: Community working draft 4 — not released
+**Status**: Release Candidate 2 — in preparation; not published
 
 **Baseline**: v0.8.0
 
-**Date**: 2026-10-31
+**Date**: 2026-11-06
 
 ## Abstract
 
@@ -30,6 +30,6 @@ It enables offline discovery, documentation generation, description validation, 
 
 ## Status of This Document
 
-This document is Community Working Draft 4 of MCP Description v0.9.0, prepared for the prerelease tag `v0.9.0-draft.4`. It is not a stable release and may change incompatibly before release. The current stable release is MCP Description v0.8.0.
+This document is Release Candidate 2 of MCP Description v0.9.0, prepared for the prerelease tag `v0.9.0-rc.2`. It includes the Section 18 document ordering profile and review-stage Proposal 0034's discriminator-driven schema validation. It has not yet been tagged or published. It is not a stable release or evidence of acceptance of review-stage proposals; its content may change incompatibly or be removed before release. The current stable release is MCP Description v0.8.0.
 
-The proposal protocol versions represented in this draft are recorded in the [proposal protocol version manifest](../PROPOSALS.md).
+The exact proposal revisions represented in this candidate are recorded in the [proposal revision manifest](../PROPOSALS.md).

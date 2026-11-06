@@ -11,8 +11,45 @@ extra properties on closed MCP types must move them.
 ## Version and schema identity
 
 Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
-`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`; the stable
+`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`; the stable
 identifier is assigned at release.
+
+## Discriminator-driven diagnostics after RC.1
+
+The working draft implements review-stage [Proposal 0034](../proposal-snapshots/0034-discriminator-driven-schema-validation.md)
+([issue #112](https://github.com/mcpdesc/mcpdesc-specification/issues/112)) in
+the RC.2 preparation. Transport and seven other unambiguously discriminated
+object unions use standard JSON Schema `if`/`then` conditionals. No document
+rewrite is intended: required fields, discriminator values, closure, and
+specification-extension eligibility are unchanged.
+
+Diagnostic counts, ordering, and raw schema paths can change. For example,
+`#/$defs/transport/oneOf/1` becomes
+`#/$defs/transport/allOf/1/then`; the Resource `size` rule's content-block
+location moves similarly. Registered rule IDs and the validation-result format
+are unchanged. Consumers should use rule IDs and document locations rather than
+pinning error counts or schema paths across selectors.
+With redundant union or conditional summaries removed, an enclosing shape rule
+can now pass while a more specific nested rule fails (for example, Resource
+`size`). Rule citations track the specific failures rather than those summaries.
+
+AJV can report an `if` summary alongside specific selected-branch failures. The
+candidate validator omits only a summary whose selected `then` already supplies
+a specific failure; independent defects remain. Raw schema engines can retain
+summaries. No actionable/supporting diagnostic fields are standardized.
+Unchanged nested unions, such as a sampling content value that can be an
+object or an array, can still report alternative failures and `oneOf` summaries.
+
+Published RC.1 remains immutable. The prepared RC.2 schema identity is
+`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`, and the intended
+exact downstream selector is `0.9.0-rc.2`. The candidate is not yet tagged or
+published, and this repository does not establish support in released tooling.
+After specification approval and publication, the validator should import the
+new snapshot additively, keeping RC.1 intact, and verify runtime/generated
+standalone/browser parity. Core should adopt that selector, verify each
+selector-sensitive operation, and update its support
+matrix and validator pin rather than reproducing branch-selection semantics.
+JSON/YAML editor completion and hover behavior still need downstream review.
 
 ## Annotations
 
@@ -113,26 +150,10 @@ MCP Description does not support completion examples for MCP 2024-11-05.
 
 ### Rule catalog consumers
 
-Draft 3 introduces rule-format `1.1.0`, separate from the `mcpdesc` version
-and the validator package release. Catalog consumers must accept required
-`title` and `description`, plus `applicability` for active rules, use the exact
-format schema, and select catalogs by specification snapshot. Within
-applicability, `protocolVersions` is `independent` or a protocol map, and
-`schemaDialects` is optional separate metadata. `summary` and permanent rule
-IDs keep their existing meanings. Named rulesets are removed; filters are
-catalog views, not validation profiles. Retired records remain discoverable
-but do not participate in active applicability checks. Records no longer list
-`diagnostics`: each fixture citation has a checked `outcome` (`passes`,
-`error`, or `warning`), and diagnostic codes come from the producer that
-emits them.
-
-Draft 4 introduced rule-format `1.2.0` and validation result format `1.0.0`.
-RC1 introduces rule-format and validation result format `1.3.0` to normalize
-MCP protocol-version terminology. Rule records now use
-`protocolVersions` for arbitration and gap scopes, and `$defs/protocol-version`
-in both schemas. Rule IDs, requirement anchors, fixture paths, and the
-projection failure identifier are also renamed; see the RC1 migration section
-of the validation rule-format changelog.
+0.9.0 introduces validation rule catalogs and rule-linked diagnostics; these
+are new to 0.9.0, not formats that 0.8.0 validators emitted. For changes to the
+catalog and validation result formats in RC.1, see the Release Candidate 1
+entry in the [0.9.0 changelog](../CHANGELOG.md).
 
 Discover catalogs through the publication index, then pin an immutable
 manifest. Resolve evidence and description links from its
@@ -173,17 +194,16 @@ Other output changes:
   which 0.8.0 accepted.
 - The `completion-example-version-mismatch` message for MCP 2024-11-05 says the
   protocol version is not supported by MCP Description.
-- From Draft 4, `schema-validation` diagnostics name the rule that owns the
-  failing schema location, for example `mcpdesc.tool.members` or
-  `mcp.content.members`, instead of `mcpdesc.document.schema`, which now
-  reports only failures of the document root. The diagnostics themselves are
-  unchanged.
-- From Draft 4, a diagnostic whose finding depends on MCP protocol versions
-  lists them in `protocolVersions`. `rule`, `severity`, and `path` are the
-  interoperable contract; `code` and `message` are optional producer output
+- `schema-validation` diagnostics name the rule that owns the failing schema
+  location, for example `mcpdesc.tool.members` or `mcp.content.members`,
+  instead of `mcpdesc.document.schema`, which reports only failures of the
+  document root.
+- A diagnostic whose finding depends on MCP protocol versions lists them in
+  `protocolVersions`. `rule`, `severity`, and `path` are the interoperable
+  contract; `code` and `message` are optional producer output
   ([Section 16.5](../sections/16-conformance.md#req-diagnostic-rule)). Compare
   diagnostics by `rule`, not by `code`.
-- From Draft 4, the exported validator's `validate()` also returns `results`:
+- The exported validator's `validate()` also returns `results`:
   one status per rule and declared protocol version, in the
   [validation result format](../validation/result.schema.json). Treat
   `not-applicable` and `not-evaluated` as not confirmed, never as passed.

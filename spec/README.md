@@ -17,11 +17,17 @@ Think of it as **OpenAPI for MCP servers**: a static description that enables di
 
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
-| 0.9.0 | Release Candidate 1 (`v0.9.0-rc.1`; prerelease) | [`draft/`](draft/) | [`../schemas/mcp-description/0.9.0.json`](../schemas/mcp-description/0.9.0.json) |
+| 0.9.0 | Release Candidate 2 (`v0.9.0-rc.2`; prerelease) — in preparation | [`draft/`](draft/) | [`../schemas/mcp-description/0.9.0.json`](../schemas/mcp-description/0.9.0.json) |
 | 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) |
 | 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
+RC.2 prepares the Section 18 document ordering profile and review-stage
+Proposal 0034's discriminator-driven validation. Its canonical schema identity
+is `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`; `mcpdesc`
+remains `0.9.0`. The candidate is not yet tagged or published, and downstream
+support for selector `0.9.0-rc.2` requires separate adoption. See the
+[candidate changelog](draft/CHANGELOG.md) and [migration guide](draft/guides/migration-0.8-to-0.9.md).
 The exact proposal protocol versions represented by 0.8.0 are recorded in its [`0.8.0/PROPOSALS.md`](0.8.0/PROPOSALS.md) manifest.
 
 ## Quick Example

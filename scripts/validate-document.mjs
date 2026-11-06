@@ -266,7 +266,7 @@ function structuralDiagnostics(document) {
   structuralEvaluations = outer;
   if (valid) return [];
   const errors = validateStructure.errors ?? [];
-  return errors.map((error) => ({
+  return errors.filter((error) => !redundantConditionalSummary(error, errors)).map((error) => ({
     code: 'schema-validation',
     severity: 'error',
     message: `does not validate against ${specificationVersion}: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
@@ -310,6 +310,16 @@ function reachableFrom(node) {
   return found;
 }
 const depth = (instancePath) => (instancePath ? instancePath.split('/').length - 1 : 0);
+
+function redundantConditionalSummary(error, errors) {
+  if (error.keyword !== 'if' || error.params.failingKeyword !== 'then') return false;
+  const branch = error.parentSchema.then;
+  if (branch === null || typeof branch !== 'object') return false;
+  const members = reachableFrom(branch);
+  return errors.some((failure) => !['if', 'oneOf', 'anyOf'].includes(failure.keyword)
+    && withinInstance(failure.instancePath, error.instancePath)
+    && members.has(failure.parentSchema));
+}
 
 // The alternative of a failed oneOf or anyOf that best matches the instance: its failures reach
 // deepest into the instance, then it has the fewest failures, then it comes first.

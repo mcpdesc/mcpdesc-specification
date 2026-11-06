@@ -1,0 +1,31 @@
+{
+  "mcpdesc": "0.9.0",
+  "info": { "name": "discriminated-union-members", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25"],
+  "securitySchemes": {
+    "token": { "type": "http", "shceme": "bearer" }
+  },
+  "tools": [
+    {
+      "name": "inspect",
+      "inputSchema": { "type": "object" },
+      "elicitations": [
+        { "name": "approve", "mode": "form", "message": "Approve?" }
+      ],
+      "interactionExamples": {
+        "invalid": {
+          "input": {},
+          "steps": [
+            {
+              "type": "elicitation",
+              "request": { "mode": "url", "message": "Authorize", "ur": "https://example.test/auth" },
+              "response": { "action": "accepted" }
+            },
+            { "type": "roots", "request": {}, "respose": { "roots": [] } }
+          ],
+          "result": { "content": [{ "type": "text", "tetx": "Done" }] }
+        }
+      }
+    }
+  ]
+}

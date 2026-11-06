@@ -214,7 +214,7 @@ rules:
     kind: structural
     documentSchema:
       - "#/$defs/resource/properties/size"
-      - "#/$defs/toolResultContent/oneOf/3/properties/size"
+      - "#/$defs/toolResultContent/allOf/3/then/properties/size"
     requirement: must
     applicability:
       protocolVersions: independent
@@ -255,6 +255,12 @@ rules:
       - path: expected-invalid/fractional-resource-link-size.json
         pointer: /tools/0/examples/listing/result/content/0/size
         outcome: error
+      - path: expected-invalid/discriminated-resource-link-size.json
+        pointer: /tools/0/interactionExamples/nested/steps/0/response/content/size
+        outcome: error
+      - path: expected-valid/discriminated-unions.json
+        pointer: /tools/0/interactionExamples/approved/steps/1/response/content/size
+        outcome: passes
       - path: expected-valid/named-resource-examples.json
         pointer: /resources/2/size
         outcome: passes

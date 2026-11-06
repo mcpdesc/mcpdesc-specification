@@ -1,0 +1,9 @@
+{
+  "mcpdesc": "0.9.0",
+  "info": { "name": "transport-independent-defects", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25"],
+  "transports": [
+    { "type": "stdio", "command": 5, "arg": ["serve"] },
+    { "type": "stdio", "command": "chess-rating", "env": { "MODE": 1 } }
+  ]
+}
