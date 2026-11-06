@@ -11,14 +11,14 @@ extra properties on closed MCP types must move them.
 ## Version and schema identity
 
 Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
-`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`; the stable
+`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`; the stable
 identifier is assigned at release.
 
 ## Discriminator-driven diagnostics after RC.1
 
 The working draft implements review-stage [Proposal 0034](../proposal-snapshots/0034-discriminator-driven-schema-validation.md)
-([issue #112](https://github.com/mcpdesc/mcpdesc-specification/issues/112)) for
-possible RC.2 inclusion. Transport and seven other unambiguously discriminated
+([issue #112](https://github.com/mcpdesc/mcpdesc-specification/issues/112)) in
+the RC.2 preparation. Transport and seven other unambiguously discriminated
 object unions use standard JSON Schema `if`/`then` conditionals. No document
 rewrite is intended: required fields, discriminator values, closure, and
 specification-extension eligibility are unchanged.
@@ -40,11 +40,14 @@ summaries. No actionable/supporting diagnostic fields are standardized.
 Unchanged nested unions, such as a sampling content value that can be an
 object or an array, can still report alternative failures and `oneOf` summaries.
 
-Published RC.1 remains immutable. This working-tree implementation does not
-assign an RC.2 schema identity or validator selector. An approved new candidate
-needs normal release preparation, a new exact downstream validator selector,
-and runtime/generated standalone/browser parity checks. Core should adopt that
-selector, verify each selector-sensitive operation, and update its support
+Published RC.1 remains immutable. The prepared RC.2 schema identity is
+`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`, and the intended
+exact downstream selector is `0.9.0-rc.2`. The candidate is not yet tagged or
+published, and this repository does not establish support in released tooling.
+After specification approval and publication, the validator should import the
+new snapshot additively, keeping RC.1 intact, and verify runtime/generated
+standalone/browser parity. Core should adopt that selector, verify each
+selector-sensitive operation, and update its support
 matrix and validator pin rather than reproducing branch-selection semantics.
 JSON/YAML editor completion and hover behavior still need downstream review.
 

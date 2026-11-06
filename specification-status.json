@@ -17,11 +17,11 @@
   "draft": {
     "version": "0.9.0",
     "status": "release-candidate",
-    "iteration": 1,
-    "snapshotTag": "v0.9.0-rc.1",
-    "snapshotDate": "2026-11-02",
+    "iteration": 2,
+    "snapshotTag": "v0.9.0-rc.2",
+    "snapshotDate": "2026-11-06",
     "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
-    "branch": "release/0.9.0-rc.1",
+    "branch": "release/0.9.0-rc.2",
     "path": "spec/draft",
     "released": false,
     "baselineTag": "v0.9.0-draft.4"

@@ -4,6 +4,7 @@ This changelog records repository governance, release-process, and project-tooli
 
 ## Unreleased
 
+- Prepared 0.9.0 RC.2 (`v0.9.0-rc.2`, dated 2026-11-06), combining the document ordering profile and review-stage Proposal 0034's discriminator-driven schema validation (#112, proposal PR #113). Updated active schema identity, status, documentation, examples, and fixtures; `mcpdesc` remains `0.9.0`, rule/result formats remain `1.3.0`, and stable pointers are unchanged. This is preparation only: tagging, schema/catalog publication, and downstream validator/core intake remain separate gates.
 - Preparing 0.9.0 RC.1: migrate MCP revision terminology to protocol-version terminology across rule IDs, anchors, fixture paths/case fields, schemas, scripts, and active editorial docs. Rule and result formats move to 1.3.0 under the approved pre-final incompatible-minor exception. Migration inventory and downstream actions are tracked in issue #109.
 - Catalog publication tooling handles a rule-format change: each indexed catalog is verified against the rule format its own manifest declares, and `rules:check-publication --index-out` accepts a live index declared in an earlier format and re-declares it in the current one. `--check-index` still requires the current format. Previously the Draft 4 index update failed on the live `1.1.0` index and its Draft 3 catalog.
 - `rules:check-publication --schema-only` reports the validation result schema when the bundle includes it, and the publication recipe in `scripts/README.md` lists it with the rule schema.

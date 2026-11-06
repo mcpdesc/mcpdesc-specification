@@ -24,15 +24,23 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
-### In progress
+### Release Candidate 2 — 2026-11-06 (`v0.9.0-rc.2`)
+
+In preparation, not yet tagged or published. This candidate combines the
+document ordering profile and review-stage Proposal 0034 implementation.
+Its canonical schema identity and intended downstream selector are
+`0.9.0-rc.2`; the document's `mcpdesc` value remains `0.9.0`.
+Rule and validation-result formats remain `1.3.0`, and
+`schemas/latest.json` remains pinned to stable 0.8.0.
+Publication and downstream validator/core intake require separate approval.
 
 New document ordering profile
 
-- Added Section 18 with a recommended document-oriented property order for newly generated JSON and YAML descriptions. It leaves property order non-semantic and validation unchanged, while defining a shared presentation profile for downstream tooling. Source-preserving editors and converters retain source order unless the caller selects the profile. This is draft work for consideration in a future release candidate; no RC.2 has been issued.
+- Added Section 18 with a recommended document-oriented property order for newly generated JSON and YAML descriptions. It leaves property order non-semantic and validation unchanged, while defining a shared presentation profile for downstream tooling. Source-preserving editors and converters retain source order unless the caller selects the profile.
 
 Discriminator-driven schema validation
 
-- Implemented review-stage [Proposal 0034](proposal-snapshots/0034-discriminator-driven-schema-validation.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #112](https://github.com/mcpdesc/mcpdesc-specification/issues/112) and [PR #113](https://github.com/mcpdesc/mcpdesc-specification/pull/113), for consideration in RC.2. Eight unambiguously discriminated object unions now use guarded `if`/`then` alternatives instead of `oneOf`, preserving document acceptance, closure, and extension eligibility. Other unions are unchanged. Review-stage content remains subject to incompatible change or removal; no RC.2 has been issued.
+- Implemented review-stage [Proposal 0034](proposal-snapshots/0034-discriminator-driven-schema-validation.md), captured in [the proposal manifest](PROPOSALS.md) and tracked in [issue #112](https://github.com/mcpdesc/mcpdesc-specification/issues/112) and [PR #113](https://github.com/mcpdesc/mcpdesc-specification/pull/113). Eight unambiguously discriminated object unions now use guarded `if`/`then` alternatives instead of `oneOf`, preserving document acceptance, closure, and extension eligibility. Other unions are unchanged. Review-stage content remains subject to incompatible change or removal.
 - Section 16.5 explains branch-specific diagnostics without changing the validation-result format. The candidate validator omits redundant conditional summaries only when specific selected-branch failures are present, retaining independent failures and rule attribution. Updated the resource-link `size` catalog pointer without changing rule IDs.
 - Added fixtures and generated equivalence, diagnostic, rule-result, and runtime/standalone CSP checks. Raw schema paths and diagnostic counts change; see the [migration guidance](guides/migration-0.8-to-0.9.md#discriminator-driven-diagnostics-after-rc1). Published RC.1 and stable snapshots remain unchanged.
 
