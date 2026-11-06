@@ -271,7 +271,8 @@ const draftProposalSnapshots = [
   ['0030-readable-and-complete-rule-records.md', '7633f147faf5800e35c21c55411609a9db637eba', 'proposals/0030-readable-and-complete-rule-records.md', 'df8da81c56cab87817291135147f355e34d46b43b7bbcbb38ee9d615343c6a75'],
   ['0031-rule-level-validation-results.md', 'd85a92e76a5dbf810f85dcec66d19af2ff0397e3', 'proposals/0031-rule-level-validation-results.md', '432b73ef2e3d0d86ae98d9bedbf702bc79af0655582c772d7d01a73631c334d5'],
   ['0032-dialect-governed-tool-schemas.md', 'e344a04ae9b6f1d4a8dd03f685c3877f6af6f40a', 'proposals/0032-dialect-governed-tool-schemas.md', '353dce36f35e9c7df63821e32d054d676ae09eb6a5ae9727357e5aeb5d0ec5f5'],
-  ['0033-complete-validation-catalog.md', '9ffaaec089d7b4ee94e82dcb404f121bb3beceac', 'proposals/0033-complete-validation-catalog.md', 'f0aebaf968cbb7374139febaec83306a6f933f9c6e64117211c106a0cd8b3d76']
+  ['0033-complete-validation-catalog.md', '9ffaaec089d7b4ee94e82dcb404f121bb3beceac', 'proposals/0033-complete-validation-catalog.md', 'f0aebaf968cbb7374139febaec83306a6f933f9c6e64117211c106a0cd8b3d76'],
+  ['0034-discriminator-driven-schema-validation.md', '3a9b7309d2cc038acfba64e23764650f0df44b12', 'proposals/0034-discriminator-driven-schema-validation.md', '0a1ab35e7054850cf41639353498ee1366782cdd0863f723f22479fec39786ee']
 ];
 
 function checkProposalSnapshots(specificationPath, snapshots) {

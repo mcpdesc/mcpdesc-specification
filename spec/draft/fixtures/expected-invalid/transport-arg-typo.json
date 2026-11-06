@@ -1,0 +1,8 @@
+{
+  "mcpdesc": "0.9.0",
+  "info": { "name": "transport-arg-typo", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25"],
+  "transports": [
+    { "type": "stdio", "command": "chess-rating", "arg": ["serve"] }
+  ]
+}

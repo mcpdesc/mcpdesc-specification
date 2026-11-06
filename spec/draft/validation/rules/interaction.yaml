@@ -188,8 +188,8 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/malformed-sampling-step.json
-        pointer: "/tools/0/interactionExamples/summary/steps/0/request"
+      - path: expected-invalid/discriminated-union-members.json
+        pointer: /tools/0/interactionExamples/invalid/steps/1
         outcome: error
       - path: expected-invalid/malformed-tool-interaction-examples.json
         pointer: "/tools/0/interactionExamples/broken/description"
@@ -259,4 +259,10 @@ rules:
     fixtures:
       - path: expected-invalid/malformed-sampling-step.json
         pointer: "/tools/0/interactionExamples/summary/steps/0/request"
+        outcome: error
+      - path: expected-invalid/discriminated-resource-link-size.json
+        pointer: /tools/0/interactionExamples/nested/steps/0/response/content
+        outcome: error
+      - path: expected-invalid/discriminated-union-members.json
+        pointer: /tools/0/interactionExamples/invalid/steps/0
         outcome: error

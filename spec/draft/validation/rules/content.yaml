@@ -141,9 +141,6 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/content-annotations-unknown-property.json
-        pointer: "/tools/0/examples/basic/result/content/0"
-        outcome: error
-      - path: expected-invalid/fractional-resource-link-size.json
-        pointer: "/tools/0/examples/listing/result/content/0"
+      - path: expected-invalid/discriminated-union-members.json
+        pointer: /tools/0/interactionExamples/invalid/result/content/0
         outcome: error

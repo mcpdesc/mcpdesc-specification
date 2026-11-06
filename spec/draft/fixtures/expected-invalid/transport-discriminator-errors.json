@@ -1,0 +1,19 @@
+{
+  "mcpdesc": "0.9.0",
+  "info": { "name": "transport-discriminator-errors", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25"],
+  "transports": [
+    { "command": "run" },
+    { "type": "unknown" },
+    { "type": null },
+    { "type": 5 },
+    null,
+    "stdio",
+    5,
+    [],
+    true,
+    { "type": "stdio" },
+    { "type": "stdio", "command": "run", "url": "https://example.test/mcp" },
+    { "type": "stdio", "command": "run", "X-vendor": true }
+  ]
+}

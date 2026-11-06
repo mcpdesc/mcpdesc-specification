@@ -136,3 +136,15 @@ rules:
       - path: expected-invalid/malformed-info-transport-tag-resource.json
         pointer: "/transports/0"
         outcome: error
+      - path: expected-invalid/transport-arg-typo.json
+        pointer: /transports/0
+        outcome: error
+      - path: expected-invalid/transport-independent-defects.json
+        pointer: /transports
+        outcome: error
+      - path: expected-invalid/transport-discriminator-errors.json
+        pointer: /transports
+        outcome: error
+      - path: expected-valid/discriminated-unions.json
+        pointer: /transports
+        outcome: passes

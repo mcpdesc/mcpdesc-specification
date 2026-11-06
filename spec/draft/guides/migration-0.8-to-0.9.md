@@ -14,6 +14,40 @@ Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
 `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.1.json`; the stable
 identifier is assigned at release.
 
+## Discriminator-driven diagnostics after RC.1
+
+The working draft implements review-stage [Proposal 0034](../proposal-snapshots/0034-discriminator-driven-schema-validation.md)
+([issue #112](https://github.com/mcpdesc/mcpdesc-specification/issues/112)) for
+possible RC.2 inclusion. Transport and seven other unambiguously discriminated
+object unions use standard JSON Schema `if`/`then` conditionals. No document
+rewrite is intended: required fields, discriminator values, closure, and
+specification-extension eligibility are unchanged.
+
+Diagnostic counts, ordering, and raw schema paths can change. For example,
+`#/$defs/transport/oneOf/1` becomes
+`#/$defs/transport/allOf/1/then`; the Resource `size` rule's content-block
+location moves similarly. Registered rule IDs and the validation-result format
+are unchanged. Consumers should use rule IDs and document locations rather than
+pinning error counts or schema paths across selectors.
+With redundant union or conditional summaries removed, an enclosing shape rule
+can now pass while a more specific nested rule fails (for example, Resource
+`size`). Rule citations track the specific failures rather than those summaries.
+
+AJV can report an `if` summary alongside specific selected-branch failures. The
+candidate validator omits only a summary whose selected `then` already supplies
+a specific failure; independent defects remain. Raw schema engines can retain
+summaries. No actionable/supporting diagnostic fields are standardized.
+Unchanged nested unions, such as a sampling content value that can be an
+object or an array, can still report alternative failures and `oneOf` summaries.
+
+Published RC.1 remains immutable. This working-tree implementation does not
+assign an RC.2 schema identity or validator selector. An approved new candidate
+needs normal release preparation, a new exact downstream validator selector,
+and runtime/generated standalone/browser parity checks. Core should adopt that
+selector, verify each selector-sensitive operation, and update its support
+matrix and validator pin rather than reproducing branch-selection semantics.
+JSON/YAML editor completion and hover behavior still need downstream review.
+
 ## Annotations
 
 Tool Annotations and Resource Annotations, including annotations on content

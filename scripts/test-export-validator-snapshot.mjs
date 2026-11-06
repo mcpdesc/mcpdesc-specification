@@ -125,6 +125,18 @@ try {
   assert.deepEqual(headerResults(fixture('expected-invalid', 'invalid-mcp-header-value.json')), ['2026-07-28 failed']);
   assert.deepEqual(headerResults(fixture('expected-valid', 'custom-tool-schema-keywords.json')), ['2025-11-25 not-applicable', '2026-07-28 passed']);
 
+  if (fs.existsSync(path.join(output, 'fixtures/expected-invalid/transport-arg-typo.json'))) {
+    const report = runtime.validate(fixture('expected-invalid', 'transport-arg-typo.json'));
+    assert.equal(report.valid, false);
+    assert.deepEqual(report.diagnostics.map(({ rule, path: location }) => ({ rule, path: location })), [
+      { rule: 'mcpdesc.transport.members', path: ['transports', 0, 'arg'] }
+    ]);
+    assert.equal(runtime.validate(fixture('expected-valid', 'discriminated-unions.json')).valid, true);
+    const nested = runtime.validate(fixture('expected-invalid', 'discriminated-resource-link-size.json'));
+    assert.equal(nested.diagnostics.length, 3, 'Export retains object/array union errors but not conditional summaries');
+    assert.equal(nested.diagnostics[0].rule, 'mcp.resource.size');
+  }
+
   if (hasProjectionFixtures) {
     const cases = fs.readdirSync(path.join(output, 'projection-fixtures')).filter((name) => name.endsWith('.json'));
     assert.ok(cases.length > 0, 'projection fixtures are exported');

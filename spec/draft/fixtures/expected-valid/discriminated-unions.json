@@ -1,0 +1,75 @@
+{
+  "mcpdesc": "0.9.0",
+  "info": { "name": "discriminated-unions", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25"],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "chess-rating",
+      "args": ["serve"],
+      "env": { "MODE": "test" },
+      "x-vendor": { "nested": [1, null] }
+    },
+    { "type": "streamable-http", "url": "https://example.test/mcp" }
+  ],
+  "securitySchemes": {
+    "token": { "type": "http", "scheme": "bearer", "x-vendor": true }
+  },
+  "tools": [
+    {
+      "name": "inspect",
+      "inputSchema": { "type": "object" },
+      "elicitations": [
+        {
+          "name": "approve",
+          "mode": "form",
+          "message": "Approve?",
+          "requestedSchema": {
+            "type": "object",
+            "properties": { "approved": { "type": "boolean" } }
+          },
+          "x-vendor": true
+        }
+      ],
+      "interactionExamples": {
+        "approved": {
+          "input": {},
+          "steps": [
+            {
+              "type": "elicitation",
+              "declaration": "approve",
+              "request": {
+                "mode": "form",
+                "message": "Approve?",
+                "requestedSchema": {
+                  "type": "object",
+                  "properties": { "approved": { "type": "boolean" } }
+                }
+              },
+              "response": { "action": "accept", "content": { "approved": true } },
+              "x-vendor": true
+            },
+            {
+              "type": "sampling",
+              "request": {
+                "messages": [{ "role": "user", "content": { "type": "text", "text": "Inspect" } }],
+                "maxTokens": 10
+              },
+              "response": {
+                "role": "assistant",
+                "model": "example",
+                "content": {
+                  "type": "resource_link",
+                  "name": "readme",
+                  "uri": "file:///readme",
+                  "size": 12
+                }
+              }
+            }
+          ],
+          "result": { "content": [{ "type": "text", "text": "Done" }] }
+        }
+      }
+    }
+  ]
+}

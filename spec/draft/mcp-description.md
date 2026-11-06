@@ -2012,6 +2012,28 @@ Validation rules identify the requirements that validators check (Section 2.3). 
 
 <a id="req-diagnostic-rule"></a>Each diagnostic that a validator reports MUST identify the registered validation rule it reports, its severity, and the location it concerns in the document. When the finding depends on an MCP protocol version, the diagnostic SHOULD identify that version. A diagnostic MAY carry a code and a message; their values belong to the validator and are not defined by this specification.
 
+The document schema uses discriminator-driven conditionals for Transport Objects,
+Security Scheme Objects, Tool interaction steps, elicitation interaction requests
+and responses, Elicitation Declarations, Tool result content blocks, and sampling
+content blocks. Each is an object with an already-required discriminator (`type`,
+`mode`, or `action`); its value selects the applicable alternative. The schema
+requires the discriminator, constrains its values, and applies the selected
+alternative through guarded `if`/`then` entries in `allOf`. Other unions retain
+`oneOf` where a discriminator does not unambiguously select an alternative.
+This structure does not change the document fields, accepted values, object
+closure, or specification-extension eligibility defined in the preceding sections.
+
+Schema engines can report a generic conditional summary in addition to specific
+failures in the selected alternative. A producer can omit a redundant summary
+when specific failures from that conditional's selected branch already explain
+the rejection, retaining independent failures and their rule attribution. For
+example, a stdio transport with `arg` instead of `args` fails for the unexpected
+`arg`, not for lacking the HTTP transport's `url`. Neither raw error counts and
+schema paths nor a common actionable/supporting diagnostic vocabulary are part
+of the validation result contract.
+Nested unions without a discriminator can still produce their own alternative
+failures and union summaries; this design does not normalize those errors.
+
 <a id="req-rule-results"></a>A validator MAY report rule results. A validator that claims conformance with this specification's validation fixtures MUST report them: one status for each rule and each protocol version declared by the document, or one status for a rule whose applicability does not depend on the protocol version. A status is `passed`, `failed`, `warning`, `not-applicable`, `not-evaluated`, or `delegated`. Rule results do not change document validity, which errors alone determine.
 
 <a id="req-rule-results-executed"></a>A rule result MUST come from the checks the validator executed. A validator MUST NOT report `passed` for a rule that it did not check for that protocol version, including when an earlier validation stage failed, when it does not implement the check, or when the check is not applied to a legacy compatibility protocol version.

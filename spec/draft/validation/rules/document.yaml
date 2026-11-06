@@ -443,6 +443,9 @@ rules:
       - path: expected-invalid/invalid-security-scheme-name.json
         pointer: "/securitySchemes"
         outcome: error
+      - path: expected-invalid/discriminated-union-members.json
+        pointer: /securitySchemes/token
+        outcome: error
 
   - id: mcpdesc.tag.members
     title: "Declare tags with a name"

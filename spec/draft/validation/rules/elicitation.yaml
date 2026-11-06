@@ -205,6 +205,9 @@ rules:
       - path: expected-invalid/elicitation-branch-mixing.json
         pointer: "/resources/0/elicitations/0"
         outcome: error
+      - path: expected-invalid/discriminated-union-members.json
+        pointer: /tools/0/elicitations/0
+        outcome: error
 
   - id: mcp.elicitation.form-schema.members
     title: "Use MCP primitive schemas in elicitation forms"
