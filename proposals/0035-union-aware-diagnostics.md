@@ -230,7 +230,7 @@ rewrite:
 | `resourceContents` | Select on `blob`: when present, forbid `text`; otherwise require `text`. Preserve required `uri` and closure. |
 | `elicitationFormProperty` | Select first by `type`, then by the applicable defining member (`enum`, `oneOf`, or `items`). The plain string case has neither `enum` nor `oneOf`; the array case requires `items`. |
 | The nested `elicitationFormProperty` `items` alternatives | Select between `enum` and `anyOf` by member presence. |
-| `jsonValue` | Replace with `{"type": ["object", "array", "string", "number", "boolean", "null"]}`. It accepts every JSON value, so it needs no conditional and no exception. |
+| `jsonValue` | Replace with `{"type": ["object", "array", "string", "number", "boolean", "null"]}`. It accepts every JSON value, so it needs no conditional and no exception. Equivalence: the RC.2 alternatives (object of `jsonValue`, array of `jsonValue`, string, number, boolean, null) are disjoint by JSON type and their nested values are themselves unrestricted, so both forms accept exactly every JSON value; integers are numbers. AJV consumers running in `strict` mode must set `allowUnionTypes: true`; the repository's document validators already use `strict: false`. |
 
 Every guard MUST be checked for missing, conflicting, wrong-type and unknown
 selector values. Guards for mutually exclusive alternatives MUST be disjoint;
@@ -483,8 +483,12 @@ that were rejected. Related locations expose only paths in the same document.
   schema-only tools would retain noisy diagnostics and every producer would
   need schema-specific branch selection.
 - **Keep an unconditional `jsonValue` `oneOf` because it is total.** Rejected:
-  its JSON-type alternatives are disjoint and can also be expressed as
-  conditionals, avoiding an exception with no diagnostic benefit.
+  it accepts every JSON value, so the type list
+  `["object", "array", "string", "number", "boolean", "null"]` is equivalent,
+  needs neither a conditional nor an allowlist exception, and has no
+  diagnostic benefit as a union.
+- **Rewrite `jsonValue` as an if/else chain by JSON type.** Rejected: a chain
+  adds guards that can never fail, for no diagnostic benefit.
 - **Custom schema keywords for selectors.** Rejected: strict engines reject
   unknown keywords. Standard conditional applicators remain portable.
 - **AJV/OpenAPI `discriminator`.** Non-standard, covers only discriminators,
