@@ -37,8 +37,10 @@ if (previous.status === 'release-candidate'
   die(`iteration must be greater than current release candidate ${previous.iteration}, or reuse it with the same snapshot date`);
 }
 
-const baselineTag = previous.status === 'release-candidate' ? previous.baselineTag : previous.snapshotTag;
-if (!/^v\d+\.\d+\.\d+-draft\.\d+$/.test(baselineTag ?? '')) die('release candidate requires a draft snapshot baseline tag');
+const baselineTag = previous.snapshotTag;
+if (!/^v\d+\.\d+\.\d+-(?:draft|rc)\.\d+$/.test(baselineTag ?? '')) {
+  die('release candidate requires a draft or earlier release-candidate snapshot baseline tag');
+}
 const snapshotTag = `v${version}-rc.${iteration}`;
 const schemaId = `https://mcpdesc.org/schema/mcp-description/${snapshotTag.slice(1)}.json`;
 const previousSchemaIds = new Set([

@@ -2,6 +2,30 @@
 # runtime: behavior of MCP clients, servers, or consumers; processing: behavior of MCP Description
 # tools that document fixtures cannot show; guidance: an authoring choice the document cannot decide.
 uncheckedRequirements:
+  - location: sections/16-conformance.md#req-diagnostic-source-location
+    reason: processing
+    note: "Specifies validator diagnostic locations; this behavior is exercised by repository diagnostic tests rather than document fixtures."
+  - location: sections/16-conformance.md#req-diagnostic-component-provenance
+    reason: processing
+    note: "Specifies component-reference resolution and diagnostic provenance, which document fixtures cannot validate as a conformance property."
+  - location: sections/16-conformance.md#req-diagnostic-union-conditionals
+    reason: processing
+    note: "Constrains schema authoring and repository schema checks, not the contents of an individual description."
+  - location: sections/16-conformance.md#req-diagnostic-union-closure
+    reason: processing
+    note: "Constrains schema authoring and repository schema checks, not the contents of an individual description."
+  - location: sections/16-conformance.md#req-diagnostic-conditional-reduction
+    reason: processing
+    note: "Specifies validator error reduction and is tested by repository diagnostic tests rather than document fixtures."
+  - location: sections/16-conformance.md#req-diagnostic-rule-attribution
+    reason: processing
+    note: "Specifies validator rule attribution and is tested by repository diagnostic tests rather than document fixtures."
+  - location: sections/16-conformance.md#req-diagnostic-detail
+    reason: processing
+    note: "Defines the validation result format, checked against its result schema rather than document conformance fixtures."
+  - location: sections/16-conformance.md#req-diagnostic-deduplication
+    reason: processing
+    note: "Specifies validator diagnostic deduplication and is tested by repository diagnostic tests rather than document fixtures."
   - location: sections/03-document-structure.md#req-serialization-order
     reason: processing
     note: "Concerns how tools read a serialization, not a document value."

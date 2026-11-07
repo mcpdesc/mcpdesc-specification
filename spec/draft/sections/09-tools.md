@@ -111,6 +111,12 @@ Tool `interactionExamples` are separate from completed Tool `examples`. <a id="r
 
 An `elicitation` step MAY contain `declaration`, naming an Elicitation Declaration on the same Tool. <a id="req-interaction-elicitation-declaration"></a>When present, the request mode and the request schema or known URL MUST be compatible with that declaration after local reference resolution. <a id="req-interaction-elicitation-response"></a>For `mode: "form"`, an accepted response MUST contain `content` conforming to the request schema; declined and cancelled responses MUST NOT contain `content`. For `mode: "url"`, the response MUST omit `content`.
 
+<a id="req-interaction-response-closed"></a>The Elicitation Interaction Response Object is closed. It MUST NOT contain
+members other than `action`, `content`, and `_meta`; the applicable action
+rules above determine when `content` is permitted. This closure applies to the
+response value in a Tool Interaction Example, not to the native MCP response
+received at runtime.
+
 <a id="req-interaction-sampling-protocol-version"></a>A `sampling` step request uses the native `sampling/createMessage` parameter field names and constraints of every MCP protocol version in the containing Tool's effective protocol scope, excluding JSON-RPC, transport, task, and MRTR framing. This includes required `messages` and `maxTokens`, and MAY include protocol version-supported model preferences, system prompt, context inclusion, stop sequences, temperature, metadata, and Tool-related fields. Its response uses the native completed sampling result field names and constraints of every applicable protocol version, excluding JSON-RPC and task framing.
 
 A `roots` step request is an empty object. Its response contains the ordered native `roots` declarations returned by the client for this illustration. Roots are descriptive input only; they do not authorize filesystem access.
@@ -259,4 +265,3 @@ All Tool Annotation properties are advisory. They are not guaranteed to describe
   ]
 }
 ```
-

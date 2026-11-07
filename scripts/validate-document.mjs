@@ -242,10 +242,10 @@ function structuralPath(document, error) {
   const segments = error.instancePath
     ? error.instancePath.slice(1).split('/').map((segment) => segment.replaceAll('~1', '/').replaceAll('~0', '~'))
     : [];
-  if (error.keyword === 'required' && typeof error.params.missingProperty === 'string') {
-    segments.push(error.params.missingProperty);
-  } else if (error.keyword === 'additionalProperties' && typeof error.params.additionalProperty === 'string') {
+  if (error.keyword === 'additionalProperties' && typeof error.params.additionalProperty === 'string') {
     segments.push(error.params.additionalProperty);
+  } else if (error.keyword === 'propertyNames' && typeof error.params.propertyName === 'string') {
+    segments.push(error.params.propertyName);
   }
   let node = document;
   return segments.map((segment) => {
@@ -255,31 +255,15 @@ function structuralPath(document, error) {
   });
 }
 
-function structuralDiagnostics(document) {
-  const outer = structuralEvaluations;
-  structuralEvaluations = isRecording() ? [] : undefined;
-  const valid = validateStructure(document);
-  for (const visit of new Set((structuralEvaluations ?? []).map((entry) => JSON.stringify(entry)))) {
-    const [rule, instancePath] = JSON.parse(visit);
-    evaluated(rule, structuralPath(document, { instancePath, keyword: undefined, params: {} }));
-  }
-  structuralEvaluations = outer;
-  if (valid) return [];
-  const errors = validateStructure.errors ?? [];
-  return errors.filter((error) => !redundantConditionalSummary(error, errors)).map((error) => ({
-    code: 'schema-validation',
-    severity: 'error',
-    message: `does not validate against ${specificationVersion}: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
-    path: structuralPath(document, error),
-    rule: structuralRule(error, errors)
-  }));
-}
-
 // JSON Pointer of every subschema object, so a verbose error's parentSchema locates the failing keyword.
 const schemaPointers = new Map();
+const schemasByPointer = new Map();
 (function indexSchema(node, pointer) {
   if (node === null || typeof node !== 'object') return;
-  if (!Array.isArray(node)) schemaPointers.set(node, pointer);
+  if (!Array.isArray(node)) {
+    schemaPointers.set(node, pointer);
+    schemasByPointer.set(pointer, node);
+  }
   for (const [key, child] of Object.entries(node)) indexSchema(child, `${pointer}/${key.replaceAll('~', '~0').replaceAll('/', '~1')}`);
 })(instrumentedSchema, '#');
 
@@ -293,7 +277,7 @@ function schemaOwner(pointer) {
 }
 const withinInstance = (instancePath, container) => instancePath === container || instancePath.startsWith(`${container}/`);
 
-// Subschema objects reachable from an alternative, following local $ref, so a failure can be traced to its alternative.
+// Subschema objects reachable from an alternative, following local $ref.
 const reachable = new WeakMap();
 function reachableFrom(node) {
   if (reachable.has(node)) return reachable.get(node);
@@ -309,48 +293,173 @@ function reachableFrom(node) {
   reachable.set(node, found);
   return found;
 }
-const depth = (instancePath) => (instancePath ? instancePath.split('/').length - 1 : 0);
 
-function redundantConditionalSummary(error, errors) {
-  if (error.keyword !== 'if' || error.params.failingKeyword !== 'then') return false;
-  const branch = error.parentSchema.then;
-  if (branch === null || typeof branch !== 'object') return false;
-  const members = reachableFrom(branch);
-  return errors.some((failure) => !['if', 'oneOf', 'anyOf'].includes(failure.keyword)
-    && withinInstance(failure.instancePath, error.instancePath)
-    && members.has(failure.parentSchema));
+function getAtInstancePath(document, instancePath) {
+  return instancePath.split('/').slice(1).reduce((value, segment) => {
+    const key = segment.replaceAll('~1', '/').replaceAll('~0', '~');
+    const index = Array.isArray(value) && /^(?:0|[1-9][0-9]*)$/.test(key) ? Number(key) : key;
+    return value !== null && typeof value === 'object' ? value[index] : undefined;
+  }, document);
 }
 
-// The alternative of a failed oneOf or anyOf that best matches the instance: its failures reach
-// deepest into the instance, then it has the fewest failures, then it comes first.
-function selectedAlternative(container, errors) {
-  let best;
-  container.parentSchema[container.keyword].forEach((alternative, index) => {
-    const members = reachableFrom(alternative);
-    const failures = errors.filter((error) => error !== container && withinInstance(error.instancePath, container.instancePath) && members.has(error.parentSchema));
-    if (!failures.length) return;
-    const score = [Math.max(...failures.map((error) => depth(error.instancePath))), -failures.length, -index];
-    if (!best || score[0] > best.score[0] || (score[0] === best.score[0] && (score[1] > best.score[1] || (score[1] === best.score[1] && score[2] > best.score[2])))) {
-      best = { members, score };
-    }
-  });
-  return best?.members;
-}
-
-// Registered rule for a JSON Schema failure (Proposals 0024 and 0033): the rule owning the longest
-// documentSchema pointer that contains the failing location. A failure in an alternative of a
-// failed oneOf or anyOf other than the best-matching one belongs to the owner of the alternatives.
-function structuralRule(error, errors) {
-  const own = schemaOwner(schemaPointers.get(error.parentSchema) ?? '#')?.[1];
-  const containers = errors
-    .filter((candidate) => candidate !== error && (candidate.keyword === 'oneOf' || candidate.keyword === 'anyOf') && withinInstance(error.instancePath, candidate.instancePath))
-    .sort((left, right) => depth(left.instancePath) - depth(right.instancePath));
-  for (const container of containers) {
-    const alternatives = container.parentSchema[container.keyword];
-    if (!alternatives.some((alternative) => reachableFrom(alternative).has(error.parentSchema))) continue;
-    if (!selectedAlternative(container, errors)?.has(error.parentSchema)) return schemaOwner(schemaPointers.get(container.parentSchema) ?? '#')?.[1];
+function conditionalContext(error) {
+  const pointer = schemaPointers.get(error.parentSchema) ?? '#';
+  const parts = pointer.split('/');
+  for (let length = parts.length; length > 0; length -= 1) {
+    const candidatePointer = parts.slice(0, length).join('/');
+    const candidate = schemasByPointer.get(candidatePointer);
+    if (!candidate?.if) continue;
+    const branch = ['then', 'else'].find((name) => {
+      const branchPointer = `${candidatePointer}/${name}`;
+      return candidate[name] && (pointer === branchPointer || pointer.startsWith(`${branchPointer}/`));
+    });
+    if (branch) return { guard: candidate.if, branch };
   }
-  return own;
+  return undefined;
+}
+
+function selectorForError(error, document) {
+  const guard = conditionalContext(error)?.guard;
+  if (!guard?.properties || !Array.isArray(guard.required)) return undefined;
+  for (const member of guard.required) {
+    const constraint = guard.properties[member];
+    if (!constraint || (!Object.hasOwn(constraint, 'const') && !Array.isArray(constraint.enum))) continue;
+    const actual = getAtInstancePath(document, error.instancePath)?.[member];
+    if (Object.hasOwn(constraint, 'const') && actual === constraint.const) return { member, value: actual };
+    if (Array.isArray(constraint.enum) && constraint.enum.includes(actual)) return { member, value: actual };
+  }
+  return undefined;
+}
+
+function unicodeCodePointOrder(left, right) {
+  const a = Array.from(left, (character) => character.codePointAt(0));
+  const b = Array.from(right, (character) => character.codePointAt(0));
+  for (let index = 0; index < Math.min(a.length, b.length); index += 1) {
+    if (a[index] !== b[index]) return a[index] - b[index];
+  }
+  return a.length - b.length;
+}
+
+function structuralDetail(error, document) {
+  const keyword = error.keyword;
+  const schemaValue = error.parentSchema?.[keyword];
+  const selector = selectorForError(error, document);
+  if (keyword === 'required') {
+    const member = error.params.missingProperty;
+    const property = error.parentSchema?.properties?.[member];
+    const allowedValues = property?.enum ?? (Object.hasOwn(property ?? {}, 'const') ? [property.const] : undefined);
+    return { kind: 'missing-member', member, ...(allowedValues ? { allowedValues } : {}) };
+  }
+  if (keyword === 'additionalProperties') {
+    const properties = error.parentSchema?.properties ?? {};
+    const patterns = error.parentSchema?.patternProperties;
+    return {
+      kind: 'unexpected-member',
+      member: error.params.additionalProperty,
+      allowedMembers: Object.keys(properties).sort(unicodeCodePointOrder),
+      ...(patterns ? { allowedMemberPatterns: Object.keys(patterns) } : {}),
+      ...(selector ? { selector } : {})
+    };
+  }
+  if (keyword === 'propertyNames') {
+    return {
+      kind: 'invalid-member-name',
+      member: error.params.propertyName,
+      ...(typeof schemaValue === 'string' || typeof schemaValue === 'number' ? { limit: schemaValue } : {})
+    };
+  }
+  if (keyword === 'enum' || keyword === 'const') {
+    return {
+      kind: 'invalid-value',
+      allowedValues: keyword === 'enum' ? schemaValue : [schemaValue],
+      ...(selector ? { selector } : {})
+    };
+  }
+  if (keyword === 'type') {
+    return { kind: 'invalid-type', expectedTypes: Array.isArray(schemaValue) ? schemaValue : [schemaValue] };
+  }
+  if (keyword === 'not' && Array.isArray(error.parentSchema?.not?.required)) {
+    const context = conditionalContext(error);
+    return {
+      kind: 'conflicting-members',
+      members: [...(context?.guard?.required ?? []), ...error.parentSchema.not.required],
+      ...(selector ? { selector } : {})
+    };
+  }
+  if (keyword === 'anyOf') {
+    const members = (error.parentSchema.anyOf ?? []).flatMap((alternative) => alternative.required ?? []);
+    return { kind: 'missing-alternative', members };
+  }
+  return {
+    kind: 'constraint',
+    keyword,
+    ...(['number', 'string'].includes(typeof schemaValue) ? { limit: schemaValue } : {})
+  };
+}
+
+function sameDiagnosticFailure(left, right) {
+  const a = left.diagnostic;
+  const b = right.diagnostic;
+  if (left.keyword !== right.keyword
+    || JSON.stringify(a.path) !== JSON.stringify(b.path)
+    || a.rule !== b.rule
+    || a.severity !== b.severity
+    || a.detail.kind !== b.detail.kind) return false;
+  if (a.detail.member !== undefined || b.detail.member !== undefined) return a.detail.member === b.detail.member;
+  if (a.detail.members !== undefined || b.detail.members !== undefined) {
+    return JSON.stringify(a.detail.members) === JSON.stringify(b.detail.members);
+  }
+  return a.detail.keyword === b.detail.keyword
+    && JSON.stringify(a.detail.allowedValues) === JSON.stringify(b.detail.allowedValues)
+    && JSON.stringify(a.detail.expectedTypes) === JSON.stringify(b.detail.expectedTypes);
+}
+
+function structuralDiagnostics(document) {
+  const outer = structuralEvaluations;
+  structuralEvaluations = isRecording() ? [] : undefined;
+  const valid = validateStructure(document);
+  for (const visit of new Set((structuralEvaluations ?? []).map((entry) => JSON.stringify(entry)))) {
+    const [rule, instancePath] = JSON.parse(visit);
+    evaluated(rule, structuralPath(document, { instancePath, keyword: undefined, params: {} }));
+  }
+  structuralEvaluations = outer;
+  if (valid) return [];
+  const errors = validateStructure.errors ?? [];
+  const anyOfErrors = errors.filter((error) => error.keyword === 'anyOf');
+  const normalized = [];
+  for (const error of errors) {
+    if (error.keyword !== 'anyOf' && anyOfErrors.some((container) => {
+      if (!withinInstance(error.instancePath, container.instancePath)) return false;
+      return container.parentSchema.anyOf.some((alternative) => reachableFrom(alternative).has(error.parentSchema));
+    })) continue;
+    if (error.keyword === 'if' && errors.some((other) => other !== error && withinInstance(other.instancePath, error.instancePath))) continue;
+    const diagnostic = {
+      code: 'schema-validation',
+      severity: 'error',
+      message: `does not validate against ${specificationVersion}: ${error.instancePath || '/'} ${error.message ?? 'unknown error'}`,
+      path: structuralPath(document, error),
+      rule: structuralRule(error),
+      detail: structuralDetail(error, document)
+    };
+    normalized.push({
+      diagnostic,
+      keyword: error.keyword,
+      pointer: schemaPointers.get(error.parentSchema) ?? '#'
+    });
+  }
+  const unique = [];
+  for (const entry of normalized) {
+    const existingIndex = unique.findIndex((candidate) => sameDiagnosticFailure(candidate, entry));
+    if (existingIndex < 0) unique.push(entry);
+    else if (entry.pointer.length > unique[existingIndex].pointer.length) unique[existingIndex] = entry;
+  }
+  return unique.map(({ diagnostic }) => diagnostic);
+}
+
+// Attribute a failure to the owner of the failing keyword's absolute schema
+// pointer rather than the owner of an enclosing union.
+function structuralRule(error) {
+  return schemaOwner(schemaPointers.get(error.parentSchema) ?? '#')?.[1];
 }
 
 // Rules for diagnostic codes that only one registered rule emits. Codes shared
@@ -1253,14 +1362,32 @@ function runSemantics(document, rel = 'document') {
     ? []
     : structuralDiagnostics(resolution.document);
   const base = !resolution.diagnostics.length && !resolvedStructureDiagnostics.length;
-  const diagnostics = [
-    ...resolution.diagnostics,
+  const resolvedDiagnostics = [
     ...resolvedStructureDiagnostics,
     ...(base ? validateBaseSemantics(resolution.document, rel) : []),
     ...validateToolInteractionExamples(resolution.document),
     ...validatePromptExamples(resolution.document),
     ...validateCompletionExamples(resolution.document),
     ...validateClientRequirements(document)
+  ];
+  const mappedDiagnostics = resolvedDiagnostics.map((diagnostic) => {
+    const match = resolution.provenance
+      .filter(({ referencePath }) => referencePath.length <= diagnostic.path.length
+        && referencePath.every((segment, index) => diagnostic.path[index] === segment))
+      .sort((left, right) => right.referencePath.length - left.referencePath.length)[0];
+    if (!match) return diagnostic;
+    return {
+      ...diagnostic,
+      path: [...match.referencePath],
+      relatedLocations: [{
+        path: [...match.targetPath, ...diagnostic.path.slice(match.referencePath.length)],
+        relation: 'component-definition'
+      }]
+    };
+  });
+  const diagnostics = [
+    ...resolution.diagnostics,
+    ...mappedDiagnostics
   ];
   const filtered = Object.hasOwn(document, 'transports')
     ? diagnostics

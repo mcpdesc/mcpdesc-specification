@@ -1,0 +1,46 @@
+{
+  "mcpdesc": "0.9.0",
+  "info": { "name": "elicitation-response-unknown-member", "version": "1.0.0" },
+  "protocolVersions": ["2025-11-25"],
+  "tools": [
+    {
+      "name": "inspect",
+      "inputSchema": { "type": "object" },
+      "elicitations": [
+        {
+          "name": "approve",
+          "mode": "form",
+          "message": "Approve?",
+          "requestedSchema": {
+            "type": "object",
+            "properties": { "approved": { "type": "boolean" } }
+          }
+        }
+      ],
+      "interactionExamples": {
+        "approval": {
+          "input": {},
+          "steps": [
+            {
+              "type": "elicitation",
+              "request": {
+                "mode": "form",
+                "message": "Approve?",
+                "requestedSchema": {
+                  "type": "object",
+                  "properties": { "approved": { "type": "boolean" } }
+                }
+              },
+              "response": {
+                "action": "accept",
+                "content": { "approved": true },
+                "unexpected": true
+              }
+            }
+          ],
+          "result": { "content": [{ "type": "text", "text": "Done" }] }
+        }
+      }
+    }
+  ]
+}

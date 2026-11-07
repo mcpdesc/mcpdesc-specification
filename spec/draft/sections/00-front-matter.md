@@ -1,13 +1,13 @@
 ---
 title: MCP Description Specification
 version: 0.9.0
-status: Release candidate 2
-release-candidate-iteration: 2
-snapshot-tag: v0.9.0-rc.2
+status: Release candidate 3
+release-candidate-iteration: 3
+snapshot-tag: v0.9.0-rc.3
 released: false
 baseline: 0.8.0
-baseline-snapshot: v0.9.0-draft.4
-date: 2026-11-06
+baseline-snapshot: v0.9.0-rc.2
+date: 2026-11-07
 ---
 
 # MCP Description Specification

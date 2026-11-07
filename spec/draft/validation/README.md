@@ -531,15 +531,23 @@ mapping from codes to rules and test it against the fixtures
 Every candidate-validator diagnostic identifies a registered rule.
 
 A document-schema failure belongs to the rule whose `documentSchema` lists the
-longest JSON Pointer containing the failing schema location (Proposal 0033).
-Every canonical schema definition and the document root have exactly one
-owner; `mcpdesc.document.schema` owns only the root and generic JSON values.
-When a value fails a `oneOf` or `anyOf`, failures in the alternative that best
-matches the value belong to the owners of their own locations, and failures in
-the other alternatives to the owner of the location offering the
-alternatives. Which alternative matches best is implementation-defined; the
-candidate validator chooses the one whose failures reach deepest into the
-value, then the one with the fewest failures, then the first.
+longest JSON Pointer that prefixes the absolute schema pointer of the failing
+keyword (Proposal 0033 and Proposal 0035). This is a pointer in the document
+schema, not an engine evaluation path relative to a `$ref`. Every canonical
+schema definition and the document root have exactly one owner;
+`mcpdesc.document.schema` owns only the root and generic JSON values. The
+schema selects applicable alternatives through guarded conditionals; validators
+do not infer the best-matching alternative. Failures from unselected branches
+do not appear or cause their rules to fail.
+
+Schema-derived findings include a factual `detail` in validation result format
+1.4.0. It names the kind of fact (such as a missing or unexpected member,
+invalid value or type, conflicting members, or missing alternative) and
+provides structured context such as allowed values or members. Missing-member
+locations identify the enclosing object, with the absent name in
+`detail.member`. Findings reached through `$componentRef` identify the use
+site in `path` and the component definition in `relatedLocations`. Consumers
+should render recognized details and fall back to `message` for unknown kinds.
 
 `scripts/test-validation-rules.mjs` checks that every fixture diagnostic
 identifies a registered, active rule, that every severity a rule reports in
@@ -554,7 +562,7 @@ Diagnostics show only what failed. Rule results also show what was checked
 rule and protocol version declared by the document, or one entry for a rule
 whose applicability is `independent`. The
 [validation result format](result.schema.json)
-(`https://mcpdesc.org/schema/validation-result/1.3.0.json`) defines the shape:
+(`https://mcpdesc.org/schema/validation-result/1.4.0.json`) defines the shape:
 
 ```json
 {
@@ -606,14 +614,15 @@ Format `1.0.0` was published first but is used by no rule catalog. These
 versioned schemas remain unchanged. Format `1.2.0` added `documentSchema` and
 `uncheckedRequirements`, and Draft 4 manifests list the validation result
 schema as `resultSchema`. Format `1.3.0` uses protocol-version terminology in
-record fields and schema definitions; the
+record fields and schema definitions; format `1.4.0` adds factual diagnostic
+details and related component locations. The
 [result-format changelog](result-format-changelog.md) records its versions.
 No 0.8.0 catalog is published by this work.
 
 | Resource | Publication target |
 | --- | --- |
 | Rule-format schema | `https://mcpdesc.org/schema/validation-rule/1.3.0.json` (Draft 4: `1.2.0.json`; Draft 3: `1.1.0.json`) |
-| Validation result schema | `https://mcpdesc.org/schema/validation-result/1.3.0.json` (Draft 4: `1.0.0.json`) |
+| Validation result schema | `https://mcpdesc.org/schema/validation-result/1.4.0.json` (RC.2: `1.3.0.json`; Draft 4: `1.0.0.json`) |
 | Draft 3 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/manifest.json` |
 | Draft 3 aggregate | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.3/rules.json` |
 | Draft 4 manifest | `https://mcpdesc.org/validation/catalogs/0.9.0-draft.4/manifest.json` |

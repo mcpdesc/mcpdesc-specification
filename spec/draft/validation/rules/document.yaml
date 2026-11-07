@@ -506,9 +506,6 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/component-extension-boundaries.json
-        pointer: "/components/toolExamples/x-map-extension"
-        outcome: error
       - path: expected-invalid/components-empty-and-reference-shapes.json
         pointer: "/components/schemas"
         outcome: error

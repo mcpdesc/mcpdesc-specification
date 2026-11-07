@@ -55,27 +55,84 @@ Validation rules identify the requirements that validators check (Section 2.3). 
 
 <a id="req-diagnostic-rule"></a>Each diagnostic that a validator reports MUST identify the registered validation rule it reports, its severity, and the location it concerns in the document. When the finding depends on an MCP protocol version, the diagnostic SHOULD identify that version. A diagnostic MAY carry a code and a message; their values belong to the validator and are not defined by this specification.
 
-The document schema uses discriminator-driven conditionals for Transport Objects,
-Security Scheme Objects, Tool interaction steps, elicitation interaction requests
-and responses, Elicitation Declarations, Tool result content blocks, and sampling
-content blocks. Each is an object with an already-required discriminator (`type`,
-`mode`, or `action`); its value selects the applicable alternative. The schema
-requires the discriminator, constrains its values, and applies the selected
-alternative through guarded `if`/`then` entries in `allOf`. Other unions retain
-`oneOf` where a discriminator does not unambiguously select an alternative.
-This structure does not change the document fields, accepted values, object
-closure, or specification-extension eligibility defined in the preceding sections.
+<a id="req-diagnostic-source-location"></a>The location of a diagnostic MUST identify a value or member name present in
+the document as written, before component references are replaced. A diagnostic
+for a missing member MUST identify the closest enclosing object; in validation
+result format `1.4.0`, its `detail.member` MUST identify the missing member and
+its message, when present, SHOULD identify it. A diagnostic for an unexpected
+or invalid member name MUST identify that member.
 
-Schema engines can report a generic conditional summary in addition to specific
-failures in the selected alternative. A producer can omit a redundant summary
-when specific failures from that conditional's selected branch already explain
-the rejection, retaining independent failures and their rule attribution. For
-example, a stdio transport with `arg` instead of `args` fails for the unexpected
-`arg`, not for lacking the HTTP transport's `url`. Neither raw error counts and
-schema paths nor a common actionable/supporting diagnostic vocabulary are part
-of the validation result contract.
-Nested unions without a discriminator can still produce their own alternative
-failures and union summaries; this design does not normalize those errors.
+<a id="req-diagnostic-component-provenance"></a>A diagnostic for content reached through `$componentRef` MUST identify the
+reference object at the use site as its primary location. In format `1.4.0`, it
+MUST also include the location within the component as a related location with
+relation `component-definition`. When chained references are resolved, the
+related location is in the final component definition. For a finding at
+resolved path `P`, the resolver selects the provenance entry whose
+`referencePath` is the longest prefix of `P` (including `P` itself). The primary
+location is that `referencePath`; the related location is the entry's
+`targetPath` followed by the remainder of `P`. When no entry matches, `P` is
+already a source-document location. The related location for a missing member
+identifies the enclosing component object.
+
+<a id="req-diagnostic-union-conditionals"></a>The document schema MUST express every union with a deterministic, portable
+selector as guarded conditionals using JSON Schema 2020-12. A guard MUST use a
+discriminator value, the presence of `$componentRef`, a JSON type, or defining
+members; a discriminator guard MAY be combined with defining members. The
+conditionals MUST select only the applicable alternative and preserve the
+original acceptance constraints, including closure, required members, and
+specification extensions, except for the explicit closure of the Elicitation
+Interaction Response Object in [Section 9.4](09-tools.md#req-interaction-response-closed).
+A selector typo does not authorize a validator to infer the intended
+alternative. A schema check MUST reject unreviewed
+`oneOf`/`anyOf` occurrences and conditional guards outside these forms. An
+allowlisted `anyOf` remains inclusive and MUST produce one
+`missing-alternative` finding at the union value when it fails; failures of its
+individual alternatives MUST NOT be emitted.
+
+<a id="req-diagnostic-union-closure"></a>For each discriminated object union, the parent schema MUST declare the union
+of member names accepted by its alternatives, keep the discriminator's
+constraint, and reject other members while preserving its specification-
+extension pattern. Other parent member schemas MUST be `true` so value
+constraints remain in the selected branch. Alternative schemas retain their
+own closure; a member allowed by a different alternative remains invalid in
+the selected alternative.
+
+<a id="req-diagnostic-conditional-reduction"></a>Findings from the selected `then` or `else` branch MUST be retained. A failure
+reported for an `if` keyword MUST NOT be emitted when another finding exists
+at or below the same instance location. Otherwise it MUST be emitted as kind
+`constraint` with keyword `if`. A `not` failure over `required` members MUST
+produce one `conflicting-members` finding at the object. Its member list names
+the enclosing guard's required members followed by the members forbidden by
+`not`; when selected by a discriminator, it also identifies that selector.
+Unselected alternatives MUST NOT be reconstructed or inferred.
+
+<a id="req-diagnostic-rule-attribution"></a>A schema-derived finding MUST be attributed to the rule whose catalog schema
+pointer is the longest prefix of the absolute schema pointer of the subschema
+containing the failing keyword. This is the location in the document schema,
+not an engine evaluation path relative to a `$ref`. A shared definition is
+therefore attributed to the same rule wherever it is used. A validator MUST
+NOT attribute a finding to an enclosing union by choosing a best-matching
+alternative. Findings removed by conditional or `anyOf` reduction MUST NOT
+cause a rule to be reported as `failed`.
+
+<a id="req-diagnostic-detail"></a>Validation result format `1.4.0` defines factual `detail` for findings derived
+from the document schema. It identifies missing, unexpected, or invalid
+members and values; expected types; conflicting members; missing alternatives;
+and the failing keyword for other constraints. `allowedValues`,
+`allowedMembers`, and `expectedTypes` describe the subschema that reported the
+finding. The format also defines related component locations. `kind` is
+extensible; consumers MUST fall back to `message` for an unrecognized kind.
+Detail states facts, not remedies. The location, rule, severity, conditional
+reduction, and generic handling of remaining `anyOf` and `not` findings are
+specified; raw engine error counts, schema paths, `code`, and `message` wording
+are not.
+
+<a id="req-diagnostic-deduplication"></a>Duplicate findings share their source path, rule, severity, kind, and relevant
+member or member-list facts; constraint findings are distinguished by failing
+keyword. Only one duplicate MUST be emitted: the one whose failing keyword has
+the longest absolute schema pointer. Independent findings MUST be retained.
+Diagnostic order is not part of the contract; producers SHOULD order findings
+by document position.
 
 <a id="req-rule-results"></a>A validator MAY report rule results. A validator that claims conformance with this specification's validation fixtures MUST report them: one status for each rule and each protocol version declared by the document, or one status for a rule whose applicability does not depend on the protocol version. A status is `passed`, `failed`, `warning`, `not-applicable`, `not-evaluated`, or `delegated`. Rule results do not change document validity, which errors alone determine.
 

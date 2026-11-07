@@ -199,9 +199,6 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/component-contextual-schemas.json
-        pointer: "/tools/0/elicitations/0/requestedSchema/$componentRef"
-        outcome: error
       - path: expected-invalid/elicitation-branch-mixing.json
         pointer: "/resources/0/elicitations/0"
         outcome: error
