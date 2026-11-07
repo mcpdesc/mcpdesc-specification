@@ -16,8 +16,8 @@ discriminator-driven transport design to every applicable `oneOf`, so schema
 engines validate the selected alternative without validator-specific union
 logic. Keep the remaining diagnostic handling generic: report locations in the
 document as written, map findings through component references, and attribute
-findings by the failing schema keyword. Result format `1.4.0` adds optional,
-factual diagnostic detail.
+findings by the failing schema keyword. Result format `1.4.0` adds factual
+diagnostic detail, required for findings derived from the document schema.
 
 Document acceptance does not change. The proposal builds on RC.2 and
 Proposal 0034, and extends their principle to all unions.
@@ -97,25 +97,58 @@ Amend `#req-diagnostic-rule`. The location of a diagnostic:
 
 - MUST identify a value or member name present in the document as written,
   before component references are replaced;
-- for a missing member, MUST identify the closest enclosing object, and the
-  diagnostic MUST name the missing member in its message and, in format
-  `1.4.0`, in `detail.member`;
+- for a missing member, MUST identify the closest enclosing object. In format
+  `1.4.0`, `detail.member` MUST name the missing member. A `message`, when
+  present, SHOULD name it; message wording remains defined by the validator;
 - for an unexpected or invalid member name, MUST identify that member;
 - for a finding in content reached through `$componentRef`, MUST identify the
-  reference object at the use site. In format `1.4.0`, the diagnostic SHOULD
+  reference object at the use site. In format `1.4.0`, the diagnostic MUST
   give the location within the component as a related location.
 
 The use site is the primary location, because component content is validated
 in the context where it is used (Proposal 0009). A component used in several
 places can therefore produce one finding per use site.
 
+**Mapping through references.** The resolver records one provenance entry
+`{referencePath, targetPath}` for each substituted reference, where
+`targetPath` is the final component after following chained references. For a
+finding at resolved path `P`:
+
+1. Select the entry whose `referencePath` is the longest prefix of `P`
+   (including `P` itself). If there is none, `P` is already a source path.
+2. The primary path is `referencePath`: the object containing `$componentRef`.
+3. The related location is `targetPath` followed by the remainder of `P` after
+   `referencePath`, with `relation: "component-definition"`.
+
+The related location applies the location rules above within the component.
+For example, a missing member is reported at its enclosing object in the
+component.
+
 ### 2. Schema selection and generic diagnostic reduction
 
 The document schema MUST express each union whose alternatives have a
-deterministic, portable selector as guarded `if`/`then` entries in `allOf`,
-following Proposal 0034. The guards MUST select only the applicable
-alternative, and the rewrite MUST preserve all acceptance constraints,
-including object closure, required members, and specification extensions.
+deterministic, portable selector as guarded conditionals, following
+Proposal 0034. A conditional is either:
+
+- an `allOf` of `if`/`then` entries with disjoint guards, as in RC.2; or
+- an `if`/`then`/`else` choice. `else` can itself be a conditional, forming an
+  else-if chain, for example to choose among three alternatives.
+
+The guards MUST select only the applicable alternative, and the rewrite MUST
+preserve all acceptance constraints, including object closure, required
+members, and specification extensions.
+
+Every `if` MUST use one of these approved guard forms:
+
+| Form | Guard |
+| --- | --- |
+| Discriminator | `{"type": "object", "required": [m], "properties": {m: {"const": v}}}`, or `enum` instead of `const` |
+| Reference presence | `{"type": "object", "required": ["$componentRef"]}` |
+| JSON type | `{"type": t}`, where `t` is a JSON type name |
+| Defining members | `{"type": "object", "required": [m, ...]}` |
+
+A guard MAY combine the discriminator form with the defining-members form,
+for a staged selection such as `elicitationFormProperty`.
 
 The schema MUST NOT add `oneOf` or `anyOf` outside the explicit allowlist in
 the Schema impact section. Each allowlisted occurrence requires a documented
@@ -126,19 +159,31 @@ an unreviewed union or guard fails validation.
 
 Validators MUST handle conditional diagnostics generically:
 
-1. A failure reported for an `if` keyword is control flow, not a document
-   finding, and MUST NOT be emitted as a diagnostic.
-2. Findings from the selected `then` branch MUST be retained. Findings from
-   branches not selected by their guards MUST NOT be emitted or attributed to
-   their rules.
-3. An `anyOf` failure that remains on the allowlist MUST produce one finding
-   at the union value. When its alternatives are simple `required` constraints,
-   the finding SHOULD identify the permitted members that are absent.
-4. A `not` failure over `required` members MUST produce one finding at the
-   object naming the conflicting members.
-5. Exact duplicate findings at the same instance location with the same rule,
-   keyword and detail MUST be emitted once. Independent findings MUST be
-   retained.
+1. A failure reported for an `if` keyword (the conditional summary) MUST NOT
+   be emitted when at least one other finding exists at or below the same
+   instance location. Otherwise it MUST be emitted as kind `constraint` with
+   `keyword: "if"`. This ensures that an invalid document always has at least
+   one diagnostic, including in first-error execution.
+2. Findings from the selected `then` or `else` branch MUST be retained.
+   Guarded conditionals do not evaluate unselected branches, so validators MUST
+   NOT reconstruct or infer findings for them.
+3. An `anyOf` failure that remains on the allowlist MUST produce one finding of
+   kind `missing-alternative` at the union value. Failures of its individual
+   alternatives MUST NOT be emitted. When the alternatives are simple `required`
+   constraints, `detail.members` MUST list the members they require.
+4. A `not` failure over `required` members MUST produce one finding of kind
+   `conflicting-members` at the object. `detail.members` lists the members
+   required by the enclosing `if` guard followed by the members the `not`
+   forbids. When the guard selects by discriminator, `detail.selector` gives the
+   discriminator member and value.
+5. Two findings are duplicates when they share `path`, `rule`, `severity`,
+   `detail.kind` and `detail.member`, or `detail.members` for kinds without a
+   single member. Only one of them MUST be emitted: the one whose failing
+   keyword has the longest absolute schema pointer, so a selected branch is
+   preferred over its parent. Independent findings MUST be retained.
+
+Diagnostic order is not part of the contract. Producers SHOULD order findings
+by document position.
 
 Selection is encoded in the schema and is not inferred by a "closest
 alternative" heuristic. A selector typo does not authorize the validator to
@@ -146,11 +191,20 @@ guess which alternative the author intended.
 
 ### 3. Rule attribution
 
-A finding is attributed to the rule whose schema `pointer` most specifically
-contains the schema location of the failing keyword, not the rule for the
-instance location. Findings removed by rule 2 MUST NOT cause any rule to be
-reported as `failed`. This follows from `#req-rule-results-executed`: a rule
-fails only on checks that apply to the document.
+A finding is attributed to the rule whose catalog schema `pointer` is the
+longest prefix of the **absolute schema pointer** of the subschema containing
+the failing keyword. This is the pointer within the document schema at which
+that subschema is defined, for example `#/$defs/toolExample/required`. It is
+not the engine's evaluation path, which is relative to a `$ref` target in some
+engines and depends on the route taken through references. A definition shared
+through `$ref` is therefore always attributed to the same rule, whatever the
+use site.
+
+Validators MUST NOT attribute a finding to the owner of an enclosing union by
+choosing a "best-matching" alternative. Findings removed by section 2 MUST NOT
+cause any rule to be reported as `failed`. This follows from
+`#req-rule-results-executed`: a rule fails only on checks that apply to the
+document.
 
 ### 4. Section 16.5
 
@@ -176,7 +230,7 @@ rewrite:
 | `resourceContents` | Select on `blob`: when present, forbid `text`; otherwise require `text`. Preserve required `uri` and closure. |
 | `elicitationFormProperty` | Select first by `type`, then by the applicable defining member (`enum`, `oneOf`, or `items`). The plain string case has neither `enum` nor `oneOf`; the array case requires `items`. |
 | The nested `elicitationFormProperty` `items` alternatives | Select between `enum` and `anyOf` by member presence. |
-| `jsonValue` | Select by JSON type (object, array, string, number, boolean, or null). This is a total union but can still be expressed without `oneOf`. |
+| `jsonValue` | Replace with `{"type": ["object", "array", "string", "number", "boolean", "null"]}`. It accepts every JSON value, so it needs no conditional and no exception. |
 
 Every guard MUST be checked for missing, conflicting, wrong-type and unknown
 selector values. Guards for mutually exclusive alternatives MUST be disjoint;
@@ -188,12 +242,14 @@ pointers must remain equivalent. In particular, a naive
 
 For discriminated object unions, the parent schema MUST declare the union of
 member names accepted by its alternatives, set `additionalProperties` to
-`false`, and preserve the existing specification-extension pattern. This
+`false`, and preserve the existing specification-extension pattern. The parent
+keeps the discriminator's `enum`. It declares every other member as `true`, so
+the value constraints stay in the branches and are not duplicated. This
 allows object closure at the parent to report a misspelled member even when no
 discriminator alternative is selected. Alternative schemas retain their own
 closure, so members allowed by another alternative remain invalid for the
 selected alternative. If parent and branch constraints produce the same
-finding, the generic duplicate-removal rule emits it once.
+finding, the generic duplicate-removal rule keeps the branch finding.
 
 ### Remaining allowlisted union
 
@@ -206,22 +262,25 @@ alternative finding when no flow is present.
 The schema check MUST inspect schema applicator locations structurally, not
 search text: embedded JSON Schemas and document properties can contain keywords
 named `oneOf`, `anyOf`, or `if`. It MUST verify that `oauthFlows` is the only
-allowlisted `anyOf`, that no `oneOf` remains, and that each `if` guard is one
-of the approved discriminator, reference-presence, JSON-type, or defining-
-member forms. The check does not require a published inventory file.
+allowlisted `anyOf`, that no `oneOf` remains, and that each `if` guard has one
+of the approved forms in section 2. The check does not require a published
+inventory file.
 
 ### Validation result format `1.4.0`
 
-Add optional members to `#/$defs/diagnostic`:
+Add the members `detail` and `relatedLocations` to `#/$defs/diagnostic`. Both
+are optional in the result schema structure; the rules below say when they
+are required:
 
 ```jsonc
 {
   "detail": {
-    "kind": "missing-member",       // extensible, see below
-    "member": "type",
-    "members": ["text", "blob"],    // conflicting-members, at-least-one
-    "allowedValues": ["stdio", "streamable-http", "sse"],
-    "allowedMembers": ["type", "command", "args", "env", "cwd"],
+    "kind": "unexpected-member",       // extensible, see below
+    "member": "arg",
+    "members": ["text", "blob"],       // conflicting-members, missing-alternative
+    "allowedValues": ["streamable-http", "stdio", "sse"],
+    "allowedMembers": ["args", "command", "env", "protocolVersions", "security", "type"],
+    "allowedMemberPatterns": ["^x-"],
     "expectedTypes": ["object", "array"],
     "keyword": "minLength",
     "limit": 1,
@@ -234,17 +293,58 @@ Add optional members to `#/$defs/diagnostic`:
 }
 ```
 
-- Initial `kind` values: `missing-member`, `unexpected-member`,
-  `invalid-member-name`, `invalid-value`, `invalid-type`,
-  `conflicting-members`, `missing-alternative`, `constraint`.
+Schema-derived findings use this mapping. A producer of format `1.4.0` MUST
+include `detail` in every finding derived from the document schema, with the
+required fields below.
+
+| Failing keyword | `kind` | `path` | Required `detail` fields | Optional `detail` fields |
+| --- | --- | --- | --- | --- |
+| `required` | `missing-member` | Enclosing object | `member` | `allowedValues` from `properties[member].enum` or `const` of the same subschema |
+| `additionalProperties: false` | `unexpected-member` | The member | `member`, `allowedMembers`, and `allowedMemberPatterns` when the subschema has `patternProperties` | `selector` |
+| `propertyNames` | `invalid-member-name` | The member | `member` | `keyword`, `limit` |
+| `enum`, `const` | `invalid-value` | The value | `allowedValues` | `selector`, when the value is a discriminator |
+| `type` | `invalid-type` | The value | `expectedTypes` | — |
+| `not` over `required` | `conflicting-members` | Enclosing object | `members` | `selector` |
+| Allowlisted `anyOf` | `missing-alternative` | Union value | `members` | — |
+| `if` (fallback only, see section 2) | `constraint` | The value | `keyword` | — |
+| Any other keyword (`pattern`, `format`, `minLength`, `maxItems`, `uniqueItems`, ...) | `constraint` | The value | `keyword` | `limit`: the keyword's value, when it is a number or string |
+
+Field rules:
+
+- `allowedMembers` lists the names in the failing subschema's `properties`,
+  sorted by Unicode code point. `allowedMemberPatterns` lists the keys of its
+  `patternProperties` in schema order.
+- `members` for `conflicting-members` lists the guard's required members, then
+  the members forbidden by the `not`, each group in schema order. For
+  `missing-alternative`, it lists the required members of each `anyOf`
+  alternative in schema order.
+- `allowedValues` lists `enum` values in schema order, or the single `const`
+  value.
+- `allowedValues` and `allowedMembers` describe the subschema that reported
+  the finding. Once a branch is selected, they describe that branch, not the
+  union.
+- `selector` is present when the finding comes from a branch selected by a
+  discriminator guard. It gives the discriminator member and the value found
+  in the document.
+
+Format rules:
+
 - `kind` is open. Consumers MUST fall back to `message` for kinds they do not
   recognize, so adding a kind is a minor format change.
+- `detail` is OPTIONAL for findings not derived from the document schema, such
+  as semantic and protocol checks. Such findings MAY use the kinds above when
+  they fit.
+- The result schema enforces the required fields per `kind` with `if`/`then`
+  entries.
 - `detail` states facts, not remedies.
 - `1.3.0` remains published and unchanged.
 
 ## Examples
 
-**Transport with `typ`** (`discriminator`, nothing selected):
+Each example lists the complete set of expected findings, as `path`, `rule`,
+then `detail`. Messages are omitted.
+
+**Transport with `typ`** (discriminator missing, no branch selected):
 
 ```yaml
 transports:
@@ -252,30 +352,90 @@ transports:
     command: chess-rating
 ```
 
-Findings:
+```jsonc
+// 1. From the parent's required "type"
+{ "path": ["transports", 0], "rule": "mcpdesc.transport.members",
+  "detail": { "kind": "missing-member", "member": "type",
+              "allowedValues": ["streamable-http", "stdio", "sse"] } }
+// 2. From the parent's closure (union of the alternatives' members)
+{ "path": ["transports", 0, "typ"], "rule": "mcpdesc.transport.members",
+  "detail": { "kind": "unexpected-member", "member": "typ",
+              "allowedMembers": ["args", "command", "env", "protocolVersions", "security", "type", "url"],
+              "allowedMemberPatterns": ["^x-"] } }
+```
 
-- `/transports/0`, `mcpdesc.transport.members`, missing member `type`, allowed
-  `stdio`, `streamable-http`, `sse`;
-- `/transports/0/typ`, unexpected member `typ`.
+There is no finding for `command`, because an alternative permits it.
 
-No finding for `command` (it is permitted by an alternative).
+**Stdio transport with `arg`** (branch selected). The parent and the stdio
+branch both reject `arg`. Duplicate removal keeps the branch finding, so
+`allowedMembers` lists only the members of the stdio branch:
 
-**Inline component example with `inpt`** (`reference-or-inline`, inline
-selected). One missing-member `input` at `/components/toolExamples/basic`, and
-one unexpected-member at `.../inpt`, both under `mcpdesc.example.members`.
+```jsonc
+{ "path": ["transports", 0, "arg"], "rule": "mcpdesc.transport.members",
+  "detail": { "kind": "unexpected-member", "member": "arg",
+              "allowedMembers": ["args", "command", "env", "protocolVersions", "security", "type"],
+              "allowedMemberPatterns": ["^x-"],
+              "selector": { "member": "type", "value": "stdio" } } }
+```
+
+The `if` summary is dropped because a specific finding exists at the same
+location.
+
+**Inline component example with `inpt`** (`result` present; reference presence: no
+`$componentRef`, so the inline branch is selected):
+
+```jsonc
+{ "path": ["components", "toolExamples", "basic"], "rule": "mcpdesc.example.members",
+  "detail": { "kind": "missing-member", "member": "input" } }
+{ "path": ["components", "toolExamples", "basic", "inpt"], "rule": "mcpdesc.example.members",
+  "detail": { "kind": "unexpected-member", "member": "inpt",
+              "allowedMembers": ["input", "result"], "allowedMemberPatterns": ["^x-"] } }
+```
+
+Both findings are attributed through `#/$defs/toolExample`.
 `mcpdesc.components.members` is not `failed`.
 
-**Resource contents with `text` and `blob`** (`exactly-one`). One
-`conflicting-members` finding at the contents object naming `text` and `blob`.
+**Resource contents with `text` and `blob`** (the guard requires `blob`; the
+`then` forbids `text`):
 
-**Referenced form property with `type: strin`.** Findings under
-`mcp.elicitation.form-schema.members`:
+```jsonc
+{ "path": [..., "contents", 0], "rule": "mcp.content.members",
+  "detail": { "kind": "conflicting-members", "members": ["blob", "text"] } }
+```
 
-- location `/tools/0/elicitations/0/requestedSchema` (the reference);
-- invalid value `strin` for selector `type`, allowed `string`, `number`,
-  `integer`, `boolean`, `array`;
-- related location
-  `/components/schemas/Form/properties/approval/type`.
+**Form-mode elicitation declaration with `url`** (discriminator guard on
+`mode`; the `then` forbids `url`):
+
+```jsonc
+{ "path": ["tools", 0, "elicitations", 0], "rule": "mcpdesc.elicitation.members",
+  "detail": { "kind": "conflicting-members", "members": ["mode", "url"],
+              "selector": { "member": "mode", "value": "form" } } }
+```
+
+**OAuth flows object with no flow** (the allowlisted `anyOf`):
+
+```jsonc
+{ "path": ["securitySchemes", "oauth", "flows"], "rule": "mcpdesc.security-scheme.members",
+  "detail": { "kind": "missing-alternative",
+              "members": ["implicit", "password", "clientCredentials", "authorizationCode"] } }
+```
+
+**Referenced form property with `type: strin`.** The parent of
+`elicitationFormProperty` constrains `type`, so no branch is selected and only
+one finding remains (16 in RC.2):
+
+```jsonc
+{ "path": ["tools", 0, "elicitations", 0, "requestedSchema"],
+  "rule": "mcp.elicitation.form-schema.members",
+  "detail": { "kind": "invalid-value",
+              "allowedValues": ["string", "number", "integer", "boolean", "array"] },
+  "relatedLocations": [
+    { "path": ["components", "schemas", "Form", "properties", "approval", "type"],
+      "relation": "component-definition" } ] }
+```
+
+All rule IDs are the catalog owners found by longest-prefix match and were
+confirmed against the RC.2 catalog.
 
 ## Compatibility
 
@@ -344,8 +504,6 @@ that were rejected. Related locations expose only paths in the same document.
 - **Schema generation.** Would generating the schema from a higher-level
   alternative definition reduce conditional-schema maintenance without
   compromising direct usability of the published JSON Schema?
-- **`allowedMembers`.** Should it be required for closed objects, or stay
-  optional to limit result size?
 - **Editors.** How do downstream JSON/YAML editors behave for completion and
   hover under the additional conditionals?
 
@@ -356,13 +514,20 @@ that were rejected. Related locations expose only paths in the same document.
    documented `oauthFlows` `anyOf`. Add a schema check to `npm test` that
    rejects new `oneOf` uses, new `anyOf` uses outside the allowlist, and
    conditional guards outside the approved forms.
-3. Map paths for missing members and through reference provenance. Report
-   related locations.
-4. Implement generic conditional-branch reduction, duplicate removal and
-   attribution by keyword location. Remove transport-specific summary
-   suppression once the generic behavior covers it.
-5. Add equivalence tests for every schema rewrite against RC.2, covering
-   non-objects, closure, extensions, selector conflicts and nesting.
+3. Fix locations in `scripts/validate-document.mjs`:
+   - `required` findings report the object, not object plus missing member;
+   - map paths through reference provenance (longest `referencePath` prefix)
+     and add the `component-definition` related location.
+4. Replace the special cases with the generic rules of section 2:
+   - remove `selectedAlternative` and the fallback to the owner of an enclosing
+     `oneOf`/`anyOf`;
+   - replace `redundantConditionalSummary` with the generic `if` rule;
+   - attribute by the absolute schema pointer of the failing keyword;
+   - emit `detail` per the keyword mapping table, and remove duplicates by key,
+     keeping the longest schema pointer.
+5. Add equivalence tests for every schema rewrite against the
+   `v0.9.0-rc.2` schema, covering non-objects, closure, extensions, selector
+   conflicts and nesting.
 6. Publish `result.schema.json` `1.4.0` with its changelog entry.
 7. Add mutation tests over the `expected-valid` corpus:
    - rename and delete members;
