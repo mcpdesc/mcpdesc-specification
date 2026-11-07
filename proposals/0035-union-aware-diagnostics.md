@@ -10,13 +10,14 @@
 
 ## Summary
 
-Make diagnostics for every schema union point to locations that exist in the
-document as written, and report only findings from the alternative that
-applies. A published **union inventory** gives each union a selection policy.
-A CI check keeps the inventory synchronized with the schema. Validators reduce
-engine errors according to the inventory, map paths back through component
-references, and attribute findings to rules by the schema location that failed.
-Result format `1.4.0` adds optional, factual diagnostic detail.
+Make schema alternatives explicit wherever their selector can be expressed
+portably with JSON Schema 2020-12 conditionals. This extends RC.2's
+discriminator-driven transport design to every applicable `oneOf`, so schema
+engines validate the selected alternative without validator-specific union
+logic. Keep the remaining diagnostic handling generic: report locations in the
+document as written, map findings through component references, and attribute
+findings by the failing schema keyword. Result format `1.4.0` adds optional,
+factual diagnostic detail.
 
 Document acceptance does not change. The proposal builds on RC.2 and
 Proposal 0034, and extends their principle to all unions.
@@ -41,9 +42,10 @@ The root causes are:
 2. **Unmapped references.** Validation runs on the document after references
    are replaced. The resolver records provenance, but diagnostic paths do not
    use it.
-3. **Unselected alternatives.** 16 `oneOf` and 1 `anyOf` remain. Engines report
-   failures from every alternative. Rules are attributed by instance location,
-   so a rule the author did not exercise can be reported as `failed`.
+3. **Unselected alternatives.** The 16 `oneOf` occurrences and the one
+   `anyOf` remain outside the RC.2 discriminator rewrite. Engines can report
+   failures from every `oneOf` alternative. Rules are attributed by instance
+   location, so a rule the author did not exercise can be reported as `failed`.
 4. **No shared contract.** Section 16.5 states that diagnostic behavior beyond
    rule, severity and location is not specified, and that nested unions are not
    normalized. Each producer reinvents handling for each union.
@@ -53,9 +55,10 @@ The root causes are:
 - Every diagnostic location exists in the authored document.
 - Findings come only from alternatives that apply, and only exercised rules
   fail.
-- One policy-driven mechanism covers all current and future unions, with no
-  producer code specific to a union.
-- Schema changes that add or change a union cannot be merged without a policy.
+- Schema conditionals select alternatives for every disjoint union that has a
+  portable selector; validators do not need a hand-maintained union inventory.
+- A schema check prevents unreviewed `oneOf`/`anyOf` uses and unsupported
+  conditional guards from being added.
 - Consumers can explain findings from structured facts, without parsing
   messages.
 - Document acceptance is exactly preserved.
@@ -84,8 +87,9 @@ The root causes are:
 
 ## Proposed normative behavior
 
-The principle: **the schema defines acceptance; the union inventory defines
-explanation; presentation belongs to tools.**
+The principle: **the schema defines acceptance and alternative selection;
+generic validation-result rules define explanation; presentation belongs to
+tools.**
 
 ### 1. Locations
 
@@ -105,47 +109,40 @@ The use site is the primary location, because component content is validated
 in the context where it is used (Proposal 0009). A component used in several
 places can therefore produce one finding per use site.
 
-### 2. Union selection and reduction
+### 2. Schema selection and generic diagnostic reduction
 
-A **union** is any `oneOf`, `anyOf`, `not`, or discriminated `allOf`
-containing `if`/`then` entries, in the document schema. Each union has exactly
-one selection policy in the union inventory:
+The document schema MUST express each union whose alternatives have a
+deterministic, portable selector as guarded `if`/`then` entries in `allOf`,
+following Proposal 0034. The guards MUST select only the applicable
+alternative, and the rewrite MUST preserve all acceptance constraints,
+including object closure, required members, and specification extensions.
 
-| Policy | Selection |
-| --- | --- |
-| `discriminator` | Value of a required member. Can be staged: a second selector applies within the selected alternative. |
-| `reference-or-inline` | Presence of `$componentRef`. |
-| `json-type` | JSON type of the value. |
-| `defining-members` | Which defining members are present, with cardinality `exactly-one`, `at-most-one` or `at-least-one`. |
-| `forbidden-members` | Members that MUST NOT appear together. |
-| `total` | The union accepts every value it can receive; no finding can arise. |
-| `ambiguous` | No deterministic selector. Requires a written justification in the inventory. |
+The schema MUST NOT add `oneOf` or `anyOf` outside the explicit allowlist in
+the Schema impact section. Each allowlisted occurrence requires a documented
+reason it cannot use a selector without changing its semantics. The CI check
+MUST ensure that every conditional guard uses an approved selector form and
+that every `oneOf`/`anyOf` occurrence is allowlisted. A schema change adding
+an unreviewed union or guard fails validation.
 
-For each union value in the validated document, a validator that claims
-conformance with the validation fixtures MUST apply the following rules. Other
-validators SHOULD.
+Validators MUST handle conditional diagnostics generically:
 
-1. **Selected alternative.** Report only findings from the selected
-   alternatives and findings outside the union. Do not report the union
-   summary.
-2. **No alternative selected** (the selector is missing, has a disallowed
-   value, or the wrong type):
-   - report one finding on the selector at the union value, listing allowed
-     values when they are enumerable;
-   - also report members that no alternative permits, when the alternatives
-     are closed;
-   - report nothing else from the alternatives.
-3. **Conflict.** For `exactly-one` or `at-most-one` with several defining
-   members present, or
-   for `forbidden-members`, report one finding at the object naming the
-   conflicting members.
-4. **At least one.** For `at-least-one` with no defining member, report one
-   finding listing the defining members.
-5. **Ambiguous.** Report one union-level finding at the value. Specific findings
-   from individual alternatives are not reported.
+1. A failure reported for an `if` keyword is control flow, not a document
+   finding, and MUST NOT be emitted as a diagnostic.
+2. Findings from the selected `then` branch MUST be retained. Findings from
+   branches not selected by their guards MUST NOT be emitted or attributed to
+   their rules.
+3. An `anyOf` failure that remains on the allowlist MUST produce one finding
+   at the union value. When its alternatives are simple `required` constraints,
+   the finding SHOULD identify the permitted members that are absent.
+4. A `not` failure over `required` members MUST produce one finding at the
+   object naming the conflicting members.
+5. Exact duplicate findings at the same instance location with the same rule,
+   keyword and detail MUST be emitted once. Independent findings MUST be
+   retained.
 
-Selection is deterministic and comes from the inventory. It is not a heuristic
-such as "closest alternative".
+Selection is encoded in the schema and is not inferred by a "closest
+alternative" heuristic. A selector typo does not authorize the validator to
+guess which alternative the author intended.
 
 ### 3. Rule attribution
 
@@ -160,68 +157,58 @@ fails only on checks that apply to the document.
 Replace the paragraph describing producer summary omission and the two
 sentences that disclaim diagnostic behavior with the behavior above. State
 that raw engine error counts, schema paths, `code` and `message` remain outside
-the contract. Location, rule, severity and union reduction are inside it.
+the contract. Location, rule, severity, conditional reduction, and the
+generic handling of remaining `anyOf`/`not` findings are inside it.
 
 ## Schema impact
 
-### Union inventory
+### Conditional rewrites
 
-Add `spec/draft/validation/unions.json` and `unions.schema.json`. Each entry
-has:
-
-- `pointer` to the union in the document schema;
-- `policy`, with its selector (member, values, defining members, cardinality);
-- `alternatives`: each alternative's pointer and selector value, and, for closed
-  objects, its permitted members;
-- `justification` for `ambiguous`.
-
-The inventory is published with the validation snapshot. A repository check
-walks the schema structurally, not by text search, because the schema contains
-JSON Schema keywords as member names inside embedded schemas. The check fails
-on any union with no entry, any entry with no union, or any selector that
-disagrees with the schema.
-
-Initial classification of the RC.2 unions:
+All 16 current `oneOf` occurrences have a portable selector and MUST be
+rewritten as guarded conditionals, with acceptance-equivalence tests for each
+rewrite:
 
 | Location | Policy |
 | --- | --- |
-| 8 RC.2 discriminated unions (Proposal 0034) | `discriminator` |
-| `toolExamples`, `promptExamples`, `resourceExamples`, `resourceTemplateExamples` values, inline and in `components` (8) | `reference-or-inline` |
-| `schemaComponentValue`, `elicitationDeclaration.requestedSchema` | `reference-or-inline` |
-| `samplingMessageContent`, `samplingToolResultContent.content` | `json-type` (object or array) |
-| `jsonValue` | `total` |
-| `resourceContents` | `defining-members`, `exactly-one` of `text`, `blob` |
-| `oauthFlows` | `defining-members`, `at-least-one` of the four flows |
-| `elicitationFormProperty` | `discriminator` on `type`, then, for `string`, `defining-members` `at-most-one` of `enum`, `oneOf` |
-| `elicitationFormProperty` array `items` | `defining-members`, `exactly-one` of `enum`, `anyOf` |
-| `elicitationDeclaration` mode branches (`not`) | `forbidden-members` (`url` with form, `requestedSchema` with URL) |
+| 8 discriminated unions already rewritten by Proposal 0034 | Keep guarded `if`/`then` selection. |
+| 10 reference-or-inline unions (example maps, `schemaComponentValue`, and `requestedSchema`) | Select on the presence of `$componentRef`. Preserve inline closure and the reference object's required member. |
+| `samplingMessageContent` and `samplingToolResultContent.content` | Select array versus object by JSON type. |
+| `resourceContents` | Select on `blob`: when present, forbid `text`; otherwise require `text`. Preserve required `uri` and closure. |
+| `elicitationFormProperty` | Select first by `type`, then by the applicable defining member (`enum`, `oneOf`, or `items`). The plain string case has neither `enum` nor `oneOf`; the array case requires `items`. |
+| The nested `elicitationFormProperty` `items` alternatives | Select between `enum` and `anyOf` by member presence. |
+| `jsonValue` | Select by JSON type (object, array, string, number, boolean, or null). This is a total union but can still be expressed without `oneOf`. |
 
-The `not` in the inline alternative of `schemaComponentValue` belongs to its
-enclosing `reference-or-inline` union rather than being a separate entry.
+Every guard MUST be checked for missing, conflicting, wrong-type and unknown
+selector values. Guards for mutually exclusive alternatives MUST be disjoint;
+their applicable cases MUST cover the original union's accepted instances.
+Property sets, branch-local closure, `^x-` extension eligibility, and rule
+pointers must remain equivalent. In particular, a naive
+`if: {required: [text]}` rewrite of `resourceContents` would accept
+`{"uri":"data://status"}`, which RC.2 rejects.
 
-### Acceptance-equivalent rewrites (SHOULD)
+For discriminated object unions, the parent schema MUST declare the union of
+member names accepted by its alternatives, set `additionalProperties` to
+`false`, and preserve the existing specification-extension pattern. This
+allows object closure at the parent to report a misspelled member even when no
+discriminator alternative is selected. Alternative schemas retain their own
+closure, so members allowed by another alternative remain invalid for the
+selected alternative. If parent and branch constraints produce the same
+finding, the generic duplicate-removal rule emits it once.
 
-Where an equivalence proof and tests hold, express the selector in the schema
-so that schema-only engines also follow it:
+### Remaining allowlisted union
 
-- **`reference-or-inline`:**
-  `if: {type: object, required: [$componentRef]}`, `then` the reference object,
-  `else` the inline alternative. This is equivalent because every inline
-  alternative either has `additionalProperties: false` without a
-  `$componentRef` property, or explicitly forbids `$componentRef`, and the
-  reference object requires it. Non-objects fail both forms.
-- **`json-type`:** `if: {type: array}`, `then` the array alternative, `else`
-  the object alternative, provided the object alternative requires
-  `type: object`.
-- **`defining-members`, `discriminator` with stages:** rewrite only if the proof
-  covers absence, conflict and closure. A naive guard such as
-  `if: {required: [text]}` would accept `{"uri": "data://status"}`, which RC.2
-  rejects.
-- **`total`:** no rewrite needed.
+Keep `#/$defs/oauthFlows/anyOf` as the sole exception: its meaning is "at least
+one flow" and valid objects may contain several alternatives simultaneously.
+No alternative is selected, so conditionals would change its inclusive
+semantics. The validator's generic `anyOf` handling reports one missing-
+alternative finding when no flow is present.
 
-Each rewrite keeps object closure, `^x-` extension eligibility and the
-existing rule pointers. Rule pointers move with relocated alternatives without
-changing rule IDs.
+The schema check MUST inspect schema applicator locations structurally, not
+search text: embedded JSON Schemas and document properties can contain keywords
+named `oneOf`, `anyOf`, or `if`. It MUST verify that `oauthFlows` is the only
+allowlisted `anyOf`, that no `oneOf` remains, and that each `if` guard is one
+of the approved discriminator, reference-presence, JSON-type, or defining-
+member forms. The check does not require a published inventory file.
 
 ### Validation result format `1.4.0`
 
@@ -294,8 +281,8 @@ one unexpected-member at `.../inpt`, both under `mcpdesc.example.members`.
 
 Classification: **potentially breaking for diagnostic consumers**.
 
-- **Documents:** acceptance is identical to RC.2. The inventory and reduction do
-  not change validity. Schema rewrites require equivalence tests, as for
+- **Documents:** acceptance is identical to RC.2. Diagnostic reduction does
+  not change validity. Every schema rewrite requires equivalence tests, as for
   Proposal 0034.
 - **Diagnostics:** paths, counts and rule attribution change for invalid
   documents. Consumers that rely on absent-member paths, raw counts, or rule
@@ -317,24 +304,29 @@ No document rewrite is needed. Diagnostic consumers should:
 
 ## Security and privacy considerations
 
-The inventory and reduction use only local data and add no network resolution.
-Reduction removes only findings from alternatives that do not apply; it never
-removes a finding that independently explains the document's rejection.
-Equivalence tests ensure that rewrites cannot accept documents that were
-rejected. Related locations expose only paths in the same document.
+Conditional selection and diagnostic reduction use only local data and add no
+network resolution. Reduction removes only failures from unselected branches;
+it never removes a failure from the selected branch or an independent
+constraint. Equivalence tests ensure that rewrites cannot accept documents
+that were rejected. Related locations expose only paths in the same document.
 
 ## Alternatives considered
 
-- **Revert to RC.1 `oneOf` unions and rely on producer reduction only.** This
-  is possible, but schema-only engines would lose RC.2's transport improvement,
-  and every third-party validator would depend on the inventory.
-- **Mandatory six-pattern taxonomy with no other unions allowed.** Rejected.
-  The downstream draft's patterns mix selection, prohibition (`not`) and
-  member-name constraints. They also do not fit inclusive (`oauthFlows`) or
-  staged (`elicitationFormProperty`) unions. Explicit policies with an
-  `ambiguous` escape are more durable.
+- **Keep `oneOf` and infer the closest alternative in each validator.** Rejected:
+  the heuristic is not deterministic, portable, or guaranteed to preserve
+  errors from the intended alternative.
+- **Use an external union inventory to drive every producer.** Rejected for
+  this version: the canonical schema can express all but the inclusive
+  `oauthFlows` constraint directly, so a second source of selection semantics
+  would duplicate information and risk drift.
+- **Leave all unions as `oneOf` and normalize errors in validators.** Rejected:
+  schema-only tools would retain noisy diagnostics and every producer would
+  need schema-specific branch selection.
+- **Keep an unconditional `jsonValue` `oneOf` because it is total.** Rejected:
+  its JSON-type alternatives are disjoint and can also be expressed as
+  conditionals, avoiding an exception with no diagnostic benefit.
 - **Custom schema keywords for selectors.** Rejected: strict engines reject
-  unknown keywords. A separate inventory file keeps the schema portable.
+  unknown keywords. Standard conditional applicators remain portable.
 - **AJV/OpenAPI `discriminator`.** Non-standard, covers only discriminators,
   and is ignored by other engines.
 - **Closest-alternative heuristics.** Not deterministic and not portable across
@@ -345,13 +337,13 @@ rejected. Related locations expose only paths in the same document.
 
 ## Open questions
 
-- **Generated inventory.** Should a later version generate the schema and the
-  inventory from one source definition, rather than checking a hand-maintained
-  inventory against the schema?
 - **Diagnostic conformance profile.** A later version could define one, with
   fixtures generated by systematic mutation. These would assert required and
   forbidden facts, not exact counts. Until then, the same mutation tests run as
   repository tests.
+- **Schema generation.** Would generating the schema from a higher-level
+  alternative definition reduce conditional-schema maintenance without
+  compromising direct usability of the published JSON Schema?
 - **`allowedMembers`.** Should it be required for closed objects, or stay
   optional to limit result size?
 - **Editors.** How do downstream JSON/YAML editors behave for completion and
@@ -360,15 +352,17 @@ rejected. Related locations expose only paths in the same document.
 ## Implementation and validation plan
 
 1. Implement on `feature/union-aware-diagnostics`, based on `main` (RC.2).
-2. Add `unions.json`, its schema, and the structural inventory check to
-   `npm test`.
+2. Rewrite all 16 `oneOf` occurrences as guarded conditionals; retain only the
+   documented `oauthFlows` `anyOf`. Add a schema check to `npm test` that
+   rejects new `oneOf` uses, new `anyOf` uses outside the allowlist, and
+   conditional guards outside the approved forms.
 3. Map paths for missing members and through reference provenance. Report
    related locations.
-4. Implement inventory-driven reduction and attribution by keyword location.
-   Remove the transport-specific summary omission it supersedes.
-5. Add the SHOULD rewrites one union at a time, each with an equivalence test
-   against a reconstruction of RC.2, covering non-objects, closure, extensions
-   and nesting.
+4. Implement generic conditional-branch reduction, duplicate removal and
+   attribution by keyword location. Remove transport-specific summary
+   suppression once the generic behavior covers it.
+5. Add equivalence tests for every schema rewrite against RC.2, covering
+   non-objects, closure, extensions, selector conflicts and nesting.
 6. Publish `result.schema.json` `1.4.0` with its changelog entry.
 7. Add mutation tests over the `expected-valid` corpus:
    - rename and delete members;
