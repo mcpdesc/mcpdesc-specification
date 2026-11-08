@@ -250,11 +250,8 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
-      - path: expected-invalid/content-annotations-unknown-property.json
-        pointer: "/tools/0/examples/basic"
-        outcome: error
-      - path: expected-invalid/fractional-resource-link-size.json
-        pointer: "/tools/0/examples/listing"
+      - path: expected-invalid/component-extension-boundaries.json
+        pointer: "/components/toolExamples/x-map-extension"
         outcome: error
 
   - id: mcp.example-result.members

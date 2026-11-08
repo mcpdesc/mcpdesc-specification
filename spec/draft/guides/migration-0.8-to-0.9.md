@@ -11,45 +11,40 @@ extra properties on closed MCP types must move them.
 ## Version and schema identity
 
 Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
-`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`; the stable
+`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json`; the stable
 identifier is assigned at release.
 
-## Discriminator-driven diagnostics after RC.1
+## Union-aware diagnostics in RC.3
 
-The working draft implements review-stage [Proposal 0034](../proposal-snapshots/0034-discriminator-driven-schema-validation.md)
-([issue #112](https://github.com/mcpdesc/mcpdesc-specification/issues/112)) in
-the RC.2 preparation. Transport and seven other unambiguously discriminated
-object unions use standard JSON Schema `if`/`then` conditionals. No document
-rewrite is intended: required fields, discriminator values, closure, and
-specification-extension eligibility are unchanged.
+The working draft implements review-stage [Proposal 0035](../proposal-snapshots/0035-union-aware-diagnostics.md)
+([issue #115](https://github.com/mcpdesc/mcpdesc-specification/issues/115)),
+building on RC.2 and [Proposal 0034](../proposal-snapshots/0034-discriminator-driven-schema-validation.md).
+Unions with portable selectors use guarded JSON Schema conditionals, so only
+the applicable alternative is validated. The remaining inclusive
+`oauthFlows.anyOf` is handled generically. These changes do not intend to alter
+which documents are accepted: required members, object closure, extension
+eligibility, and reference constraints remain equivalent to RC.2.
 
-Diagnostic counts, ordering, and raw schema paths can change. For example,
-`#/$defs/transport/oneOf/1` becomes
-`#/$defs/transport/allOf/1/then`; the Resource `size` rule's content-block
-location moves similarly. Registered rule IDs and the validation-result format
-are unchanged. Consumers should use rule IDs and document locations rather than
-pinning error counts or schema paths across selectors.
-With redundant union or conditional summaries removed, an enclosing shape rule
-can now pass while a more specific nested rule fails (for example, Resource
-`size`). Rule citations track the specific failures rather than those summaries.
+Diagnostic paths and rule results can change. A missing-member path now points
+to its enclosing object, with the absent name in `detail.member`. A typo path
+points to the unexpected member that exists in the source. Findings reached
+through `$componentRef` use the reference object as their primary `path` and
+provide a `component-definition` related location. Alternative failures that
+do not apply are no longer reported, and rules for those alternatives no
+longer fail. Consumers should not rely on raw finding counts or engine schema
+paths.
 
-AJV can report an `if` summary alongside specific selected-branch failures. The
-candidate validator omits only a summary whose selected `then` already supplies
-a specific failure; independent defects remain. Raw schema engines can retain
-summaries. No actionable/supporting diagnostic fields are standardized.
-Unchanged nested unions, such as a sampling content value that can be an
-object or an array, can still report alternative failures and `oneOf` summaries.
+One intentional acceptance narrowing is included: the Elicitation Interaction
+Response Object in a Tool Interaction Example now rejects unknown members.
+RC.2's schema allowed arbitrary additional members on those response objects.
+The narrowing does not apply to native MCP responses at runtime.
 
-Published RC.1 remains immutable. The prepared RC.2 schema identity is
-`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`, and the intended
-exact downstream selector is `0.9.0-rc.2`. The candidate is not yet tagged or
-published, and this repository does not establish support in released tooling.
-After specification approval and publication, the validator should import the
-new snapshot additively, keeping RC.1 intact, and verify runtime/generated
-standalone/browser parity. Core should adopt that selector, verify each
-selector-sensitive operation, and update its support
-matrix and validator pin rather than reproducing branch-selection semantics.
-JSON/YAML editor completion and hover behavior still need downstream review.
+Validation result format `1.4.0` adds factual `detail` fields and
+`relatedLocations`. Consumers should render recognized `detail.kind` values
+and their fields, falling back to `message` for unknown kinds or diagnostics
+without detail. The document `mcpdesc` version remains `0.9.0`; consumers
+should select the exact `0.9.0-rc.3` validator candidate. Published RC.1 and
+RC.2 snapshots remain unchanged.
 
 ## Annotations
 

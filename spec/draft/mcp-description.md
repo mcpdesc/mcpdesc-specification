@@ -1,13 +1,13 @@
 ---
 title: MCP Description Specification
 version: 0.9.0
-status: Release candidate 2
-release-candidate-iteration: 2
-snapshot-tag: v0.9.0-rc.2
+status: Release candidate 3
+release-candidate-iteration: 3
+snapshot-tag: v0.9.0-rc.3
 released: false
 baseline: 0.8.0
-baseline-snapshot: v0.9.0-draft.4
-date: 2026-11-06
+baseline-snapshot: v0.9.0-rc.2
+date: 2026-11-07
 ---
 
 # MCP Description Specification
@@ -255,7 +255,7 @@ A minimal valid MCP Description document:
 
 ```json
 {
-  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json",
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json",
   "mcpdesc": "0.9.0",
   "info": {
     "name": "chess-rating-server",
@@ -305,7 +305,7 @@ The schema document's root `$id` identifies that schema resource and establishes
 The `$schema` value does not change the MCP Description conformance version: community working draft documents remain `mcpdesc: 0.9.0`.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json
 mcpdesc: 0.9.0
 ```
 
@@ -319,7 +319,7 @@ The project controls canonical schema URIs under:
 https://mcpdesc.org/schema/<format-family>/<version-or-snapshot>.json
 ```
 
-This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`.
+This specification assigns `mcp-description` as the MCP Description format family. A stable release uses its semantic version, for example `https://mcpdesc.org/schema/mcp-description/0.8.0.json`. A public prerelease uses the target version followed by its prerelease identifier, for example `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json`.
 
 Assigning a new format family requires an accepted specification decision. Similar repository paths, redirects, or aliases do not create canonical format authority.
 
@@ -984,6 +984,12 @@ Tool `interactionExamples` are separate from completed Tool `examples`. <a id="r
 <a id="req-interaction-step-closed"></a>Steps MAY carry `x-*` specification extensions and MUST NOT contain other additional fields except those defined for their step kind. Step `response` values are carried MCP values governed by [Section 3.6](#36-carried-mcp-values). A step is semantic MCP Description metadata, not a native MCP wire object. <a id="req-interaction-step-not-wire"></a>An implementation MUST NOT serialize a Tool Interaction Step directly onto an MCP connection.
 
 An `elicitation` step MAY contain `declaration`, naming an Elicitation Declaration on the same Tool. <a id="req-interaction-elicitation-declaration"></a>When present, the request mode and the request schema or known URL MUST be compatible with that declaration after local reference resolution. <a id="req-interaction-elicitation-response"></a>For `mode: "form"`, an accepted response MUST contain `content` conforming to the request schema; declined and cancelled responses MUST NOT contain `content`. For `mode: "url"`, the response MUST omit `content`.
+
+<a id="req-interaction-response-closed"></a>The Elicitation Interaction Response Object is closed. It MUST NOT contain
+members other than `action`, `content`, and `_meta`; the applicable action
+rules above determine when `content` is permitted. This closure applies to the
+response value in a Tool Interaction Example, not to the native MCP response
+received at runtime.
 
 <a id="req-interaction-sampling-protocol-version"></a>A `sampling` step request uses the native `sampling/createMessage` parameter field names and constraints of every MCP protocol version in the containing Tool's effective protocol scope, excluding JSON-RPC, transport, task, and MRTR framing. This includes required `messages` and `maxTokens`, and MAY include protocol version-supported model preferences, system prompt, context inclusion, stop sequences, temperature, metadata, and Tool-related fields. Its response uses the native completed sampling result field names and constraints of every applicable protocol version, excluding JSON-RPC and task framing.
 
@@ -1942,10 +1948,10 @@ If a JSON document and a YAML document decode to the same JSON-compatible data m
 
 <a id="req-serialization-schema-property"></a>MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
+For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json
 mcpdesc: 0.9.0
 ```
 
@@ -2012,27 +2018,84 @@ Validation rules identify the requirements that validators check (Section 2.3). 
 
 <a id="req-diagnostic-rule"></a>Each diagnostic that a validator reports MUST identify the registered validation rule it reports, its severity, and the location it concerns in the document. When the finding depends on an MCP protocol version, the diagnostic SHOULD identify that version. A diagnostic MAY carry a code and a message; their values belong to the validator and are not defined by this specification.
 
-The document schema uses discriminator-driven conditionals for Transport Objects,
-Security Scheme Objects, Tool interaction steps, elicitation interaction requests
-and responses, Elicitation Declarations, Tool result content blocks, and sampling
-content blocks. Each is an object with an already-required discriminator (`type`,
-`mode`, or `action`); its value selects the applicable alternative. The schema
-requires the discriminator, constrains its values, and applies the selected
-alternative through guarded `if`/`then` entries in `allOf`. Other unions retain
-`oneOf` where a discriminator does not unambiguously select an alternative.
-This structure does not change the document fields, accepted values, object
-closure, or specification-extension eligibility defined in the preceding sections.
+<a id="req-diagnostic-source-location"></a>The location of a diagnostic MUST identify a value or member name present in
+the document as written, before component references are replaced. A diagnostic
+for a missing member MUST identify the closest enclosing object; in validation
+result format `1.4.0`, its `detail.member` MUST identify the missing member and
+its message, when present, SHOULD identify it. A diagnostic for an unexpected
+or invalid member name MUST identify that member.
 
-Schema engines can report a generic conditional summary in addition to specific
-failures in the selected alternative. A producer can omit a redundant summary
-when specific failures from that conditional's selected branch already explain
-the rejection, retaining independent failures and their rule attribution. For
-example, a stdio transport with `arg` instead of `args` fails for the unexpected
-`arg`, not for lacking the HTTP transport's `url`. Neither raw error counts and
-schema paths nor a common actionable/supporting diagnostic vocabulary are part
-of the validation result contract.
-Nested unions without a discriminator can still produce their own alternative
-failures and union summaries; this design does not normalize those errors.
+<a id="req-diagnostic-component-provenance"></a>A diagnostic for content reached through `$componentRef` MUST identify the
+reference object at the use site as its primary location. In format `1.4.0`, it
+MUST also include the location within the component as a related location with
+relation `component-definition`. When chained references are resolved, the
+related location is in the final component definition. For a finding at
+resolved path `P`, the resolver selects the provenance entry whose
+`referencePath` is the longest prefix of `P` (including `P` itself). The primary
+location is that `referencePath`; the related location is the entry's
+`targetPath` followed by the remainder of `P`. When no entry matches, `P` is
+already a source-document location. The related location for a missing member
+identifies the enclosing component object.
+
+<a id="req-diagnostic-union-conditionals"></a>The document schema MUST express every union with a deterministic, portable
+selector as guarded conditionals using JSON Schema 2020-12. A guard MUST use a
+discriminator value, the presence of `$componentRef`, a JSON type, or defining
+members; a discriminator guard MAY be combined with defining members. The
+conditionals MUST select only the applicable alternative and preserve the
+original acceptance constraints, including closure, required members, and
+specification extensions, except for the explicit closure of the Elicitation
+Interaction Response Object in [Section 9.4](09-tools.md#req-interaction-response-closed).
+A selector typo does not authorize a validator to infer the intended
+alternative. A schema check MUST reject unreviewed
+`oneOf`/`anyOf` occurrences and conditional guards outside these forms. An
+allowlisted `anyOf` remains inclusive and MUST produce one
+`missing-alternative` finding at the union value when it fails; failures of its
+individual alternatives MUST NOT be emitted.
+
+<a id="req-diagnostic-union-closure"></a>For each discriminated object union, the parent schema MUST declare the union
+of member names accepted by its alternatives, keep the discriminator's
+constraint, and reject other members while preserving its specification-
+extension pattern. Other parent member schemas MUST be `true` so value
+constraints remain in the selected branch. Alternative schemas retain their
+own closure; a member allowed by a different alternative remains invalid in
+the selected alternative.
+
+<a id="req-diagnostic-conditional-reduction"></a>Findings from the selected `then` or `else` branch MUST be retained. A failure
+reported for an `if` keyword MUST NOT be emitted when another finding exists
+at or below the same instance location. Otherwise it MUST be emitted as kind
+`constraint` with keyword `if`. A `not` failure over `required` members MUST
+produce one `conflicting-members` finding at the object. Its member list names
+the enclosing guard's required members followed by the members forbidden by
+`not`; when selected by a discriminator, it also identifies that selector.
+Unselected alternatives MUST NOT be reconstructed or inferred.
+
+<a id="req-diagnostic-rule-attribution"></a>A schema-derived finding MUST be attributed to the rule whose catalog schema
+pointer is the longest prefix of the absolute schema pointer of the subschema
+containing the failing keyword. This is the location in the document schema,
+not an engine evaluation path relative to a `$ref`. A shared definition is
+therefore attributed to the same rule wherever it is used. A validator MUST
+NOT attribute a finding to an enclosing union by choosing a best-matching
+alternative. Findings removed by conditional or `anyOf` reduction MUST NOT
+cause a rule to be reported as `failed`.
+
+<a id="req-diagnostic-detail"></a>Validation result format `1.4.0` defines factual `detail` for findings derived
+from the document schema. It identifies missing, unexpected, or invalid
+members and values; expected types; conflicting members; missing alternatives;
+and the failing keyword for other constraints. `allowedValues`,
+`allowedMembers`, and `expectedTypes` describe the subschema that reported the
+finding. The format also defines related component locations. `kind` is
+extensible; consumers MUST fall back to `message` for an unrecognized kind.
+Detail states facts, not remedies. The location, rule, severity, conditional
+reduction, and generic handling of remaining `anyOf` and `not` findings are
+specified; raw engine error counts, schema paths, `code`, and `message` wording
+are not.
+
+<a id="req-diagnostic-deduplication"></a>Duplicate findings share their source path, rule, severity, kind, and relevant
+member or member-list facts; constraint findings are distinguished by failing
+keyword. Only one duplicate MUST be emitted: the one whose failing keyword has
+the longest absolute schema pointer. Independent findings MUST be retained.
+Diagnostic order is not part of the contract; producers SHOULD order findings
+by document position.
 
 <a id="req-rule-results"></a>A validator MAY report rule results. A validator that claims conformance with this specification's validation fixtures MUST report them: one status for each rule and each protocol version declared by the document, or one status for a rule whose applicability does not depend on the protocol version. A status is `passed`, `failed`, `warning`, `not-applicable`, `not-evaluated`, or `delegated`. Rule results do not change document validity, which errors alone determine.
 
@@ -2387,7 +2450,7 @@ See [examples/full-featured.yaml](examples/full-featured.yaml) for a complete MC
 The normative JSON Schema for this specification version is available at:
 
 - [../../schemas/mcp-description/0.9.0.json](../../schemas/mcp-description/0.9.0.json)
-- `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.2.json` for the current community working draft canonical schema resource
+- `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json` for the current community working draft canonical schema resource
 - `https://mcpdesc.org/schema/mcp-description/0.9.0.json` for the stable 0.9.0 canonical schema resource after release
 
 Archival retrieval locations may also exist for frozen historical bytes, including the legacy Draft 3 short URI `https://mcpdesc.org/schema/0.8.0.json` and the stable 0.7.0 mirror `https://mcpdesc.org/schema/mcp-description/0.7.0.json`. Those retrieval URLs do not change the historical embedded `$id` values of the frozen schemas they mirror.

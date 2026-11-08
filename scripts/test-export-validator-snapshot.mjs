@@ -133,7 +133,7 @@ try {
     ]);
     assert.equal(runtime.validate(fixture('expected-valid', 'discriminated-unions.json')).valid, true);
     const nested = runtime.validate(fixture('expected-invalid', 'discriminated-resource-link-size.json'));
-    assert.equal(nested.diagnostics.length, 3, 'Export retains object/array union errors but not conditional summaries');
+    assert.equal(nested.diagnostics.length, 1, 'Export retains the selected branch failure without conditional summaries');
     assert.equal(nested.diagnostics[0].rule, 'mcp.resource.size');
   }
 

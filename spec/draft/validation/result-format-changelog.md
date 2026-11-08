@@ -14,6 +14,34 @@ properties and new status values, which consumers must be able to interpret.
 Compatible additions are minor. Editorial schema documentation corrections use
 a new patch-version URL. Published versioned URLs retain their exact bytes.
 
+## [1.4.0] — 2026-11-07 (0.9.0 RC.3 candidate)
+
+Adds structured diagnostic facts and related component-definition locations
+under review-stage [Proposal 0035](../proposal-snapshots/0035-union-aware-diagnostics.md).
+The schema identity is
+`https://mcpdesc.org/schema/validation-result/1.4.0.json`; it is a candidate
+format, not a published URL.
+
+### Format
+
+- Diagnostics may include `detail` and `relatedLocations`. Schema-derived
+  diagnostics require `detail` under Section 16.5; details are factual and
+  `kind` is extensible.
+- Detail kinds describe missing or unexpected members, invalid member names,
+  values and types, conflicting members, missing alternatives, and other
+  keyword constraints. Their required fields are validated by the schema.
+- A `component-definition` related location identifies the source within a
+  component for a diagnostic whose primary `path` identifies its reference
+  use site.
+- `1.3.0` and earlier published schemas remain unchanged.
+
+### Consumer Migration
+
+- Prefer recognized `detail.kind` and fields for structured explanations;
+  fall back to `message` for unknown kinds or diagnostics without detail.
+- Use `relatedLocations` to provide navigation from a reference use site to
+  its component definition.
+
 ## [1.3.0] — 2026-11-02 (0.9.0 RC.1)
 
 Breaking terminology migration for MCP protocol versions. The schema identity

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/validation-result/1.3.0.json",
+  "$id": "https://mcpdesc.org/schema/validation-result/1.4.0.json",
   "title": "MCP Description validation result",
-  "description": "Validation result format 1.3.0 (Proposal 0031): document validity, diagnostics that identify the registered rule they report, and optional rule results with one status per rule and declared MCP protocol version. Producers may add properties to the result and to diagnostics; rule results are closed.",
+  "description": "Validation result format 1.4.0 (Proposal 0035): document validity, diagnostics with factual detail and related locations, and optional rule results with one status per rule and declared MCP protocol version. Producers may add properties to the result and to diagnostics; rule results are closed.",
   "type": "object",
   "required": [
     "valid",
@@ -29,11 +29,14 @@
   },
   "$defs": {
     "diagnostic": {
-      "description": "A finding of a check that ran. rule, severity, and path are the interoperable contract; code and message belong to the producer.",
+      "description": "A finding of a check that ran. rule, severity, and path are the interoperable contract; code and message belong to the producer. Schema-derived findings in format 1.4.0 include detail.",
       "properties": {
         "code": {
           "description": "Producer-defined category. Not defined by this specification; several rules can share one code.",
           "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/detail"
         },
         "message": {
           "description": "Informative text for readers.",
@@ -51,6 +54,12 @@
                 "type": "integer"
               }
             ]
+          },
+          "type": "array"
+        },
+        "relatedLocations": {
+          "items": {
+            "$ref": "#/$defs/related-location"
           },
           "type": "array"
         },
@@ -80,9 +89,276 @@
       ],
       "type": "object"
     },
+    "detail": {
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "missing-member"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "member": true
+            },
+            "required": [
+              "member"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "unexpected-member"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "allowedMembers": true,
+              "member": true
+            },
+            "required": [
+              "member",
+              "allowedMembers"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "invalid-member-name"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "member": true
+            },
+            "required": [
+              "member"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "invalid-value"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "allowedValues": true
+            },
+            "required": [
+              "allowedValues"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "invalid-type"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "expectedTypes": true
+            },
+            "required": [
+              "expectedTypes"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "conflicting-members"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "members": true
+            },
+            "required": [
+              "members"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "missing-alternative"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "members": true
+            },
+            "required": [
+              "members"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "constraint"
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "type": "object"
+          },
+          "then": {
+            "properties": {
+              "keyword": true
+            },
+            "required": [
+              "keyword"
+            ]
+          }
+        }
+      ],
+      "description": "Factual detail for a diagnostic. kind is extensible; consumers should fall back to message for kinds they do not recognize.",
+      "properties": {
+        "allowedMemberPatterns": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "allowedMembers": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "allowedValues": {
+          "items": {},
+          "type": "array"
+        },
+        "expectedTypes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "limit": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "member": {
+          "type": "string"
+        },
+        "members": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "selector": {
+          "properties": {
+            "member": {
+              "type": "string"
+            },
+            "value": {}
+          },
+          "required": [
+            "member",
+            "value"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "type": "object"
+    },
     "protocol-version": {
       "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
       "type": "string"
+    },
+    "related-location": {
+      "properties": {
+        "path": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "minimum": 0,
+                "type": "integer"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        "relation": {
+          "const": "component-definition"
+        }
+      },
+      "required": [
+        "path",
+        "relation"
+      ],
+      "type": "object"
     },
     "rule-id": {
       "description": "Identifier of a rule in the validation rule catalog.",

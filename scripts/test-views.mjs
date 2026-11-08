@@ -659,12 +659,26 @@ assert.deepEqual(
 );
 const invalidComponentExamples = fixture('spec/draft/fixtures/expected-invalid/component-contextual-examples.json');
 const referencedExampleDiagnostics = semanticValidateDocument(invalidComponentExamples);
-assert.ok(referencedExampleDiagnostics.some(
-  (diagnostic) => diagnostic.code === 'tool-example-schema-mismatch' && diagnostic.path.at(-1) === 'input'
-));
-assert.ok(referencedExampleDiagnostics.some(
-  (diagnostic) => diagnostic.code === 'tool-example-schema-mismatch' && diagnostic.path.at(-1) === 'structuredContent'
-));
+assert.deepEqual(
+  referencedExampleDiagnostics.filter((diagnostic) => diagnostic.code === 'tool-example-schema-mismatch')
+    .map(({ path, relatedLocations }) => ({ path, relatedLocations })),
+  [
+    {
+      path: ['tools', 0, 'examples', 'bad'],
+      relatedLocations: [{
+        path: ['components', 'toolExamples', 'bad-input', 'input'],
+        relation: 'component-definition'
+      }]
+    },
+    {
+      path: ['tools', 0, 'examples', 'bad'],
+      relatedLocations: [{
+        path: ['components', 'toolExamples', 'bad-input', 'result', 'structuredContent'],
+        relation: 'component-definition'
+      }]
+    }
+  ]
+);
 assert.ok(referencedExampleDiagnostics.some((diagnostic) => diagnostic.code === 'resource-template-example-invalid-expansion'));
 assert.ok(referencedExampleDiagnostics.some((diagnostic) => diagnostic.code === 'prompt-example-unknown-argument'));
 const inlineInvalidExamples = structuredClone(invalidComponentExamples);
@@ -674,8 +688,17 @@ inlineInvalidExamples.resourceTemplates[0].examples.bad = structuredClone(
 );
 inlineInvalidExamples.prompts[0].examples.bad = structuredClone(inlineInvalidExamples.components.promptExamples['bad-arguments']);
 assert.deepEqual(
-  semanticValidateDocument(inlineInvalidExamples).map(({ code, path }) => ({ code, path })),
-  referencedExampleDiagnostics.map(({ code, path }) => ({ code, path }))
+  semanticValidateDocument(inlineInvalidExamples).map(({ code }) => code),
+  referencedExampleDiagnostics.map(({ code }) => code)
+);
+assert.deepEqual(
+  semanticValidateDocument(inlineInvalidExamples)
+    .filter((diagnostic) => diagnostic.code === 'tool-example-schema-mismatch')
+    .map(({ path }) => path),
+  [
+    ['tools', 0, 'examples', 'bad', 'input'],
+    ['tools', 0, 'examples', 'bad', 'result', 'structuredContent']
+  ]
 );
 const componentProtocolScope = fixture('spec/draft/fixtures/expected-warning/component-protocol-scope.json');
 const componentProtocolDiagnostics = semanticValidateDocument(componentProtocolScope);

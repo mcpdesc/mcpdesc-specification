@@ -24,6 +24,24 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### Release Candidate 3 — 2026-11-07 (`v0.9.0-rc.3` candidate)
+
+In preparation from RC.2; not tagged or published. This candidate implements
+review-stage [Proposal 0035](proposal-snapshots/0035-union-aware-diagnostics.md),
+tracked in [issue #115](https://github.com/mcpdesc/mcpdesc-specification/issues/115)
+and [PR #116](https://github.com/mcpdesc/mcpdesc-specification/pull/116).
+Document acceptance is intended to remain unchanged. The schema uses portable
+conditionals for every disjoint union with an approved selector, retaining only
+the inclusive `oauthFlows` `anyOf`. The candidate validator reports source
+locations for missing and unexpected members, maps component findings to their
+use sites with definition-related locations, reduces conditional and remaining
+`anyOf` findings generically, and attributes findings to the failing keyword's
+absolute schema location. Validation result format `1.4.0` adds factual
+diagnostic details and related locations. One intentional acceptance narrowing
+closes Elicitation Interaction Response Objects in Tool Interaction Examples;
+RC.2 allowed unknown members there. RC.2 and earlier snapshots remain
+unchanged; `schemas/latest.json` remains pinned to stable 0.8.0.
+
 ### Release Candidate 2 — 2026-11-06 (`v0.9.0-rc.2`)
 
 In preparation, not yet tagged or published. This candidate combines the

@@ -10,7 +10,7 @@ import { fetchSchemaPublication, verifySchemaPublication } from './schema-public
 
 export const ruleFormatVersion = '1.3.0';
 export const ruleSchemaUrl = `https://mcpdesc.org/schema/validation-rule/${ruleFormatVersion}.json`;
-export const resultFormatVersion = '1.3.0';
+export const resultFormatVersion = '1.4.0';
 export const resultSchemaUrl = `https://mcpdesc.org/schema/validation-result/${resultFormatVersion}.json`;
 export const catalogIndexUrl = 'https://mcpdesc.org/validation/catalogs/index.json';
 const repository = 'https://github.com/mcpdesc/mcpdesc-specification';

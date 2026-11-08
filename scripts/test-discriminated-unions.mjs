@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -7,7 +6,6 @@ import vm from 'node:vm';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import standaloneCode from 'ajv/dist/standalone/index.js';
-import { formatCanonicalJson } from './canonical-json.mjs';
 import { candidateSpecification } from './candidate-specification.mjs';
 import { decodeDocumentSource, documentFormatForPath } from './decode-document.mjs';
 import { evaluateDocument, validateDocument } from './validate-document.mjs';
@@ -15,22 +13,26 @@ import { evaluateDocument, validateDocument } from './validate-document.mjs';
 const candidate = candidateSpecification(process.cwd());
 const schema = JSON.parse(fs.readFileSync(candidate.schemaPath, 'utf8'));
 const definitions = {
-  transport: ['type', '01ee56245a31b8c08e14e2ce776598032a3ee22b3327e9b5637173fc57f9a30a'],
-  securityScheme: ['type', '2091295d3ad82b46e8b8197d4771b1c146c03c4ee09f288c9a504fb5d9638252'],
-  toolInteractionStep: ['type', 'aee78a65281442f057e82311b0a479b8247ac4ee9ee6dd3afbaa99888f5f6520'],
-  elicitationInteractionRequest: ['mode', '5416357dcca85496f39152c2254e5f0b58f76ef1be7f80eb1b1e2acc4501c861'],
-  elicitationInteractionResponse: ['action', '256e3be40f4c07e4659e19361014565e4b95096a152ae0509e2e7ac91f7478fa'],
-  elicitationDeclaration: ['mode', '75265296fc799654f848e3a7b48ab8552fd81518eaebf87e3881d7f6140cc7b1'],
-  toolResultContent: ['type', '7d16a06983585d1e726d359cc51f043fc3daba881c92fced4d52581e1feec970'],
-  samplingContentBlock: ['type', 'ffac150b104da42129e8b996388c65b295394df86dcc823388d8c8080971eb93']
+  transport: 'type',
+  securityScheme: 'type',
+  toolInteractionStep: 'type',
+  elicitationInteractionRequest: 'mode',
+  elicitationInteractionResponse: 'action',
+  elicitationDeclaration: 'mode',
+  toolResultContent: 'type',
+  samplingContentBlock: 'type'
 };
-const baseline = structuredClone(schema);
-for (const [name, [selector, digest]] of Object.entries(definitions)) {
-  const definition = baseline.$defs[name];
+const baseline = JSON.parse(fs.readFileSync(
+  path.join(process.cwd(), 'scripts/fixtures/mcp-description-0.9.0-rc.2.schema.json'),
+  'utf8'
+));
+for (const [name, selector] of Object.entries(definitions)) {
+  const definition = schema.$defs[name];
   assert.equal(definition.type, 'object', `${name}: reject non-objects at the union level`);
   assert.ok(definition.required.includes(selector));
   assert.equal(definition.oneOf, undefined);
-  const values = definition.allOf.flatMap(({ if: condition, then }) => {
+  const conditionals = definition.allOf.filter((entry) => entry.if);
+  const values = conditionals.flatMap(({ if: condition, then }) => {
     assert.equal(condition.type, 'object', `${name}: guard non-objects inside if`);
     assert.deepEqual(condition.required, [selector]);
     assert.ok(then && typeof then === 'object');
@@ -39,17 +41,7 @@ for (const [name, [selector, digest]] of Object.entries(definitions)) {
   });
   assert.equal(new Set(values).size, values.length, `${name}: disjoint selectors`);
   assert.deepEqual(definition.properties[selector].enum, values);
-  definition.oneOf = definition.allOf.map((entry) => entry.then);
-  delete definition.allOf;
-  if (name !== 'elicitationDeclaration') {
-    delete definition.type;
-    delete definition.required;
-    delete definition.properties;
-  }
-  // Hashes pin the original RC.1 definitions, including every branch and parent constraint.
-  const normalized = JSON.parse(formatCanonicalJson({ definition })).definition;
-  assert.equal(createHash('sha256').update(JSON.stringify(normalized)).digest('hex'), digest,
-    `${name}: inverse rewrite must recover the exact RC.1 definition`);
+  assert.ok(baseline.$defs[name], `${name}: RC.2 acceptance baseline must contain the definition`);
 }
 
 function compiler(documentSchema, allErrors) {
@@ -62,6 +54,10 @@ function compiler(documentSchema, allErrors) {
 const exports = Object.fromEntries([
   ['document', schema.$id],
   ...Object.keys(definitions).map((name) => [name, `${schema.$id}#/$defs/${name}`])
+]);
+const baselineExports = Object.fromEntries([
+  ['document', baseline.$id],
+  ...Object.keys(definitions).map((name) => [name, `${baseline.$id}#/$defs/${name}`])
 ]);
 const baselineAjv = compiler(baseline, true);
 assert.throws(() => new vm.Script('Function("return true")()').runInNewContext({}, {
@@ -127,22 +123,48 @@ const mutations = [null, true, 5, '', [], {}, ['wrong'], { unexpected: 1 }];
 let comparisons = 0;
 let accepted = 0;
 const errorShape = (errors) => JSON.parse(JSON.stringify(errors));
+function withoutUnknownResponseMembers(name, value) {
+  const cleanResponse = (response) => {
+    const entries = Object.entries(response);
+    if (entries.every(([key]) => ['action', 'content'].includes(key))) return undefined;
+    return Object.fromEntries(entries.filter(([key]) => ['action', 'content'].includes(key)));
+  };
+  if (name === 'elicitationInteractionResponse' && value && typeof value === 'object' && !Array.isArray(value)) {
+    return cleanResponse(value);
+  }
+  if (name === 'toolInteractionStep' && value?.type === 'elicitation'
+      && value.response && typeof value.response === 'object' && !Array.isArray(value.response)) {
+    const response = cleanResponse(value.response);
+    if (response) return { ...value, response };
+  }
+  return undefined;
+}
 function compare(name, value, expected) {
-  const old = baselineAjv.getSchema(exports[name]);
-  const valid = old(value);
-  if (expected !== undefined) assert.equal(valid, expected, `${name}: baseline ${JSON.stringify(value)}`);
+  const old = baselineAjv.getSchema(baselineExports[name]);
+  const baselineValid = old(value);
+  if (expected !== undefined) assert.equal(baselineValid, expected, `${name}: baseline ${JSON.stringify(value)}`);
+  const cleanedResponse = baselineValid ? withoutUnknownResponseMembers(name, value) : undefined;
+  const responseClosureNarrowing = cleanedResponse !== undefined;
   for (const { allErrors, runtime, standalone } of modes) {
-    assert.equal(runtime[name](value), valid, `${name}: runtime equivalence ${JSON.stringify(value)}`);
+    const candidateValid = runtime[name](value);
+    if (candidateValid !== baselineValid) {
+      assert.ok(responseClosureNarrowing && baselineValid && !candidateValid,
+        `${name}: runtime equivalence ${JSON.stringify(value)}`);
+      assert.equal(runtime[name](cleanedResponse), true, `${name}: response closure is the only acceptance change`);
+    }
     const errors = errorShape(runtime[name].errors);
-    assert.equal(standalone[name](value), valid, `${name}: standalone equivalence`);
-    assert.deepEqual(errorShape(standalone[name].errors), errors, `${name}: standalone diagnostic parity (${allErrors})`);
+    assert.equal(standalone[name](value), candidateValid, `${name}: standalone equivalence`);
+    if (!responseClosureNarrowing) {
+      assert.deepEqual(errorShape(standalone[name].errors), errors,
+        `${name}: standalone diagnostic parity (${allErrors})`);
+    }
   }
   comparisons++;
-  accepted += Number(valid);
+  accepted += Number(baselineValid);
 }
 
 for (const [name, validSeeds] of Object.entries(seeds)) {
-  const [selector] = definitions[name];
+  const selector = definitions[name];
   const covered = new Set(validSeeds.map((seed) => seed[selector]));
   assert.deepEqual([...covered].sort(), [...schema.$defs[name].properties[selector].enum].sort(), `${name}: every tag has a valid seed`);
   for (const value of [...nonObjects, {}]) compare(name, value, false);
@@ -198,13 +220,16 @@ function rawErrors(name, value, keywords) {
   assert.equal(runtime[name](value), false);
   assert.deepEqual(runtime[name].errors.map((error) => error.keyword), keywords);
 }
-rawErrors('transport', { type: 'stdio', command: 'run', arg: ['serve'] }, ['additionalProperties', 'if']);
-rawErrors('transport', { type: 'stdio', command: 5, arg: ['serve'] }, ['additionalProperties', 'type', 'if']);
+rawErrors('transport', { type: 'stdio', command: 'run', arg: ['serve'] },
+  ['additionalProperties', 'if', 'additionalProperties']);
+rawErrors('transport', { type: 'stdio', command: 5, arg: ['serve'] },
+  ['additionalProperties', 'type', 'if', 'additionalProperties']);
 rawErrors('transport', {}, ['required']);
 for (const type of ['unknown', null, 5]) rawErrors('transport', { type }, ['enum']);
 for (const value of nonObjects) rawErrors('transport', value, ['type']);
 rawErrors('transport', { type: 'stdio' }, ['required', 'if']);
-rawErrors('transport', { type: 'stdio', command: 'run', url: 'https://example.test' }, ['additionalProperties', 'if']);
+rawErrors('transport', { type: 'stdio', command: 'run', url: 'https://example.test' },
+  ['additionalProperties', 'if']);
 rawErrors('transport', { type: 'stdio', command: 'run', env: { A: 1 } }, ['type', 'if']);
 assert.equal(runtime.transport.errors[0].instancePath, '/env/A');
 assert.equal(runtime.transport({ type: 'stdio', command: 'run', 'x-vendor': { nested: [1, null] } }), true);
@@ -224,9 +249,9 @@ assert.deepEqual(validateDocument(defects).map(({ path: location }) => location)
 const discriminatorErrors = validateDocument(fixture('expected-invalid', 'transport-discriminator-errors.json'));
 assert.deepEqual(discriminatorErrors.map(({ rule }) => rule), Array(12).fill('mcpdesc.transport.members'));
 assert.deepEqual(discriminatorErrors.map(({ path: location }) => location), [
-  ['transports', 0, 'type'], ['transports', 1, 'type'], ['transports', 2, 'type'], ['transports', 3, 'type'],
+  ['transports', 0], ['transports', 1, 'type'], ['transports', 2, 'type'], ['transports', 3, 'type'],
   ...[4, 5, 6, 7, 8].map((index) => ['transports', index]),
-  ['transports', 9, 'command'], ['transports', 10, 'url'], ['transports', 11, 'X-vendor']
+  ['transports', 9], ['transports', 10, 'url'], ['transports', 11, 'X-vendor']
 ]);
 const members = evaluateDocument(fixture('expected-invalid', 'discriminated-union-members.json'));
 assert.deepEqual(members.diagnostics.map(({ rule }) => rule), [
@@ -242,7 +267,7 @@ const size = fixture('expected-invalid', 'discriminated-resource-link-size.json'
 const sizeReport = evaluateDocument(size);
 assert.equal(runtime.document(size), false);
 assert.ok(runtime.document.errors.filter((error) => error.keyword === 'if').length >= 2, 'Exercise nested conditional wrappers');
-assert.equal(sizeReport.diagnostics.length, 3, 'Retain the untouched object/array union errors');
+assert.equal(sizeReport.diagnostics.length, 1, 'Object/array selection reports only the applicable alternative');
 assert.equal(sizeReport.diagnostics[0].rule, 'mcp.resource.size');
 assert.equal(sizeReport.diagnostics[0].path.at(-1), 'size');
 assert.ok(sizeReport.diagnostics.every((diagnostic) => !diagnostic.message.includes('must match "then"')), 'Remove nested if wrappers only');
@@ -260,6 +285,15 @@ for (const directory of ['examples', 'fixtures']) {
   for (const relative of fs.readdirSync(root, { recursive: true }).filter((name) => /\.(?:json|ya?ml)$/.test(name))) {
     const full = path.join(root, relative);
     const document = decodeDocumentSource(fs.readFileSync(full, 'utf8'), documentFormatForPath(full), full);
+    if (relative === 'expected-invalid/elicitation-response-unknown-member.json') {
+      assert.equal(baselineAjv.getSchema(baselineExports.document)(document), true);
+      for (const { runtime, standalone } of modes) {
+        assert.equal(runtime.document(document), false);
+        assert.equal(standalone.document(document), false);
+      }
+      corpus++;
+      continue;
+    }
     compare('document', document);
     corpus++;
   }
