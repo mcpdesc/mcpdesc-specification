@@ -24,6 +24,11 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### Release Candidate 4 — 2026-11-09 (`v0.9.0-rc.4`)
+
+In preparation; not tagged or published. RC.4 retains the validation behavior
+of RC.3 and implements draft Proposal 0036, captured from [PR #120](https://github.com/mcpdesc/mcpdesc-specification/pull/120) at status Draft and tracked in [issue #119](https://github.com/mcpdesc/mcpdesc-specification/issues/119). Section 15.9 defines the normalized YAML output profile, and the getting-started guide's inline examples follow it. The profile is presentation-only: it does not change YAML input parsing, document acceptance, validation outcomes, or JSON Schema constraints. The candidate-specific schema identity is `0.9.0-rc.4`; the document's `mcpdesc` value remains `0.9.0`. The proposal and implementation remain subject to review and possible incompatible change or removal. RC.3 and earlier snapshots remain unchanged; `schemas/latest.json` remains pinned to stable 0.8.0.
+
 ### Normalized YAML presentation — 2026-11-09
 
 - Implemented the specification-side presentation profile from Proposal 0036 in Section 15.9. The profile is opt-in and does not change input parsing, validation, document acceptance, or the JSON Schema.

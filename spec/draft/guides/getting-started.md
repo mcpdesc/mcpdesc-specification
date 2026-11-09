@@ -19,7 +19,7 @@ MCP Description supports JSON and restricted YAML as equal serializations of one
 The YAML examples in this guide use the normalized presentation profile in [Section 15.9](../sections/15-serialization.md#normalized-yaml-presentation); other conforming YAML presentations remain accepted.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.4.json
 mcpdesc: 0.9.0
 info:
   name: chess-rating-server
