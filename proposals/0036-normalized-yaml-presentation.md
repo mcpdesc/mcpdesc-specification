@@ -128,11 +128,17 @@ through YAML 1.1 resolution or application-specific constructors. Formatting
 MUST NOT be used as a substitute for validation, and normalization MUST NOT
 silently repair invalid documents.
 
-The exact scalar-ambiguity set and line-wrapping policy should be agreed during
-review and expressed in test vectors rather than left to a serializer's
-unexamined defaults. The profile should include examples for strings such as
-`2026-07-28`, `0.8`, `123`, `true`, `on`, `null`, `""`, `Search: documents`,
-and `Hello # world`, alongside actual booleans, numbers, and nulls.
+The scalar-safety test is resolution-based: a string is double-quoted when it
+would not resolve as a string under either YAML 1.2.2 JSON-schema resolution or
+the YAML 1.1 Core Schema, as well as when its plain spelling is syntactically
+ambiguous. Scalar wrapping is disabled. JSON numbers use RFC 8785 number
+serialization. Multiline strings use literal block scalars with chomping
+indicators when they preserve the exact value, and otherwise use double-quoted
+escapes. Selecting normalized presentation does not select Section 18 ordering;
+the ordering profile remains independently selectable. The profile includes
+test vectors for strings such as `2026-07-28`, `0.8`, `123`, `true`, `on`,
+`null`, `""`, `Search: documents`, and `Hello # world`, alongside actual
+booleans, numbers, and nulls.
 
 ## Schema impact
 
@@ -208,20 +214,20 @@ into executable or application-specific YAML types.
   stronger byte-level contract than is needed for readable, consistent
   examples and normalized output.
 
-## Open questions
+## Resolved decisions
 
-- Which exact YAML 1.1-compatible scalar spellings must be quoted, and should
-  the profile enumerate them or define a resolution-based test?
-- Should scalar wrapping be disabled, or should the profile specify a
-  deterministic line width and wrapping algorithm?
-- Which multiline strings should use literal blocks, and which edge cases
-  require double-quoted escapes?
-- Should normalized document ordering be required whenever normalization is
-  requested, or should it remain an independently selectable Section 18
-  profile?
-- Which first-party repository files beyond MCP Description examples should
-  follow the same quoting and indentation rules, given that validation
-  registries and tool configuration may have their own ordering semantics?
+- Quote strings according to YAML 1.2.2 JSON-schema and YAML 1.1 Core Schema
+  resolution, plus YAML plain-scalar syntax constraints; do not rely on a
+  serializer-specific ambiguity list.
+- Disable scalar line wrapping. Emit UTF-8 without a BOM, LF line endings, and
+  exactly one final LF.
+- Use literal block scalars for multiline strings only when chomping preserves
+  the exact value; otherwise use double-quoted escapes. Use RFC 8785 number
+  serialization for JSON numbers.
+- Keep Section 18 ordering independently selectable. Without it, preserve input
+  mapping order and never sort arbitrary keys, arrays, or opaque values.
+- Apply the profile to specification-authored MCP Description YAML examples;
+  validation registries and tool configuration remain outside the profile.
 
 ## Implementation and validation plan
 
@@ -246,4 +252,5 @@ into executable or application-specific YAML types.
 
 ## Decision record
 
-Pending review.
+The policy choices above are implemented in Section 15.9 of the working draft.
+The proposal remains subject to review.

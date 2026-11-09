@@ -1961,6 +1961,87 @@ mcpdesc: 0.9.0
 
 <a id="req-serialization-untrusted"></a>Implementations MUST treat JSON and YAML input as untrusted and impose reasonable document-size, nesting-depth, scalar-length, and collection-size limits.
 
+### 15.9 Normalized YAML Presentation
+
+This profile defines a presentation for YAML output; it does not change YAML
+input requirements, document validity, or semantic equivalence.
+<a id="req-serialization-normalized-yaml-explicit"></a>A producer MUST apply
+this profile when it declares or is explicitly asked to emit normalized MCP
+Description YAML.
+<a id="req-serialization-normalized-yaml-examples-guidance"></a>
+Specification-authored MCP Description YAML examples SHOULD follow it.
+<a id="req-serialization-normalized-yaml-consumer"></a>A consumer MUST NOT
+reject an otherwise conforming document because it does not use this
+presentation.
+
+<a id="req-serialization-normalized-yaml-model"></a>Normalization MUST operate
+on the parsed JSON-compatible data model. It MUST preserve every value and
+property, including significant empty values, and MUST NOT coerce, add, remove,
+or repair data. YAML input MUST still be parsed according to Section 15.3;
+normalization MUST NOT use YAML 1.1 resolution or application-specific
+constructors to reinterpret parsed values. Formatting MUST NOT substitute for
+validation.
+
+<a id="req-serialization-normalized-yaml-layout"></a>Normalized YAML MUST use
+UTF-8 without a byte-order mark, LF line endings, and exactly one final LF. It
+MUST use two spaces per indentation level, indent block sequences beneath their
+mapping keys, and MUST NOT use tabs for indentation. Non-empty sequences and
+maps MUST use block style; empty sequences and maps MUST use `[]` and `{}`
+respectively. Scalar values MUST NOT be line-wrapped.
+
+<a id="req-serialization-normalized-yaml-scalars"></a>JSON numbers, booleans,
+and `null` MUST be emitted as unquoted YAML scalars and MUST decode to the same
+JSON value. Numbers MUST use the serialization defined by
+[RFC 8785, Section 3.2.2.3](https://www.rfc-editor.org/rfc/rfc8785#section-3.2.2.3).
+An ordinary string MUST be emitted as a plain scalar when it is valid in its
+YAML context and resolves to a string under both YAML 1.2.2 JSON-schema
+resolution and the YAML 1.1 Core Schema. Otherwise it MUST be emitted as a
+double-quoted scalar with escaping that preserves the string. This includes
+strings that resolve as null, booleans, numbers, or timestamps under either
+schema, and strings whose plain form is syntactically ambiguous. Empty strings
+MUST be written as `""`. String values in `protocolVersions` MUST always be
+double-quoted. Single-quoted strings MUST NOT be used.
+
+<a id="req-serialization-normalized-yaml-keys"></a>String mapping keys MUST
+follow the same plain-scalar safety and double-quote rules.
+<a id="req-serialization-normalized-yaml-key-types"></a>Keys MUST remain
+strings after parsing.
+
+<a id="req-serialization-normalized-yaml-multiline"></a>A string containing
+line feeds SHOULD use a literal block scalar when that representation preserves
+the exact value. The chomping indicator MUST preserve the number of trailing
+line feeds: `|-` for none, `|` for one, and `|+` for more than one. If a literal
+block scalar cannot preserve the exact value, the string MUST use a
+double-quoted escaped scalar instead.
+
+<a id="req-serialization-normalized-yaml-ordering"></a>This profile does not
+select a mapping-key ordering policy. When the document-oriented ordering
+profile in Section 18 is also selected, that profile MUST be applied to
+recognized structures. Otherwise, mapping keys MUST retain their input order.
+Array order and named-map entry order MUST always be preserved; arbitrary keys,
+arrays, and opaque values MUST NOT be sorted.
+
+<a id="req-serialization-normalized-yaml-examples"></a>The following scalar
+spellings illustrate required distinctions:
+
+| JSON-compatible value | Normalized YAML |
+| --- | --- |
+| string `2026-07-28` | `"2026-07-28"` |
+| string `0.8` | `"0.8"` |
+| string `123` | `"123"` |
+| string `true` | `"true"` |
+| string `on` | `"on"` |
+| string `null` | `"null"` |
+| empty string | `""` |
+| string `Search: documents` | `"Search: documents"` |
+| string `Hello # world` | `"Hello # world"` |
+| boolean `true` | `true` |
+| number `0.8` | `0.8` |
+| null | `null` |
+
+These requirements govern output presentation only. Other YAML spellings remain
+conforming when they decode to the same valid MCP Description data model.
+
 ## 16. Conformance
 
 ### 16.1 Document Conformance

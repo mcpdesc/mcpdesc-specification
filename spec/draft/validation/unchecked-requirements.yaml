@@ -269,6 +269,39 @@ uncheckedRequirements:
   - location: sections/15-serialization.md#req-serialization-conversion
     reason: processing
     note: "Checked for one document pair by scripts/test-serializations.mjs; concerns conversion tools."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-explicit
+    reason: processing
+    note: "Constrains producers that claim or are asked to use the output profile."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-consumer
+    reason: processing
+    note: "Prevents presentation style from affecting input document conformance."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-examples-guidance
+    reason: guidance
+    note: "Recommends the output presentation for specification-authored examples."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-model
+    reason: processing
+    note: "Constrains normalization of parsed values, not document validity."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-layout
+    reason: processing
+    note: "Defines output presentation details that document validation does not check."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-scalars
+    reason: processing
+    note: "Defines output scalar spelling and type preservation, not input conformance."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-keys
+    reason: processing
+    note: "Constrains serialization of string mapping keys."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-key-types
+    reason: processing
+    note: "Prevents output parsing from changing mapping-key types."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-multiline
+    reason: processing
+    note: "Defines lossless output presentation for multiline strings."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-ordering
+    reason: processing
+    note: "Constrains serializer ordering behavior, not document values."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-examples
+    reason: guidance
+    note: "Provides informative presentation examples without affecting document validity."
   - location: sections/15-serialization.md#req-serialization-numbers
     reason: processing
     note: "Concerns implementation number handling."

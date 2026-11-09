@@ -24,6 +24,12 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### Normalized YAML presentation — 2026-11-09
+
+- Implemented the specification-side presentation profile from Proposal 0036 in Section 15.9. The profile is opt-in and does not change input parsing, validation, document acceptance, or the JSON Schema.
+- Defined indentation, scalar and key quoting, multiline chomping, UTF-8/LF output, scalar wrapping, number spelling, and the relationship to the independently selected Section 18 ordering profile.
+- Updated the getting-started guide's inline YAML examples to use the normalized presentation, including block sequences and double-quoted protocol versions.
+
 ### Release Candidate 3 — 2026-11-07 (`v0.9.0-rc.3`)
 
 In preparation from RC.2; not tagged or published. This candidate implements
