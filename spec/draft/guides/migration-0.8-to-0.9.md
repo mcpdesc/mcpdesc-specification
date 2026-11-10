@@ -14,6 +14,34 @@ Set `mcpdesc` to `0.9.0`. When emitting `$schema` during the draft, use
 `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.4.json`; the stable
 identifier is assigned at release.
 
+## YAML scalar resolution
+
+The working draft explicitly defines the string fallback used by the candidate
+decoder: recognize null, booleans, and numbers using the YAML JSON-schema rules,
+then treat unmatched untagged plain scalars as strings. Strict YAML JSON-schema
+mode alone may reject ordinary words; YAML Core-schema mode can instead
+silently convert some strings into other types. Neither mode alone implements
+the restricted profile.
+
+For example:
+
+```yaml
+x-label: 0o12
+x-count: 10
+```
+
+The decoded values are the string `"0o12"` and the number `10`. A YAML 1.2 Core
+reader would instead interpret both values as the number `10`. Values such as
+`0x12`, `012`, `TRUE`, and `~` also remain strings under the restricted profile.
+Consumers moving from Core resolution must review unquoted values whose types
+change. To express a number, use a JSON numeric spelling; to make a string
+explicit across authoring tools, quote it.
+
+Unquoted non-finite forms such as `.inf` and `.nan`, and numeric overflow such as
+`1e400`, remain rejected. Quoted `".inf"` and `".nan"` remain strings. This
+clarification does not change the candidate decoder or JSON Schema and does not
+modify earlier released specifications or immutable validator snapshots.
+
 ## Union-aware diagnostics in RC.3
 
 The working draft implements review-stage [Proposal 0035](../proposal-snapshots/0035-union-aware-diagnostics.md)

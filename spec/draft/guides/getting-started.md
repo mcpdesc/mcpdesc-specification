@@ -15,7 +15,7 @@ Every MCP Description requires `mcpdesc`, `info`, and a non-empty `protocolVersi
 
 Create a file called `chess-coach.mcpdesc.yaml`:
 
-MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files use YAML 1.2.2 JSON-schema scalar resolution and exclude aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numbers.
+MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files recognize null, booleans, and numbers using the YAML 1.2.2 JSON-schema rules, with other untagged plain values treated as strings as specified in [Section 15.3.3](../sections/15-serialization.md#1533-scalar-resolution-and-numeric-values). The restricted profile excludes aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numeric forms.
 The YAML examples in this guide use the normalized presentation profile in [Section 15.9](../sections/15-serialization.md#normalized-yaml-presentation); other conforming YAML presentations remain accepted.
 
 ```yaml

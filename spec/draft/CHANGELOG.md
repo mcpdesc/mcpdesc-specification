@@ -24,10 +24,23 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 ## [0.9.0] — Unreleased (community working draft)
 
+### YAML scalar-resolution clarification — RC.4 candidate (pending review)
+
+- Made the string fallback explicit: use YAML JSON-schema recognition for null,
+  booleans, and numbers, then treat unmatched untagged plain scalars as strings.
+  This extends strict YAML JSON-schema resolution and documents the existing
+  candidate decoder behavior, including `0o12` remaining a string.
+- Explicitly retained rejection of numeric overflow and unquoted non-finite
+  forms, while preserving quoted strings with those spellings. Added equivalent
+  JSON/YAML fixture coverage and migration guidance for Core-schema consumers.
+- Updated Section 15.9 to reference these input rules for plain-string safety.
+  This input-contract clarification is separate from the presentation-only
+  Proposal 0036. JSON Schema, decoded-document validation, frozen proposal
+  snapshots, and released specification artifacts are unchanged.
+
 ### Release Candidate 4 — 2026-11-09 (`v0.9.0-rc.4`)
 
-In preparation; not tagged or published. RC.4 retains the validation behavior
-of RC.3 and implements draft Proposal 0036, captured from [PR #120](https://github.com/mcpdesc/mcpdesc-specification/pull/120) at status Draft and tracked in [issue #119](https://github.com/mcpdesc/mcpdesc-specification/issues/119). Section 15.9 defines the normalized YAML output profile, and the getting-started guide's inline examples follow it. The profile is presentation-only: it does not change YAML input parsing, document acceptance, validation outcomes, or JSON Schema constraints. The candidate-specific schema identity is `0.9.0-rc.4`; the document's `mcpdesc` value remains `0.9.0`. The proposal and implementation remain subject to review and possible incompatible change or removal. RC.3 and earlier snapshots remain unchanged; `schemas/latest.json` remains pinned to stable 0.8.0.
+In preparation; not tagged or published. RC.4 retains RC.3's semantic document-validation behavior, implements draft Proposal 0036, and clarifies YAML scalar resolution as described above. The parsing clarification is part of this candidate, not deferred to a post-RC.4 revision. Proposal 0036 was captured from [PR #120](https://github.com/mcpdesc/mcpdesc-specification/pull/120) at status Draft and is tracked in [issue #119](https://github.com/mcpdesc/mcpdesc-specification/issues/119). Section 15.9 defines the normalized YAML output profile, and the getting-started guide's inline examples follow it. The profile is presentation-only: it does not change YAML input parsing, document acceptance, validation outcomes, or JSON Schema constraints. The candidate-specific schema identity is `0.9.0-rc.4`; the document's `mcpdesc` value remains `0.9.0`. The proposal and implementation remain subject to review and possible incompatible change or removal. RC.3 and earlier snapshots remain unchanged; `schemas/latest.json` remains pinned to stable 0.8.0.
 
 ### Normalized YAML presentation — 2026-11-09
 

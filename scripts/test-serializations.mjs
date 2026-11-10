@@ -23,6 +23,18 @@ const jsonDocument = decodeDocumentSource(
 assert.deepEqual(yamlDocument, jsonDocument);
 assert.deepEqual(validateDocument(yamlDocument), validateDocument(jsonDocument));
 
+for (const spelling of ['.inf', '+.inf', '-.inf', '.NaN', '+.NAN', '-.nan', '1e400']) {
+  assert.throws(
+    () => decodeDocumentSource(`value: ${spelling}\n`, 'yaml', 'non-finite.yaml'),
+    /finite/,
+    spelling
+  );
+  assert.deepEqual(
+    decodeDocumentSource(`value: "${spelling}"\n`, 'yaml', 'quoted-string.yaml'),
+    { value: spelling }
+  );
+}
+
 const integratedSource = fs.readFileSync(
   path.join(process.cwd(), specificationRoot, 'fixtures', 'expected-valid', 'integrated-draft2-features.yaml'),
   'utf8'

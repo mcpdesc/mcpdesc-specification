@@ -4,3 +4,10 @@ info:
   version: 1.0.0
 protocolVersions: ["2026-07-28"]
 x-values: [true, false, null, 12, -1.5, 6.02e23, 2026-08-25]
+x-resolution:
+  ordinary: ordinary
+  0o12: 0o12
+  0x12: 0x12
+  012: 012
+  TRUE: TRUE
+  ~: ~

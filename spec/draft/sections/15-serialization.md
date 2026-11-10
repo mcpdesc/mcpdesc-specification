@@ -26,7 +26,7 @@ application/mcp-description+json
 
 ### 15.3 YAML Serialization
 
-An MCP Description MAY be serialized as YAML 1.2.2 using the JSON schema defined by Section 10.2.1.3 of the [YAML 1.2.2 specification](https://yaml.org/spec/1.2.2/) for scalar resolution.
+An MCP Description MAY be serialized as YAML 1.2.2 using the JSON scalar-resolution rules defined by Section 10.2.1.3 of the [YAML 1.2.2 specification](https://yaml.org/spec/1.2.2/), with the string fallback and restrictions defined in Section 15.3.3 below.
 
 <a id="req-serialization-yaml-claims"></a>A consumer that claims YAML input support MUST accept YAML MCP Description documents that satisfy this restricted profile and MUST reject documents that violate it. A producer that claims YAML output support MUST emit only documents that satisfy the restricted profile. General MCP Description conformance does not make YAML support mandatory or preferred over JSON support.
 
@@ -59,9 +59,11 @@ The project-specific `application/mcp-description+yaml` media type is not regist
 
 #### 15.3.3 Scalar Resolution and Numeric Values
 
-<a id="req-serialization-yaml-scalars"></a>A YAML processor MUST use the YAML 1.2.2 JSON schema for scalar resolution. A YAML scalar used as an MCP Description value MUST resolve to a string, finite number, boolean, or null. Non-finite numeric values such as positive infinity, negative infinity, and NaN MUST be rejected.
+<a id="req-serialization-yaml-scalars"></a>A YAML processor MUST use the YAML 1.2.2 JSON schema's scalar-resolution rules for recognizing null, booleans, and numbers. An untagged plain scalar that does not match those rules MUST resolve to a string, except for the non-finite numeric forms prohibited below. This string fallback is an explicit extension to the YAML JSON schema, which would otherwise report unmatched plain scalars as errors. These rules apply to both mapping keys and values; mapping keys remain subject to Section 15.3.1. A YAML scalar used as an MCP Description value MUST resolve to a string, finite number, boolean, or null. Non-finite numeric values, including overflow from a numeric spelling such as `1e400`, MUST be rejected. Untagged plain `.inf` and `.nan` spellings, case-insensitively and with an optional leading `+` or `-`, MUST also be rejected rather than handled by the string fallback. Quoted versions of those spellings remain strings.
 
-The YAML 1.2.2 JSON schema does not implicitly resolve timestamps. Date-time and date values therefore remain strings; <a id="req-serialization-yaml-quoted-dates"></a>authors SHOULD still quote them for clarity and portability across authoring tools.
+For example, plain `null`, `true`, and `12` resolve to null, a boolean, and a number respectively. Plain `ordinary`, `0o12`, `0x12`, `012`, `TRUE`, and `~` resolve to strings. In particular, `0o12` remains a string rather than becoming the octal number `10`; these rules differ from YAML 1.2 Core and YAML 1.1 scalar resolution.
+
+These rules do not implicitly resolve timestamps. Date-time and date values therefore remain strings; <a id="req-serialization-yaml-quoted-dates"></a>authors SHOULD still quote them for clarity and portability across authoring tools.
 
 #### 15.3.4 Tags and Safe Parsing
 
@@ -147,8 +149,8 @@ and `null` MUST be emitted as unquoted YAML scalars and MUST decode to the same
 JSON value. Numbers MUST use the serialization defined by
 [RFC 8785, Section 3.2.2.3](https://www.rfc-editor.org/rfc/rfc8785#section-3.2.2.3).
 An ordinary string MUST be emitted as a plain scalar when it is valid in its
-YAML context and resolves to a string under both YAML 1.2.2 JSON-schema
-resolution and the YAML 1.1 Core Schema. Otherwise it MUST be emitted as a
+YAML context and resolves to a string under both the Section 15.3.3
+scalar-resolution rules and the YAML 1.1 Core Schema. Otherwise it MUST be emitted as a
 double-quoted scalar with escaping that preserves the string. This includes
 strings that resolve as null, booleans, numbers, or timestamps under either
 schema, and strings whose plain form is syntactically ambiguous. Empty strings
@@ -188,6 +190,8 @@ spellings illustrate required distinctions:
 | empty string | `""` |
 | string `Search: documents` | `"Search: documents"` |
 | string `Hello # world` | `"Hello # world"` |
+| string `ordinary` | `ordinary` |
+| string `0o12` | `0o12` |
 | boolean `true` | `true` |
 | number `0.8` | `0.8` |
 | null | `null` |
