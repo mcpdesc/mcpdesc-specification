@@ -15,33 +15,34 @@ Every MCP Description requires `mcpdesc`, `info`, and a non-empty `protocolVersi
 
 Create a file called `chess-coach.mcpdesc.yaml`:
 
-MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files use YAML 1.2.2 JSON-schema scalar resolution and exclude aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numbers.
+MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files recognize null, booleans, and numbers using the YAML 1.2.2 JSON-schema rules, with other untagged plain values treated as strings as specified in [Section 15.3.3](../sections/15-serialization.md#1533-scalar-resolution-and-numeric-values). The restricted profile excludes aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numeric forms.
+The YAML examples in this guide use the normalized presentation profile in [Section 15.9](../sections/15-serialization.md#normalized-yaml-presentation); other conforming YAML presentations remain accepted.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.4.json
 mcpdesc: 0.9.0
 info:
   name: chess-rating-server
   title: Chess Rating MCP Server
   version: 1.0.0
 protocolVersions:
-- '2025-11-25'
+  - "2025-11-25"
 transports:
-- type: stdio
-  command: chess-rating
-  args:
-  - serve
+  - type: stdio
+    command: chess-rating
+    args:
+      - serve
 tools:
-- name: get_player_rating
-  description: Get the current Elo rating for a chess player
-  inputSchema:
-    type: object
-    properties:
-      player_id:
-        type: string
-        description: Player identifier
-    required:
-    - player_id
+  - name: get_player_rating
+    description: Get the current Elo rating for a chess player
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          type: string
+          description: Player identifier
+      required:
+        - player_id
 ```
 
 That's a valid MCP Description document. It declares a server with one tool accessible via stdio.
@@ -71,75 +72,75 @@ Add tools with input schemas, output schemas, and behavioral annotations:
 
 ```yaml
 tools:
-- name: analyze_game
-  title: Analyze Chess Game
-  description: Analyze a chess game from PGN notation
-  inputSchema:
-    type: object
-    properties:
-      pgn:
-        type: string
-        description: Game in PGN format
-      depth:
-        type: integer
-        minimum: 1
-        maximum: 40
-    required:
-    - pgn
-  outputSchema:
-    type: object
-    properties:
-      evaluation:
-        type: number
-      best_move:
-        type: string
-    required:
-    - evaluation
-    - best_move
-  examples:
-    short-opening:
-      input:
-        pgn: 1. e4 e5 2. Nf3 Nc6
-        depth: 12
-      result:
-        content:
-        - type: text
-          text: White has a small opening advantage.
-        structuredContent:
-          evaluation: 18
-          best_move: Bb5
-  annotations:
-    readOnlyHint: true
-    destructiveHint: false
-    idempotentHint: true
-  tags:
-  - analysis
-- name: record_game_result
-  title: Record Game Result
-  description: Record a game result and update Elo ratings
-  inputSchema:
-    type: object
-    properties:
-      white_player_id:
-        type: string
-      black_player_id:
-        type: string
-      result:
-        type: string
-        enum:
-        - "1-0"
-        - "0-1"
-        - "1/2-1/2"
-    required:
-    - white_player_id
-    - black_player_id
-    - result
-  annotations:
-    readOnlyHint: false
-    destructiveHint: false
-  tags:
-  - rating
-  - game
+  - name: analyze_game
+    title: Analyze Chess Game
+    description: Analyze a chess game from PGN notation
+    inputSchema:
+      type: object
+      properties:
+        pgn:
+          type: string
+          description: Game in PGN format
+        depth:
+          type: integer
+          minimum: 1
+          maximum: 40
+      required:
+        - pgn
+    outputSchema:
+      type: object
+      properties:
+        evaluation:
+          type: number
+        best_move:
+          type: string
+      required:
+        - evaluation
+        - best_move
+    examples:
+      short-opening:
+        input:
+          pgn: 1. e4 e5 2. Nf3 Nc6
+          depth: 12
+        result:
+          content:
+            - type: text
+              text: White has a small opening advantage.
+          structuredContent:
+            evaluation: 18
+            best_move: Bb5
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+    tags:
+      - analysis
+  - name: record_game_result
+    title: Record Game Result
+    description: Record a game result and update Elo ratings
+    inputSchema:
+      type: object
+      properties:
+        white_player_id:
+          type: string
+        black_player_id:
+          type: string
+        result:
+          type: string
+          enum:
+            - 1-0
+            - 0-1
+            - 1/2-1/2
+      required:
+        - white_player_id
+        - black_player_id
+        - result
+    annotations:
+      readOnlyHint: false
+      destructiveHint: false
+    tags:
+      - rating
+      - game
 ```
 
 **Annotation tips:**
@@ -153,14 +154,15 @@ When a Tool has an unconditional client capability precondition, add a protocol 
 
 ```yaml
 tools:
-- name: full_rebuild
-  protocolVersions: ['2026-07-28']
-  inputSchema:
-    type: object
-    additionalProperties: false
-  clientRequirements:
-    extensions:
-      io.modelcontextprotocol/tasks: {}
+  - name: full_rebuild
+    protocolVersions:
+      - "2026-07-28"
+    inputSchema:
+      type: object
+      additionalProperties: false
+    clientRequirements:
+      extensions:
+        io.modelcontextprotocol/tasks: {}
 ```
 
 Do not derive this field from server capabilities or conditional Elicitation Declarations. Split protocol-scoped variants when the requirement shape differs by MCP protocol version.
@@ -175,11 +177,12 @@ components:
       properties:
         player_id:
           type: string
-      required: [player_id]
+      required:
+        - player_id
 tools:
   - name: get_player_rating
     inputSchema:
-      $componentRef: '#/components/schemas/PlayerLookup'
+      $componentRef: "#/components/schemas/PlayerLookup"
 ```
 
 References are local to one document, have no sibling properties, and inherit protocol applicability from each use site. Keep JSON Schema `$ref` for reuse inside an embedded schema. See [the reusable-components example](../examples/reusable-components.yaml).
@@ -190,30 +193,30 @@ Resources are data the server exposes. Static resources have fixed URIs; templat
 
 ```yaml
 resources:
-- uri: chess://leaderboard/classical
-  name: classical_leaderboard
-  title: Classical Leaderboard
-  description: Top-100 classical chess ratings
-  mimeType: application/json
+  - uri: chess://leaderboard/classical
+    name: classical_leaderboard
+    title: Classical Leaderboard
+    description: Top-100 classical chess ratings
+    mimeType: application/json
 resourceTemplates:
-- uriTemplate: "chess://games/{game_id}"
-  name: game_detail
-  title: Game Detail
-  description: Full details of a specific chess game
-  mimeType: application/json
-  examples:
-    sample-game:
-      uri: chess://games/example-1234
-      result:
-        contents:
-        - uri: chess://games/example-1234
-          mimeType: application/json
-          text: '{"id":"example-1234","result":"1-0"}'
-- uriTemplate: "chess://players/{player_id}/rating-history"
-  name: player_rating_history
-  title: Player Rating History
-  description: Historical Elo rating progression
-  mimeType: application/json
+  - uriTemplate: chess://games/{game_id}
+    name: game_detail
+    title: Game Detail
+    description: Full details of a specific chess game
+    mimeType: application/json
+    examples:
+      sample-game:
+        uri: chess://games/example-1234
+        result:
+          contents:
+            - uri: chess://games/example-1234
+              mimeType: application/json
+              text: "{\"id\":\"example-1234\",\"result\":\"1-0\"}"
+  - uriTemplate: chess://players/{player_id}/rating-history
+    name: player_rating_history
+    title: Player Rating History
+    description: Historical Elo rating progression
+    mimeType: application/json
 ```
 
 Resource `examples` use the declaration URI as their implicit read input. Resource Template examples add the exact concrete expanded `uri`. In both cases, copy only a completed `resources/read` result payload, preserve content order, and use exactly one of `text` or base64 `blob` per content entry. Examples are snapshots and do not guarantee live contents or freshness. Never dereference example URIs automatically or publish sensitive captured data.
@@ -226,28 +229,28 @@ Prompts are server-side templates that generate messages:
 
 ```yaml
 prompts:
-- name: game_summary
-  title: Game Summary
-  description: Generate a narrative summary of a chess game
-  arguments:
-  - name: game_id
-    description: Game to summarize
-    required: true
-  - name: detail_level
-    description: "'brief', 'standard', or 'comprehensive'"
-    required: false
-  examples:
-    standard:
-      arguments:
-        game_id: example-2026-08-24
-        detail_level: standard
-      result:
-        resultType: complete
-        messages:
-        - role: user
-          content:
-            type: text
-            text: Summarize the game with key turning points.
+  - name: game_summary
+    title: Game Summary
+    description: Generate a narrative summary of a chess game
+    arguments:
+      - name: game_id
+        description: Game to summarize
+        required: true
+      - name: detail_level
+        description: "'brief', 'standard', or 'comprehensive'"
+        required: false
+    examples:
+      standard:
+        arguments:
+          game_id: example-2026-08-24
+          detail_level: standard
+        result:
+          resultType: complete
+          messages:
+            - role: user
+              content:
+                type: text
+                text: Summarize the game with key turning points.
 ```
 
 Prompt `examples` pair a complete `prompts/get` argument map with one completed Prompt result. When no arguments are supplied, either omit `arguments` or write `arguments: {}`. Keep only the payload from the JSON-RPC response's `result` member. For MCP 2026-07-28, include `resultType: complete`; earlier protocol versions do not define it, so validators warn when an example shared with them includes it. Examples are descriptive snapshots, not guarantees of deterministic live output.

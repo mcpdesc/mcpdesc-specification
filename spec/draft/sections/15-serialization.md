@@ -26,7 +26,7 @@ application/mcp-description+json
 
 ### 15.3 YAML Serialization
 
-An MCP Description MAY be serialized as YAML 1.2.2 using the JSON schema defined by Section 10.2.1.3 of the [YAML 1.2.2 specification](https://yaml.org/spec/1.2.2/) for scalar resolution.
+An MCP Description MAY be serialized as YAML 1.2.2 using the JSON scalar-resolution rules defined by Section 10.2.1.3 of the [YAML 1.2.2 specification](https://yaml.org/spec/1.2.2/), with the string fallback and restrictions defined in Section 15.3.3 below.
 
 <a id="req-serialization-yaml-claims"></a>A consumer that claims YAML input support MUST accept YAML MCP Description documents that satisfy this restricted profile and MUST reject documents that violate it. A producer that claims YAML output support MUST emit only documents that satisfy the restricted profile. General MCP Description conformance does not make YAML support mandatory or preferred over JSON support.
 
@@ -59,9 +59,11 @@ The project-specific `application/mcp-description+yaml` media type is not regist
 
 #### 15.3.3 Scalar Resolution and Numeric Values
 
-<a id="req-serialization-yaml-scalars"></a>A YAML processor MUST use the YAML 1.2.2 JSON schema for scalar resolution. A YAML scalar used as an MCP Description value MUST resolve to a string, finite number, boolean, or null. Non-finite numeric values such as positive infinity, negative infinity, and NaN MUST be rejected.
+<a id="req-serialization-yaml-scalars"></a>A YAML processor MUST use the YAML 1.2.2 JSON schema's scalar-resolution rules for recognizing null, booleans, and numbers. An untagged plain scalar that does not match those rules MUST resolve to a string, except for the non-finite numeric forms prohibited below. This string fallback is an explicit extension to the YAML JSON schema, which would otherwise report unmatched plain scalars as errors. These rules apply to both mapping keys and values; mapping keys remain subject to Section 15.3.1. A YAML scalar used as an MCP Description value MUST resolve to a string, finite number, boolean, or null. Non-finite numeric values, including overflow from a numeric spelling such as `1e400`, MUST be rejected. Untagged plain `.inf` and `.nan` spellings, case-insensitively and with an optional leading `+` or `-`, MUST also be rejected rather than handled by the string fallback. Quoted versions of those spellings remain strings.
 
-The YAML 1.2.2 JSON schema does not implicitly resolve timestamps. Date-time and date values therefore remain strings; <a id="req-serialization-yaml-quoted-dates"></a>authors SHOULD still quote them for clarity and portability across authoring tools.
+For example, plain `null`, `true`, and `12` resolve to null, a boolean, and a number respectively. Plain `ordinary`, `0o12`, `0x12`, `012`, `TRUE`, and `~` resolve to strings. In particular, `0o12` remains a string rather than becoming the octal number `10`; these rules differ from YAML 1.2 Core and YAML 1.1 scalar resolution.
+
+These rules do not implicitly resolve timestamps. Date-time and date values therefore remain strings; <a id="req-serialization-yaml-quoted-dates"></a>authors SHOULD still quote them for clarity and portability across authoring tools.
 
 #### 15.3.4 Tags and Safe Parsing
 
@@ -101,10 +103,10 @@ If a JSON document and a YAML document decode to the same JSON-compatible data m
 
 <a id="req-serialization-schema-property"></a>MCP Description documents SHOULD include a `$schema` property referencing the appropriate JSON Schema for IDE validation and tooling support. The property has the same meaning in JSON and YAML, and the referenced schema remains a JSON Schema when the instance is serialized as YAML.
 
-For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
+For the current 0.9.0 community working draft, the canonical value is `https://mcpdesc.org/schema/mcp-description/0.9.0-rc.4.json`. The stable 0.9.0 release will instead use `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. The `$schema` value does not change the required `mcpdesc: 0.9.0` discriminator.
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.3.json
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0-rc.4.json
 mcpdesc: 0.9.0
 ```
 
@@ -113,3 +115,86 @@ mcpdesc: 0.9.0
 <a id="req-serialization-negotiation"></a>Producers and consumers SHOULD explicitly communicate or negotiate the serialization when it cannot be determined from a file extension, media type, or other enclosing protocol metadata. Implementations MAY support JSON, YAML, or both according to their use case and declared capabilities.
 
 <a id="req-serialization-untrusted"></a>Implementations MUST treat JSON and YAML input as untrusted and impose reasonable document-size, nesting-depth, scalar-length, and collection-size limits.
+
+### 15.9 Normalized YAML Presentation
+
+This profile defines a presentation for YAML output; it does not change YAML
+input requirements, document validity, or semantic equivalence.
+<a id="req-serialization-normalized-yaml-explicit"></a>A producer MUST apply
+this profile when it declares or is explicitly asked to emit normalized MCP
+Description YAML.
+<a id="req-serialization-normalized-yaml-examples-guidance"></a>
+Specification-authored MCP Description YAML examples SHOULD follow it.
+<a id="req-serialization-normalized-yaml-consumer"></a>A consumer MUST NOT
+reject an otherwise conforming document because it does not use this
+presentation.
+
+<a id="req-serialization-normalized-yaml-model"></a>Normalization MUST operate
+on the parsed JSON-compatible data model. It MUST preserve every value and
+property, including significant empty values, and MUST NOT coerce, add, remove,
+or repair data. YAML input MUST still be parsed according to Section 15.3;
+normalization MUST NOT use YAML 1.1 resolution or application-specific
+constructors to reinterpret parsed values. Formatting MUST NOT substitute for
+validation.
+
+<a id="req-serialization-normalized-yaml-layout"></a>Normalized YAML MUST use
+UTF-8 without a byte-order mark, LF line endings, and exactly one final LF. It
+MUST use two spaces per indentation level, indent block sequences beneath their
+mapping keys, and MUST NOT use tabs for indentation. Non-empty sequences and
+maps MUST use block style; empty sequences and maps MUST use `[]` and `{}`
+respectively. Scalar values MUST NOT be line-wrapped.
+
+<a id="req-serialization-normalized-yaml-scalars"></a>JSON numbers, booleans,
+and `null` MUST be emitted as unquoted YAML scalars and MUST decode to the same
+JSON value. Numbers MUST use the serialization defined by
+[RFC 8785, Section 3.2.2.3](https://www.rfc-editor.org/rfc/rfc8785#section-3.2.2.3).
+An ordinary string MUST be emitted as a plain scalar when it is valid in its
+YAML context and resolves to a string under both the Section 15.3.3
+scalar-resolution rules and the YAML 1.1 Core Schema. Otherwise it MUST be emitted as a
+double-quoted scalar with escaping that preserves the string. This includes
+strings that resolve as null, booleans, numbers, or timestamps under either
+schema, and strings whose plain form is syntactically ambiguous. Empty strings
+MUST be written as `""`. String values in `protocolVersions` MUST always be
+double-quoted. Single-quoted strings MUST NOT be used.
+
+<a id="req-serialization-normalized-yaml-keys"></a>String mapping keys MUST
+follow the same plain-scalar safety and double-quote rules.
+<a id="req-serialization-normalized-yaml-key-types"></a>Keys MUST remain
+strings after parsing.
+
+<a id="req-serialization-normalized-yaml-multiline"></a>A string containing
+line feeds SHOULD use a literal block scalar when that representation preserves
+the exact value. The chomping indicator MUST preserve the number of trailing
+line feeds: `|-` for none, `|` for one, and `|+` for more than one. If a literal
+block scalar cannot preserve the exact value, the string MUST use a
+double-quoted escaped scalar instead.
+
+<a id="req-serialization-normalized-yaml-ordering"></a>This profile does not
+select a mapping-key ordering policy. When the document-oriented ordering
+profile in Section 18 is also selected, that profile MUST be applied to
+recognized structures. Otherwise, mapping keys MUST retain their input order.
+Array order and named-map entry order MUST always be preserved; arbitrary keys,
+arrays, and opaque values MUST NOT be sorted.
+
+<a id="req-serialization-normalized-yaml-examples"></a>The following scalar
+spellings illustrate required distinctions:
+
+| JSON-compatible value | Normalized YAML |
+| --- | --- |
+| string `2026-07-28` | `"2026-07-28"` |
+| string `0.8` | `"0.8"` |
+| string `123` | `"123"` |
+| string `true` | `"true"` |
+| string `on` | `"on"` |
+| string `null` | `"null"` |
+| empty string | `""` |
+| string `Search: documents` | `"Search: documents"` |
+| string `Hello # world` | `"Hello # world"` |
+| string `ordinary` | `ordinary` |
+| string `0o12` | `0o12` |
+| boolean `true` | `true` |
+| number `0.8` | `0.8` |
+| null | `null` |
+
+These requirements govern output presentation only. Other YAML spellings remain
+conforming when they decode to the same valid MCP Description data model.
