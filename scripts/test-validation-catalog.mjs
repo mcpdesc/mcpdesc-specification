@@ -85,7 +85,7 @@ for (const change of [
   (manifest) => { manifest.ruleCount++; },
   (manifest) => { manifest.source.tag = 'v9.9.9'; },
   (manifest) => { manifest.specificationBaseUrl = 'https://github.com/mcpdesc/mcpdesc-specification/blob/main/spec/draft/'; },
-  (manifest) => { manifest.status = 'stable'; },
+  (manifest) => { manifest.status = manifest.status === 'stable' ? 'draft' : 'stable'; },
   (manifest) => { manifest.ruleSchema.url = 'https://untrusted.invalid/schema.json'; },
   (manifest) => { if (manifest.resultSchema) manifest.resultSchema.sha256 = '0'.repeat(64); else manifest.ruleCount++; },
   (manifest) => { manifest.catalog.url = 'https://untrusted.invalid/rules.json'; }
@@ -102,13 +102,15 @@ assert.throws(() => validateCatalogBundle(duplicateTitle, snapshot), /Duplicate 
 const empty = emptyCatalogIndex();
 const index = extendCatalogIndex(empty, bundle, true);
 assert.equal(empty.catalogs.length, 0, 'Index update does not mutate its input');
-assert.equal(index.currentStable, null, 'No stable catalog is invented');
-assert.equal(index.currentDraft, catalogIdentity(snapshot).manifestUrl);
+const currentPointer = bundle.manifest.status === 'stable' ? 'currentStable' : 'currentDraft';
+const otherPointer = currentPointer === 'currentStable' ? 'currentDraft' : 'currentStable';
+assert.equal(index[otherPointer], null, 'A catalog does not update the other status pointer');
+assert.equal(index[currentPointer], catalogIdentity(snapshot).manifestUrl);
 assert.deepEqual(extendCatalogIndex(index, bundle, true), index, 'Index update is idempotent');
-assert.throws(() => validateCatalogIndex({ ...index, currentStable: index.currentDraft }, bundle.schema));
+assert.throws(() => validateCatalogIndex({ ...index, [otherPointer]: index[currentPointer] }, bundle.schema));
 assert.throws(() => validateCatalogIndex({ ...index, currentDraft: 'https://mcpdesc.org/missing.json' }, bundle.schema));
 assert.throws(() => validateCatalogIndex({ ...index, catalogs: [...index.catalogs, index.catalogs[0]] }, bundle.schema));
-assert.throws(() => validateCatalogIndex({ ...index, catalogs: [{ ...index.catalogs[0], status: 'stable' }] }, bundle.schema));
+assert.throws(() => validateCatalogIndex({ ...index, catalogs: [{ ...index.catalogs[0], status: index.catalogs[0].status === 'stable' ? 'draft' : 'stable' }] }, bundle.schema));
 
 const responses = new Map([...bundle.files].map(([relative, bytes]) => [`https://mcpdesc.org/${relative}`, bytes]));
 responses.set(catalogIndexUrl, Buffer.from(formatCanonicalJson(index)));
@@ -162,10 +164,10 @@ const earlierManifest = {
   ruleFormatVersion: '1.1.0',
   snapshot: earlierSnapshot,
   status: earlierIdentity.status,
-  source: { ...bundle.manifest.source, tag: earlierIdentity.tag },
+  source: { ...bundle.manifest.source, tag: earlierIdentity.tag, specificationPath: earlierIdentity.specificationPath },
   ruleSchema: { url: earlierSchemaUrl, sha256: catalogDigest(earlierSchemaBytes) },
   catalog: { url: earlierIdentity.catalogUrl, sha256: bundle.manifest.catalog.sha256 },
-  specificationBaseUrl: bundle.manifest.specificationBaseUrl.replace(catalogIdentity(snapshot).tag, earlierIdentity.tag)
+  specificationBaseUrl: `https://github.com/mcpdesc/mcpdesc-specification/blob/${earlierIdentity.tag}/${earlierIdentity.specificationPath}/`
 };
 const earlierFiles = new Map([
   [new URL(earlierSchemaUrl).pathname.slice(1), earlierSchemaBytes],
@@ -184,7 +186,7 @@ assert.throws(() => validateCatalogIndex({ ...earlierIndex, $schema: 'https://mc
 const upgraded = extendCatalogIndex(earlierIndex, bundle, true);
 assert.equal(upgraded.$schema, `${ruleSchemaUrl}#/$defs/catalog-index`);
 assert.deepEqual(upgraded.catalogs.map((entry) => entry.snapshot), [earlierSnapshot, snapshot].sort());
-assert.equal(upgraded.currentDraft, catalogIdentity(snapshot).manifestUrl);
+assert.equal(upgraded[currentPointer], catalogIdentity(snapshot).manifestUrl);
 for (const [relative, bytes] of earlierFiles) responses.set(`https://mcpdesc.org/${relative}`, bytes);
 responses.set(catalogIndexUrl, Buffer.from(formatCanonicalJson(earlierIndex)));
 await assert.rejects(() => verifyCatalogIndexPublication(schemaBytes, makeFetch()), 'A published index must declare the current format');
