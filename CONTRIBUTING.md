@@ -39,7 +39,7 @@ A non-trivial specification change should include:
 
 A schema change without corresponding specification text and examples is incomplete.
 
-Every proposal corresponds to a public issue. Its normative changes are implemented first in the active development version under `spec/draft/`, with the reviewed proposal revision captured under `spec/draft/proposal-snapshots/` and recorded in `spec/draft/PROPOSALS.md`. Once accepted, the proposal becomes a durable decision record under the root `proposals/` directory. See the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
+Every proposal corresponds to a public issue. Its normative changes are implemented first in the active development version under `spec/draft/`, with a copy of the proposal placed under `spec/draft/proposal-snapshots/` and listed in `spec/draft/PROPOSALS.md`. Inclusion means the proposal is implemented for that specification version; Git history records when the copy was added or changed. Once accepted, the proposal becomes a durable decision record under the root `proposals/` directory. See the proposal workflow in [`GOVERNANCE.md`](GOVERNANCE.md).
 
 ## Compatibility classification
 

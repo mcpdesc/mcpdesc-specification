@@ -5,6 +5,7 @@ This changelog records repository governance, release-process, and project-tooli
 ## 0.9.0 preparation — 2026-11-12
 
 - Prepared the stable 0.9.0 artifact tree and promoted Proposals 0024–0036 as durable decision records. Publication and downstream default adoption remain separate coordination steps.
+- Simplified proposal tracking: inclusion in the versioned snapshot list means implemented in that specification version; Git history is the source of truth for changes, without separate capture-status or digest bookkeeping.
 
 ## 2026-10-24 — Stable maintenance policy
 

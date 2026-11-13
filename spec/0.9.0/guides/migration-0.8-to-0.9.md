@@ -1,107 +1,157 @@
 # Migrating from MCP Description 0.8.0 to 0.9.0
 
-MCP Description 0.9.0 is the stable specification release. This guide
-summarizes migration from 0.8.0; see the [changelog](../CHANGELOG.md) and
-[proposal manifest](../PROPOSALS.md) for the release history and design records.
+This guide helps you update an MCP Description document from 0.8.0 to 0.9.0,
+either with migration tools or by hand. For the full list of changes and the
+proposals behind them, see the [0.9.0 changelog](../CHANGELOG.md) and the
+[proposal manifest](../PROPOSALS.md).
 
-Version 0.9.0 measures carried MCP values against each protocol version's TypeScript
-schema. Most 0.8.0 documents need only a version change. Documents that put
-extra properties on closed MCP types must move them.
+## What to expect
 
-## Version and schema identity
+Most 0.8.0 documents need only a version change. 0.9.0 checks the MCP values a
+document carries against the MCP types of each applicable protocol version, so
+a document needs edits only when it:
 
-Set `mcpdesc` to `0.9.0`. When emitting `$schema`, use the stable identifier
-`https://mcpdesc.org/schema/mcp-description/0.9.0.json`.
+- adds properties to Tool or Resource annotations;
+- requires client capabilities that MCP does not define;
+- adds fields to the `completion` object of a completion example result;
+- has a malformed Resource Template `uriTemplate`, a Resource `uri` without a
+  scheme, or a fractional `size` or `ttlMs`.
 
-## YAML scalar resolution
+Other changes relax earlier restrictions or add warnings. They do not make a
+valid 0.8.0 document invalid, but they are worth reviewing.
 
-The specification explicitly defines the string fallback: recognize null,
-booleans, and numbers using the YAML JSON-schema rules,
-then treat unmatched untagged plain scalars as strings. Strict YAML JSON-schema
-mode alone may reject ordinary words; YAML Core-schema mode can instead
-silently convert some strings into other types. Neither mode alone implements
-the restricted profile.
+| Change | Automatic | Fix offered by tools |
+| --- | --- | --- |
+| [Version and schema identity](#version-and-schema-identity) | Yes | — |
+| [Annotations](#annotations) | No | Remove the property |
+| [Client capability requirements](#client-capability-requirements) | No | Remove, or move to `experimental` |
+| [Completion example results](#completion-example-results) | No | Remove the property |
+| [Resource Template URI templates](#resource-template-uri-templates) | No | None |
+| [Resource URIs](#resource-uris) | No | None |
+| [Integer numbers](#integer-numbers) | No | None |
 
-For example:
+## Migrate with tools
 
-```yaml
-x-label: 0o12
-x-count: 10
+The `migrate` command of the `mcpcontract` CLI and the migration tools in the
+MCP Description Editor automate the migration. Both implement the
+[0.8.0 to 0.9.0 conversion profile](../conversion/README.md), using the
+reference implementation in [`@mcpdesc/core`](https://github.com/mcpdesc/core).
+See [Known Implementations](../../implementations.md) for where to get them.
+
+A conversion:
+
+1. validates the document against 0.8.0, and stops if it is invalid, so fix
+   0.8.0 errors first;
+2. sets `mcpdesc` to `0.9.0` and, when present, updates `$schema`;
+3. validates the result against 0.9.0 and reports each remaining
+   incompatibility as a blocker, with the path of the value and the conversion
+   rule that applies.
+
+Some blockers offer a fix, such as removing a property. A tool applies a fix
+only when you request it. A tool never moves a value into `_meta` or an `x-*`
+property, never guesses a URI, and never rounds a number: those decisions are
+yours. Blockers found by semantic validation, such as a malformed
+`uriTemplate`, appear only once structural blockers are resolved, so run the
+conversion again after each round of fixes.
+
+The result includes a JSON Patch of the changes. Editors apply it to your
+source text, so YAML comments and key order are preserved.
+
+## Find remaining gaps with validation
+
+Whether you migrate with tools or by hand, finish by validating the document
+against 0.9.0. Validation confirms the document is valid and reports warnings
+worth reviewing:
+
+```bash
+mcpcontract validate my-server.mcpdesc.yaml --schema mcpdesc --strict
 ```
 
-The decoded values are the string `"0o12"` and the number `10`. A YAML 1.2 Core
-reader would instead interpret both values as the number `10`. Values such as
-`0x12`, `012`, `TRUE`, and `~` also remain strings under the restricted profile.
-Consumers moving from Core resolution must review unquoted values whose types
-change. To express a number, use a JSON numeric spelling; to make a string
-explicit across authoring tools, quote it.
+Each diagnostic names the validation rule it reports and the path of the
+value concerned. See [Validation](../validation/README.md) for how rules and
 
-Unquoted non-finite forms such as `.inf` and `.nan`, and numeric overflow such as
-`1e400`, remain rejected. Quoted `".inf"` and `".nan"` remain strings. This
-clarification does not change the JSON Schema or semantic document validation,
-and does not modify earlier released specifications or immutable validator
-snapshots.
 
-## Union-aware diagnostics
+## Migrate by hand
 
-The release implements [Proposal 0035](../proposal-snapshots/0035-union-aware-diagnostics.md)
-([issue #115](https://github.com/mcpdesc/mcpdesc-specification/issues/115)),
-building on RC.2 and [Proposal 0034](../proposal-snapshots/0034-discriminator-driven-schema-validation.md).
-Unions with portable selectors use guarded JSON Schema conditionals, so only
-the applicable alternative is validated. The remaining inclusive
-`oauthFlows.anyOf` is handled generically. These changes do not intend to alter
-which documents are accepted: required members, object closure, extension
-eligibility, and reference constraints remain equivalent to RC.2.
+1. Validate the document against 0.8.0 and fix any errors.
+2. Set `mcpdesc` to `0.9.0`, and update `$schema` when present.
+3. Remove unknown properties from Tool and Resource annotations.
+4. Move custom client capability requirements into `experimental` or
+   `extensions`.
+5. Remove extra fields from the `completion` object of completion example
+   results.
+6. Fix malformed `uriTemplate` values, Resource `uri` values without a scheme,
+   and fractional `size` or `ttlMs` values.
+7. Validate against 0.9.0 and review the warnings.
 
-Diagnostic paths and rule results can change. A missing-member path now points
-to its enclosing object, with the absent name in `detail.member`. A typo path
-points to the unexpected member that exists in the source. Findings reached
-through `$componentRef` use the reference object as their primary `path` and
-provide a `component-definition` related location. Alternative failures that
-do not apply are no longer reported, and rules for those alternatives no
-longer fail. Consumers should not rely on raw finding counts or engine schema
-paths.
+The sections below explain each step.
 
-One intentional acceptance narrowing is included: the Elicitation Interaction
-Response Object in a Tool Interaction Example now rejects unknown members.
-RC.2's schema allowed arbitrary additional members on those response objects.
-The narrowing does not apply to native MCP responses at runtime.
+## Required changes
 
-Validation result format `1.4.0` adds factual `detail` fields and
-`relatedLocations`. Consumers should render recognized `detail.kind` values
-and their fields, falling back to `message` for unknown kinds or diagnostics
-without detail. The document `mcpdesc` version remains `0.9.0`; consumers
-should select validator selector `0.9.0`. Published RC.1, RC.2, and RC.3
-snapshots remain unchanged. The RC.4 candidate was prepared but never tagged.
+### Version and schema identity
 
-## Annotations
+Set `mcpdesc` to `0.9.0`. When the document declares `$schema`, use the stable
+identifier `https://mcpdesc.org/schema/mcp-description/0.9.0.json`.
 
-Tool Annotations and Resource Annotations, including annotations on content
-blocks, accept only the properties MCP defines (Sections 9.6 and 10.3):
+Tools apply this change automatically.
+
+### Annotations
+
+Tool annotations and Resource annotations, including annotations on content
+blocks, accept only the properties MCP defines
+([Sections 9.6](../sections/09-tools.md) and
+[10.3](../sections/10-resources.md)):
 
 | Object | Allowed properties |
 | --- | --- |
 | Tool `annotations` | `title`, `readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint` |
-| Resource Annotations | `audience`, `priority`, `lastModified` (from MCP 2025-06-18) |
+| Resource annotations | `audience`, `priority`, `lastModified` (from MCP 2025-06-18) |
 
-Remove other properties, including `x-*` keys. Server-defined metadata belongs
-in the declaration's `_meta` where the protocol version defines it (from MCP
-2025-06-18). MCP Description metadata belongs in `x-*` properties on the
-declaration itself.
+Remove other properties, including `x-*` keys. Decide where each removed value
+belongs:
+
+- server-defined metadata belongs in the declaration's `_meta`, for protocol
+  versions that define it (from MCP 2025-06-18);
+- MCP Description metadata belongs in `x-*` properties on the declaration
+  itself.
+
+Before:
+
+```json
+{
+  "name": "inspect",
+  "inputSchema": { "type": "object" },
+  "annotations": {
+    "readOnlyHint": true,
+    "com.example/tier": "gold",
+    "x-owner": "platform-team"
+  }
+}
+```
+
+After:
 
 ```json
 {
   "name": "inspect",
   "inputSchema": { "type": "object" },
   "annotations": { "readOnlyHint": true },
-  "_meta": { "com.example/tier": "gold" }
+  "_meta": { "com.example/tier": "gold" },
+  "x-owner": "platform-team"
 }
 ```
 
-## Client capability requirements
+Tools report these as blockers
+(`mcpdesc.conversion.0-8-to-0-9.tool-annotations-closed` and
+`mcpdesc.conversion.0-8-to-0-9.annotations-closed`) and offer to remove the
+property. Moving the value is up to you. See
+[Proposal 0027](../proposal-snapshots/0027-closed-mcp-types.md).
+
+### Client capability requirements
 
 A `clientRequirements` object names only client capabilities that the
-applicable MCP protocol versions define (Section 8.5). Move custom requirements into
+applicable MCP protocol versions define
+([Section 8.5](../sections/08-capabilities.md)). Move custom requirements into
 `experimental` or, for MCP 2026-07-28, into `extensions`:
 
 ```json
@@ -110,158 +160,119 @@ applicable MCP protocol versions define (Section 8.5). Move custom requirements 
 
 Server capabilities were already closed in 0.8.0.
 
-## Integer numbers
+Tools report this as a blocker
+(`mcpdesc.conversion.0-8-to-0-9.client-requirements-closed`) and offer to
+remove the requirement or move it to `experimental`. See
+[Proposal 0027](../proposal-snapshots/0027-closed-mcp-types.md).
 
-Resource `size`, the `size` of resource link content blocks, and Resource
-example result `ttlMs` are integers (Sections 3.6, 10.1.1, and 10.4.4), as in
-the JSON Schema MCP generates. Replace a fractional value with the intended
-integer; `1024.0` is already an integer.
+### Completion example results
 
-## Resource URIs
-
-A Resource `uri` must be an RFC 3986 URI with a scheme (Section 10.1.2), as
-MCP types it and as Section 15 already required of URI values; 0.8.0 accepted
-any string. Custom schemes remain valid. Replace a relative reference or free
-text with the absolute URI the server uses, for example `file:///docs/readme.md`
-instead of `docs/readme.md`. Version conversion reports such a value as
-blocked rather than guessing the URI.
-
-## Tool schema dialects
-
-For MCP 2025-11-25 and later, a Tool `inputSchema` or `outputSchema` that
-declares `$schema` must declare JSON Schema 2020-12 or draft-07 (Section 9.2).
-In 0.8.0 the accepted set depended on the validator; the reference validator
-already accepted only these two, so its results do not change. Replace any
-other declared dialect, preferably by removing `$schema` to use the 2020-12
-default.
-
-For MCP 2025-11-25 and later, the dialect also decides the schema's shape
-(Section 9.2). 0.8.0 required a literal `"type": "object"` at every
-`inputSchema` root; 0.9.0 requires it only before MCP 2025-11-25 and otherwise
-rejects only a declared root `type` that excludes `"object"`. No 0.8.0 document
-becomes invalid. A schema that the MCP `Tool` type of an applicable protocol version
-rejects, such as a root in `$ref` or a boolean `properties` value for MCP
-2025-11-25, stays valid with the new warning `tool-schema-mcp-type-mismatch`,
-because native projection fails for that protocol version. Write `{}` instead of
-`true`, `{ "not": {} }` instead of `false`, or `"type": "object"` beside
-`$ref` or `allOf`, or narrow the Tool's `protocolVersions`.
-
-## Example results
-
-Example results and Tool Interaction step responses are checked against each
-applicable protocol version's MCP type (Section 3.6):
-
-- A field that an open MCP result type allows but the protocol version does not define
-  is accepted and preserved with the warning
-  `result-field-not-defined-by-version`. For example, `resultType` in a result
-  shared by MCP 2025-11-25 and MCP 2026-07-28 no longer requires splitting the
-  declaration. Variants that were split only for `resultType`, `ttlMs`, or
-  `cacheScope` may be merged; splitting still clears the warning.
-- The `completion` object of a completion example result accepts only
-  `values`, `total`, and `hasMore`. Move other fields, for example to result
-  `_meta`.
-- For MCP 2026-07-28, sampling, elicitation, and roots step responses are
-  closed: remove unknown fields, and keep `_meta` only on sampling responses.
-- Result `_meta` is accepted in every protocol version. Root `_meta` in roots responses
-  is accepted from MCP 2025-06-18.
-- Reserved `_meta` keys are checked in example results, their content, step
-  responses, and roots.
+The `completion` object of a completion example result accepts only `values`,
+`total`, and `hasMore`. Move other fields elsewhere, for example to the
+result's `_meta`.
 
 MCP Description does not support completion examples for MCP 2024-11-05.
 
-## Validator output
+Tools report this as a blocker
+(`mcpdesc.conversion.0-8-to-0-9.completion-result-closed`) and offer to remove
+the field. See
+[Proposal 0026](../proposal-snapshots/0026-open-mcp-results-in-examples.md).
 
-### Rule catalog consumers
+### Resource Template URI templates
 
-0.9.0 introduces validation rule catalogs and rule-linked diagnostics; these
-are new to 0.9.0, not formats that 0.8.0 validators emitted. For catalog and
-validation-result format history, see the earlier entries in the
-[0.9.0 changelog](../CHANGELOG.md).
+Every Resource Template `uriTemplate` must be a valid RFC 6570 URI template
+([Section 10.2.1](../sections/10-resources.md)). 0.8.0 checked it only when the
+Resource Template had examples. Correct the template to the one the server
+uses.
 
-Discover catalogs through the publication index, then pin an immutable
-manifest. Resolve evidence and description links from its
-`specificationBaseUrl`, not a moving branch. See the
-[catalog publication contract](../validation/README.md#catalog-publication-and-discovery).
-Existing 0.8.0 validators do not gain retroactive rule diagnostics or a catalog.
+Tools report this as a blocker
+(`mcpdesc.conversion.0-8-to-0-9.uri-template-checked`) without a fix.
 
-### Document diagnostics
+### Resource URIs
 
-Every diagnostic carries a `rule` property naming the validation rule it
-reports, next to `code`, `severity`, `message`, and `path`:
+A Resource `uri` must be an RFC 3986 URI with a scheme
+([Section 10.1.2](../sections/10-resources.md)); 0.8.0 accepted any string.
+Custom schemes remain valid. Replace a relative reference or free text with the
+absolute URI the server uses, for example `file:///docs/readme.md` instead of
+`docs/readme.md`.
 
-```json
-{
-  "code": "schema-validation",
-  "severity": "error",
-  "message": "does not validate against 0.9.0: /tools/0/annotations must NOT have additional properties",
-  "path": ["tools", 0, "annotations", "audience"],
-  "rule": "mcp.tool-annotations.members"
-}
-```
+Tools report this as a blocker
+(`mcpdesc.conversion.0-8-to-0-9.resource-uri-checked`) without a fix, because
+only you know the intended URI.
 
-Tools, CI checks, and snapshot tests that compare whole diagnostic objects, or
-reject unknown properties, must accept `rule` or compare the other four
-properties only. `@mcpdesc/core` updates its frozen diagnostic expectations at
-the next validator snapshot intake.
+### Integer numbers
 
-Other output changes:
+Resource `size`, the `size` of resource link content blocks, and Resource
+example result `ttlMs` are integers
+([Sections 3.6](../sections/03-document-structure.md),
+[10.1.1, and 10.4.4](../sections/10-resources.md)), as in the JSON Schema MCP
+generates. Replace a fractional value with the intended integer; `1024.0` is
+already an integer.
 
-- Array indices in `schema-validation` paths are numbers, as in semantic
-  diagnostics. Previously they were strings below the document root.
-- New codes include `result-field-not-defined-by-version` (warning). Some
-  conditions that were errors in 0.8.0 are now warnings with that code.
-- `invalid-resource-template-uri-template` replaces
-  `resource-template-example-invalid-template` and
-  `resource-template-completion-example-invalid-template`. It reports a
-  malformed `uriTemplate` once, also on Resource Templates without examples,
-  which 0.8.0 accepted.
-- The `completion-example-version-mismatch` message for MCP 2024-11-05 says the
-  protocol version is not supported by MCP Description.
-- `schema-validation` diagnostics name the rule that owns the failing schema
-  location, for example `mcpdesc.tool.members` or `mcp.content.members`,
-  instead of `mcpdesc.document.schema`, which reports only failures of the
-  document root.
-- A diagnostic whose finding depends on MCP protocol versions lists them in
-  `protocolVersions`. `rule`, `severity`, and `path` are the interoperable
-  contract; `code` and `message` are optional producer output
-  ([Section 16.5](../sections/16-conformance.md#req-diagnostic-rule)). Compare
-  diagnostics by `rule`, not by `code`.
-- The exported validator's `validate()` also returns `results`:
-  one status per rule and declared protocol version, in the
-  [validation result format](../validation/result.schema.json). Treat
-  `not-applicable` and `not-evaluated` as not confirmed, never as passed.
-  Validity is unchanged.
+Tools report this as a blocker
+(`mcpdesc.conversion.0-8-to-0-9.integer-numbers`) without a fix, because
+rounding would change the value. See
+[Proposal 0029](../proposal-snapshots/0029-integer-mcp-numbers.md).
 
-## Recommended algorithm
+## Changes to review
 
-1. Validate the 0.8.0 source.
-2. Set `mcpdesc` to `0.9.0` and update `$schema` when emitted.
-3. Remove unknown annotation properties, moving server-defined metadata to
-   `_meta` only where the protocol version defines it.
-4. Move unknown client capability requirements into `experimental` or
-   `extensions`.
-5. Move extra fields out of completion `completion` objects.
-6. Fix malformed `uriTemplate` values and fractional `size` or `ttlMs`
-   values.
-7. Validate against the 0.9.0 JSON Schema and semantic rules, and review the
-   new warnings.
+These changes do not make a valid 0.8.0 document invalid. Some add warnings,
+and some let you simplify a document.
 
-A migration tool MUST report unresolved ambiguity instead of guessing, and
-MUST NOT move a value into `_meta` or `x-*` without author review.
+### Example results
 
-## Conversion
+Example results and Tool Interaction step responses are checked against the
+MCP type of each applicable protocol version
+([Section 3.6](../sections/03-document-structure.md)):
 
-The [conversion profile](../conversion/README.md) implements this algorithm
-for tools such as the mcpcontract CLI and the mcpdesc live editor. Steps 1, 2,
-and 7 are automatic. Steps 3 to 6 are blockers, each reported with a
-conversion rule and a path:
+- A field that an open MCP result type allows, but the protocol version does
+  not define, is accepted with the warning
+  `result-field-not-defined-by-version`. For example, a result shared by MCP
+  2025-11-25 and MCP 2026-07-28 can include `resultType`. Declarations split
+  only because of `resultType`, `ttlMs`, or `cacheScope` can be merged;
+  keeping them split avoids the warning.
+- Sampling, elicitation, and roots step responses accept `_meta` and, with
+  warnings, unknown fields through MCP 2025-11-25. For MCP 2026-07-28 they are
+  closed, and only sampling responses accept `_meta`.
+- Roots in roots responses accept `_meta` from MCP 2025-06-18.
+- Reserved `_meta` keys are also checked in example results, their content,
+  step responses, and roots.
 
-| Step | Conversion rule | Fixes offered |
-| --- | --- | --- |
-| 3 | `mcpdesc.conversion.0-8-to-0-9.tool-annotations-closed`, `annotations-closed` | `remove-property` |
-| 4 | `mcpdesc.conversion.0-8-to-0-9.client-requirements-closed` | `remove-property`, `move-to-experimental` |
-| 5 | `mcpdesc.conversion.0-8-to-0-9.completion-result-closed` | `remove-property` |
-| 6 | `mcpdesc.conversion.0-8-to-0-9.uri-template-checked`, `integer-numbers` | none |
+See
+[Proposal 0026](../proposal-snapshots/0026-open-mcp-results-in-examples.md).
 
-A fix is applied only when the author requests it. Moving a value into
-`_meta` or `x-*` is never offered as a fix.
+### Tool schema dialects
+
+For MCP 2025-11-25 and MCP 2026-07-28, a Tool `inputSchema` or `outputSchema`
+that declares `$schema` must declare JSON Schema 2020-12 or draft-07
+([Section 9.2](../sections/09-tools.md)). The reference validator already
+accepted only these two. Prefer removing `$schema` to use the 2020-12 default.
+
+For these protocol versions the dialect, not a literal `"type": "object"`,
+decides whether a schema is valid. A schema the dialect accepts but the native
+MCP `Tool` type rejects, such as a root `$ref` or a boolean `properties` value
+for MCP 2025-11-25, stays valid with the warning
+`tool-schema-mcp-type-mismatch`, because the Tool cannot be projected to MCP
+for that protocol version. To clear the warning, write `{}` instead of `true`,
+`{ "not": {} }` instead of `false`, or `"type": "object"` beside `$ref` or
+`allOf`, or narrow the Tool's `protocolVersions`.
+
+See
+[Proposal 0032](../proposal-snapshots/0032-dialect-governed-tool-schemas.md).
+
+### YAML scalars
+
+0.9.0 clarifies how YAML plain scalars are read
+([Section 15.3.3](../sections/15-serialization.md)): null, booleans, and
+numbers follow the YAML JSON-schema rules, and every other unquoted value is a
+string. Values such as `0o12`, `0x12`, `012`, `TRUE`, and `~` are therefore
+strings, although a YAML 1.2 Core reader would convert them. Write numbers in
+JSON spelling, and quote strings that could be misread.
+
+## If you maintain tooling
+
+Validator output changed in 0.9.0. Diagnostics carry a `rule` property, some
+codes were renamed or replaced, and paths can differ. CI checks or snapshot
+tests that compare whole diagnostics may need updating; compare diagnostics by
+`rule`, `severity`, and `path`. See [Validation](../validation/README.md) and
+the [0.9.0 changelog](../CHANGELOG.md) for details.

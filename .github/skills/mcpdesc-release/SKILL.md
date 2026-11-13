@@ -18,7 +18,7 @@ Use repository scripts as the source of deterministic release behavior. Do not r
    - Validator snapshot export: `npm run release:prepare -- validator <x.y.z|x.y.z-draft.n|x.y.z-rc.n|x.y.z-rev.YYYYMMDD> <output-directory>`
    - Stable: `npm run release:prepare -- stable <x.y.z> <YYYY-MM-DD>`
      The helper has end-to-end coverage in `scripts/test-freeze-version.mjs`. Review its complete output and complete the manual release decisions and prose.
-4. Complete the review-required prose, proposal provenance, schema pointers, tests, or status changes printed by the script. Snapshot exports require an exact approved tag at a clean `HEAD`.
+4. Complete the review-required prose, proposal provenance, schema pointers, tests, or status changes printed by the script. Keep the human-readable proposal summary in `PROPOSALS.md` synchronized with exact source and digest records in `proposal-snapshots/manifest.json`. Snapshot exports require an exact approved tag at a clean `HEAD`.
 5. Run the matching check:
    - `npm run release:check -- draft`
    - `npm run release:check -- rc`

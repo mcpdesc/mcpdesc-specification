@@ -128,7 +128,7 @@ remain maintainer actions.
 
 Public draft snapshots use annotated tags named `v<version>-draft.<iteration>`, such as `v0.8.0-draft.1`. They identify an immutable review and interoperability baseline but do not create a new `mcpdesc` conformance version or a stable release.
 
-Before tagging, maintainers update the draft status metadata, front matter, changelog, public status pages, and `spec/draft/PROPOSALS.md`; capture and verify every proposal protocol version required by governance; run `npm test`; and confirm that `schemas/latest.json` and frozen specification versions are unchanged. Once the canonical schema URL is live, maintainers also run `npm run release:check -- draft-publication` to verify direct publication, media type, immutable bytes, schema identity, CORS, cache policy, ETag, and HTML-fallback absence before tagging. Draft snapshots are tagged directly from the reviewed integration commit. Do not run `freeze-version.mjs` for a draft snapshot.
+Before tagging, maintainers update draft status metadata, front matter, changelog, public status pages, and `spec/draft/PROPOSALS.md`; verify that each listed proposal snapshot exists and has a durable record under `proposals/`; run `npm test`; and confirm `schemas/latest.json` and frozen specification versions are unchanged. Git history records proposal snapshot changes. Once the canonical schema URL is live, maintainers also run `npm run release:check -- draft-publication` to verify direct publication, media type, immutable bytes, schema identity, CORS, cache policy, ETag, and HTML-fallback absence before tagging. Draft snapshots are tagged directly from the reviewed integration commit. Do not run `freeze-version.mjs` for a draft snapshot.
 
 ## Validator snapshot export boundary
 
