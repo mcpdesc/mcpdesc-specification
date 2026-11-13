@@ -2,18 +2,18 @@
 
 ### 1.1 Purpose
 
-The MCP Description Specification defines a standard format for describing the capabilities of a Model Context Protocol (MCP) server as a static, curated document.
+The MCP Description Specification defines a standard format for describing an MCP server surface in a static, curated document.
 
-The MCP ecosystem supports runtime discovery and capability inspection. While effective for dynamic interactions, runtime discovery alone limits offline tooling, cross-platform interoperability, design review, and governance workflows.
+The MCP ecosystem supports runtime discovery and capability inspection. These features are effective for dynamic interactions. However, runtime discovery alone limits offline tooling, cross-platform interoperability, design review, and governance workflows.
 
-This specification addresses these limitations by providing a portable description format for MCP servers, analogous to the descriptive role OpenAPI plays for HTTP APIs.
+This specification addresses these limitations by providing a portable description format for MCP servers, much as OpenAPI provides a description format for HTTP APIs.
 
 ### 1.2 Goals
 
 An MCP Description document enables:
 
 - **Standardized server descriptions** — a consistent structure for declaring server metadata, transports, tools, resources, prompts, and capabilities.
-- **Offline discoverability** — platforms can index and display server capabilities without establishing a runtime connection.
+- **Offline discoverability** — platforms can index and display server descriptions without establishing a runtime connection.
 - **Tooling interoperability** — documentation generators, testing frameworks, agent discovery tools, IDE integrations, and governance platforms can operate on a common format.
 - **Description-driven development** — teams can define, review, and validate MCP server surfaces before deployment.
 
@@ -21,14 +21,14 @@ An MCP Description document enables:
 
 This specification is intended for:
 
-- MCP server developers who publish capability descriptions
+- MCP server developers who publish server descriptions
 - MCP client and agent developers who consume server descriptions
 - Platform developers building registries, documentation portals, and governance tools
 - Tool authors creating validators, generators, and IDE integrations
 
 ### 1.4 Relationship to the MCP Protocol
 
-The MCP Description Specification does **not** replace the MCP protocol. It complements the protocol by providing a static description format for server capabilities.
+The MCP Description Specification does **not** replace the MCP protocol. It complements the protocol by providing a static description format for MCP servers.
 
 | MCP Protocol | MCP Description |
 |---|---|
@@ -37,19 +37,20 @@ The MCP Description Specification does **not** replace the MCP protocol. It comp
 | Tool invocation | Tool definitions |
 | Resource fetching | Resource definitions |
 
-The MCP protocol defines runtime communication and behavior. An MCP Description statically represents durable, externally relevant server semantics without reproducing MCP wire choreography.
+The MCP protocol defines runtime communication and behavior. An MCP Description statically represents durable, externally relevant server semantics. It does not reproduce the protocol's runtime message exchanges.
 
 ### 1.5 Scope
 
 This specification defines:
 
 - The structure and semantics of an MCP Description document
-- JSON Schema validation rules for MCP Description documents
+- Conforming JSON and YAML serializations
+- Validation requirements, including a JSON Schema for structural validation
+- Protocol-version views, merge, and native MCP projection
 - The specification extension mechanism for vendor-specific metadata
 
-This specification does NOT define:
+This specification does not define:
 
 - The MCP protocol itself
 - Runtime behavior of MCP servers or clients
 - The content or structure of vendor extensions (these are defined independently by extension authors)
-

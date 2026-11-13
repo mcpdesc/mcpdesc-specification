@@ -116,9 +116,6 @@ uncheckedRequirements:
   - location: sections/04-versioning.md#req-schema-bytes-immutable
     reason: processing
     note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
-  - location: sections/04-versioning.md#req-schema-prerelease-identity
-    reason: processing
-    note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
   - location: sections/04-versioning.md#req-schema-publication-http
     reason: processing
     note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
@@ -128,9 +125,6 @@ uncheckedRequirements:
   - location: sections/04-versioning.md#req-schema-aliases
     reason: processing
     note: "Concerns schema publication, checked by the release publication checks rather than by document validation."
-  - location: sections/04-versioning.md#req-schema-status-manifests
-    reason: processing
-    note: "Concerns repository files, not documents."
   - location: sections/04-versioning.md#req-no-network-conformance
     reason: processing
     note: "Network access by a validator cannot be shown by a document fixture."

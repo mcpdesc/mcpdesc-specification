@@ -20,14 +20,21 @@ date: 2026-11-12
 
 ## Abstract
 
-This specification defines the **MCP Description** format — a portable, machine-readable document that describes the durable, externally relevant surface of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
+This specification defines the **MCP Description** format. It is a portable, machine-readable document that describes the durable, externally relevant surface of a [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server.
 
-An MCP Description declares supported MCP protocol versions, instructions, transports, security requirements, capabilities, tools, resources, resource templates, prompts, and metadata in a static, machine-readable document.
+An MCP Description declares the MCP protocol versions it covers, instructions, transports, security requirements, and capabilities. It also describes tools, resources, resource templates, prompts, and metadata.
 
-It enables offline discovery, documentation generation, description validation, change analysis, testing, governance, and [interoperable tooling](../../implementations.md) across the MCP ecosystem.
+It enables offline discovery and documentation generation. It also supports description validation, change analysis, testing, governance, and [interoperable tooling](../../implementations.md) across the MCP ecosystem.
 
 ## Status of This Document
 
-This document defines the stable MCP Description 0.9.0 release, prepared for tag `v0.9.0`. It includes the normalized YAML presentation profile, YAML scalar-resolution clarification, and the changes recorded in Proposals 0024–0036. It has not yet been tagged or published; the published stable release remains 0.8.0 until publication. Downstream default adoption and publication on `mcpdesc.org` are coordinated separately.
+This document defines the stable MCP Description 0.9.0 release and is prepared for tag `v0.9.0`. It has not yet been tagged or published. Until publication, 0.8.0 remains the published stable release.
 
-The exact proposal revisions represented in this release are recorded in the [proposal revision manifest](../PROPOSALS.md).
+This release:
+
+- Adds protocol-version-specific views and conversion guidance, and a native MCP projection.
+- Expands validation rules, rule-level results, and diagnostics.
+- Clarifies MCP-aligned type constraints, integer values, and Tool schema dialects.
+- Defines a normalized YAML presentation profile and clarifies YAML scalar resolution.
+
+The proposals implemented in this release are listed in [`PROPOSALS.md`](../PROPOSALS.md).

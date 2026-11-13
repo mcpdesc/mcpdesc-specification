@@ -36,9 +36,9 @@ It does not define canonical JSON or a source-aware editing API.
 
 The header identifies the format first. Server identity and instructions
 precede connectivity. Security definitions precede their default requirements.
-Capability flags precede concrete declarations. Tag definitions and reusable
-components follow the primary server description. Unknown fields and `x-*`
-extensions follow `components`, retaining their relative order.
+Server capability declarations precede primitive declarations. Tag definitions
+and reusable components follow the primary server description. Unknown fields
+and `x-*` extensions follow `components`, retaining their relative order.
 
 This sequence applies only to root properties. It does not sort tools,
 resources, prompts, transports, tags, or capability entries within their arrays.
@@ -103,11 +103,11 @@ preserved. Both server and client `extensions` are extension-identifier maps
 with opaque values. Preserve identifiers, their ordering, and all nested
 payload ordering.
 
-### 18.6 Concrete Capability Declarations
+### 18.6 Concrete Primitive Declarations
 
 The common progression is identity, documentation, protocol scope, primary
 contract, behavior, dependencies, examples, and metadata. Exact per-kind lists
-avoid inventing fields on kinds that do not support them.
+avoid inventing fields on primitives that do not support them.
 
 | Structure | Field sequence |
 | --- | --- |
