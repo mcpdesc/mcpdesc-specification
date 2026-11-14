@@ -64,7 +64,7 @@ An MCP Description document provides a consistent structure for declaring:
 * resources and resource templates
 * prompts
 * server capabilities
-* flat document-wide tag catalogue
+* flat document-wide tag catalog
 
 ### Offline discoverability
 

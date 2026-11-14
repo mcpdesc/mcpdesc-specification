@@ -13,7 +13,7 @@ This guide maps MCP Description concepts to OpenAPI for developers familiar with
 | `webhooks` | — | No equivalent (MCP uses notifications) |
 | `components/schemas` and Reference Objects | `components/schemas` and `$componentRef` | Typed local reuse; different reference syntax and semantics |
 | `security` / `securitySchemes` | `security` / `securitySchemes` | Named schemes and requirement arrays with MCP Description semantics |
-| `tags` | Root `tags` catalogue and declaration references | Flat document-wide categorization |
+| `tags` | Root `tags` catalog and declaration references | Flat document-wide categorization |
 | — | `resources` | No direct OpenAPI equivalent |
 | — | `prompts` | No direct OpenAPI equivalent |
 | `x-` extensions | `x-` extensions | Same convention |

@@ -45,7 +45,7 @@ Root `securitySchemes` is a map from a local name to a Security Scheme Object. <
 | `openIdConnectUrl` | string (URI) | For `openIdConnect` | OpenID Connect discovery URL |
 | `description` | string | No | Human-readable description |
 
-An OAuth Flows Object MAY contain `implicit`, `password`, `clientCredentials`, and `authorizationCode`. <a id="req-oauth-flows-fields"></a>At least one flow MUST be present. Every flow MUST contain a `scopes` map and MAY contain `refreshUrl`. An implicit flow MUST contain `authorizationUrl`; password and client-credentials flows MUST contain `tokenUrl`; an authorization-code flow MUST contain both `authorizationUrl` and `tokenUrl`.
+An OAuth Flows Object MAY contain `implicit`, `password`, `clientCredentials`, and `authorizationCode`. <a id="req-oauth-flows-fields"></a>At least one flow MUST be present. Every flow MUST contain a `scopes` map and MAY contain `refreshUrl`. An `implicit` flow MUST contain `authorizationUrl`. `password` and `clientCredentials` flows MUST contain `tokenUrl`. An `authorizationCode` flow MUST contain both `authorizationUrl` and `tokenUrl`.
 
 ### 7.3 Security Requirement Array
 
@@ -62,7 +62,7 @@ A `security` value is an array of Security Requirement Objects. Each object maps
 
 Entries in the outer array are alternatives (**OR**). Multiple scheme names in one object are jointly required (**AND**). Every listed OAuth2 or OpenID Connect scope is required.
 
-<a id="req-security-scheme-references"></a>Every referenced name MUST exist in root `securitySchemes`. <a id="req-security-scopes-unique"></a>Scope arrays MUST contain unique strings. <a id="req-security-scopes-oauth-only"></a>HTTP and API-key schemes MUST use an empty scope array. <a id="req-security-uncatalogued-scope"></a>An OAuth2 or OpenID Connect requirement MAY use a scope absent from a static scope catalogue; validators MAY warn but MUST NOT reject solely for that reason.
+<a id="req-security-scheme-references"></a>Every referenced name MUST exist in root `securitySchemes`. <a id="req-security-scopes-unique"></a>Scope arrays MUST contain unique strings. <a id="req-security-scopes-oauth-only"></a>HTTP and API-key schemes MUST use an empty scope array. <a id="req-security-uncataloged-scope"></a>An OAuth2 or OpenID Connect requirement MAY use a scope absent from a static scope catalog. Validators MAY warn but MUST NOT reject solely for that reason.
 
 Array order, scheme-key order, and scope order are not semantically significant.
 
@@ -88,10 +88,10 @@ For a primitive used through a selected transport, the effective requirement is 
 3. root `security`;
 4. no mcpdesc-declared requirement.
 
-This is replacement, not merging. <a id="req-security-projection"></a>Protocol projection MUST preserve security declarations and MUST NOT copy one transport's inherited security onto a primitive unless a separate operation also selects that transport.
+This is replacement, not merging. <a id="req-security-projection"></a>Single-version projection MUST preserve security declarations and MUST NOT copy one transport's inherited security onto a primitive unless a separate operation also selects that transport.
 
 ### 7.6 Interpretation Limits
 
 Primitive requirements describe access conditions, not identities, roles, ownership, or exact discovery visibility. A requirement neither guarantees that a primitive is hidden before authorization nor guarantees that it is visible.
 
-A primitive-level override applies regardless of selected transport. <a id="req-security-transport-variants"></a>If transport inheritance cannot faithfully represent materially different per-transport primitive requirements, authors SHOULD publish separate descriptions or use a specification extension. <a id="req-security-no-combined-requirement"></a>Tools MUST NOT invent a combined requirement.
+A primitive-level override applies regardless of selected transport. <a id="req-security-transport-variants"></a>If transport inheritance cannot faithfully represent materially different per-transport primitive requirements, authors SHOULD publish separate descriptions or use a specification extension. <a id="req-security-no-combined-requirement"></a>Tooling MUST NOT invent a combined requirement.

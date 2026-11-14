@@ -1,5 +1,5 @@
 {
-  "description": "Projection keeps the declarations whose effective scope includes the protocol version, removes their protocolVersions, sets root protocolVersions to the protocol version, and keeps the complete root tag catalogue.",
+  "description": "Projection keeps the declarations whose effective scope includes the protocol version, removes their protocolVersions, sets root protocolVersions to the protocol version, and keeps the complete root tag catalog.",
   "operation": "view",
   "inputs": [
     "../fixtures/expected-valid/protocol-scoped-primitives.json"

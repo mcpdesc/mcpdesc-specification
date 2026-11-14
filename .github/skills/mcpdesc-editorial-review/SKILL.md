@@ -16,7 +16,7 @@ Review specification prose for clarity without changing its technical meaning or
 4. Make focused edits to the section source only. Preserve requirement anchors, links, examples, and technical distinctions unless the user approves a change.
 5. Follow the user's incremental review process. Do not assemble or regenerate `mcp-description.md` until the user says the section reviews are complete and asks for final assembly.
 6. If an edit adds, deletes, or changes the meaning of a requirement (including removing or renaming a `req-*` anchor, or changing a keyword such as SHOULD to MUST), list it separately in the summary so the responsible user can decide whether to keep or revert it. For each removed or renamed anchor, search the repository (for example `validation/rules/`, `validation/unchecked-requirements.yaml`, and fixtures) and report any references.
-7. Run `git diff --check`. Do not run broad tests for prose-only edits unless requested or needed to check a specific concern. Report validation limits accurately.
+7. Run `git diff --check` and `node scripts/test-validation-rules.mjs`. That check requires every RFC 2119 obligation to follow a `req-*` anchor in the same paragraph, so splitting a paragraph, turning sentences into a list, or turning a descriptive sentence into a MUST can break it. Keep obligations with their anchor rather than adding new anchors. Do not run broad tests for prose-only edits unless requested or needed to check a specific concern. Report validation limits accurately.
 
 ## Style
 

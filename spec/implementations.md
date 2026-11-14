@@ -1,6 +1,6 @@
 # Known Implementations
 
-Tools and libraries that support the MCP Description format. This is a non-normative catalogue; inclusion does not imply endorsement or conformance certification.
+Tools and libraries that support the MCP Description format. This is a non-normative catalog; inclusion does not imply endorsement or conformance certification.
 
 ## CLI and Generators
 

@@ -47,6 +47,13 @@ design-input revisions are preserved in [`PROPOSALS.md`](PROPOSALS.md).
 - Tightened MCP-aligned object closure, integer-valued MCP fields, Tool schema
   dialect behavior, and Resource URI requirements. Some documents accepted by
   0.8.0 require migration; see the [migration guide](guides/migration-0.8-to-0.9.md).
+- Standardized on the US spelling "catalog". The warning code
+  `uncatalogued-oauth-scope` is now `uncataloged-oauth-scope`, the rule
+  `mcpdesc.extensions.catalogue-maturity` is now
+  `mcpdesc.extensions.catalog-maturity`, and the requirement anchors
+  `req-security-uncataloged-scope`, `req-extensions-catalog-maturity`, and
+  `req-extensions-catalog-disclosure` replace their `catalogue` forms. Published
+  release candidates keep the earlier identifiers.
 
 ### Release coordination
 

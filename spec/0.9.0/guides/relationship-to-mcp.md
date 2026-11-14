@@ -16,8 +16,8 @@ For each declared protocol version, that protocol version's normative MCP specif
 | Capabilities | Advertised or discovered dynamically | Described as durable semantics |
 | Primitive client requirements | Declared through the protocol version's client capability mechanism | Unconditional minimum capabilities described per Tool, Resource, Resource Template, or Prompt |
 | Tools | Invoked | Described with input and output schemas |
-| Resources | Read or subscribed to | Catalogued |
-| Prompts | Retrieved | Catalogued |
+| Resources | Read or subscribed to | Cataloged |
+| Prompts | Retrieved | Cataloged |
 | Elicitation | Executed through protocol-version-specific form, URL, or MRTR behavior | Expected operation-level interactions described statically |
 | Authorization | Enforced at runtime | Statically known requirements described |
 
@@ -28,7 +28,7 @@ MCP does not define a general Reference Object that can replace an arbitrary MCP
 | MCP mechanism | Meaning in MCP | MCP Description representation |
 |---------------|----------------|--------------------------------|
 | JSON Schema `$ref` in Tool `inputSchema` or `outputSchema` | Applies the reference rules of the schema's declared or default dialect. JSON Schema 2020-12 references may identify local or external schema resources. MCP forbids automatic network dereferencing and permits guarded opt-in retrieval. | Preserved inside inline schemas and schemas in `components.schemas`. External references are preserved when unresolved; validators do not fetch them automatically and report incomplete validation. |
-| `Resource.uri`, Resource Link `uri`, Embedded Resource `uri`, and Root `uri` | Identifies a runtime entity. Depending on the MCP type and URI scheme, a client may pass the URI to an MCP operation or retrieve it by another defined means. A URI does not import an MCP Description fragment. | Resource URIs and Resource Template `uriTemplate` values are declared directly. Resource Links and Embedded Resources can appear in applicable Prompt and Tool examples. Roots can be represented in Tool interaction examples and client capability requirements; MCP Description does not define a static root catalogue. |
+| `Resource.uri`, Resource Link `uri`, Embedded Resource `uri`, and Root `uri` | Identifies a runtime entity. Depending on the MCP type and URI scheme, a client may pass the URI to an MCP operation or retrieve it by another defined means. A URI does not import an MCP Description fragment. | Resource URIs and Resource Template `uriTemplate` values are declared directly. Resource Links and Embedded Resources can appear in applicable Prompt and Tool examples. Roots can be represented in Tool interaction examples and client capability requirements; MCP Description does not define a static root catalog. |
 | Completion `PromptReference` and `ResourceTemplateReference` | Selects the Prompt name or Resource Template URI whose argument is being completed. It is a request target, not reusable document content. | A `completionExamples` entry is attached to its Prompt or Resource Template, so the containing declaration supplies the target identity without copying the MCP `ref` object. |
 | Icon `src` and other URL-valued metadata | Locates external media or metadata according to the field's own MCP semantics and security rules. | Preserved in the corresponding MCP Description field where that MCP field is supported. |
 
@@ -61,6 +61,6 @@ A single-version Effective Protocol View is produced by retaining declarations a
 
 ## Durable Semantics Across Wire Changes
 
-MCP Description retains fields such as `tools.listChanged`, `prompts.listChanged`, `resources.listChanged`, and `resources.subscribe` because they describe observable server behavior. It does not add message catalogues for the different notification or subscription mechanisms used by different MCP protocol versions.
+MCP Description retains fields such as `tools.listChanged`, `prompts.listChanged`, `resources.listChanged`, and `resources.subscribe` because they describe observable server behavior. It does not add message catalogs for the different notification or subscription mechanisms used by different MCP protocol versions.
 
 Where semantics materially differ, declarations are split by protocol scope. For example, core Tasks in MCP 2025-11-25 and a formal Tasks extension in MCP 2026-07-28 are represented separately and are not automatically converted into one another.

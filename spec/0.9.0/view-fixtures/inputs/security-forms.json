@@ -54,7 +54,7 @@
     },
     {
       "name": "search",
-      "description": "Search the catalogue.",
+      "description": "Search the catalog.",
       "inputSchema": {
         "type": "object",
         "properties": {

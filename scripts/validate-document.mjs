@@ -14,14 +14,14 @@ import {
   declareChecks,
   evaluated,
   isRecording,
-  mcpExtensionCatalogue,
+  mcpExtensionCatalog,
   mcpExtensionMaturity,
   recordEvaluations,
   semanticValidateDocument as validateBaseSemantics,
   supportedProtocolVersions
 } from './validator-base.mjs';
 
-export { mcpExtensionCatalogue, mcpExtensionMaturity, supportedProtocolVersions };
+export { mcpExtensionCatalog, mcpExtensionMaturity, supportedProtocolVersions };
 
 const TOOL_INTERACTION_SENTINEL = '__interaction_example__';
 const specificationVersion = schema.properties.mcpdesc.const;
@@ -91,7 +91,7 @@ declareChecks('semantic', [
   'mcpdesc.components.references',
   'mcpdesc.example.completed-result-form',
   'mcpdesc.example.result.protocol-fidelity',
-  'mcpdesc.extensions.catalogue-maturity',
+  'mcpdesc.extensions.catalog-maturity',
   'mcpdesc.prompt.example.arguments',
   'mcpdesc.tool.interaction.client-requirements-consistency',
   'mcpdesc.tool.interaction.elicitation-consistency'
@@ -531,8 +531,8 @@ const ruleForCode = new Map([
   ['invalid-client-requirement-value', 'mcp.client-capabilities.protocol-shape'],
   ['deprecated-client-requirement', 'mcp.client-capabilities.deprecated'],
   ['extensions-not-supported-by-version', 'mcp.capabilities.extensions.protocol-version'],
-  ['experimental-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
-  ['unknown-reserved-extension-identifier', 'mcpdesc.extensions.catalogue-maturity'],
+  ['experimental-reserved-extension-identifier', 'mcpdesc.extensions.catalog-maturity'],
+  ['unknown-reserved-extension-identifier', 'mcpdesc.extensions.catalog-maturity'],
   ['tasks-core-not-valid-in-2026', 'mcp.capabilities.tasks.protocol-version'],
   ['logging-deprecated-in-2026', 'mcp.capabilities.logging.deprecated'],
   ['transport-not-supported-by-version', 'mcp.transport.streamable-http.protocol-version'],
@@ -543,7 +543,7 @@ const ruleForCode = new Map([
   ['unknown-security-scheme', 'mcpdesc.security.requirements'],
   ['non-oauth-scope-misuse', 'mcpdesc.security.requirements'],
   ['duplicate-security-scope', 'mcpdesc.security.requirements'],
-  ['uncatalogued-oauth-scope', 'mcpdesc.security.requirements'],
+  ['uncataloged-oauth-scope', 'mcpdesc.security.requirements'],
   ['component-reference-cycle', 'mcpdesc.components.references'],
   ['missing-component-reference-target', 'mcpdesc.components.references'],
   ['wrong-component-reference-namespace', 'mcpdesc.components.references'],
@@ -991,7 +991,7 @@ function validateClientRequirements(document) {
             validateTasks(value, location, path, version);
           } else if (capability === 'extensions') {
             for (const extension of Object.keys(value)) {
-              evaluated('mcpdesc.extensions.catalogue-maturity', [...path, extension]);
+              evaluated('mcpdesc.extensions.catalog-maturity', [...path, extension]);
               if (!usesMcpReservedPrefix(extension)) continue;
               const maturity = mcpExtensionMaturity(extension);
               if (maturity === 'official') continue;

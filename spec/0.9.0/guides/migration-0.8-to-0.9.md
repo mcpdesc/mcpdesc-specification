@@ -276,3 +276,6 @@ codes were renamed or replaced, and paths can differ. CI checks or snapshot
 tests that compare whole diagnostics may need updating; compare diagnostics by
 `rule`, `severity`, and `path`. See [Validation](../validation/README.md) and
 the [0.9.0 changelog](../CHANGELOG.md) for details.
+
+For example, the 0.8.0 warning `uncatalogued-oauth-scope` is reported as
+`uncataloged-oauth-scope` under rule `mcpdesc.security.requirements`.

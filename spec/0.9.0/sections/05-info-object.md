@@ -2,9 +2,11 @@
 
 The `info` object provides metadata about the MCP server. <a id="req-info-required"></a>It is REQUIRED.
 
-The `info` object combines OpenAPI-style metadata (`contact`, `license`) with fields from the MCP `Implementation` type used for server identity. The MCP-sourced fields — `name`, `title`, `description`, `version`, `icons`, and `websiteUrl` — allow an MCP Description document to represent server identity metadata that may also be advertised at runtime.
+The `info` object combines OpenAPI-style metadata (`contact`, `license`) with server identity fields from MCP.
 
-Info is unscoped, document-wide MCP Description metadata. Every property defined by this specification MAY appear regardless of the protocol versions listed in root `protocolVersions`. A mapping to MCP `Implementation` indicates that a producer MAY obtain or compare the value through runtime initialization when the negotiated protocol version defines that field. <a id="req-info-protocol-version-independent"></a>It MUST NOT be interpreted as requiring a runtime origin or restricting the property's presence to those protocol versions. Validators MUST NOT emit a protocol version-applicability diagnostic solely because an Info property is unavailable on `Implementation` in an applicable MCP protocol version.
+During initialization, an MCP server identifies itself by returning an `Implementation` value as `serverInfo` in its `initialize` result. The Info fields `name`, `title`, `description`, `version`, `icons`, and `websiteUrl` correspond to fields of that type. The "Runtime mapping" entries in Section 5.1 name the corresponding field and the MCP protocol version that introduced it, so tools can compare a description with what a running server reports.
+
+Info is unscoped, document-wide MCP Description metadata (Section 4.10). Every property defined in this section MAY appear regardless of the protocol versions listed in root `protocolVersions`. <a id="req-info-protocol-version-independent"></a>A runtime mapping MUST NOT be interpreted as requiring the value to come from a running server, or as limiting the property to protocol versions whose `Implementation` type defines the field. MCP 2025-11-25 and MCP 2026-07-28 define every mapped field, so this requirement matters only for documents that cover earlier protocol versions. For example, `description` is valid in a document that covers MCP 2025-06-18, although `Implementation.description` is available only since MCP 2025-11-25. Validators MUST NOT emit a protocol-version applicability diagnostic solely because an Info property is unavailable on `Implementation` in an applicable MCP protocol version.
 
 A producer MAY obtain Info metadata from author input, configuration, package metadata, a registry, runtime discovery, or another source. <a id="req-info-trust"></a>This specification does not assign trust or precedence among those sources, and consumers MUST NOT infer that an Info value was asserted by a live server.
 
@@ -14,9 +16,9 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
-| `name` | string | **Yes** | Programmatic server name (identifier). <a id="req-info-name-non-empty"></a>MUST be non-empty. Maps to `Implementation.name` (MCP `BaseMetadata`). |
-| `version` | string | **Yes** | Server version. <a id="req-info-version-semver"></a>Semver RECOMMENDED. <a id="req-info-version-non-empty"></a>MUST be non-empty. Maps to `Implementation.version`. |
-| `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Runtime mapping: `Implementation.title` (MCP `BaseMetadata`, available since 2025-06-18). |
+| `name` | string | **Yes** | Programmatic server name (identifier). <a id="req-info-name-non-empty"></a>MUST be non-empty. Runtime mapping: `Implementation.name` (MCP `BaseMetadata`). |
+| `version` | string | **Yes** | Server version. <a id="req-info-version-semver"></a>Semantic Versioning RECOMMENDED. <a id="req-info-version-non-empty"></a>MUST be non-empty. Runtime mapping: `Implementation.version`. |
+| `title` | string | No | Human-readable display name for UI contexts. Falls back to `name` if not provided. Runtime mapping: `Implementation.title` (MCP `BaseMetadata`, available since MCP 2025-06-18). |
 | `description` | string | No | Brief description of what the server does. Runtime mapping: `Implementation.description` (available since MCP 2025-11-25). |
 | `id` | string | No | Unique server identifier (URI, DID, or URN). |
 | `icons` | non-empty array\<[Icon](#appendix-a-icon-object)\> | No | Icons for UI display. Runtime mapping: `Implementation.icons` (available since MCP 2025-11-25). |
@@ -28,11 +30,11 @@ A producer MAY obtain Info metadata from author input, configuration, package me
 
 <a id="req-contact-fields"></a>
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `name` | string | Organization or maintainer name |
-| `url` | string (URI) | Contact URL |
-| `email` | string (email) | Contact email address |
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `name` | string | No | Organization or maintainer name |
+| `url` | string (URI) | No | Contact URL |
+| `email` | string (email) | No | Contact email address |
 
 ### 5.3 License Object
 

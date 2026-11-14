@@ -100,8 +100,8 @@ const expectedWarningCodesByFixture = new Map([
     'tool-schema-mcp-type-mismatch',
     'tool-schema-mcp-type-mismatch'
   ]],
-  ['uncatalogued-oauth-scope.json', ['uncatalogued-oauth-scope']],
-  ['uncatalogued-openid-scope.json', ['uncatalogued-oauth-scope']],
+  ['uncataloged-oauth-scope.json', ['uncataloged-oauth-scope']],
+  ['uncataloged-openid-scope.json', ['uncataloged-oauth-scope']],
   ['unknown-reserved-extension-identifier.json', ['unknown-reserved-extension-identifier']],
   ['unknown-reserved-meta-key.json', ['meta-unknown-reserved-key']],
   ['unresolved-external-tool-example-ref.json', [

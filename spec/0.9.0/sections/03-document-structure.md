@@ -74,9 +74,7 @@ Metadata in a named example describes only that example. It does not define a re
 
 <a id="req-meta-keys"></a>Each key name, its use, and the value of any reserved key MUST follow the rules of every applicable MCP protocol version. A recognized violation is a document-conformance error.
 
-<a id="req-meta-reserved-prefix"></a>A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved.
-
-A single-version projection MUST preserve `_meta`. It MUST NOT combine metadata from variants that cover different protocol versions.
+<a id="req-meta-reserved-prefix"></a>A valid but unrecognized key under an MCP-reserved prefix MUST be preserved and SHOULD produce a warning. Other valid keys MUST be accepted and preserved. A single-version projection MUST preserve `_meta`. It MUST NOT combine metadata from variants that cover different protocol versions.
 
 ### 3.6 Carried MCP Values
 
@@ -88,7 +86,7 @@ Named examples carry MCP values in these places:
 
 This includes values reached through component references.
 
-A conforming validator MUST validate each carried value against the type defined by every MCP protocol version in the containing declaration's effective scope. A type accepts fields it does not list only if its protocol version's TypeScript schema declares or inherits an index signature. Such a type is open; every other type is closed.
+A carried value is validated against the type defined by every MCP protocol version in the containing declaration's effective scope. A type accepts fields it does not list only if its protocol version's TypeScript schema declares or inherits an index signature. Such a type is open; every other type is closed.
 
 <a id="req-mcp-integer-numbers"></a>A field declared as `number` by the protocol version's TypeScript schema is an integer unless the schema annotates it `@TJS-type number`. This matches the JSON Schema that MCP generates from its TypeScript schema.
 

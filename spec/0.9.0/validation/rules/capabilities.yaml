@@ -313,11 +313,11 @@ rules:
         reviewTrigger: Retirement of the pre-standard convention, or a decision to drop support for it.
         status: active
 
-  - id: mcpdesc.extensions.catalogue-maturity
+  - id: mcpdesc.extensions.catalog-maturity
     title: "Review reserved extension identifiers"
     description: >-
       Extension identifiers in an MCP-reserved namespace are checked against
-      the pinned catalogue. Unknown or experimental identifiers are preserved
+      the pinned catalog. Unknown or experimental identifiers are preserved
       with a warning. Verify the identifier and its maturity; an unrecognized
       identifier is not silently assigned known extension semantics.
     applicability:
@@ -325,17 +325,17 @@ rules:
     owner: mcpdesc
     summary: >-
       An extension identifier under an MCP-reserved prefix that the pinned
-      extension catalogue lists as experimental, or does not list, is preserved
+      extension catalog lists as experimental, or does not list, is preserved
       with a warning.
     surface: Extension identifier
     path: capabilities.extensions, clientRequirements.extensions
     kind: mcpdesc-semantic
     requirement: should
     specification:
-      - reference: MCP Description 0.9.0, Sections 8.4 and 8.5; validator extension catalogue (effective 2026-09-04)
+      - reference: MCP Description 0.9.0, Sections 8.4 and 8.5; validator extension catalog (effective 2026-09-04)
         locations:
           - sections/08-capabilities.md#req-extensions-reserved-identifiers
-          - sections/08-capabilities.md#req-extensions-catalogue-maturity
+          - sections/08-capabilities.md#req-extensions-catalog-maturity
           - sections/08-capabilities.md#req-extensions-official-no-warning
     sources:
       - tier: 1
@@ -352,7 +352,7 @@ rules:
         pointer: /prompts/0/clientRequirements/extensions
         outcome: warning
     notes: >-
-      The pinned catalogue lists no experimental identifiers, so no document
+      The pinned catalog lists no experimental identifiers, so no document
       currently produces the experimental-identifier warning.
 
   - id: mcp.capabilities.tasks.protocol-version

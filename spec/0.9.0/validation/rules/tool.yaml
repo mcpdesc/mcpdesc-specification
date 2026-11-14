@@ -675,7 +675,7 @@ rules:
     title: "Represent Tool execution errors as error results"
     description: >-
       Tool execution errors are completed MCP Tool results with isError true,
-      not a separate description-only error catalogue. Check the error
+      not a separate description-only error catalog. Check the error
       result's content and avoid presenting successful structured output as
       the error payload.
     owner: mcpdesc

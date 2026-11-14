@@ -149,7 +149,7 @@ uncheckedRequirements:
   - location: sections/08-capabilities.md#req-extensions-not-reinterpreted
     reason: processing
     note: "Concerns tool transformations, not document values."
-  - location: sections/08-capabilities.md#req-extensions-catalogue-disclosure
+  - location: sections/08-capabilities.md#req-extensions-catalog-disclosure
     reason: processing
     note: "Concerns validator metadata and release practice."
   - location: sections/08-capabilities.md#req-extensions-profiles

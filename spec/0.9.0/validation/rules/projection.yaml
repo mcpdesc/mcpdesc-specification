@@ -296,7 +296,7 @@ rules:
       - path: view-fixtures/merge-security-forms.json
         pointer: /expected
         outcome: passes
-      - path: view-fixtures/merge-tag-catalogue-conflict.json
+      - path: view-fixtures/merge-tag-catalog-conflict.json
         pointer: /expectedFailure
         outcome: error
       - path: view-fixtures/merge-unscoped-conflict.json

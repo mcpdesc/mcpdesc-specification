@@ -15,7 +15,7 @@ import { decodeDocumentSource, documentFormatForPath } from './decode-document.m
 import { mergeProtocolDescriptions, projectProtocolView, semanticallyEquivalent } from './mcpdesc-views.mjs';
 import {
   evaluateClientRequirements,
-  mcpExtensionCatalogue,
+  mcpExtensionCatalog,
   mcpExtensionMaturity,
   resolveComponentReferences,
   semanticValidateDocument,
@@ -28,9 +28,9 @@ const root = process.cwd();
 const candidate = candidateSpecification(root);
 const { specificationRoot } = candidate;
 
-assert.equal(mcpExtensionCatalogue.effectiveDate, '2026-09-04');
+assert.equal(mcpExtensionCatalog.effectiveDate, '2026-09-04');
 assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/ui'), 'official');
-assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/future-capability'), 'uncatalogued');
+assert.equal(mcpExtensionMaturity('io.modelcontextprotocol/future-capability'), 'uncataloged');
 
 function fixture(relativePath) {
   const resolvedPath = relativePath.replace(/^spec\/draft/, specificationRoot);
@@ -402,12 +402,12 @@ assert.deepEqual(
 const preStandardExtensionView = projectProtocolView(preStandardExtensionSource, '2025-11-25');
 assert.deepEqual(preStandardExtensionView.capabilities[0].extensions['io.modelcontextprotocol/ui'], {});
 
-const uncataloguedPreStandardExtension = structuredClone(preStandardExtensionSource);
-uncataloguedPreStandardExtension.capabilities[0].extensions = {
+const uncatalogedPreStandardExtension = structuredClone(preStandardExtensionSource);
+uncatalogedPreStandardExtension.capabilities[0].extensions = {
   'io.modelcontextprotocol/future-capability': {}
 };
 assert.deepEqual(
-  semanticValidateDocument(uncataloguedPreStandardExtension).map(({ code, severity }) => ({ code, severity })),
+  semanticValidateDocument(uncatalogedPreStandardExtension).map(({ code, severity }) => ({ code, severity })),
   [
     { code: 'extensions-not-supported-by-version', severity: 'warning' },
     { code: 'unknown-reserved-extension-identifier', severity: 'warning' }

@@ -184,9 +184,9 @@ rules:
   - id: mcpdesc.tags.references
     title: "Reference unique declared tags"
     description: >-
-      When the document declares a tag catalogue, primitive tag references
+      When the document declares a tag catalog, primitive tag references
       must name entries in it. Root tag names and repeated primitive
-      references are checked for duplicates. Fix the name or catalogue entry
+      references are checked for duplicates. Fix the name or catalog entry
       instead of relying on an undeclared alias.
     applicability:
       protocolVersions: independent
@@ -221,15 +221,15 @@ rules:
     description: >-
       Security requirements refer to named schemes, and scopes have meaning
       only for OAuth 2.0 or OpenID Connect schemes. Correct missing references
-      or repeated scopes. An uncatalogued scope can produce a warning where
-      the scheme declares a static scope catalogue.
+      or repeated scopes. An uncataloged scope can produce a warning where
+      the scheme declares a static scope catalog.
     applicability:
       protocolVersions: independent
     owner: mcpdesc
     summary: >-
       Security requirements name declared schemes, list scopes only for OAuth
-      2.0 and OpenID Connect schemes, do not repeat scopes, and use catalogued
-      scopes when the scheme declares a static catalogue.
+      2.0 and OpenID Connect schemes, do not repeat scopes, and use cataloged
+      scopes when the scheme declares a static catalog.
     surface: Security Requirement
     kind: mcpdesc-semantic
     documentSchema:
@@ -242,7 +242,7 @@ rules:
           - sections/07-security.md#req-security-scheme-references
           - sections/07-security.md#req-security-scopes-unique
           - sections/07-security.md#req-security-scopes-oauth-only
-          - sections/07-security.md#req-security-uncatalogued-scope
+          - sections/07-security.md#req-security-uncataloged-scope
           - sections/06-transports.md#req-transport-security-example
           - sections/14-specification-extensions.md#req-extension-ineligible-locations
     enforcement: internal
@@ -257,10 +257,10 @@ rules:
       - path: expected-invalid/duplicate-security-scope.json
         pointer: /security/0
         outcome: error
-      - path: expected-warning/uncatalogued-oauth-scope.json
+      - path: expected-warning/uncataloged-oauth-scope.json
         pointer: /tools/0/security/0/oauth
         outcome: warning
-      - path: expected-warning/uncatalogued-openid-scope.json
+      - path: expected-warning/uncataloged-openid-scope.json
         pointer: /security/0/oidc
         outcome: warning
     notes: >-
@@ -375,6 +375,9 @@ rules:
     enforcement: internal
     status: internal
     fixtures:
+      - path: expected-valid/protocol-independent-info-metadata.json
+        pointer: /info
+        outcome: passes
       - path: expected-invalid/malformed-info-transport-tag-resource.json
         pointer: "/info/owner"
         outcome: error
@@ -450,7 +453,7 @@ rules:
   - id: mcpdesc.tag.members
     title: "Declare tags with a name"
     description: >-
-      Each entry of the root tags catalogue is a Tag Object with a name and only
+      Each entry of the root tags catalog is a Tag Object with a name and only
       the properties of Section 13.1.
     owner: mcpdesc
     summary: >-

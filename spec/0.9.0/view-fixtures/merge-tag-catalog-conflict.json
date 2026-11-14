@@ -1,5 +1,5 @@
 {
-  "description": "Inputs with different root tag catalogues fail to merge.",
+  "description": "Inputs with different root tag catalogs fail to merge.",
   "operation": "merge",
   "inputs": [
     "inputs/tags-a-2025-11-25.json",
