@@ -25,7 +25,7 @@ format, not a published URL.
 ### Format
 
 - Diagnostics may include `detail` and `relatedLocations`. Schema-derived
-  diagnostics require `detail` under Section 16.5; details are factual and
+  diagnostics require `detail` under Section 16.6; details are factual and
   `kind` is extensible.
 - Detail kinds describe missing or unexpected members, invalid member names,
   values and types, conflicting members, missing alternatives, and other

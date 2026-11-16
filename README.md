@@ -16,14 +16,14 @@ The machine-readable form of this status is in [`specification-status.json`](spe
 
 MCP Description 0.8.0 adds MCP `2026-07-28` support, multi-protocol version server descriptions, and deterministic Effective Protocol Views. It also introduces reusable components, richer examples and interactions, primitive client capability requirements, elicitation declarations, formal MCP extension support, reusable security schemes, and conforming JSON and YAML serializations. See the [changelog](CHANGELOG.md) for details. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
 
-MCP Description 0.9.0 is prepared as the current stable specification, with a canonical schema identity of `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. It includes Proposals 0024–0036, YAML scalar-resolution clarification, and the normalized YAML presentation profile. The 0.9.0 changelog and [migration guide](spec/0.9.0/guides/migration-0.8-to-0.9.md) describe the changes from 0.8.0. Tagging, schema publication, and adoption as the default in `mcpdesc/core`, the CLI, the editor, and `mcpdesc.org` remain separate release-coordination steps.
+MCP Description 0.9.0 is the current stable specification, with a canonical schema identity of `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. It includes Proposals 0024–0036, YAML scalar-resolution clarification, and the normalized YAML presentation profile. The 0.9.0 [changelog](spec/0.9.0/CHANGELOG.md) and [migration guide](spec/0.9.0/guides/migration-0.8-to-0.9.md) describe the changes from 0.8.0. Adoption as the default in `mcpdesc/core`, the CLI, the editor, and `mcpdesc.org` is coordinated separately.
 
 ## Repository roles
 
 - `main` is the integration branch and the default view of the project. It carries every released specification version and, when development is active, the in-progress `spec/draft/`.
 - Feature branches target `main` via pull request. When an active development version has been initialized, normative feature branches change `spec/draft/`.
 - Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`).
-- `schemas/latest.json` identifies the current stable schema. The active 0.9.0 working draft is described by `schemas/draft.json` and `specification-status.json`.
+- `schemas/latest.json` identifies the current stable schema. When development is active, the working draft is described by `specification-status.json`.
 
 ## Project identity
 

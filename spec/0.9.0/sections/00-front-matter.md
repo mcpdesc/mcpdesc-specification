@@ -5,7 +5,7 @@ status: Stable release
 release-tag: v0.9.0
 released: true
 baseline: 0.8.0
-date: 2026-11-12
+date: 2026-11-16
 ---
 
 # MCP Description Specification
@@ -16,7 +16,7 @@ date: 2026-11-12
 
 **Baseline**: v0.8.0
 
-**Date**: 2026-11-12
+**Date**: 2026-11-16
 
 ## Abstract
 

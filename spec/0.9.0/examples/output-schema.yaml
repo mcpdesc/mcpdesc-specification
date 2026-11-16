@@ -1,0 +1,87 @@
+mcpdesc: 0.9.0
+info:
+  name: fide-rating-server
+  title: FIDE Rating Server
+  version: 1.0.0
+  description: |
+    Return a chess player's FIDE standard rating, using an object in MCP 2025-11-25 and a direct integer in MCP 2026-07-28.
+protocolVersions:
+  - "2025-11-25"
+  - "2026-07-28"
+transports:
+  - type: stdio
+    command: fide-rating
+    args:
+      - serve
+capabilities:
+  - tools:
+      listChanged: false
+tools:
+  - name: get_player_rating
+    title: Get Player Rating
+    description: Get the current FIDE standard rating for a chess player
+    protocolVersions:
+      - "2025-11-25"
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          type: string
+          description: FIDE player identifier
+      required:
+        - player_id
+      additionalProperties: false
+    outputSchema:
+      type: object
+      properties:
+        rating:
+          type: integer
+          description: Current FIDE standard rating
+      required:
+        - rating
+      additionalProperties: false
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+    examples:
+      fide-rating:
+        input:
+          player_id: planchaman
+        result:
+          content:
+            - type: text
+              text: "{\"rating\":1701}"
+          structuredContent:
+            rating: 1701
+  - name: get_player_rating
+    title: Get Player Rating
+    description: Get the current FIDE standard rating for a chess player
+    protocolVersions:
+      - "2026-07-28"
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          type: string
+          description: FIDE player identifier
+      required:
+        - player_id
+      additionalProperties: false
+    outputSchema:
+      type: integer
+      description: Current FIDE standard rating
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+    examples:
+      fide-rating:
+        input:
+          player_id: planchaman
+        result:
+          resultType: complete
+          content:
+            - type: text
+              text: "1701"
+          structuredContent: 1701

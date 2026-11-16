@@ -8,7 +8,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 <!-- update with `markdown-toc -i CHANGELOG.md --maxdepth 2 -->
 <!-- toc -->
 
-- [[0.9.0] — 2026-11-12](#090--2026-11-12)
+- [[0.9.0] — 2026-11-16](#090--2026-11-16)
 - [[0.8.0+editorial.1] — 2026-10-19](#080editorial1--2026-10-19)
 - [[0.8.0] — 2026-09-09](#080--2026-09-09)
 - [[0.7.0] — 2026-03-23](#070--2026-03-23)
@@ -22,7 +22,7 @@ This project uses specification versioning aligned with its `mcpdesc` field.
 
 <!-- tocstop -->
 
-## [0.9.0] — 2026-11-12
+## [0.9.0] — 2026-11-16
 
 MCP Description 0.9.0 is a stable specification release. It includes the
 accepted and implemented Proposals 0024–0036; the durable proposal decisions
@@ -44,6 +44,17 @@ design-input revisions are preserved in [`PROPOSALS.md`](PROPOSALS.md).
 - Clarified restricted YAML scalar resolution: JSON-schema rules recognize
   null, booleans, and numbers, and unmatched untagged plain scalars fall back
   to strings; unquoted non-finite forms and numeric overflow are rejected.
+- Implementations must reject YAML aliases (previously a recommendation),
+  matching the restricted profile and the validator.
+- Clarified the normalized YAML presentation profile in Section 15.9: split
+  it into subsections, replaced the undefined "YAML 1.1 Core Schema" with
+  explicit YAML 1.1 patterns, defined plain-safe strings and RFC 8785
+  double-quoted escaping, specified literal-block eligibility and indentation
+  indicators, excluded directives and document markers, and stated that
+  normalization does not select Section 18 ordering.
+- Replaced the recommendation to omit `null`-valued properties with a
+  statement that MCP Description-defined properties do not accept `null`;
+  `null` inside JSON-compatible values remains data.
 - Tightened MCP-aligned object closure, integer-valued MCP fields, Tool schema
   dialect behavior, and Resource URI requirements. Some documents accepted by
   0.8.0 require migration; see the [migration guide](guides/migration-0.8-to-0.9.md).
@@ -54,6 +65,16 @@ design-input revisions are preserved in [`PROPOSALS.md`](PROPOSALS.md).
   `req-security-uncataloged-scope`, `req-extensions-catalog-maturity`, and
   `req-extensions-catalog-disclosure` replace their `catalogue` forms. Published
   release candidates keep the earlier identifiers.
+- Editorial review of Sections 0–18 and the appendices: clarified wording,
+  corrected section cross-references, and removed rule citations of
+  requirement anchors that no longer exist. Rule IDs, conditions, and
+  severities are unchanged.
+- Rewrote the examples in the normalized YAML presentation profile. Replaced
+  `multi-version.yaml` with `multi-version-MRTR.yaml` and
+  `multi-version-tasks.yaml`, and added `elicitation-MRTR.yaml` and
+  `output-schema.yaml`.
+- Added fixtures for an empty Tool `inputSchema`: an error before MCP
+  2025-11-25 and a `tool-schema-mcp-type-mismatch` warning otherwise.
 
 ### Release coordination
 
@@ -63,7 +84,7 @@ design-input revisions are preserved in [`PROPOSALS.md`](PROPOSALS.md).
 
 ### Release Candidate 3 — 2026-11-07 (`v0.9.0-rc.3`)
 
-In preparation from RC.2; not tagged or published. This candidate implements
+Prepared from RC.2. This candidate implements
 review-stage [Proposal 0035](proposal-snapshots/0035-union-aware-diagnostics.md),
 tracked in [issue #115](https://github.com/mcpdesc/mcpdesc-specification/issues/115)
 and [PR #116](https://github.com/mcpdesc/mcpdesc-specification/pull/116).
@@ -82,7 +103,7 @@ unchanged; `schemas/latest.json` remains pinned to stable 0.8.0.
 
 ### Release Candidate 2 — 2026-11-06 (`v0.9.0-rc.2`)
 
-In preparation, not yet tagged or published. This candidate combines the
+This candidate combines the
 document ordering profile and review-stage Proposal 0034 implementation.
 Its canonical schema identity and intended downstream selector are
 `0.9.0-rc.2`; the document's `mcpdesc` value remains `0.9.0`.

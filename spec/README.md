@@ -55,7 +55,8 @@ read directly, without consulting git history. An in-progress working draft live
 
 ```
 spec/
-  0.8.0/               Frozen current stable release
+  0.9.0/               Frozen current stable release
+  0.8.0/               Frozen previous stable release
   0.7.0/               Frozen release pointer (canonical source: Cisco Open)
   README.md            Version index and status (this file)
   implementations.md   Known implementations and tooling
@@ -67,10 +68,10 @@ Versioned JSON Schemas live at the repository root under
 
 ## Getting Started
 
-- **Read the spec**: [0.8.0/mcp-description.md](0.8.0/mcp-description.md)
-- **Explore examples**: [0.8.0/examples/](0.8.0/examples/)
-- **Try the schema**: [../schemas/mcp-description/0.8.0.json](../schemas/mcp-description/0.8.0.json) (latest — see [../schemas/latest.json](../schemas/latest.json))
-- **Write your first description**: [0.8.0/guides/getting-started.md](0.8.0/guides/getting-started.md)
+- **Read the spec**: [0.9.0/mcp-description.md](0.9.0/mcp-description.md)
+- **Explore examples**: [0.9.0/examples/](0.9.0/examples/)
+- **Try the schema**: [../schemas/mcp-description/0.9.0.json](../schemas/mcp-description/0.9.0.json) (latest — see [../schemas/latest.json](../schemas/latest.json))
+- **Write your first description**: [0.9.0/guides/getting-started.md](0.9.0/guides/getting-started.md)
 
 ## Key Features
 

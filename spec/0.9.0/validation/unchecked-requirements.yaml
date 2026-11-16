@@ -281,6 +281,9 @@ uncheckedRequirements:
   - location: sections/15-serialization.md#req-serialization-normalized-yaml-scalars
     reason: processing
     note: "Defines output scalar spelling and type preservation, not input conformance."
+  - location: sections/15-serialization.md#req-serialization-normalized-yaml-escaping
+    reason: processing
+    note: "Defines the escaping used in double-quoted output scalars."
   - location: sections/15-serialization.md#req-serialization-normalized-yaml-keys
     reason: processing
     note: "Constrains serialization of string mapping keys."

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://mcpdesc.org/schema/mcp-description/0.9.0.json",
+  "mcpdesc": "0.9.0",
+  "info": {
+    "name": "empty-input-schema",
+    "version": "1.0.0"
+  },
+  "protocolVersions": [
+    "2025-11-25",
+    "2026-07-28"
+  ],
+  "transports": [
+    {
+      "type": "stdio",
+      "command": "empty-input-schema"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get_current_time",
+      "description": "Returns the current time",
+      "inputSchema": {}
+    }
+  ]
+}

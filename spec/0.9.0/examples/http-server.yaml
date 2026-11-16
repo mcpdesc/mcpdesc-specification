@@ -1,4 +1,3 @@
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0.json
 mcpdesc: 0.9.0
 info:
   name: chess-coach
@@ -13,10 +12,10 @@ info:
     name: MIT
     url: https://opensource.org/licenses/MIT
 protocolVersions:
-- '2025-11-25'
+  - "2025-11-25"
 transports:
-- type: streamable-http
-  url: https://chess-coach.example.com/mcp
+  - type: streamable-http
+    url: https://chess-coach.example.com/mcp
 securitySchemes:
   bearer:
     type: http
@@ -24,127 +23,203 @@ securitySchemes:
     bearerFormat: JWT
     description: JWT token from chess-coach.example.com/auth
 security:
-- bearer: []
+  - bearer: []
 capabilities:
-- tools:
-    listChanged: false
-  resources:
-    subscribe: true
-    listChanged: false
-  prompts:
-    listChanged: false
-  completions: {}
-  logging: {}
+  - tools:
+      listChanged: false
+    resources:
+      subscribe: true
+      listChanged: false
+    prompts:
+      listChanged: false
+    logging: {}
+    completions: {}
 tools:
-- name: analyze_game
-  title: Analyze Chess Game
-  description: Analyze a chess game from PGN notation using cloud-based engine
-  inputSchema:
-    type: object
-    properties:
-      pgn:
-        type: string
-        description: Game in PGN format
-      depth:
-        type: integer
-        minimum: 1
-        maximum: 40
-    required:
-    - pgn
-  annotations:
-    readOnlyHint: true
-    destructiveHint: false
-    idempotentHint: true
-  tags:
-  - analysis
-- name: get_player_rating
-  title: Get Player Rating
-  description: Get the current Elo rating for a player
-  inputSchema:
-    type: object
-    properties:
-      player_id:
-        type: string
-      rating_type:
-        type: string
-        enum:
-        - classical
-        - rapid
-        - blitz
-        - bullet
-    required:
-    - player_id
-  annotations:
-    readOnlyHint: true
-  tags:
-  - ratings
-- name: record_game_result
-  title: Record Game Result
-  description: Record a game result and update Elo ratings
-  inputSchema:
-    type: object
-    properties:
-      white_player_id:
-        type: string
-      black_player_id:
-        type: string
-      result:
-        type: string
-        enum:
-        - 1-0
-        - 0-1
-        - 1/2-1/2
-      pgn:
-        type: string
-      time_control:
-        type: string
-    required:
-    - white_player_id
-    - black_player_id
-    - result
-  annotations:
-    readOnlyHint: false
-    destructiveHint: false
-  tags:
-  - games
-  - ratings
+  - name: analyze_game
+    title: Analyze Chess Game
+    description: Analyze a chess game from PGN notation using cloud-based engine
+    tags:
+      - analysis
+    inputSchema:
+      type: object
+      properties:
+        pgn:
+          type: string
+          description: Game in PGN format
+        depth:
+          type: integer
+          minimum: 1
+          maximum: 40
+      required:
+        - pgn
+    outputSchema:
+      type: object
+      properties:
+        evaluation:
+          type: number
+        best_move:
+          type: string
+        blunders:
+          type: array
+          items:
+            type: object
+            properties:
+              move_number:
+                type: integer
+              move:
+                type: string
+              evaluation_loss:
+                type: number
+      required:
+        - evaluation
+        - best_move
+        - blunders
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+    examples:
+      analyzed-game:
+        input:
+          pgn: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+          depth: 20
+        result:
+          content:
+            - type: text
+              text: Game analyzed successfully.
+          structuredContent:
+            evaluation: 0.24
+            best_move: Ba4
+            blunders: []
+  - name: get_player_rating
+    title: Get Player Rating
+    description: Get the current Elo rating for a player
+    tags:
+      - ratings
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          type: string
+        rating_type:
+          type: string
+          enum:
+            - classical
+            - rapid
+            - blitz
+            - bullet
+      required:
+        - player_id
+    outputSchema:
+      type: object
+      properties:
+        rating:
+          type: integer
+          description: Current Elo rating
+      required:
+        - rating
+      additionalProperties: false
+    annotations:
+      readOnlyHint: true
+    examples:
+      current-rating:
+        input:
+          player_id: planchaman
+          rating_type: classical
+        result:
+          content:
+            - type: text
+              text: Player FIDE rating is 1701
+          structuredContent:
+            rating: 1701
+  - name: record_game_result
+    title: Record Game Result
+    description: Record a game result and update Elo ratings
+    tags:
+      - games
+      - ratings
+    inputSchema:
+      type: object
+      properties:
+        white_player_id:
+          type: string
+        black_player_id:
+          type: string
+        result:
+          type: string
+          enum:
+            - 1-0
+            - 0-1
+            - 1/2-1/2
+        pgn:
+          type: string
+        time_control:
+          type: string
+      required:
+        - white_player_id
+        - black_player_id
+        - result
+    outputSchema:
+      type: object
+      properties:
+        game_id:
+          type: string
+          description: Identifier of the recorded game
+      required:
+        - game_id
+      additionalProperties: false
+    annotations:
+      readOnlyHint: false
+      destructiveHint: false
+    examples:
+      recorded-game:
+        input:
+          white_player_id: player-42
+          black_player_id: player-84
+          result: 1-0
+        result:
+          content:
+            - type: text
+              text: Game result recorded successfully.
+          structuredContent:
+            game_id: game-2025-001
 resources:
-- uri: chess://leaderboard/classical
-  name: classical_leaderboard
-  title: Classical Leaderboard
-  description: Top-100 classical ratings
-  mimeType: application/json
-  tags:
-  - ratings
+  - uri: chess://leaderboard/classical
+    name: classical_leaderboard
+    title: Classical Leaderboard
+    description: Top-100 classical ratings
+    tags:
+      - ratings
+    mimeType: application/json
 resourceTemplates:
-- uriTemplate: chess://games/{game_id}
-  name: game_detail
-  title: Game Detail
-  description: Full game details including PGN and analysis
-  mimeType: application/json
-  tags:
-  - games
-- uriTemplate: chess://players/{player_id}/rating-history
-  name: player_rating_history
-  title: Player Rating History
-  description: Historical Elo progression
-  mimeType: application/json
-  tags:
-  - ratings
+  - uriTemplate: chess://games/{game_id}
+    name: game_detail
+    title: Game Detail
+    description: Full game details including PGN and analysis
+    tags:
+      - games
+    mimeType: application/json
+  - uriTemplate: chess://players/{player_id}/rating-history
+    name: player_rating_history
+    title: Player Rating History
+    description: Historical Elo progression
+    tags:
+      - ratings
+    mimeType: application/json
 prompts:
-- name: game_summary
-  title: Game Summary
-  description: Generate a narrative summary of a chess game
-  arguments:
-  - name: game_id
-    description: Game identifier
-    required: true
-  tags:
-  - games
+  - name: game_summary
+    title: Game Summary
+    description: Generate a narrative summary of a chess game
+    tags:
+      - games
+    arguments:
+      - name: game_id
+        description: Game identifier
+        required: true
 tags:
-- name: analysis
-  description: Game analysis and evaluation
-- name: games
-  description: Game records, history, and summaries
-- name: ratings
-  description: Elo ratings, leaderboards, and statistics
+  - name: analysis
+    description: Game analysis and evaluation
+  - name: games
+    description: Game records, history, and summaries
+  - name: ratings
+    description: Elo ratings, leaderboards, and statistics

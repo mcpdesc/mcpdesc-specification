@@ -208,13 +208,53 @@ into executable or application-specific YAML types.
   stronger byte-level contract than is needed for readable, consistent
   examples and normalized output.
 
-## Resolved decisions
+## Open questions
 
-- Quote according to YAML 1.2.2 JSON-schema resolution, the YAML 1.1 Core Schema, and plain-scalar syntax; unmatched plain strings follow Section 15.3.3.
-- Disable scalar wrapping; use UTF-8 without a BOM, LF line endings, one final LF, and RFC 8785 number serialization.
-- Use literal block scalars only when chomping preserves the exact multiline value; otherwise use double-quoted escapes.
-- Keep Section 18 ordering independently selectable; otherwise preserve input mapping order and never sort arbitrary keys, arrays, or opaque values.
-- Apply the profile to specification-authored MCP Description YAML examples, not validation registries or tool configuration.
+- Which exact YAML 1.1-compatible scalar spellings must be quoted, and should
+  the profile enumerate them or define a resolution-based test?
+- Should scalar wrapping be disabled, or should the profile specify a
+  deterministic line width and wrapping algorithm?
+- Which multiline strings should use literal blocks, and which edge cases
+  require double-quoted escapes?
+- Should normalized document ordering be required whenever normalization is
+  requested, or should it remain an independently selectable Section 18
+  profile?
+- Which first-party repository files beyond MCP Description examples should
+  follow the same quoting and indentation rules, given that validation
+  registries and tool configuration may have their own ordering semantics?
+
+
+## Arbitrations
+
+Each former open question is closed below.
+Section 15.9 of the 0.9.0 specification is the authoritative definition; this list records the intent.
+
+1. **Quoting:** quote minimally, using a resolution-based test rather than an
+   ad hoc list. A string is written plain only when it contains no line break,
+   parses back to the same string under Section 15.3 (including the 15.3.3
+   scalar rules and plain-scalar syntax), and does not fully match a published
+   YAML 1.1 null, boolean, integer, float, timestamp, or merge-key pattern.
+   All other strings, every `protocolVersions` string item at any level, and
+   the empty string are double-quoted. YAML 1.1 has no "Core Schema"; the
+   patterns follow the YAML 1.1 type repository as applied by common
+   processors, so `1.0.0` and `0o12` remain plain. Double-quoted content uses
+   RFC 8785 string escaping, and single quotes are never used.
+2. **Wrapping:** never wrap scalars. Output is UTF-8 without a BOM, uses LF
+   line endings and one final LF, contains no directives or document markers,
+   and serializes numbers as specified by RFC 8785. Reopening the RFC 8785
+   number decision is out of scope.
+3. **Multiline:** prefer literal block scalars when they preserve the exact
+   value, with `|-`, `|`, or `|+` chomping and an indentation indicator when
+   the first non-empty line starts with a space. Otherwise use a double-quoted
+   scalar. Mapping keys never use block scalars.
+4. **Ordering:** Section 18 remains independently selectable; requesting
+   normalized YAML does not select it. Without it, preserve input mapping
+   order. Never sort arbitrary keys, arrays, named maps, or opaque values.
+5. **Scope:** the profile applies to MCP Description YAML, and
+   specification-authored MCP Description examples should follow it. It does
+   not apply to validation rule catalogs, fixture registries, or tool
+   configuration. Hand-authored examples can keep comments.
+
 
 ## Implementation and validation plan
 
@@ -243,4 +283,4 @@ Proposal status at capture was Draft; accepted by the 0.9.0 release decision bel
 
 ## Release decision — 0.9.0
 
-Accepted and implemented in MCP Description 0.9.0 by the release decision dated 2026-11-12. This decision covers the proposal scope incorporated in the release; any work not represented by the released specification artifacts remains deferred. The exact source revision and its status at capture are recorded in [the 0.9.0 proposal manifest](../spec/0.9.0/PROPOSALS.md).
+Accepted and implemented in MCP Description 0.9.0 by the release decision dated 2026-11-16. This decision covers the proposal scope incorporated in the release; any work not represented by the released specification artifacts remains deferred. The exact source revision and its status at capture are recorded in [the 0.9.0 proposal manifest](../spec/0.9.0/PROPOSALS.md).

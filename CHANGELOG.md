@@ -2,9 +2,9 @@
 
 This changelog records repository governance, release-process, and project-tooling changes. Changes to the MCP Description format are recorded in the versioned specification changelog, currently [0.9.0](spec/0.9.0/CHANGELOG.md).
 
-## 0.9.0 preparation — 2026-11-12
+## 0.9.0 release — 2026-11-16
 
-- Prepared the stable 0.9.0 artifact tree and promoted Proposals 0024–0036 as durable decision records. Publication and downstream default adoption remain separate coordination steps.
+- Released the stable 0.9.0 artifact tree and promoted Proposals 0024–0036 as durable decision records. Downstream default adoption remains a separate coordination step.
 - Simplified proposal tracking: inclusion in the versioned snapshot list means implemented in that specification version; Git history is the source of truth for changes, without separate capture-status or digest bookkeeping.
 
 ## 2026-10-24 — Stable maintenance policy

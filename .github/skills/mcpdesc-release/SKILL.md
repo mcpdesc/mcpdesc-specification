@@ -32,7 +32,7 @@ Use repository scripts as the source of deterministic release behavior. Do not r
 
 ## Boundaries
 
-- Draft tags do not update `schemas/latest.json` or make v0.8.0 stable.
+- Draft and release-candidate tags do not update `schemas/latest.json` or make a version stable.
 - Stable releases use `freeze-version.mjs`; draft snapshots do not.
 - This repository exports approved snapshot inputs and does not publish `@mcpdesc/validator`.
 - Never rewrite or move an existing release tag.

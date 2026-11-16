@@ -249,6 +249,12 @@ rules:
       - path: expected-invalid/non-literal-object-input-schema-before-2025-11-25.json
         pointer: /tools/0/inputSchema
         outcome: error
+      - path: expected-invalid/empty-input-schema-before-2025-11-25.json
+        pointer: /tools/0/inputSchema
+        outcome: error
+      - path: expected-warning/empty-input-schema.json
+        pointer: /tools/0/inputSchema
+        outcome: passes
       - path: expected-valid/custom-tool-schema-keywords.json
         pointer: /tools/0/inputSchema
         outcome: passes
@@ -529,6 +535,9 @@ rules:
         outcome: warning
       - path: expected-warning/tool-schema-mcp-type-mismatch.json
         pointer: /tools/3/outputSchema
+        outcome: warning
+      - path: expected-warning/empty-input-schema.json
+        pointer: /tools/0/inputSchema
         outcome: warning
       - path: expected-valid/tool-schema-mcp-type-shapes.json
         pointer: /tools/0/inputSchema

@@ -1,4 +1,4 @@
-# Example 1 — Tasks migration between MCP 2025-11-25 and 2026-07-28
+# Example — Tasks migration between MCP 2025-11-25 and 2026-07-28
 #
 # Educational point:
 # The business operation is the same in both Effective Protocol Views.
@@ -10,7 +10,6 @@
 # protocol contract changed, not because the server happens to ship two
 # unrelated product editions.
 
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0.json
 mcpdesc: 0.9.0
 
 info:
@@ -19,13 +18,13 @@ info:
   version: 2.0.0
   description: >
     Provides chess-engine analysis while exposing long-running work using the
-    task model appropriate to each supported MCP protocol version.
+    task model appropriate to each supported MCP protocol revision.
 
 protocolVersions:
 - '2025-11-25'
 - '2026-07-28'
 
-# The same stdio transport is valid for both protocol versions, so it is
+# The same stdio transport is valid for both protocol revisions, so it is
 # deliberately left unscoped.
 transports:
 - type: stdio
@@ -54,11 +53,12 @@ capabilities:
     io.modelcontextprotocol/tasks: {}
 
 tools:
-# This synchronous tool has identical MCP semantics in both protocol versions,
-# so it
-# inherits the root protocolVersions and needs only one declaration.
+# The result payload is the same in both revisions, but the result discriminator
+# is protocol-specific, so the examples use separate protocol-scoped variants.
 - name: get_position_evaluation
   title: Get Position Evaluation
+  protocolVersions:
+  - '2025-11-25'
   description: Return a quick static evaluation of a chess position.
   inputSchema:
     type: object
@@ -78,10 +78,54 @@ tools:
     required:
     - evaluation_cp
     additionalProperties: false
+  examples:
+    starting-position:
+      input:
+        fen: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+      result:
+        content:
+        - type: text
+          text: Position evaluated.
+        structuredContent:
+          evaluation_cp: 20
+
+- name: get_position_evaluation
+  title: Get Position Evaluation
+  protocolVersions:
+  - '2026-07-28'
+  description: Return a quick static evaluation of a chess position.
+  inputSchema:
+    type: object
+    properties:
+      fen:
+        type: string
+        description: Position in Forsyth-Edwards Notation.
+    required:
+    - fen
+    additionalProperties: false
+  outputSchema:
+    type: object
+    properties:
+      evaluation_cp:
+        type: integer
+        description: Evaluation in centipawns from White's perspective.
+    required:
+    - evaluation_cp
+    additionalProperties: false
+  examples:
+    starting-position:
+      input:
+        fen: rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+      result:
+        resultType: complete
+        content:
+        - type: text
+          text: Position evaluated.
+        structuredContent:
+          evaluation_cp: 20
 
 # 2025-11-25 variant:
-# Tool.execution is defined by MCP Description only for this MCP protocol
-# version.
+# Tool.execution is defined by MCP Description only for this MCP revision.
 # taskSupport: required means this operation is described as task-only here.
 - name: analyze_game
   title: Analyze Game
@@ -120,6 +164,19 @@ tools:
     - evaluation_cp
     - best_move
     additionalProperties: false
+  examples:
+    analyzed-game:
+      input:
+        pgn: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+        depth: 30
+      result:
+        content:
+        - type: text
+          text: Deep analysis completed.
+        structuredContent:
+          evaluation_cp: 24
+          best_move: Ba4
+          critical_positions: []
   execution:
     taskSupport: required
 
@@ -169,3 +226,17 @@ tools:
     - evaluation_cp
     - best_move
     additionalProperties: false
+  examples:
+    analyzed-game:
+      input:
+        pgn: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+        depth: 30
+      result:
+        resultType: complete
+        content:
+        - type: text
+          text: Deep analysis completed.
+        structuredContent:
+          evaluation_cp: 24
+          best_move: Ba4
+          critical_positions: []

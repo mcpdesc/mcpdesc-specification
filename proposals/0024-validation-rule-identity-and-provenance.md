@@ -494,4 +494,4 @@ Pending.
 
 ## Release decision — 0.9.0
 
-Accepted and implemented in MCP Description 0.9.0 by the release decision dated 2026-11-12. This decision covers the proposal scope incorporated in the release; any work not represented by the released specification artifacts remains deferred. The exact source revision and its status at capture are recorded in [the 0.9.0 proposal manifest](../spec/0.9.0/PROPOSALS.md).
+Accepted and implemented in MCP Description 0.9.0 by the release decision dated 2026-11-16. This decision covers the proposal scope incorporated in the release; any work not represented by the released specification artifacts remains deferred. The exact source revision and its status at capture are recorded in [the 0.9.0 proposal manifest](../spec/0.9.0/PROPOSALS.md).

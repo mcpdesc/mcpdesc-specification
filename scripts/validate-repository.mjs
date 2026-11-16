@@ -53,6 +53,7 @@ const expectedWarningCodesByFixture = new Map([
     'deprecated-client-requirement',
     'unknown-reserved-extension-identifier'
   ]],
+  ['empty-input-schema.json', ['tool-schema-mcp-type-mismatch']],
   ['legacy-completion-examples.json', ['legacy-protocol-validation-incomplete']],
   ['legacy-result-meta.json', ['legacy-protocol-validation-incomplete']],
   ['legacy-sse-modern-protocol-version.json', [

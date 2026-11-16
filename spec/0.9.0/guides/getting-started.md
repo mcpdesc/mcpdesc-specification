@@ -16,7 +16,7 @@ Every MCP Description requires `mcpdesc`, `info`, and a non-empty `protocolVersi
 Create a file called `chess-coach.mcpdesc.yaml`:
 
 MCP Description supports JSON and restricted YAML as equal serializations of one JSON-compatible data model. YAML files recognize null, booleans, and numbers using the YAML 1.2.2 JSON-schema rules, with other untagged plain values treated as strings as specified in [Section 15.3.3](../sections/15-serialization.md#1533-scalar-resolution-and-numeric-values). The restricted profile excludes aliases, custom tags, duplicate or non-string mapping keys, merge semantics, multiple documents, and non-finite numeric forms.
-The YAML examples in this guide use the normalized presentation profile in [Section 15.9](../sections/15-serialization.md#normalized-yaml-presentation); other conforming YAML presentations remain accepted.
+The YAML examples in this guide use the normalized presentation profile in [Section 15.9](../sections/15-serialization.md#159-normalized-yaml-presentation); other conforming YAML presentations remain accepted.
 
 ```yaml
 $schema: https://mcpdesc.org/schema/mcp-description/0.9.0.json
@@ -272,7 +272,7 @@ These tools are implementations, not normative parts of the specification. See [
 ## Next Steps
 
 - See [examples/](../examples/) for complete working examples at different complexity levels
-- See [examples/multi-version.yaml](../examples/multi-version.yaml) for shared declarations and protocol-scoped capability variants across MCP 2025-11-25 and MCP 2026-07-28
+- See [examples/multi-version-MRTR.yaml](../examples/multi-version-MRTR.yaml) and [examples/multi-version-tasks.yaml](../examples/multi-version-tasks.yaml) for shared declarations and protocol-scoped variants across MCP 2025-11-25 and MCP 2026-07-28
 - Read the [full specification](../mcp-description.md)
 - Learn about [vendor extensions](vendor-extensions-guide.md) for adding custom metadata
 - Read the [0.8.0 to 0.9.0 migration guide](migration-0.8-to-0.9.md)

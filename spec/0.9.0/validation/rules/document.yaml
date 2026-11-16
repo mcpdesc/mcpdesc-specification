@@ -164,7 +164,6 @@ rules:
           - sections/04-versioning.md#req-scope-root-subset
           - sections/10-resources.md#req-resource-scopes-disjoint
           - sections/11-prompts.md#req-prompt-scopes-disjoint
-          - sections/11-prompts.md#req-prompt-variants-disjoint
     enforcement: internal
     status: internal
     fixtures:
@@ -204,8 +203,6 @@ rules:
           - sections/10-resources.md#req-resource-tags-references
           - sections/10-resources.md#req-resource-template-tags-references
           - sections/11-prompts.md#req-prompt-tags-references
-          - sections/13-tags.md#req-tag-name-unique
-          - sections/13-tags.md#req-tags-undeclared-error
     enforcement: internal
     status: internal
     fixtures:
@@ -331,7 +328,7 @@ rules:
     kind: mcpdesc-semantic
     requirement: must
     specification:
-      - reference: MCP Description 0.9.0, Sections 3.5 and 16.2; Proposal 0024, Section 4.1
+      - reference: MCP Description 0.9.0, Sections 12.5 and 16.2; Proposal 0024, Section 4.1
         locations:
           - sections/16-conformance.md#req-legacy-validation-scope
           - proposal-snapshots/0024-validation-rule-identity-and-provenance.md

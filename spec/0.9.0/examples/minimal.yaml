@@ -1,24 +1,36 @@
-$schema: https://mcpdesc.org/schema/mcp-description/0.9.0.json
 mcpdesc: 0.9.0
 info:
   name: chess-rating-server
   title: Chess Rating MCP Server
   version: 1.0.0
 protocolVersions:
-  - "2025-11-25"
+  - "2026-07-28"
 transports:
-  - args:
-      - serve
+  - type: stdio
     command: chess-rating
-    type: stdio
+    args:
+      - serve
 tools:
-  - description: Get the current Elo rating for a chess player
+  - name: get_player_rating
+    description: Get the current FIDE standard rating for a chess player
     inputSchema:
+      type: object
       properties:
         player_id:
-          description: Player identifier
+          description: FIDE player identifier
           type: string
       required:
         - player_id
-      type: object
-    name: get_player_rating
+    outputSchema:
+      type: integer
+      description: Current FIDE standard rating
+    examples:
+      fide-rating:
+        input:
+          player_id: planchaman
+        result:
+          resultType: complete
+          content:
+            - type: text
+              text: The player's FIDE rating is 1701
+          structuredContent: 1701

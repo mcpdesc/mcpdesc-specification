@@ -1,31 +1,33 @@
 ## 18. Document-oriented Serialization Ordering
 
 This section defines a recommended presentation order for MCP Description
-properties in newly generated JSON and YAML documents. It is intended to make
+fields in newly generated JSON and YAML documents. Its purpose is to make
 documents easier to scan and more consistent across producers. It does not
-change document meaning, validation, or conformance: property order remains
-insignificant as specified in Sections 3.1 and 3.7.
+change document meaning, validation, or conformance. Property order remains
+insignificant, as specified in [Section 3.1](#31-format) and
+[Section 3.7](#37-property-ordering). The same sequences apply to JSON and
+YAML; neither format gives object member order semantic meaning.
 
-<a id="req-document-ordering-default"></a>A producer that generates an MCP Description document without source property order to preserve or an explicit caller-selected ordering policy SHOULD emit properties according to this section. A source-preserving editor or converter SHOULD preserve the source property order unless the caller selects this ordering profile. Producers MAY expose other ordering policies.
+<a id="req-document-ordering-default"></a>A producer that generates an MCP Description document SHOULD emit fields according to this section when it has neither a source property order to preserve nor an explicit caller-selected ordering policy. A source-preserving editor or converter SHOULD preserve the source property order unless the caller selects this ordering profile. Producers MAY expose other ordering policies.
 
 The sequences in this section are the source of truth for this presentation
 profile. JSON Schema property order, examples, and implementation-specific
-constants do not define or override these sequences. A sequence applies only to
-fields defined at the stated location for the document version; it does not
-authorize a field or change its validity.
+constants do not define or override them. A sequence applies only to fields
+defined at the stated location for the document version. It does not authorize
+a field or change its validity.
 
 ### 18.1 Ordering Algorithm
 
-<a id="req-document-ordering-algorithm"></a>An implementation applying this profile MUST emit present known fields of a recognized fixed-field object in the listed left-to-right order, followed by unlisted fields in their existing relative order. It MUST skip missing fields and MUST NOT create defaults or empty sections. It MUST apply a rule to a child object only when that object's structure is recognized.
+<a id="req-document-ordering-algorithm"></a>An implementation applying this profile MUST emit the known fields present in a recognized fixed-field object in the listed left-to-right order, followed by any unlisted fields in their existing relative order. It MUST skip missing fields and MUST NOT create defaults or empty sections. It MUST apply a sequence to a child object only when that object's structure is recognized.
 
-<a id="req-document-ordering-collections"></a>An implementation applying this profile MUST preserve the order of every array while visiting eligible elements and MUST preserve entry order in named maps while visiting values whose structure is explicitly known. The sequences below apply equally to JSON and YAML; neither format gives object member order semantic meaning.
+<a id="req-document-ordering-collections"></a>An implementation applying this profile MUST preserve the order of every array and the entry order of every named map, including when it organizes the elements or values within them.
 
-<a id="req-document-ordering-recognition"></a>The implementation MUST identify a rule using the document path, owning structure, and union discriminator together. It MUST NOT classify arbitrary objects by matching familiar field names such as `name`, `type`, `properties`, or `description`. For an unknown object, unknown variant, malformed container, or opaque subtree, it MUST preserve the existing order and MUST NOT guess a rule or fall back to alphabetical sorting. Every array and named-map entry sequence MUST remain unchanged while the implementation visits eligible values. The implementation MUST preserve opaque subtrees without recursively applying this profile.
+<a id="req-document-ordering-recognition"></a>An implementation applying this profile MUST select a sequence using the document path, owning structure, and union discriminator together. It MUST NOT classify arbitrary objects by matching familiar field names such as `name`, `type`, `properties`, or `description`. For an unknown object, unknown variant, malformed container, or opaque subtree, it MUST preserve the existing order and MUST NOT guess a sequence or fall back to alphabetical sorting. It MUST NOT apply this profile recursively inside an opaque subtree.
 
-<a id="req-document-ordering-preservation"></a>Applying this profile MUST NOT change any value or field presence. It MUST NOT resolve references, deduplicate values, expand aliases, or replace inline objects with references. Unknown fields on an organized object follow the known fields and retain their relative order; this may change their absolute positions. A source-preserving policy is required when even those moves must be avoided.
+<a id="req-document-ordering-preservation"></a>Applying this profile MUST NOT change any value or field presence. It MUST NOT resolve references, deduplicate values, expand aliases, or replace inline objects with references. Because unknown fields move after the known fields, their absolute positions can change even though their relative order is kept. Only a source-preserving policy avoids such moves.
 
-This profile does not promise preservation of comments, whitespace, quoting,
-YAML anchors, source locations, or original property positions after conversion.
+This profile does not guarantee that comments, whitespace, quoting, YAML
+anchors, source locations, or original property positions survive conversion.
 It does not define canonical JSON or a source-aware editing API.
 
 ### 18.2 Root Document
@@ -34,13 +36,14 @@ It does not define canonical JSON or a source-aware editing API.
 | --- | --- |
 | MCP Description root | `$schema`, `mcpdesc`, `info`, `instructions`, `protocolVersions`, `transports`, `securitySchemes`, `security`, `capabilities`, `tools`, `resources`, `resourceTemplates`, `prompts`, `tags`, `components` |
 
-The header identifies the format first. Server identity and instructions
-precede connectivity. Security definitions precede their default requirements.
-Server capability declarations precede primitive declarations. Tag definitions
-and reusable components follow the primary server description. Unknown fields
-and `x-*` extensions follow `components`, retaining their relative order.
+`$schema` and `mcpdesc` come first because they identify the format. Server
+identity and instructions precede protocol versions and transports. Security
+definitions precede their default requirements. Server capability declarations
+precede primitive declarations. Tag definitions and reusable components follow
+the primary server description. Unknown fields and `x-*` extensions follow
+`components`, retaining their relative order.
 
-This sequence applies only to root properties. It does not sort tools,
+This sequence applies only to root fields. It does not reorder tools,
 resources, prompts, transports, tags, or capability entries within their arrays.
 
 ### 18.3 Identity and Shared Presentation Fields
@@ -53,8 +56,8 @@ resources, prompts, transports, tags, or capability entries within their arrays.
 | Icon entry wherever icons are declared | `src`, `mimeType`, `sizes`, `theme` |
 | Root tag definition | `name`, `description` |
 
-Preserve the order of icon and icon-size arrays. A declaration's `tags` array
-contains names, not tag-definition objects, and retains its exact sequence.
+Icon and icon-size arrays keep their order. A declaration's `tags` array
+contains names, not tag-definition objects, and keeps its exact order.
 
 ### 18.4 Transports and Security
 
@@ -69,15 +72,15 @@ contains names, not tag-definition objects, and retains its exact sequence.
 | OAuth `flows` | `authorizationCode`, `clientCredentials`, `implicit`, `password` |
 | OAuth flow | `authorizationUrl`, `tokenUrl`, `refreshUrl`, `scopes` |
 
-`securitySchemes` is a named map: preserve scheme-name order and organize only
-recognized scheme values. Stdio `env` is an environment-variable map and is
-opaque. OAuth `scopes` is a scope-name-to-description map and retains entry
-order.
+`securitySchemes` is a named map. Scheme names keep their order, and only
+recognized scheme values are organized. Stdio `env` is an environment-variable
+map and is opaque. OAuth `scopes` maps scope names to descriptions and keeps
+its entry order.
 
-Every `security` array retains its exact order. Each requirement object maps
-scheme names to scope arrays; preserve both the object entry order and scope
-array order. Do not sort alternatives, merge requirements, expand an empty
-requirement, or collapse an empty security array.
+Every `security` array keeps its exact order. Each requirement object maps
+scheme names to scope arrays; both its entry order and each scope array's order
+are kept. Ordering does not sort alternatives, merge requirements, expand an
+empty requirement, or collapse an empty security array.
 
 ### 18.5 Server and Client Capabilities
 
@@ -92,22 +95,22 @@ requirement, or collapse an empty security array.
 | Task `requests.tools` | `call` |
 | Declaration `clientRequirements` | `roots`, `sampling`, `elicitation`, `tasks`, `extensions`, `experimental` |
 
-`logging`, `completions`, server `experimental`, task `list`, task `cancel`, and
-task `requests.tools.call` have open payload objects. Preserve them in full. An
-empty object remains empty; do not synthesize capability flags.
+`logging`, `completions`, server `experimental`, task `list`, task `cancel`,
+and task `requests.tools.call` have open payload objects, which are preserved
+in full. An empty object remains empty; ordering does not add capability flags.
 
-Client requirement values are open objects. Preserve those values recursively;
-do not interpret their keys as server capability fields or convert them to
+Client requirement values are open objects and are preserved recursively.
+Their keys are not interpreted as server capability fields or converted to
 flags. Client `experimental` is a named map of such values and is also
-preserved. Both server and client `extensions` are extension-identifier maps
-with opaque values. Preserve identifiers, their ordering, and all nested
-payload ordering.
+preserved. Server and client `extensions` map extension identifiers to opaque
+values. Identifiers, their order, and all nested payload order are preserved.
 
 ### 18.6 Concrete Primitive Declarations
 
-The common progression is identity, documentation, protocol scope, primary
-contract, behavior, dependencies, examples, and metadata. Exact per-kind lists
-avoid inventing fields on primitives that do not support them.
+Fields follow a common progression: identity, documentation, protocol scope,
+primary contract, behavior, dependencies, examples, and metadata. Each
+primitive kind has its own sequence, so no sequence lists a field that the
+kind does not support.
 
 | Structure | Field sequence |
 | --- | --- |
@@ -120,10 +123,11 @@ avoid inventing fields on primitives that do not support them.
 | Resource annotations, including content-block annotations | `audience`, `priority`, `lastModified` |
 | Tool `execution` | `taskSupport` |
 
-Preserve `inputSchema` and `outputSchema` completely, including their property
-maps, keyword order, and nested arrays. Preserve `_meta` completely. Annotation
-rules apply only at recognized annotation locations, not arbitrary objects
-called `annotations` inside schemas or application payloads.
+`inputSchema` and `outputSchema` are preserved completely, including their
+property maps, keyword order, and nested arrays. `_meta` is also preserved
+completely. Annotation sequences apply only at recognized annotation
+locations, not to arbitrary objects named `annotations` inside schemas or
+application payloads.
 
 ### 18.7 Elicitation Declarations
 
@@ -131,25 +135,29 @@ called `annotations` inside schemas or application payloads.
 | --- | --- |
 | Elicitation declaration | `name`, `mode`, `message`, `protocolVersions`, `when`, `requestedSchema`, `url`, `onDecline`, `onCancel` |
 
-Preserve the order of the declaration array. Mode selects the appropriate
-shape; ordering never changes it or supplies a missing discriminator.
+The declaration array keeps its order. `mode` selects the declaration shape;
+ordering never changes `mode` or supplies a missing one.
 
 `requestedSchema` is an opaque schema boundary, even though the specification
-defines a restricted elicitation schema vocabulary. This includes the known
-form-schema fields `$schema`, `type`, `properties`, and `required`; property
-fields `type`, `title`, `description`, `default`, `format`, `minLength`,
-`maxLength`, `minimum`, `maximum`, `enum`, `enumNames`, `oneOf`, `items`,
-`minItems`, and `maxItems`; enum-option `const` and `title`; and item `type`,
-`enum`, or `anyOf` structures. Preserve `additionalProperties` and its nested
-property-schema structure as well. None receives an ordering rule. Preserve
-parallel arrays such as `enum` and `enumNames` exactly.
+defines a restricted vocabulary for elicitation schemas. No ordering sequence
+applies to any of its fields, including:
+
+- form-schema fields `$schema`, `type`, `properties`, and `required`;
+- property fields `type`, `title`, `description`, `default`, `format`,
+  `minLength`, `maxLength`, `minimum`, `maximum`, `enum`, `enumNames`,
+  `oneOf`, `items`, `minItems`, and `maxItems`;
+- enum-option fields `const` and `title`;
+- item `type`, `enum`, or `anyOf` structures; and
+- `additionalProperties` and its nested property-schema structure.
+
+Parallel arrays such as `enum` and `enumNames` keep their exact order.
 
 ### 18.8 Examples and Their Fixed Envelopes
 
 Example names are authored identifiers, not fields with a preferred order.
-Preserve entry order in `examples`, `completionExamples`, and
-`interactionExamples` maps. Apply the following rules only to recognized
-example envelopes and protocol-defined objects within them, never arbitrary
+The `examples`, `completionExamples`, and `interactionExamples` maps keep
+their entry order. The following sequences apply only to recognized example
+envelopes and the protocol-defined objects within them, never to arbitrary
 application input or output.
 
 | Structure | Field sequence |
@@ -176,8 +184,8 @@ application input or output.
 
 Tool example `input`, result `structuredContent`, prompt example `arguments`,
 and completion context `arguments` are application-owned payloads or argument
-maps: preserve them recursively. Keep content, messages, resource contents,
-completion values, and all other arrays in their original order.
+maps and are preserved recursively. Content, messages, resource contents,
+completion values, and all other arrays keep their original order.
 
 String payloads such as `text`, `blob`, and `data` are never parsed,
 reformatted, decoded, or interpreted as nested documents. Unknown result or
@@ -207,16 +215,18 @@ content variants remain untouched, including their nested objects.
 | Sampling tool-use content | `type`, `id`, `name`, `input` |
 | Sampling tool-result content | `type`, `toolUseId`, `isError`, `content` |
 
-The `steps` array is an ordered interaction trace, and the array-preservation
-requirement above applies to it. Tool inputs, elicitation response `content`,
-sampling tool-use `input`, sampling `metadata`, every `_meta` subtree, and
-schemas retain their existing internal order.
+The `steps` array is an ordered interaction trace and keeps its order, like
+every array (see [Section 18.1](#181-ordering-algorithm)). Tool inputs,
+elicitation response `content`, sampling tool-use `input`, sampling
+`metadata`, every `_meta` subtree, and schemas keep their existing internal
+order.
 
-Sampling message content uses the known content-block rules above where its
-variant is recognized. Model hint, message, tool, stop-sequence, and roots
-arrays retain their order. Unknown fields on open result envelopes follow known
-fields in their existing relative order, with opaque values; openness does not
-permit interpreting those values.
+Sampling message content uses the content-block sequences from
+[Section 18.8](#188-examples-and-their-fixed-envelopes) when its variant is
+recognized. Model hint, message, tool, stop-sequence, and roots arrays keep
+their order. On open result envelopes, unknown fields follow the known fields
+in their existing relative order. Their values are opaque: an open envelope
+does not make them interpretable.
 
 ### 18.10 Reusable Components and References
 
@@ -225,13 +235,14 @@ permit interpreting those values.
 | `components` | `schemas`, `toolExamples`, `resourceExamples`, `resourceTemplateExamples`, `promptExamples` |
 | Component reference object | `$componentRef` |
 
-Each component category is a named map. Preserve component-name order. Entire
-`components.schemas` values are opaque, including schema objects and component
-references. Boolean subschemas inside a schema remain untouched. Other
-component values use the corresponding recognized example envelope rule or
-remain reference objects. Reference objects inside an opaque schema are part
-of that schema and are not traversed.
+Each component category is a named map whose component-name order is kept.
+Entire `components.schemas` values are opaque, including schema objects and
+component references. Boolean subschemas inside a schema remain untouched.
+Other component values use the matching example envelope sequence from
+[Section 18.8](#188-examples-and-their-fixed-envelopes), or remain reference
+objects. Reference objects inside an opaque schema are part of that schema and
+are not traversed.
 
-Keep reference strings byte-for-byte unchanged. Do not resolve references,
-rename components, reorder component entries by dependencies, inline values,
-or change relative versus absolute references as part of ordering.
+Reference strings remain byte-for-byte unchanged. Ordering does not resolve
+references, rename components, reorder component entries by dependencies,
+inline values, or convert between relative and absolute references.
