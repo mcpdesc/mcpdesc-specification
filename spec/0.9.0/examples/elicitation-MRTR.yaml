@@ -1,0 +1,110 @@
+mcpdesc: 0.9.0
+info:
+  name: chess-tournament-registration
+  title: Chess Tournament Registration — Multi-Round Interaction
+  version: 2.0.0
+  description: |
+    Demonstrates an interaction with Multi Round-Trip Requests (MRTR).
+protocolVersions:
+  - "2026-07-28"
+transports:
+  - type: stdio
+    command: chess-tournament
+    args:
+      - serve
+capabilities:
+  - tools:
+      listChanged: true
+tools:
+  - name: register_tournament_entry
+    title: Register Tournament Entry
+    description: |
+      Register a player for a tournament. The player must select an eligible section before the registration can be completed.
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          type: string
+          description: Stable player identifier.
+        tournament_id:
+          type: string
+          description: Tournament identifier.
+      required:
+        - player_id
+        - tournament_id
+    outputSchema:
+      type: object
+      properties:
+        registration_id:
+          type: string
+        section:
+          type: string
+          enum:
+            - open
+            - u2000
+            - u1600
+      required:
+        - registration_id
+        - section
+      additionalProperties: false
+    clientRequirements:
+      elicitation:
+        form: {}
+    elicitations:
+      - name: choose_section
+        mode: form
+        message: Choose the tournament section for this entry.
+        when: After eligibility is calculated for the supplied player.
+        requestedSchema:
+          type: object
+          properties:
+            section:
+              type: string
+              title: Tournament section
+              oneOf:
+                - const: open
+                  title: Open
+                - const: u2000
+                  title: Under 2000
+                - const: u1600
+                  title: Under 1600
+          required:
+            - section
+        onDecline: The registration is not created.
+        onCancel: The registration attempt is abandoned without creating an entry.
+    interactionExamples:
+      eligible-player:
+        input:
+          player_id: player-42
+          tournament_id: spring-open-2026
+        steps:
+          - type: elicitation
+            request:
+              mode: form
+              message: Choose the tournament section for this entry.
+              requestedSchema:
+                type: object
+                properties:
+                  section:
+                    type: string
+                    oneOf:
+                      - const: open
+                        title: Open
+                      - const: u2000
+                        title: Under 2000
+                      - const: u1600
+                        title: Under 1600
+                required:
+                  - section
+            response:
+              action: accept
+              content:
+                section: u2000
+        result:
+          resultType: complete
+          content:
+            - type: text
+              text: Registration created in the Under 2000 section.
+          structuredContent:
+            registration_id: reg-example-001
+            section: u2000

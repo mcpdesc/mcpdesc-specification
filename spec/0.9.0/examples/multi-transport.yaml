@@ -1,0 +1,113 @@
+mcpdesc: 0.9.0
+info:
+  name: chess-coach
+  title: Chess Coach (Multi-Transport)
+  version: 2.1.0
+  description: Chess analysis and rating server available via both cloud and local transports
+protocolVersions:
+  - "2025-11-25"
+transports:
+  - type: streamable-http
+    url: https://chess-coach.example.com/mcp
+    security:
+      - bearer: []
+  - type: stdio
+    command: chess-coach
+    args:
+      - mcp
+    security: []
+securitySchemes:
+  bearer:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
+    description: Required for cloud transports
+tools:
+  - name: analyze_game
+    title: Analyze Chess Game
+    description: Analyze a chess game from PGN notation
+    tags:
+      - analysis
+    inputSchema:
+      type: object
+      properties:
+        pgn:
+          type: string
+          description: Game in PGN format
+      required:
+        - pgn
+    outputSchema:
+      type: object
+      properties:
+        evaluation:
+          type: number
+          description: Position evaluation from White's perspective
+        best_move:
+          type: string
+      required:
+        - evaluation
+        - best_move
+      additionalProperties: false
+    annotations:
+      readOnlyHint: true
+    examples:
+      analyzed-game:
+        input:
+          pgn: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+        result:
+          content:
+            - type: text
+              text: Game analyzed successfully.
+          structuredContent:
+            evaluation: 0.24
+            best_move: Ba4
+  - name: get_player_rating
+    title: Get Player Rating
+    description: Get the Elo rating for a chess player
+    tags:
+      - rating
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          type: string
+      required:
+        - player_id
+    outputSchema:
+      type: object
+      properties:
+        rating:
+          type: integer
+          description: Current Elo rating
+      required:
+        - rating
+      additionalProperties: false
+    annotations:
+      readOnlyHint: true
+    examples:
+      current-rating:
+        input:
+          player_id: planchaman
+        result:
+          content:
+            - type: text
+              text: Player rating retrieved.
+          structuredContent:
+            rating: 1701
+resources:
+  - uri: chess://leaderboard/classical
+    name: classical_leaderboard
+    title: Classical Leaderboard
+    description: Top-100 classical ratings
+    mimeType: application/json
+resourceTemplates:
+  - uriTemplate: chess://games/{game_id}
+    name: game_detail
+    title: Game Detail
+    description: Details of a specific chess game
+    mimeType: application/json
+tags:
+  - name: analysis
+    description: Game analysis and evaluation
+  - name: rating
+    description: Elo ratings and statistics

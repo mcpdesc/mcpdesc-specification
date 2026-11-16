@@ -23,7 +23,7 @@ export const supportedProtocolVersions = Object.freeze([
 const protocolOrder = new Map(supportedProtocolVersions.map((version, index) => [version, index]));
 const toolSchemaDialectVersion = '2025-11-25';
 const completeSemanticConformanceVersion = '2025-06-18';
-export const mcpExtensionCatalogue = Object.freeze({
+export const mcpExtensionCatalog = Object.freeze({
   effectiveDate: '2026-09-04',
   source: 'https://modelcontextprotocol.io/extensions/overview',
   officialIdentifiers: Object.freeze([
@@ -37,9 +37,9 @@ export const mcpExtensionCatalogue = Object.freeze({
 const metaKeyPattern = /^(?:(?:[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)(?:\.[A-Za-z](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\/)?(?:[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?)?$/;
 
 export function mcpExtensionMaturity(identifier) {
-  if (mcpExtensionCatalogue.officialIdentifiers.includes(identifier)) return 'official';
-  if (mcpExtensionCatalogue.experimentalIdentifiers.includes(identifier)) return 'experimental';
-  return 'uncatalogued';
+  if (mcpExtensionCatalog.officialIdentifiers.includes(identifier)) return 'official';
+  if (mcpExtensionCatalog.experimentalIdentifiers.includes(identifier)) return 'experimental';
+  return 'uncataloged';
 }
 
 function createValidatorForDialect(dialect) {
@@ -181,7 +181,7 @@ declareChecks('base', [
   'mcpdesc.elicitation.name-unique',
   'mcpdesc.example.completed-result-form',
   'mcpdesc.example.result.protocol-fidelity',
-  'mcpdesc.extensions.catalogue-maturity',
+  'mcpdesc.extensions.catalog-maturity',
   'mcpdesc.legacy-protocol.validation-scope',
   'mcpdesc.protocol-scope.consistency',
   'mcpdesc.resource-template.example.expansion',
@@ -555,9 +555,9 @@ function validateSecurityRequirements(document, rel, diagnostics) {
             if (!catalog.has(scope)) {
               diagnostics.push(
                 makeDiagnostic(
-                  'uncatalogued-oauth-scope',
+                  'uncataloged-oauth-scope',
                   'warning',
-                  `${location}[${requirementIndex}].${schemeName} references scope ${JSON.stringify(scope)} that is not present in the declared static scope catalogue`,
+                  `${location}[${requirementIndex}].${schemeName} references scope ${JSON.stringify(scope)} that is not present in the declared static scope catalog`,
                   [...locationPath, requirementIndex, schemeName, scopeIndex]
                 )
               );
@@ -1025,7 +1025,7 @@ function validateVersionSpecificSemantics(document, rel, diagnostics) {
         }
       }
       for (const identifier of Object.keys(capability.extensions ?? {})) {
-        evaluated('mcpdesc.extensions.catalogue-maturity', [...capabilityPath, 'extensions', identifier]);
+        evaluated('mcpdesc.extensions.catalog-maturity', [...capabilityPath, 'extensions', identifier]);
         if (!usesMcpReservedPrefix(identifier)) continue;
         const maturity = mcpExtensionMaturity(identifier);
         if (maturity === 'official') continue;

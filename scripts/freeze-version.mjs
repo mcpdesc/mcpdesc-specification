@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Freeze an approved release candidate into an immutable stable-release folder.
 //
-// STATUS: This generic implementation has not been exercised end to end. Do not
-// use it for a release until the next active draft/RC cycle adds fixtures and
-// validates its complete diff. It is intentionally not used for v0.8.0.
+// STATUS: The stable freeze path has end-to-end coverage in
+// test-freeze-version.mjs and was exercised for the 0.9.0 release preparation.
+// It is intentionally not used for v0.8.0.
 //
 // This script performs mechanical identity and repository-state transitions
 // only. Release prose, changelog content, proposal decisions, public status

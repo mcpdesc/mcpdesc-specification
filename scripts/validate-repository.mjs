@@ -53,6 +53,7 @@ const expectedWarningCodesByFixture = new Map([
     'deprecated-client-requirement',
     'unknown-reserved-extension-identifier'
   ]],
+  ['empty-input-schema.json', ['tool-schema-mcp-type-mismatch']],
   ['legacy-completion-examples.json', ['legacy-protocol-validation-incomplete']],
   ['legacy-result-meta.json', ['legacy-protocol-validation-incomplete']],
   ['legacy-sse-modern-protocol-version.json', [
@@ -100,8 +101,8 @@ const expectedWarningCodesByFixture = new Map([
     'tool-schema-mcp-type-mismatch',
     'tool-schema-mcp-type-mismatch'
   ]],
-  ['uncatalogued-oauth-scope.json', ['uncatalogued-oauth-scope']],
-  ['uncatalogued-openid-scope.json', ['uncatalogued-oauth-scope']],
+  ['uncataloged-oauth-scope.json', ['uncataloged-oauth-scope']],
+  ['uncataloged-openid-scope.json', ['uncataloged-oauth-scope']],
   ['unknown-reserved-extension-identifier.json', ['unknown-reserved-extension-identifier']],
   ['unknown-reserved-meta-key.json', ['meta-unknown-reserved-key']],
   ['unresolved-external-tool-example-ref.json', [
@@ -260,26 +261,11 @@ const releasedProposalSnapshots = [
   ['0021-pre-standard-extension-capabilities.md', 'bd1b6e53b1d44fb5177478ffefa32a466cfb1de4', 'proposals/0021-pre-standard-extension-capabilities.md', '4355bf4aee9e89a1681a337a5dacd9b3f6ed23d4d7bc430f05f9e413f57b64cc'],
   ['0022-protocol-independent-info-metadata.md', '87b2d493cfa87a9cbea8148ae1f6638bd1aae786', 'proposals/0022-protocol-independent-info-metadata.md', '45c66ad65bbdae67c0afea416e025ddb1ce3dd4125306b40742fb6f887824785']
 ];
-// Proposal revisions captured for the active draft: [file, commit, source path, SHA-256].
-const draftProposalSnapshots = [
-  ['0024-validation-rule-identity-and-provenance.md', '62f1f8e726c69398f8bc3edc1c0bb737c9f5b53c', 'proposals/0024-validation-rule-identity-and-provenance.md', 'fc25d6b6a0fb47e1bc6aba31cb4b6e08cc31bc029319e3c66b2c8776eb732374'],
-  ['0025-native-mcp-projection.md', '89c8c3206dc9aba3b1ffcf86c81296a5d4cde356', 'proposals/0025-native-mcp-projection.md', 'cb0118750dac07460236b363f65db855fe2f55a1c63f1352bba137aa5f7af55d'],
-  ['0026-open-mcp-results-in-examples.md', '3d4e5ce773f5f61ecb67177aa34cbfbb302d06e0', 'proposals/0026-open-mcp-results-in-examples.md', '3a50753bf217c0ceb5fb60f28766c05b06f073524eafc3c899661b6810d6cd3b'],
-  ['0027-closed-mcp-types.md', '609700bac005e182a0e65970b59f0a5c1f3dfc25', 'proposals/0027-closed-mcp-types.md', '8e83c57fc4c243bd8cde0e2d15c8f93e148311e54399445eecba171cb95a8f79'],
-  ['0028-version-conversion.md', '192e5580270d94607f9d90ad1f97236b70c318a8', 'proposals/0028-version-conversion.md', '4ca5c8876ec115ba814f81456de88d32cc27cb4f0e48df1fa771e0958d108c4a'],
-  ['0029-integer-mcp-numbers.md', 'f6ce500cdbe3e051abbf219d1005fca212c87f96', 'proposals/0029-integer-mcp-numbers.md', 'be901a5ad909e9c30ff373928f61aa31bdb4954e23307161e34631ba4bea1127'],
-  ['0030-readable-and-complete-rule-records.md', '7633f147faf5800e35c21c55411609a9db637eba', 'proposals/0030-readable-and-complete-rule-records.md', 'df8da81c56cab87817291135147f355e34d46b43b7bbcbb38ee9d615343c6a75'],
-  ['0031-rule-level-validation-results.md', 'd85a92e76a5dbf810f85dcec66d19af2ff0397e3', 'proposals/0031-rule-level-validation-results.md', '432b73ef2e3d0d86ae98d9bedbf702bc79af0655582c772d7d01a73631c334d5'],
-  ['0032-dialect-governed-tool-schemas.md', 'e344a04ae9b6f1d4a8dd03f685c3877f6af6f40a', 'proposals/0032-dialect-governed-tool-schemas.md', '353dce36f35e9c7df63821e32d054d676ae09eb6a5ae9727357e5aeb5d0ec5f5'],
-  ['0033-complete-validation-catalog.md', '9ffaaec089d7b4ee94e82dcb404f121bb3beceac', 'proposals/0033-complete-validation-catalog.md', 'f0aebaf968cbb7374139febaec83306a6f933f9c6e64117211c106a0cd8b3d76'],
-  ['0034-discriminator-driven-schema-validation.md', '3a9b7309d2cc038acfba64e23764650f0df44b12', 'proposals/0034-discriminator-driven-schema-validation.md', '0a1ab35e7054850cf41639353498ee1366782cdd0863f723f22479fec39786ee']
-];
-
-function checkProposalSnapshots(specificationPath, snapshots) {
+function checkLegacyProposalSnapshots(specificationPath, legacySnapshots) {
   const manifestPath = `${specificationPath}/PROPOSALS.md`;
   const manifest = fs.existsSync(path.join(root, manifestPath)) ? readText(manifestPath) : '';
   if (!manifest) fail(`missing required file: ${manifestPath}`);
-  for (const [filename, commit, sourcePath, expectedDigest] of snapshots) {
+  for (const [filename, commit, sourcePath, expectedDigest] of legacySnapshots) {
     const rel = `${specificationPath}/proposal-snapshots/${filename}`;
     const full = path.join(root, rel);
     if (!fs.existsSync(full)) {
@@ -294,8 +280,36 @@ function checkProposalSnapshots(specificationPath, snapshots) {
   }
 }
 
-checkProposalSnapshots('spec/0.8.0', releasedProposalSnapshots);
-if (hasActiveDraft) checkProposalSnapshots(specificationRoot, draftProposalSnapshots);
+function checkIncludedProposalSnapshots(specificationPath) {
+  const manifestPath = `${specificationPath}/PROPOSALS.md`;
+  const snapshotDirectory = `${specificationPath}/proposal-snapshots`;
+  const manifest = fs.existsSync(path.join(root, manifestPath)) ? readText(manifestPath) : '';
+  const directory = path.join(root, snapshotDirectory);
+  if (!manifest) fail(`missing required file: ${manifestPath}`);
+  if (!fs.existsSync(directory)) {
+    fail(`missing proposal snapshot directory: ${snapshotDirectory}`);
+    return;
+  }
+
+  const listed = [...manifest.matchAll(/\]\(proposal-snapshots\/([^/)]+\.md)\)/g)].map((match) => match[1]);
+  const uniqueListed = new Set(listed);
+  const snapshots = fs.readdirSync(directory).filter((filename) => filename.endsWith('.md')).sort();
+  if (listed.length === 0) fail(`${manifestPath}: list the included proposal snapshots`);
+  if (uniqueListed.size !== listed.length) fail(`${manifestPath}: duplicate proposal snapshot link`);
+  for (const filename of snapshots) {
+    if (!uniqueListed.has(filename)) fail(`${manifestPath}: proposal snapshot is not listed: ${filename}`);
+    if (!hasActiveDraft && !fs.existsSync(path.join(root, 'proposals', filename))) {
+      fail(`missing durable proposal record: proposals/${filename}`);
+    }
+  }
+  for (const filename of uniqueListed) {
+    if (!snapshots.includes(filename)) fail(`${manifestPath}: listed proposal snapshot does not exist: ${filename}`);
+  }
+}
+
+checkLegacyProposalSnapshots('spec/0.8.0', releasedProposalSnapshots);
+if (hasActiveDraft) checkIncludedProposalSnapshots(specificationRoot);
+else if (status?.stable?.version && status.stable.version !== '0.8.0') checkIncludedProposalSnapshots(`spec/${status.stable.version}`);
 
 for (const [filename] of releasedProposalSnapshots) {
   if (filename === '0008-primitive-provenance.md') continue;

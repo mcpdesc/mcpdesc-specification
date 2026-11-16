@@ -1,0 +1,581 @@
+rules:
+  - id: mcpdesc.document.schema
+    title: "Match the MCP Description document schema"
+    description: >-
+      The document root has the required mcpdesc, info, and protocolVersions
+      members, only the members of Section 3.2, and non-empty ordinary
+      collections. Failures inside a root member belong to the rule that owns
+      that member's schema location; this rule reports root-level failures.
+    applicability:
+      protocolVersions: independent
+    owner: mcpdesc
+    summary: >-
+      A document validates against the JSON Schema for its declared mcpdesc
+      version. This rule owns the document root and generic JSON values; every
+      other schema location belongs to a more specific rule.
+    surface: Document
+    kind: structural
+    documentSchema:
+      - "#"
+      - "#/$defs/jsonValue"
+      - "#/$defs/specificationExtensionValue"
+    specification:
+      - reference: MCP Description 0.9.0, Section 16.1, item 7
+        locations:
+          - sections/16-conformance.md#req-document-schema
+          - sections/03-document-structure.md#req-root-fields
+          - sections/03-document-structure.md#req-closed-objects
+          - sections/09-tools.md#req-tool-input-schema-required
+          - sections/03-document-structure.md#req-ordinary-collections-non-empty
+          - sections/03-document-structure.md#req-ordinary-collections-omitted
+          - sections/04-versioning.md#req-mcpdesc-required
+          - sections/04-versioning.md#req-mcpdesc-version
+          - sections/04-versioning.md#req-version-check
+          - sections/05-info-object.md#req-info-required
+          - sections/06-transports.md#req-transports-non-empty
+          - sections/08-capabilities.md#req-capabilities-non-empty
+          - sections/13-tags.md#req-tags-non-empty
+          - sections/13-tags.md#req-tags-omitted
+          - sections/16-conformance.md#req-conforming-document
+          - sections/14-specification-extensions.md#req-extension-names
+          - sections/14-specification-extensions.md#req-extension-unknown-accepted
+          - sections/15-serialization.md#req-serialization-empty-collections
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/empty-ordinary-root-collections.json
+        pointer: "/capabilities"
+        outcome: error
+      - path: expected-invalid/empty-tag-catalog-reference.json
+        pointer: "/tags"
+        outcome: error
+      - path: expected-valid/optional-schema-omitted.json
+        pointer: ""
+        outcome: passes
+    notes: >-
+      The optional root $schema does not select the schema used for
+      validation: optional-schema-omitted.json omits it and validates against
+      the schema for its mcpdesc version.
+
+  - id: mcp.declaration.field.protocol-version
+    title: "Keep fields within their supported protocol scope"
+    description: >-
+      A declaration must be valid in every protocol version in its effective
+      scope. A field introduced later cannot be shared with earlier versions
+      merely because the document also declares the later version. Omit the
+      field or describe disjoint scoped variants.
+    owner: mcp
+    summary: >-
+      A declaration field is used only in protocol versions whose MCP type defines it:
+      title and _meta from 2025-06-18, Tool annotations from 2025-03-26, icons
+      and Tool schema $schema from 2025-11-25, Tool execution only in
+      2025-11-25, and the completions capability from 2025-03-26.
+    surface: Tool, Resource, ResourceTemplate, Prompt, PromptArgument, ServerCapabilities
+    kind: structural
+    requirement: must
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 8.2, 9.1, 9.2, 10.1, 10.2, and 11.1
+        locations:
+          - sections/04-versioning.md#req-field-protocol-version-availability
+          - sections/09-tools.md#req-tool-schema-dialect-keyword
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2026-07-28 schema.ts, interfaces BaseMetadata, Icons, Tool, Resource, ResourceTemplate, Prompt, PromptArgument, and ServerCapabilities
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L684-L704
+          - validation/mcp-schemas/2025-03-26/schema.ts#L781-L810
+          - validation/mcp-schemas/2025-06-18/schema.ts#L925-L968
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1244-L1297
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1956-L2015
+          - validation/mcp-schemas/2025-06-18/schema.ts#L304-L324
+          - validation/mcp-schemas/2025-11-25/schema.ts#L523-L543
+          - validation/mcp-schemas/2026-07-28/schema.ts#L949-L969
+          - validation/mcp-schemas/2025-11-25/schema.ts#L503-L521
+          - validation/mcp-schemas/2026-07-28/schema.ts#L929-L947
+          - validation/mcp-schemas/2024-11-05/schema.ts#L414-L450
+          - validation/mcp-schemas/2025-03-26/schema.ts#L442-L483
+          - validation/mcp-schemas/2025-06-18/schema.ts#L521-L562
+          - validation/mcp-schemas/2025-11-25/schema.ts#L797-L838
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1433-L1474
+          - validation/mcp-schemas/2024-11-05/schema.ts#L452-L481
+          - validation/mcp-schemas/2025-03-26/schema.ts#L485-L519
+          - validation/mcp-schemas/2025-06-18/schema.ts#L564-L598
+          - validation/mcp-schemas/2025-11-25/schema.ts#L840-L874
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1476-L1507
+          - validation/mcp-schemas/2024-11-05/schema.ts#L558-L574
+          - validation/mcp-schemas/2025-03-26/schema.ts#L596-L612
+          - validation/mcp-schemas/2025-06-18/schema.ts#L696-L715
+          - validation/mcp-schemas/2025-11-25/schema.ts#L979-L999
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1654-L1671
+          - validation/mcp-schemas/2024-11-05/schema.ts#L576-L592
+          - validation/mcp-schemas/2025-03-26/schema.ts#L614-L630
+          - validation/mcp-schemas/2025-06-18/schema.ts#L717-L731
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1001-L1015
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1673-L1687
+          - validation/mcp-schemas/2024-11-05/schema.ts#L205-L248
+          - validation/mcp-schemas/2025-03-26/schema.ts#L225-L272
+          - validation/mcp-schemas/2025-06-18/schema.ts#L253-L302
+          - validation/mcp-schemas/2025-11-25/schema.ts#L381-L457
+          - validation/mcp-schemas/2026-07-28/schema.ts#L788-L883
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/protocol-version-inapplicable-execution.json
+        pointer: /tools/0
+        outcome: error
+      - path: expected-invalid/protocol-version-inapplicable-tool-schema-dialect.json
+        pointer: /tools/0/inputSchema
+        outcome: error
+    notes: >-
+      outputSchema, the outputSchema root, and the tasks capability have their
+      own rules; the rule property identifies which applies.
+
+  - id: mcpdesc.protocol-scope.consistency
+    title: "Keep protocol scopes consistent and disjoint"
+    description: >-
+      An omitted scope inherits its parent's full scope; an explicit child
+      scope must stay within it. Declarations with the same identity cannot
+      overlap where the specification requires uniqueness. Narrow the scopes
+      rather than expecting the validator to choose one variant.
+    applicability:
+      protocolVersions: independent
+    owner: mcpdesc
+    summary: >-
+      Nested protocol scopes stay within their parent scope, and same-named
+      primitives and capability objects do not overlap in protocol scope.
+    surface: Document
+    path: protocolVersions
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 4.10 and 8.6
+        locations:
+          - sections/04-versioning.md#req-scope-subset
+          - sections/08-capabilities.md#req-capability-scopes-disjoint
+          - sections/09-tools.md#req-tool-names-disjoint
+          - sections/12-elicitation.md#req-elicitation-scope
+          - sections/04-versioning.md#req-scope-root-subset
+          - sections/10-resources.md#req-resource-scopes-disjoint
+          - sections/11-prompts.md#req-prompt-scopes-disjoint
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/elicitation-scope-outside-parent.json
+        pointer: /resourceTemplates/0/elicitations/0
+        outcome: error
+      - path: expected-invalid/scoped-version-not-in-root.json
+        pointer: /transports/0
+        outcome: error
+      - path: expected-invalid/overlapping-tool-scope.json
+        pointer: /tools/1
+        outcome: error
+      - path: expected-invalid/overlapping-capabilities.json
+        pointer: /capabilities/0
+        outcome: error
+
+  - id: mcpdesc.tags.references
+    title: "Reference unique declared tags"
+    description: >-
+      When the document declares a tag catalog, primitive tag references
+      must name entries in it. Root tag names and repeated primitive
+      references are checked for duplicates. Fix the name or catalog entry
+      instead of relying on an undeclared alias.
+    applicability:
+      protocolVersions: independent
+    owner: mcpdesc
+    summary: Root tag names are unique, and primitives reference only declared tags.
+    surface: Tag
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 13.2 and 13.3
+        locations:
+          - sections/13-tags.md#req-tags-unique
+          - sections/13-tags.md#req-tags-references
+          - sections/09-tools.md#req-tool-tags-references
+          - sections/10-resources.md#req-resource-tags-references
+          - sections/10-resources.md#req-resource-template-tags-references
+          - sections/11-prompts.md#req-prompt-tags-references
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/duplicate-root-tag.json
+        pointer: /tags/1
+        outcome: error
+      - path: expected-invalid/duplicate-tag-reference.json
+        pointer: /tools/0/tags
+        outcome: error
+
+  - id: mcpdesc.security.requirements
+    title: "Reference security schemes and scopes correctly"
+    description: >-
+      Security requirements refer to named schemes, and scopes have meaning
+      only for OAuth 2.0 or OpenID Connect schemes. Correct missing references
+      or repeated scopes. An uncataloged scope can produce a warning where
+      the scheme declares a static scope catalog.
+    applicability:
+      protocolVersions: independent
+    owner: mcpdesc
+    summary: >-
+      Security requirements name declared schemes, list scopes only for OAuth
+      2.0 and OpenID Connect schemes, do not repeat scopes, and use cataloged
+      scopes when the scheme declares a static catalog.
+    surface: Security Requirement
+    kind: mcpdesc-semantic
+    documentSchema:
+      - "#/$defs/securityRequirementArray"
+      - "#/$defs/securityRequirement"
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 7.1 to 7.3
+        locations:
+          - sections/07-security.md#req-security-scheme-references
+          - sections/07-security.md#req-security-scopes-unique
+          - sections/07-security.md#req-security-scopes-oauth-only
+          - sections/07-security.md#req-security-uncataloged-scope
+          - sections/06-transports.md#req-transport-security-example
+          - sections/14-specification-extensions.md#req-extension-ineligible-locations
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/unknown-security-reference.json
+        pointer: /security/0
+        outcome: error
+      - path: expected-invalid/non-oauth-scopes.json
+        pointer: /security/0
+        outcome: error
+      - path: expected-invalid/duplicate-security-scope.json
+        pointer: /security/0
+        outcome: error
+      - path: expected-warning/uncataloged-oauth-scope.json
+        pointer: /tools/0/security/0/oauth
+        outcome: warning
+      - path: expected-warning/uncataloged-openid-scope.json
+        pointer: /security/0/oidc
+        outcome: warning
+    notes: >-
+      The document schema rejects duplicate scopes first; the semantic
+      duplicate-scope check applies only to direct callers of the semantic
+      validator.
+
+  - id: mcpdesc.components.references
+    title: "Resolve component references in the right namespace"
+    description: >-
+      A component reference must identify an existing value in the namespace
+      required by its use site, without a reference cycle. Check both the
+      target name and the namespace. Reuse does not exempt the resolved value
+      from validation in its containing declaration.
+    applicability:
+      protocolVersions: independent
+    owner: mcpdesc
+    summary: >-
+      A Reference Object targets an existing component in the namespace its
+      use site requires, without cycles.
+    surface: Reference Object
+    path: $componentRef
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 17.2 to 17.4
+        locations:
+          - sections/17-components.md#req-component-reference-form
+          - sections/17-components.md#req-component-reference-resolution
+          - sections/09-tools.md#req-tool-schema-references-resolved
+          - sections/09-tools.md#req-tool-example-references-resolved
+          - sections/12-elicitation.md#req-elicitation-schema-references-resolved
+          - sections/10-resources.md#req-resource-example-references-resolved
+          - sections/11-prompts.md#req-prompt-example-references-resolved
+          - sections/17-components.md#req-component-ref-distinct
+          - sections/17-components.md#req-component-contextual-validation
+          - sections/17-components.md#req-component-reference-pointer
+          - sections/17-components.md#req-component-resolution-errors
+          - sections/17-components.md#req-component-cycles
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/component-reference-resolution.json
+        pointer: /components/schemas
+        outcome: error
+
+  - id: mcpdesc.legacy-protocol.validation-scope
+    title: "Limited validation for early MCP protocol versions"
+    description: >-
+      MCP 2024-11-05 and 2025-03-26 receive structural and selected checks,
+      not a claim of complete MCP semantic conformance. The warning describes
+      a validation limitation rather than an invalid document. Adding a later
+      protocol version does not make checks for the earlier versions complete.
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": not-applicable
+        "2025-11-25": not-applicable
+        "2026-07-28": not-applicable
+    owner: mcpdesc
+    summary: >-
+      A document applying to MCP 2024-11-05 or 2025-03-26 is reported as
+      receiving structural and selected checks only, not complete MCP semantic
+      conformance.
+    surface: Document
+    path: protocolVersions
+    kind: mcpdesc-semantic
+    requirement: must
+    specification:
+      - reference: MCP Description 0.9.0, Sections 12.5 and 16.2; Proposal 0024, Section 4.1
+        locations:
+          - sections/16-conformance.md#req-legacy-validation-scope
+          - proposal-snapshots/0024-validation-rule-identity-and-provenance.md
+          - sections/12-elicitation.md#req-elicitation-legacy-incomplete
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-warning/legacy-result-meta.json
+        pointer: /protocolVersions
+        outcome: warning
+
+  - id: mcpdesc.info.members
+    title: "Describe the server in a valid Info Object"
+    description: >-
+      The required info object names and versions the server. Its contact and
+      license objects are closed and follow the property tables of Section 5.
+    owner: mcpdesc
+    summary: >-
+      Info has a non-empty name and version, and Info, Contact, and License
+      contain only their defined properties with the defined types.
+    surface: Info, Contact, License
+    kind: structural
+    documentSchema:
+      - "#/$defs/info"
+      - "#/$defs/contact"
+      - "#/$defs/license"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 5
+        locations:
+          - sections/05-info-object.md#req-info-fields
+          - sections/05-info-object.md#req-contact-fields
+          - sections/05-info-object.md#req-license-fields
+          - sections/04-versioning.md#req-info-unscoped
+          - sections/05-info-object.md#req-info-protocol-version-independent
+          - sections/05-info-object.md#req-info-name-non-empty
+          - sections/05-info-object.md#req-info-version-non-empty
+          - sections/15-serialization.md#req-serialization-value-formats
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-valid/protocol-independent-info-metadata.json
+        pointer: /info
+        outcome: passes
+      - path: expected-invalid/malformed-info-transport-tag-resource.json
+        pointer: "/info/owner"
+        outcome: error
+
+  - id: mcpdesc.protocol-versions.values
+    title: "List supported MCP protocol versions in protocol scopes"
+    description: >-
+      Root and declaration protocolVersions arrays are non-empty, contain no
+      duplicates, and name only MCP protocol versions this specification supports.
+    owner: mcpdesc
+    summary: >-
+      A protocolVersions array is non-empty, has unique values, and contains
+      only supported MCP protocol-version identifiers.
+    surface: Document, scoped declarations
+    kind: structural
+    documentSchema:
+      - "#/$defs/protocolVersionScope"
+      - "#/$defs/supportedProtocolVersion"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 4
+        locations:
+          - sections/04-versioning.md#req-protocol-versions-values
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/closed-protocol-enum.json
+        pointer: "/protocolVersions/0"
+        outcome: error
+
+  - id: mcpdesc.security-scheme.members
+    title: "Define security schemes with their required fields"
+    description: >-
+      Named security schemes are non-empty and each scheme has a type and the
+      fields that type requires, such as OAuth flows with their URLs and scopes.
+      Unknown properties are rejected.
+    owner: mcpdesc
+    summary: >-
+      securitySchemes is a non-empty map of Security Scheme Objects that
+      contain their type-specific required fields and only defined properties.
+    surface: Security Scheme
+    kind: structural
+    documentSchema:
+      - "#/$defs/securitySchemeMap"
+      - "#/$defs/securityScheme"
+      - "#/$defs/oauthFlows"
+      - "#/$defs/oauthFlow"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 7.1 and 7.2
+        locations:
+          - sections/07-security.md#req-security-scheme-fields
+          - sections/07-security.md#req-security-schemes-map
+          - sections/07-security.md#req-oauth-flows-fields
+          - sections/15-serialization.md#req-serialization-value-formats
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/empty-ordinary-root-collections.json
+        pointer: "/securitySchemes"
+        outcome: error
+      - path: expected-invalid/invalid-security-scheme-name.json
+        pointer: "/securitySchemes"
+        outcome: error
+      - path: expected-invalid/discriminated-union-members.json
+        pointer: /securitySchemes/token
+        outcome: error
+
+  - id: mcpdesc.tag.members
+    title: "Declare tags with a name"
+    description: >-
+      Each entry of the root tags catalog is a Tag Object with a name and only
+      the properties of Section 13.1.
+    owner: mcpdesc
+    summary: >-
+      A Tag Object has a non-empty name and only its defined properties.
+    surface: Tag
+    kind: structural
+    documentSchema:
+      - "#/$defs/tag"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 13.1
+        locations:
+          - sections/13-tags.md#req-tag-fields
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-info-transport-tag-resource.json
+        pointer: "/tags/0"
+        outcome: error
+
+  - id: mcpdesc.components.members
+    title: "Shape components and Reference Objects"
+    description: >-
+      The components object holds non-empty named maps in its five namespaces.
+      A Reference Object has exactly one $componentRef. Where a value may be
+      inline or a reference, the inline form is a JSON object without $componentRef.
+    owner: mcpdesc
+    summary: >-
+      Components contain non-empty, well-named maps; a Reference Object has
+      only $componentRef; an inline schema or example is an object.
+    surface: Components, Reference Object
+    kind: structural
+    documentSchema:
+      - "#/$defs/components"
+      - "#/$defs/componentMap"
+      - "#/$defs/referenceObject"
+      - "#/$defs/schemaComponentValue"
+      - "#/$defs/jsonSchemaObject"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 17.1 and 17.2
+        locations:
+          - sections/17-components.md#req-components-fields
+          - sections/17-components.md#req-reference-object-fields
+          - sections/14-specification-extensions.md#req-extension-ineligible-locations
+          - sections/14-specification-extensions.md#req-extension-component-names
+          - sections/17-components.md#req-component-maps
+          - sections/17-components.md#req-components-closed
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/components-empty-and-reference-shapes.json
+        pointer: "/components/schemas"
+        outcome: error
+
+  - id: mcpdesc.serialization.conforming
+    title: "Serialize documents as JSON or restricted YAML"
+    description: >-
+      A document is UTF-8 JSON or a single restricted YAML document that
+      decodes to the JSON data model: string keys only, no duplicate keys,
+      tags, or aliases, no merge semantics, and only finite numbers. Rejected
+      YAML is not validated further.
+    owner: mcpdesc
+    summary: >-
+      A document uses a conforming serialization: RFC 8259 JSON in UTF-8, or
+      exactly one YAML document within the restricted YAML profile.
+    surface: Document serialization
+    kind: structural
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 15
+        locations:
+          - sections/03-document-structure.md#req-conforming-serialization
+          - sections/15-serialization.md#req-serialization-json
+          - sections/15-serialization.md#req-serialization-yaml-claims
+          - sections/15-serialization.md#req-serialization-yaml-single-document
+          - sections/15-serialization.md#req-serialization-yaml-string-keys
+          - sections/15-serialization.md#req-serialization-yaml-duplicate-keys
+          - sections/15-serialization.md#req-serialization-yaml-scalars
+          - sections/15-serialization.md#req-serialization-yaml-tags
+          - sections/15-serialization.md#req-serialization-yaml-aliases
+          - sections/15-serialization.md#req-serialization-yaml-merge-keys
+          - sections/15-serialization.md#req-serialization-yaml-validation
+    enforcement: external
+    status: delegated
+    fixtures:
+      - path: serialization-fixtures/equivalent/document.json
+        pointer: ""
+        outcome: passes
+      - path: serialization-fixtures/equivalent/document.yaml
+        pointer: ""
+        outcome: passes
+      - path: serialization-fixtures/expected-valid/scalars-and-ordinary-merge-key.yaml
+        pointer: ""
+        outcome: passes
+      - path: serialization-fixtures/expected-invalid/multiple-documents.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/non-string-key.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/duplicate-key.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/positive-infinity.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/custom-tag.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/alias.yaml
+        pointer: ""
+        outcome: error
+      - path: serialization-fixtures/expected-invalid/merge-alias.yaml
+        pointer: ""
+        outcome: error
+    notes: >-
+      Checked when a serialization is decoded, before document validation, so
+      a validator that receives decoded data reports this rule as delegated.
+      Checked by decoding the serialization fixtures; scripts/test-serializations.mjs
+      also checks that the equivalent JSON and YAML documents decode and
+      validate identically.

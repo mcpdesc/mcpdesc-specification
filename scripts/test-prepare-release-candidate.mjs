@@ -6,6 +6,11 @@ import path from 'node:path';
 import process from 'node:process';
 
 const root = process.cwd();
+if (!fs.existsSync(path.join(root, 'spec', 'draft')) || !fs.existsSync(path.join(root, 'schemas', 'draft.json'))) {
+  console.log('Release candidate preparation tests skipped: no active draft.');
+  process.exit(0);
+}
+
 const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mcpdesc-rc-prepare-'));
 const copy = (relative) => {
   const destination = path.join(temporaryRoot, relative);

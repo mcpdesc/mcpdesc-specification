@@ -8,9 +8,10 @@ Maintain a precise, portable, machine-readable description format for MCP server
 
 ## Locked constraints
 
-- v0.8.0 is the current stable release in this repository.
+- v0.9.0 is the current stable release in this repository, frozen in `spec/0.9.0/`; its schema is `schemas/mcp-description/0.9.0.json`.
+- v0.8.0 is the previous stable release, frozen in `spec/0.8.0/`.
 - v0.7.0 remains frozen; its canonical source remains Cisco Open.
-- v0.9.0 is the active community working draft in `spec/draft/`; its schema is `schemas/mcp-description/0.9.0.json`.
+- No active draft exists; initialize `spec/draft/` only when development of the next version explicitly begins.
 - `schemas/latest.json` identifies the current stable release and MUST NOT point to draft or prerelease content.
 - No CLA, copyright assignment, or DCO is required.
 - Preserve copyright, licensing, attribution, origin, and modification records.
@@ -25,7 +26,7 @@ When an active development version has been initialized, update all affected art
 4. examples and fixtures;
 5. `spec/draft/CHANGELOG.md`;
 6. migration or compatibility notes;
-7. proposal status, when applicable.
+7. proposal snapshot list in `spec/draft/PROPOSALS.md`, when applicable.
 
 Do not silently make the schema more or less permissive than the normative text.
 
@@ -43,6 +44,7 @@ Use RFC 2119/8174 key words only for genuine normative requirements and keep cap
 - Develop each normative change on a `feature/<topic>` branch that targets `main` (for example `feature/support-meta`) and edit `spec/draft/` only. Corrections to released examples, fixtures, and documentation must not change conformance semantics and must follow the editorial-edition policy in `GOVERNANCE.md`.
 - Release by freezing `spec/draft/` into `spec/<version>/`, tagging the version, and updating the stable schema pointers. Initialize the next `spec/draft/` only when development of the next version explicitly begins.
 - Link each normative pull request to an issue and, when applicable, a proposal.
+- Keep `spec/draft/PROPOSALS.md` as a concise list of proposal snapshots included in the specification version. Inclusion means implemented in that version; use Git history as the source of truth for changes.
 - Keep changes focused; separate research/proposals from normative implementation when practical.
 - Prefer primary MCP specification sources for protocol claims.
 - Distinguish runtime MCP behavior from static description concerns.

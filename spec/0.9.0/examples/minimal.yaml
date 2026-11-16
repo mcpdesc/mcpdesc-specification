@@ -1,0 +1,36 @@
+mcpdesc: 0.9.0
+info:
+  name: chess-rating-server
+  title: Chess Rating MCP Server
+  version: 1.0.0
+protocolVersions:
+  - "2026-07-28"
+transports:
+  - type: stdio
+    command: chess-rating
+    args:
+      - serve
+tools:
+  - name: get_player_rating
+    description: Get the current FIDE standard rating for a chess player
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          description: FIDE player identifier
+          type: string
+      required:
+        - player_id
+    outputSchema:
+      type: integer
+      description: Current FIDE standard rating
+    examples:
+      fide-rating:
+        input:
+          player_id: planchaman
+        result:
+          resultType: complete
+          content:
+            - type: text
+              text: The player's FIDE rating is 1701
+          structuredContent: 1701

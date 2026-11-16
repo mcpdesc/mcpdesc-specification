@@ -3,7 +3,7 @@
 A portable, machine-readable description format for [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers.
 
 > This directory contains the MCP Description (`mcpdesc`) specification. Version
-> **0.8.0** is the current stable release, maintained in this repository.
+> **0.9.0** is the current stable release, maintained in this repository.
 > Implementations vendor a single schema version from [`../schemas/mcp-description/`](../schemas/mcp-description/)
 > and upgrade when the format advances.
 
@@ -17,31 +17,35 @@ Think of it as **OpenAPI for MCP servers**: a static description that enables di
 
 | Version | Status | Canonical source | Schema |
 |---------|--------|------------------|--------|
-| 0.9.0 | Release Candidate 4 (`v0.9.0-rc.4`; prerelease) — in preparation | [`draft/`](draft/) | [`../schemas/mcp-description/0.9.0.json`](../schemas/mcp-description/0.9.0.json) |
-| 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) |
-| 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
+| 0.9.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.9.0/spec/0.9.0) | [`../schemas/mcp-description/0.9.0.json`](../schemas/mcp-description/0.9.0.json) |
+| 0.8.0 | Previous stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) | [`../schemas/mcp-description/0.8.0.json`](../schemas/mcp-description/0.8.0.json) |
+| 0.7.0 | Historical stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) | [`../schemas/mcp-description/0.7.0.json`](../schemas/mcp-description/0.7.0.json) |
 
 The machine-readable form of this status is in [`../specification-status.json`](../specification-status.json).
-RC.4 builds on the Section 18 document ordering profile and review-stage
-Proposals 0034 and 0035, with guarded unions and source-aware diagnostics. It
-adds Proposal 0036's normalized YAML presentation profile in Section 15.9 and
-aligned getting-started examples; formatting does not change YAML input
-acceptance or schema constraints. Its canonical schema identity is
-`https://mcpdesc.org/schema/mcp-description/0.9.0-rc.4.json`; `mcpdesc`
-remains `0.9.0`. Proposal 0036 remains Draft under [PR #120](https://github.com/mcpdesc/mcpdesc-specification/pull/120), and its implementation remains subject to review. The candidate is not yet tagged or published, and downstream support for selector `0.9.0-rc.4` requires separate adoption. Review-stage content remains subject to incompatible change or removal. See the [candidate changelog](draft/CHANGELOG.md) and [migration guide](draft/guides/migration-0.8-to-0.9.md).
-The exact proposal protocol versions represented by 0.8.0 are recorded in its [`0.8.0/PROPOSALS.md`](0.8.0/PROPOSALS.md) manifest.
+MCP Description 0.9.0 is the stable specification release. It adds protocol-
+version-scoped validation, Effective Protocol Views, merge and conversion
+profiles, complete validation results and diagnostics, and a normalized YAML
+presentation profile. Its canonical schema identity is
+`https://mcpdesc.org/schema/mcp-description/0.9.0.json`; `mcpdesc` is `0.9.0`.
+The release includes changes from Proposals 0024–0036 and breaking changes
+relative to 0.8.0; see the [changelog](0.9.0/CHANGELOG.md),
+[proposal manifest](0.9.0/PROPOSALS.md), and
+[migration guide](0.9.0/guides/migration-0.8-to-0.9.md). Downstream default
+adoption and publication on `mcpdesc.org` are coordinated separately.
+The exact proposal protocol versions represented by 0.8.0 are recorded in its
+[`0.8.0/PROPOSALS.md`](0.8.0/PROPOSALS.md) manifest.
 
 ## Quick Example
 
 ```yaml
-$schema: https://mcpdesc.org/schema/mcp-description/0.8.0.json
-mcpdesc: 0.8.0
+$schema: https://mcpdesc.org/schema/mcp-description/0.9.0.json
+mcpdesc: 0.9.0
 info:
   name: chess-rating-server
   title: Chess Rating MCP Server
   version: 1.0.0
 protocolVersions:
-- '2026-07-28'
+  - "2026-07-28"
 ```
 
 ## Directory Structure
@@ -51,7 +55,8 @@ read directly, without consulting git history. An in-progress working draft live
 
 ```
 spec/
-  0.8.0/               Frozen current stable release
+  0.9.0/               Frozen current stable release
+  0.8.0/               Frozen previous stable release
   0.7.0/               Frozen release pointer (canonical source: Cisco Open)
   README.md            Version index and status (this file)
   implementations.md   Known implementations and tooling
@@ -63,10 +68,10 @@ Versioned JSON Schemas live at the repository root under
 
 ## Getting Started
 
-- **Read the spec**: [0.8.0/mcp-description.md](0.8.0/mcp-description.md)
-- **Explore examples**: [0.8.0/examples/](0.8.0/examples/)
-- **Try the schema**: [../schemas/mcp-description/0.8.0.json](../schemas/mcp-description/0.8.0.json) (latest — see [../schemas/latest.json](../schemas/latest.json))
-- **Write your first description**: [0.8.0/guides/getting-started.md](0.8.0/guides/getting-started.md)
+- **Read the spec**: [0.9.0/mcp-description.md](0.9.0/mcp-description.md)
+- **Explore examples**: [0.9.0/examples/](0.9.0/examples/)
+- **Try the schema**: [../schemas/mcp-description/0.9.0.json](../schemas/mcp-description/0.9.0.json) (latest — see [../schemas/latest.json](../schemas/latest.json))
+- **Write your first description**: [0.9.0/guides/getting-started.md](0.9.0/guides/getting-started.md)
 
 ## Key Features
 

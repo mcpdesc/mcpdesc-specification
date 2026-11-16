@@ -1,0 +1,233 @@
+mcpdesc: 0.9.0
+info:
+  name: chess-coach
+  title: Chess Coach Local
+  version: 2.1.0
+  description: Analyze chess games, track player ratings, and review game history via stdio
+protocolVersions:
+  - "2025-11-25"
+transports:
+  - type: stdio
+    command: chess-coach
+    args:
+      - mcp
+      - --db
+      - games.db
+    env:
+      CHESS_ENGINE_PATH: /usr/local/bin/stockfish
+capabilities:
+  - tools:
+      listChanged: false
+    resources:
+      subscribe: false
+      listChanged: false
+tools:
+  - name: analyze_game
+    title: Analyze Chess Game
+    description: Analyze a chess game from PGN notation and return evaluation, best moves, and blunder detection
+    tags:
+      - analysis
+    inputSchema:
+      type: object
+      properties:
+        pgn:
+          type: string
+          description: Game in Portable Game Notation (PGN) format
+        depth:
+          type: integer
+          description: "Analysis depth in half-moves (default: 20)"
+          minimum: 1
+          maximum: 40
+      required:
+        - pgn
+    outputSchema:
+      type: object
+      properties:
+        evaluation:
+          type: number
+        best_move:
+          type: string
+        blunders:
+          type: array
+          items:
+            type: object
+            properties:
+              move_number:
+                type: integer
+              move:
+                type: string
+              evaluation_loss:
+                type: number
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+      idempotentHint: true
+    examples:
+      analyzed-game:
+        input:
+          pgn: 1. e4 e5 2. Nf3 Nc6 3. Bb5 a6
+          depth: 20
+        result:
+          content:
+            - type: text
+              text: Game analyzed successfully.
+          structuredContent:
+            evaluation: 0.24
+            best_move: Ba4
+            blunders: []
+  - name: get_player_rating
+    title: Get Player Rating
+    description: Get the current FIDE standard rating for a chess player
+    tags:
+      - ratings
+    inputSchema:
+      type: object
+      properties:
+        player_id:
+          type: string
+          description: FIDE player identifier
+      required:
+        - player_id
+    outputSchema:
+      type: object
+      properties:
+        rating:
+          type: integer
+          description: Current FIDE standard rating
+      required:
+        - rating
+      additionalProperties: false
+    annotations:
+      readOnlyHint: true
+      destructiveHint: false
+    examples:
+      fide-rating:
+        input:
+          player_id: planchaman
+        result:
+          content:
+            - type: text
+              text: "{\"rating\":1701}"
+          structuredContent:
+            rating: 1701
+  - name: record_game_result
+    title: Record Game Result
+    description: Record the result of a chess game and update player ratings using Elo calculation
+    tags:
+      - games
+      - ratings
+    inputSchema:
+      type: object
+      properties:
+        white_player_id:
+          type: string
+        black_player_id:
+          type: string
+        result:
+          type: string
+          enum:
+            - 1-0
+            - 0-1
+            - 1/2-1/2
+          description: "Game result: white wins (1-0), black wins (0-1), or draw (1/2-1/2)"
+        pgn:
+          type: string
+          description: Full game in PGN format (optional)
+        time_control:
+          type: string
+          description: Time control e.g. '10+0', '3+2'
+      required:
+        - white_player_id
+        - black_player_id
+        - result
+    outputSchema:
+      type: object
+      properties:
+        game_id:
+          type: string
+          description: Identifier of the recorded game
+      required:
+        - game_id
+      additionalProperties: false
+    annotations:
+      readOnlyHint: false
+      destructiveHint: false
+      idempotentHint: false
+    examples:
+      recorded-game:
+        input:
+          white_player_id: player-42
+          black_player_id: player-84
+          result: 1-0
+        result:
+          content:
+            - type: text
+              text: Game result recorded successfully.
+          structuredContent:
+            game_id: game-2025-001
+resources:
+  - uri: chess://leaderboard/classical
+    name: classical_leaderboard
+    title: Classical Leaderboard
+    description: Current top-100 classical chess ratings leaderboard
+    tags:
+      - ratings
+    mimeType: application/json
+  - uri: chess://leaderboard/rapid
+    name: rapid_leaderboard
+    title: Rapid Leaderboard
+    description: Current top-100 rapid chess ratings leaderboard
+    tags:
+      - ratings
+    mimeType: application/json
+resourceTemplates:
+  - uriTemplate: chess://games/{game_id}
+    name: game_detail
+    title: Game Detail
+    description: Full details of a specific chess game including PGN, moves, and analysis
+    tags:
+      - games
+    mimeType: application/json
+  - uriTemplate: chess://players/{player_id}/games
+    name: player_game_history
+    title: Player Game History
+    description: Complete game history for a specific player
+    tags:
+      - games
+    mimeType: application/json
+  - uriTemplate: chess://players/{player_id}/rating-history
+    name: player_rating_history
+    title: Player Rating History
+    description: Historical Elo rating progression for a player
+    tags:
+      - ratings
+    mimeType: application/json
+prompts:
+  - name: analyze_position
+    title: Analyze Position
+    description: Generate a detailed positional analysis for a chess position
+    tags:
+      - analysis
+    arguments:
+      - name: fen
+        description: Position in Forsyth-Edwards Notation (FEN)
+        required: true
+      - name: perspective
+        description: Analyze from 'white' or 'black' perspective
+        required: false
+  - name: game_summary
+    title: Game Summary
+    description: Generate a narrative summary of a completed chess game
+    tags:
+      - games
+    arguments:
+      - name: game_id
+        description: Identifier of the game to summarize
+        required: true
+tags:
+  - name: analysis
+    description: Game analysis and position evaluation
+  - name: games
+    description: Game records, history, and summaries
+  - name: ratings
+    description: Elo ratings, leaderboards, and statistics

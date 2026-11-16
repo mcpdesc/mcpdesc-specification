@@ -8,22 +8,22 @@ A portable, machine-readable contract format for describing Model Context Protoc
 
 | Version | Status | Canonical source |
 |---|---|---|
-| 0.9.0 | Release Candidate 4 (`v0.9.0-rc.4`; prerelease) — in preparation | [`spec/draft/`](spec/draft/) |
-| 0.8.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) |
-| 0.7.0 | Previous stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
+| 0.9.0 | Current stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.9.0/spec/0.9.0) |
+| 0.8.0 | Previous stable release | [`mcpdesc/mcpdesc-specification`](https://github.com/mcpdesc/mcpdesc-specification/tree/v0.8.0/spec/0.8.0) |
+| 0.7.0 | Historical stable release | [`cisco-open/mcptoolkit-contract`](https://github.com/cisco-open/mcptoolkit-contract/tree/main/spec) |
 
 The machine-readable form of this status is in [`specification-status.json`](specification-status.json).
 
 MCP Description 0.8.0 adds MCP `2026-07-28` support, multi-protocol version server descriptions, and deterministic Effective Protocol Views. It also introduces reusable components, richer examples and interactions, primitive client capability requirements, elicitation declarations, formal MCP extension support, reusable security schemes, and conforming JSON and YAML serializations. See the [changelog](CHANGELOG.md) for details. Executable validation is maintained as `@mcpdesc/validator` in the [`mcpdesc/core`](https://github.com/mcpdesc/core) tooling repository.
 
-The 0.9.0 RC.4 candidate builds on RC.3 with the normalized YAML presentation profile from Proposal 0036. Section 15.9 defines deterministic output formatting without changing input parsing, document acceptance, or JSON Schema constraints; the getting-started examples follow the profile. The canonical schema identity and intended downstream selector are `0.9.0-rc.4`; `mcpdesc` remains `0.9.0`. Proposal 0036 is still a draft under [PR #120](https://github.com/mcpdesc/mcpdesc-specification/pull/120), and its implementation remains subject to review and possible change. RC.3 and earlier snapshots remain immutable. RC.4 has not yet been tagged or published, and downstream selector support is not implied. The candidate retains RC.3's diagnostic behavior and its intentional rejection of unknown members on Elicitation Interaction Response Objects in Tool Interaction Examples. The draft also includes the changes from Proposals 0031–0035, dialect-governed Tool schemas, the complete validation catalog, Effective Protocol View and merge cases, and the Resource `uri` requirement. The 0.9.0 draft includes breaking changes relative to 0.8.0 and remains subject to review; its [proposal manifest](spec/draft/PROPOSALS.md), [changelog](spec/draft/CHANGELOG.md), and [migration guide](spec/draft/guides/migration-0.8-to-0.9.md) describe the changes.
+MCP Description 0.9.0 is the current stable specification, with a canonical schema identity of `https://mcpdesc.org/schema/mcp-description/0.9.0.json`. It includes Proposals 0024–0036, YAML scalar-resolution clarification, and the normalized YAML presentation profile. The 0.9.0 [changelog](spec/0.9.0/CHANGELOG.md) and [migration guide](spec/0.9.0/guides/migration-0.8-to-0.9.md) describe the changes from 0.8.0. Adoption as the default in `mcpdesc/core`, the CLI, the editor, and `mcpdesc.org` is coordinated separately.
 
 ## Repository roles
 
 - `main` is the integration branch and the default view of the project. It carries every released specification version and, when development is active, the in-progress `spec/draft/`.
 - Feature branches target `main` via pull request. When an active development version has been initialized, normative feature branches change `spec/draft/`.
 - Released versions are frozen into their own version folder under `spec/` (for example `spec/0.8.0/`) and tagged (for example `v0.8.0`).
-- `schemas/latest.json` identifies the current stable schema. The active 0.9.0 working draft is described by `schemas/draft.json` and `specification-status.json`.
+- `schemas/latest.json` identifies the current stable schema. When development is active, the working draft is described by `specification-status.json`.
 
 ## Project identity
 

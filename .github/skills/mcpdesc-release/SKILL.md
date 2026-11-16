@@ -16,9 +16,9 @@ Use repository scripts as the source of deterministic release behavior. Do not r
    - Draft: `npm run release:prepare -- draft.<iteration> <YYYY-MM-DD>`
    - Release candidate: `npm run release:prepare -- rc.<iteration> <YYYY-MM-DD>`
    - Validator snapshot export: `npm run release:prepare -- validator <x.y.z|x.y.z-draft.n|x.y.z-rc.n|x.y.z-rev.YYYYMMDD> <output-directory>`
-    - Stable: `npm run release:prepare -- stable <x.y.z> <YYYY-MM-DD>`
-       The generic stable helper has not been exercised end to end and was not used for v0.8.0. Do not use it until the next active draft and release-candidate cycle adds fixtures and validates its complete diff.
-4. Complete the review-required prose, proposal provenance, schema pointers, tests, or status changes printed by the script. Snapshot exports require an exact approved tag at a clean `HEAD`.
+   - Stable: `npm run release:prepare -- stable <x.y.z> <YYYY-MM-DD>`
+     The helper has end-to-end coverage in `scripts/test-freeze-version.mjs`. Review its complete output and complete the manual release decisions and prose.
+4. Complete the review-required prose, proposal provenance, schema pointers, tests, or status changes printed by the script. Keep the human-readable proposal summary in `PROPOSALS.md` synchronized with exact source and digest records in `proposal-snapshots/manifest.json`. Snapshot exports require an exact approved tag at a clean `HEAD`.
 5. Run the matching check:
    - `npm run release:check -- draft`
    - `npm run release:check -- rc`
@@ -32,7 +32,7 @@ Use repository scripts as the source of deterministic release behavior. Do not r
 
 ## Boundaries
 
-- Draft tags do not update `schemas/latest.json` or make v0.8.0 stable.
+- Draft and release-candidate tags do not update `schemas/latest.json` or make a version stable.
 - Stable releases use `freeze-version.mjs`; draft snapshots do not.
 - This repository exports approved snapshot inputs and does not publish `@mcpdesc/validator`.
 - Never rewrite or move an existing release tag.

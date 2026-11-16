@@ -1,0 +1,751 @@
+rules:
+  - id: mcp.tool.output-schema.protocol-version
+    title: "Declare output schemas only where MCP defines them"
+    description: >-
+      Tool outputSchema is available from MCP 2025-06-18. A Tool whose
+      effective scope includes an earlier protocol version cannot carry it
+      unchanged. Omit it for the earlier version or provide disjoint variants.
+    owner: mcp
+    summary: A Tool declares outputSchema only for MCP protocol versions whose Tool type defines it.
+    surface: Tool
+    path: outputSchema
+    kind: structural
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": not-applicable
+        "2025-11-25": not-applicable
+        "2026-07-28": not-applicable
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.1 (Tool Object field table)
+        locations:
+          - sections/04-versioning.md#req-field-protocol-version-availability
+    sources:
+      - tier: 1
+        reference: MCP 2025-03-26 schema.ts, interface Tool (closed; no outputSchema)
+        locations:
+          - validation/mcp-schemas/2025-03-26/schema.ts#L781-L810
+      - tier: 1
+        reference: MCP 2025-06-18 schema.ts, interface Tool, outputSchema
+        locations:
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/output-schema-before-2025-06-18.json
+        pointer: /tools/0
+        outcome: error
+
+  - id: mcp.tool.output-schema.object-root
+    title: "Use object output schemas before MCP 2026"
+    description: >-
+      MCP 2025-06-18 and 2025-11-25 require structured output to be an object.
+      For MCP 2025-06-18 the outputSchema root declares type object. For MCP
+      2025-11-25 a declared root type must include object; a root without a
+      literal type object stays valid and mcp.tool.schema.native-shape warns.
+      MCP 2026-07-28 permits other roots, so an array schema needs a scope
+      that excludes the object-only versions; projection must not wrap it in
+      an object as a repair.
+    owner: mcp
+    summary: >-
+      Before MCP 2026-07-28, a Tool outputSchema describes an object: a literal
+      type "object" for MCP 2025-06-18, and a declared root type that includes
+      "object" for MCP 2025-11-25.
+    surface: Tool
+    path: outputSchema
+    kind: structural
+    requirement: must
+    applicability:
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": not-applicable
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-output-schema-object-root
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 and 2025-11-25 schema.ts, interface Tool, outputSchema (type "object")
+        locations:
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1272-L1284
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, interface Tool, outputSchema (no root type)
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
+      - tier: 1
+        reference: MCP 2025-11-25 specification, Basic, JSON Schema usage (schemas are validated under their declared or default dialect)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - path: expected-invalid/non-object-output-schema-before-2026.json
+        pointer: /tools/0/outputSchema
+        outcome: error
+      - path: expected-valid/protocol-coverage-and-tool-schemas.json
+        pointer: /tools/3/outputSchema
+        outcome: not-applicable
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/3/outputSchema
+        outcome: passes
+    arbitrations:
+      - protocolVersions: ["2025-11-25"]
+        conflict: >-
+          The specification validates the outputSchema under its declared or
+          default dialect, while schema.ts requires the JSON Schema keyword and
+          value type "object" at the root. A root in allOf or $ref can describe
+          an object without matching the TypeScript type.
+        authority: MCP specification text on schema dialects, with the object requirement on structured output
+        behavior: >-
+          Reject a declared root type that excludes "object"; accept other
+          roots that are valid under the dialect, which
+          mcp.tool.schema.native-shape reports as warnings.
+        rationale: >-
+          One position for every conflict between MCP's dialect text and the
+          schema syntax of its TypeScript types (Proposal 0032): MCP
+          Description enforces what MCP requires of the data and reports, but
+          does not decide, the narrower TypeScript syntax.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
+        reviewTrigger: Resolution of MCP issue 3238 or an MCP erratum for 2025-11-25.
+        status: active
+    gaps:
+      - protocolVersions: ["2024-11-05", "2025-03-26"]
+        behavior: >-
+          The object-root check also runs where outputSchema is not defined, so a
+          non-object outputSchema reports this error in addition to the
+          protocol-version applicability error.
+        resolution: not-fixed
+
+  - id: mcp.tool.schema-keywords.preserve
+    title: "Retain embedded JSON Schema keywords"
+    description: >-
+      Embedded Tool schemas can contain keywords beyond the fields MCP lists.
+      A tool must preserve them through the operations covered by the
+      specification instead of discarding unrecognized keywords. This is a
+      tooling guarantee, so a valid custom keyword does not itself produce a
+      document diagnostic.
+    owner: mcp
+    summary: >-
+      Tool inputSchema and outputSchema are JSON Schema objects; keywords beyond
+      those MCP lists are permitted and preserved, and acquire MCP semantics
+      only where a protocol version defines them.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: preservation
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-vocabulary
+          - sections/09-tools.md#req-tool-schema-keywords-preserved
+    sources:
+      - tier: 1
+        reference: MCP 2024-11-05 to 2025-11-25 schema.ts, interface Tool, inputSchema and outputSchema doc comments ("A JSON Schema object")
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L696-L703
+          - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
+          - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1265
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1272-L1284
+      - tier: 1
+        reference: "MCP 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema (index signature [key: string]: unknown)"
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - path: view-fixtures/view-tool-schema-keywords-2025-11-25.json
+        pointer: /expected
+        outcome: passes
+    arbitrations:
+      - protocolVersions: ["2024-11-05", "2025-03-26", "2025-06-18", "2025-11-25"]
+        conflict: >-
+          The TypeScript type of inputSchema (and outputSchema from 2025-06-18)
+          lists only type, properties, required, and from 2025-11-25 $schema,
+          with no index signature, while its doc comment defines the value as a
+          JSON Schema object.
+        authority: MCP schema.ts doc comment, consistent with MCP 2026-07-28
+        behavior: Accept and preserve any JSON Schema keyword in these protocol versions.
+        rationale: >-
+          A JSON Schema object admits any keyword. MCP 2026-07-28 makes this
+          explicit with an index signature, and rejecting keywords such as $defs
+          or $ref would reject Tools that MCP clients accept.
+        reviewTrigger: An upstream clarification or erratum for the earlier protocol versions.
+        status: active
+
+  - id: mcp.tool.input-schema.object-root
+    title: "Give Tool input schemas an object root"
+    description: >-
+      Tool arguments are always a JSON object, so after component resolution
+      the inputSchema root must describe an object. Before MCP 2025-11-25 the
+      root declares the literal type object. From MCP 2025-11-25 a declared
+      root type must include object; a root in $ref or allOf stays valid, and
+      mcp.tool.schema.native-shape warns that the MCP Tool type expects a
+      literal type object.
+    owner: mcp
+    summary: >-
+      Tool inputSchema describes an object: a literal type "object" before MCP
+      2025-11-25, and from MCP 2025-11-25 a declared root type that includes
+      "object".
+    surface: Tool
+    path: inputSchema
+    kind: structural
+    requirement: must
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-input-schema-object-root
+    sources:
+      - tier: 1
+        reference: 'MCP 2024-11-05 to 2026-07-28 schema.ts, interface Tool, inputSchema type: "object"'
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L696-L703
+          - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
+          - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1265
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
+      - tier: 1
+        reference: MCP 2026-07-28 specification, Server Features, Tools, Data Types, Tool (inputSchema MUST be a valid JSON Schema object, not null)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L293-L293
+      - tier: 1
+        reference: MCP 2025-11-25 and 2026-07-28 specification, Basic, JSON Schema usage (schemas are validated under their declared or default dialect)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L251-L297
+      - tier: 4
+        reference: MCP SEP-2106 (Final), which keeps type "object" deliberately
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/seps/2106-json-schema-2020-12.md
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - path: expected-invalid/non-object-input-schema.json
+        pointer: /tools/0/inputSchema
+        outcome: error
+      - path: expected-invalid/non-object-input-schema.json
+        pointer: /tools/2/inputSchema
+        outcome: error
+      - path: expected-invalid/non-literal-object-input-schema-before-2025-11-25.json
+        pointer: /tools/0/inputSchema
+        outcome: error
+      - path: expected-invalid/empty-input-schema-before-2025-11-25.json
+        pointer: /tools/0/inputSchema
+        outcome: error
+      - path: expected-warning/empty-input-schema.json
+        pointer: /tools/0/inputSchema
+        outcome: passes
+      - path: expected-valid/custom-tool-schema-keywords.json
+        pointer: /tools/0/inputSchema
+        outcome: passes
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/2/inputSchema
+        outcome: passes
+    arbitrations:
+      - protocolVersions: ["2025-11-25", "2026-07-28"]
+        conflict: >-
+          The specification validates embedded schemas under their declared or
+          default dialect, while schema.ts requires the JSON Schema keyword and
+          value type "object" at the root. A schema rooted in $ref or allOf can
+          describe an object but does not match the TypeScript type.
+        authority: MCP specification text on schema dialects, with the requirement that tool arguments are objects
+        behavior: >-
+          Reject a declared root type that excludes "object"; accept other
+          roots that are valid under the dialect, which
+          mcp.tool.schema.native-shape reports as warnings.
+        rationale: >-
+          One position for every conflict between MCP's dialect text and the
+          schema syntax of its TypeScript types (Proposal 0032): MCP
+          Description enforces what MCP requires of the data and reports, but
+          does not decide, the narrower TypeScript syntax. Replaces the Draft 3
+          decision to require a literal type "object" in every protocol version.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
+        reviewTrigger: Resolution of MCP issue 3238 or a later MCP protocol version that changes the inputSchema type.
+        status: active
+
+  - id: mcp.tool.input-schema.x-mcp-header
+    title: "Use valid HTTP header mappings in Tool input"
+    description: >-
+      MCP 2026-07-28 gives x-mcp-header meaning on string, integer, or boolean
+      input properties reachable through properties chains. Check header
+      tokens, placement, and case-insensitive uniqueness. Earlier protocol
+      versions preserve the keyword without applying those MCP header
+      semantics.
+    owner: mcp
+    summary: >-
+      An x-mcp-header annotation is a non-empty HTTP field-name token on a
+      boolean, integer, or string property reachable from the input schema root
+      through properties only, and is unique case-insensitively within the Tool.
+    surface: Tool
+    path: inputSchema properties x-mcp-header
+    kind: semantic
+    applicability:
+      protocolVersions:
+        "2024-11-05": opaque
+        "2025-03-26": opaque
+        "2025-06-18": opaque
+        "2025-11-25": opaque
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-x-mcp-header
+    sources:
+      - tier: 1
+        reference: MCP 2026-07-28 specification, Streamable HTTP transport, x-mcp-header validity and extraction rules
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L334-L402
+      - tier: 1
+        reference: MCP 2026-07-28 schema.ts, interface Tool, inputSchema doc comment
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-valid/protocol-version-inapplicable-mcp-header.json
+        pointer: /tools/0/inputSchema
+        outcome: not-applicable
+      - path: expected-valid/custom-tool-schema-keywords.json
+        pointer: /tools/0/inputSchema/properties/region
+        outcome: passes
+      - path: expected-invalid/invalid-mcp-header-value.json
+        pointer: /tools/0/inputSchema/properties/region
+        outcome: error
+      - path: expected-invalid/invalid-mcp-header-placement.json
+        pointer: /tools/0/inputSchema/allOf/0/properties/region
+        outcome: error
+      - path: expected-invalid/duplicate-mcp-header.json
+        pointer: /tools/0/inputSchema/properties/fallbackRegion
+        outcome: error
+
+  - id: json-schema.tool-schema.valid
+    title: "Validate embedded Tool schemas in their dialect"
+    description: >-
+      Tool input and output schemas must be valid under their applicable JSON
+      Schema dialect. Unsupported declared dialects are errors; unresolved
+      external references warn when complete offline checking is unavailable.
+      External schemas are not fetched automatically, and a partial check is
+      not reported as complete.
+    owner: json-schema
+    summary: >-
+      An embedded Tool inputSchema or outputSchema is valid under its declared
+      or default JSON Schema dialect, and a declared dialect is JSON Schema
+      2020-12 or draft-07.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: embedded-standard
+    requirement: must
+    applicability:
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": not-applicable
+        "2025-11-25": applies
+        "2026-07-28": applies
+      schemaDialects:
+        - https://json-schema.org/draft/2020-12/schema
+        - http://json-schema.org/draft-07/schema#
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2 (declared dialects limited to 2020-12 and draft-07; never fetch external $ref targets; warn when validation is incomplete)
+        locations:
+          - sections/09-tools.md#req-tool-output-schema-valid
+          - sections/09-tools.md#req-tool-schema-dialect-valid
+          - sections/09-tools.md#req-tool-schema-dialect-set
+          - sections/09-tools.md#req-tool-schema-external-ref
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 and 2026-07-28 specification, Basic, JSON Schema usage, Schema Dialect (implementations must support 2020-12 and must return an error for unsupported dialects)"
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L251-L297
+      - tier: 1
+        reference: MCP 2025-11-25 and 2026-07-28 schema.ts, interface Tool, inputSchema and outputSchema doc comments (default JSON Schema 2020-12 when $schema is absent)
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1265
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L1997
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1272-L1284
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1999-L2005
+      - tier: 2
+        reference: JSON Schema 2020-12 Core and Validation, and draft-07, for the declared dialect
+        locations:
+          - https://json-schema.org/draft/2020-12/json-schema-core
+          - https://json-schema.org/draft/2020-12/json-schema-validation
+          - https://json-schema.org/draft-07/json-schema-core
+          - https://json-schema.org/draft-07/json-schema-validation
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-tool-schema.json
+        pointer: /tools/0
+        outcome: error
+      - path: expected-invalid/unresolved-local-tool-ref.json
+        pointer: /tools/0
+        outcome: error
+      - path: expected-invalid/unsupported-tool-schema-dialect.json
+        pointer: /tools/0/inputSchema
+        outcome: error
+      - path: expected-warning/unresolved-external-tool-ref.json
+        pointer: /tools/0
+        outcome: warning
+      - path: expected-warning/unresolved-external-tool-example-ref.json
+        pointer: /tools/0
+        outcome: warning
+    notes: >-
+      The declared dialect set is fixed by the specification, not by the
+      validator: an unsupported dialect is an error, not a warning, because
+      MCP guarantees only 2020-12 support and peers return an error for other
+      dialects, and because Tool examples cannot be checked against a schema
+      in an unknown dialect (maintainer decision on issue #72, 2026-10-26).
+      Unresolved external references differ: offline validation forbids
+      retrieving them, so they only warn. Earlier protocol versions define no embedded
+      dialect; mcp.tool.schema.legacy-shape applies to those protocol versions instead.
+
+  - id: mcp.tool.schema.legacy-shape
+    title: "Check early Tool schemas without inferring a dialect"
+    description: >-
+      Early MCP protocol versions define a limited Tool-schema shape without a
+      default embedded dialect. Check the known properties and required-name
+      list without rejecting other keywords using an inferred meta-schema.
+      Incomplete example validation is reported separately.
+    owner: mcp
+    summary: >-
+      Before MCP 2025-11-25, Tool schema properties is an object of objects
+      and required is an array of strings; other keywords are preserved.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: structural
+    requirement: must
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": not-applicable
+        "2026-07-28": not-applicable
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-legacy-shape
+          - sections/09-tools.md#req-tool-schema-legacy-no-dialect
+    sources:
+      - tier: 1
+        reference: "MCP 2024-11-05 to 2025-06-18 schema.ts, interface Tool, inputSchema (and outputSchema from 2025-06-18): properties?: { [key: string]: object }, required?: string[]"
+        locations:
+          - validation/mcp-schemas/2024-11-05/schema.ts#L696-L703
+          - validation/mcp-schemas/2025-03-26/schema.ts#L797-L804
+          - validation/mcp-schemas/2025-06-18/schema.ts#L938-L945
+          - validation/mcp-schemas/2025-06-18/schema.ts#L947-L955
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/malformed-pre-dialect-tool-schema-shape.json
+        pointer: /tools/0/inputSchema
+        outcome: error
+    notes: >-
+      From MCP 2025-11-25 the embedded dialect governs these keywords
+      (json-schema.tool-schema.valid); mcp.tool.schema.native-shape warns where
+      the MCP 2025-11-25 Tool type is narrower.
+
+  - id: mcp.tool.schema.native-shape
+    title: "Report Tool schemas that MCP Tool types reject"
+    description: >-
+      From MCP 2025-11-25, an embedded Tool schema is judged by its JSON Schema
+      dialect, but the MCP Tool type still restricts some schema syntax: a
+      literal type object at the inputSchema root, and for MCP 2025-11-25 at
+      the outputSchema root and an object for each top-level properties value.
+      A schema that misses a restriction stays valid and receives a warning
+      naming the protocol versions concerned, because its native projection for them
+      fails. Use {} instead of true, {"not": {}} instead of false, add type
+      object beside $ref or allOf, or narrow the Tool's protocolVersions.
+    owner: mcp
+    summary: >-
+      A Tool schema that is valid under its dialect but misses a schema-syntax
+      restriction of the MCP Tool type for an applicable protocol version is accepted
+      with a warning.
+    surface: Tool
+    path: inputSchema, outputSchema
+    kind: structural
+    requirement: should
+    applicability:
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": not-applicable
+        "2025-11-25": applies
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.2
+        locations:
+          - sections/09-tools.md#req-tool-schema-native-shape
+      - reference: Proposal 0032, Dialect-governed Tool schemas
+        locations:
+          - proposal-snapshots/0032-dialect-governed-tool-schemas.md
+    sources:
+      - tier: 1
+        reference: "MCP 2025-11-25 schema.ts, interface Tool: inputSchema and outputSchema have type: \"object\" and properties?: { [key: string]: object }"
+        locations:
+          - validation/mcp-schemas/2025-11-25/schema.ts#L1257-L1284
+      - tier: 1
+        reference: "MCP 2026-07-28 schema.ts, interface Tool: inputSchema has type: \"object\" and an open index signature; outputSchema has no root type"
+        locations:
+          - validation/mcp-schemas/2026-07-28/schema.ts#L1981-L2005
+      - tier: 1
+        reference: MCP 2025-11-25 and 2026-07-28 specification, Basic, JSON Schema usage (schemas are validated under their declared or default dialect)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/basic/index.mdx#L140-L186
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/basic/index.mdx#L251-L297
+      - tier: 5
+        reference: "Official TypeScript SDK, Tool schema: any JSON value under properties, type: z.literal('object') at the inputSchema root"
+        locations:
+          - https://github.com/modelcontextprotocol/typescript-sdk/blob/39ae8e6192cf43273aaaf2de4169dfa9f7216e28/packages/core/src/schemas.ts#L1352-L1358
+    enforcement: internal
+    status: arbitrated
+    fixtures:
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/0/inputSchema/properties/enabled
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/0/inputSchema/properties/debug
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/1/outputSchema/properties/result
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/2/inputSchema
+        outcome: warning
+      - path: expected-warning/tool-schema-mcp-type-mismatch.json
+        pointer: /tools/3/outputSchema
+        outcome: warning
+      - path: expected-warning/empty-input-schema.json
+        pointer: /tools/0/inputSchema
+        outcome: warning
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/0/inputSchema
+        outcome: passes
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/1/inputSchema
+        outcome: passes
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/2/inputSchema
+        outcome: passes
+      - path: expected-valid/tool-schema-mcp-type-shapes.json
+        pointer: /tools/3/inputSchema
+        outcome: passes
+    arbitrations:
+      - protocolVersions: ["2025-11-25", "2026-07-28"]
+        conflict: >-
+          MCP validates embedded schemas under their declared or default
+          dialect, JSON Schema 2020-12 by default, which allows boolean
+          subschemas and roots in $ref or allOf. The TypeScript Tool type
+          requires a literal type "object" at the inputSchema root, and in MCP
+          2025-11-25 also at the outputSchema root and an object for each
+          top-level properties value.
+        authority: MCP specification text on schema dialects
+        behavior: >-
+          Accept the schema, report a warning naming the protocol versions concerned,
+          and let native projection fail its postcondition for them.
+        rationale: >-
+          The conflict is internal to MCP, so MCP Description reports it
+          instead of deciding it (Proposal 0032). MCP 2026-07-28 removed the
+          properties restriction, the official SDKs accept boolean property
+          subschemas, and authors can always meet the restriction without
+          changing the meaning of the schema.
+        upstream: https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3238
+        reviewTrigger: Resolution of MCP issue 3238 or an MCP erratum for 2025-11-25.
+        status: active
+    notes: >-
+      Only a declared root type is examined; composition is not analyzed to
+      prove that a root admits objects. Nested schemas and keywords other than
+      top-level properties are not restricted by any MCP Tool type.
+
+  - id: mcp.tool.structured-content.output-schema
+    title: "Supply structured content when an output schema needs it"
+    description: >-
+      A successful Tool example for a Tool with outputSchema must carry the
+      required structuredContent. The schema describes that structured value,
+      not the unstructured content array. Check success and error examples
+      separately before deciding which payload is missing.
+    owner: mcp
+    summary: >-
+      When a Tool declares outputSchema, a successful result contains
+      structuredContent.
+    surface: CallToolResult
+    path: structuredContent
+    kind: semantic
+    requirement: must
+    applicability:
+      protocolVersions:
+        "2024-11-05": not-applicable
+        "2025-03-26": not-applicable
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.3
+        locations:
+          - sections/09-tools.md#req-tool-example-structured-content
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema ("Servers MUST provide structured results that conform to this schema")
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/invalid-tool-example-result-semantics.json
+        pointer: /tools/0/examples/missing/result
+        outcome: error
+      - path: expected-invalid/invalid-tool-interaction-example-semantics.json
+        pointer: /tools/0/interactionExamples/broken/result
+        outcome: error
+    notes: >-
+      Conformance of structuredContent to outputSchema is checked by
+      mcpdesc.tool.example.schema-conformance. Error results are governed by
+      mcpdesc.tool.example.error-result.
+
+  - id: mcpdesc.tool.example.schema-conformance
+    title: "Check Tool examples against their schemas"
+    description: >-
+      Example input must satisfy the resolved inputSchema, and successful
+      structured output must satisfy outputSchema when supplied. Correct the
+      example or the declaration's schema. Where resolution or dialect support
+      prevents complete checking, the diagnostic must make that limitation
+      visible.
+    owner: mcpdesc
+    summary: >-
+      A Tool example input validates against inputSchema, and its
+      structuredContent against outputSchema, for every applicable protocol version;
+      incomplete validation is reported.
+    surface: Tool example
+    path: examples, interactionExamples
+    kind: mcpdesc-semantic
+    requirement: must
+    applicability:
+      protocolVersions:
+        "2024-11-05": applies
+        "2025-03-26": applies
+        "2025-06-18": applies
+        "2025-11-25": applies
+        "2026-07-28": applies
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.2, 9.3, and 9.4
+        locations:
+          - sections/09-tools.md#req-tool-example-input-valid
+          - sections/09-tools.md#req-tool-example-incomplete-validation
+    sources:
+      - tier: 1
+        reference: MCP 2025-06-18 to 2026-07-28 specification, Server Features, Tools, Output Schema (structured results conform to outputSchema)
+        locations:
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-06-18/server/tools.mdx#L309-L382
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2025-11-25/server/tools.mdx#L335-L408
+          - https://github.com/modelcontextprotocol/modelcontextprotocol/blob/dae694f61a31f7a3ec2af3aff709e11f70f61e48/docs/specification/2026-07-28/server/tools.mdx#L509-L631
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/tool-example-schema-mismatches.json
+        pointer: /tools/0/examples/wrong-types
+        outcome: error
+      - path: expected-invalid/component-contextual-examples.json
+        pointer: /components/toolExamples/bad-input
+        outcome: error
+      - path: expected-warning/pre-dialect-tool-example.json
+        pointer: /tools/0/examples/friendly
+        outcome: warning
+      - path: expected-warning/unresolved-external-tool-example-ref.json
+        pointer: /tools/0/examples/external-identifier
+        outcome: warning
+    notes: >-
+      Before MCP 2025-11-25 no embedded dialect is defined, so only the
+      legacy shape is checked and the warning reports the gap.
+
+  - id: mcpdesc.tool.example.error-result
+    title: "Represent Tool execution errors as error results"
+    description: >-
+      Tool execution errors are completed MCP Tool results with isError true,
+      not a separate description-only error catalog. Check the error
+      result's content and avoid presenting successful structured output as
+      the error payload.
+    owner: mcpdesc
+    summary: >-
+      A Tool execution-error example result sets isError to true and does not
+      contain structuredContent.
+    surface: Tool example
+    path: result
+    kind: mcpdesc-semantic
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Section 9.3 (an execution-error result MUST NOT contain structuredContent; outputSchema does not validate error content)
+        locations:
+          - sections/09-tools.md#req-tool-example-error-result
+          - sections/09-tools.md#req-tool-example-success
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/invalid-tool-example-result-semantics.json
+        pointer: /tools/1/examples/business-error/result
+        outcome: error
+    notes: >-
+      MCP does not forbid structuredContent on error results; MCP Description
+      requires its absence so that example structuredContent always conforms
+      to outputSchema.
+
+  - id: mcpdesc.tool.members
+    title: "Declare Tools with their defined fields"
+    description: >-
+      A Tool has a non-empty name and an inputSchema, and accepts only the
+      properties of the Section 9.1 table, each with its defined type. The
+      execution object accepts only taskSupport.
+    owner: mcpdesc
+    summary: >-
+      A Tool Object has its required fields, defined property types, and no
+      unknown properties; so does its Execution Object.
+    surface: Tool, Execution
+    kind: structural
+    documentSchema:
+      - "#/$defs/tool"
+      - "#/$defs/execution"
+    requirement: must
+    applicability:
+      protocolVersions: independent
+    specification:
+      - reference: MCP Description 0.9.0, Sections 9.1 and 9.7
+        locations:
+          - sections/09-tools.md#req-tool-fields
+          - sections/09-tools.md#req-tool-input-schema-required
+          - sections/09-tools.md#req-execution-fields
+          - sections/12-elicitation.md#req-elicitations-non-empty
+          - sections/13-tags.md#req-entity-tags-shape
+          - sections/13-tags.md#req-entity-tags-unique
+    enforcement: internal
+    status: internal
+    fixtures:
+      - path: expected-invalid/empty-ordinary-nested-collections.json
+        pointer: "/tools/0/elicitations"
+        outcome: error
+      - path: expected-invalid/missing-tool-input-schema.json
+        pointer: "/tools/0"
+        outcome: error

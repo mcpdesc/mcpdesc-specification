@@ -1,49 +1,24 @@
 # Changelog
 
-This changelog records repository governance, release-process, and project-tooling changes. Changes to the MCP Description format are recorded in the [versioned specification changelog](spec/0.8.0/CHANGELOG.md).
+This changelog records repository governance, release-process, and project-tooling changes. Changes to the MCP Description format are recorded in the versioned specification changelog, currently [0.9.0](spec/0.9.0/CHANGELOG.md).
 
-## Unreleased
+## 0.9.0 release — 2026-11-16
 
-- Completed RC.3 preparation metadata and corrected repeat release-candidate preparation to preserve its original baseline; publication and tagging remain separate gates.
-- Prepared 0.9.0 RC.3 (`v0.9.0-rc.3`, dated 2026-11-07), the cumulative candidate for the changes from stable 0.8.0. It adds protocol-version-scoped validation, rule catalogs and per-rule results; the Effective Protocol View, merge and conversion profiles; and a non-semantic document-ordering profile. It aligns carried MCP values with their protocol-version schemas, including stricter Resource URI and integer constraints, MCP-defined object closure, and dialect-dependent Tool schema validation. Review-stage Proposals 0034 and 0035 add guarded schema unions and source-aware, rule-attributed diagnostics; validation result format advances to 1.4.0 with factual details and related component locations. See the [0.8.0-to-0.9.0 migration guide](spec/draft/guides/migration-0.8-to-0.9.md) for compatibility changes, including the intentional Elicitation Interaction Response closure in Tool Interaction Examples. Tracked by issue #115 and proposal PR #116. `mcpdesc` remains `0.9.0`; stable pointers remain on 0.8.0. RC.3 is a review candidate only: tagging, publication, and downstream validator/core intake require separate approval.
-- Catalog publication tooling handles a rule-format change: each indexed catalog is verified against the rule format its own manifest declares, and `rules:check-publication --index-out` accepts a live index declared in an earlier format and re-declares it in the current one. `--check-index` still requires the current format. Previously the Draft 4 index update failed on the live `1.1.0` index and its Draft 3 catalog.
-- `rules:check-publication --schema-only` reports the validation result schema when the bundle includes it, and the publication recipe in `scripts/README.md` lists it with the rule schema.
-- Prepared the `v0.9.0-draft.4` snapshot dated 2026-10-31, with review-stage Proposals 0031, 0032, and 0033, Effective Protocol View and merge cases (#102), the Resource `uri` requirement, and a fixture without `$schema` (#66).
-- Rule-level validation results (review-stage Proposal 0031): the candidate validator records the evaluations of its checks and reports a result for every rule and declared protocol version (`evaluateDocument`, `validateDocumentWithResults`); new library module `scripts/rule-summaries.mjs`. `scripts/test-validation-rules.mjs` validates every fixture result against `validation/result.schema.json` and checks citations against rule results. Validator snapshot exports inline the rule summaries and return `results` from `validate()`. Catalog exports bundle the validation result schema and list it in the manifest as `resultSchema`; publication checks verify it with the rule schema.
-- Added `scripts/test-view-fixtures.mjs` to `npm test`: it recomputes the Effective Protocol View and merge cases in `view-fixtures/` (issue #102) with the reference operations of `scripts/mcpdesc-views.mjs`. `scripts/test-validation-rules.mjs` checks citations of those cases; validator snapshot exports and draft snapshot preparation include `view-fixtures/`.
-- Extended `scripts/test-validation-rules.mjs` for review-stage Proposal 0033: it checks that every canonical schema definition has exactly one `documentSchema` owner, that every requirement anchor is cited by a rule or listed in `validation/unchecked-requirements.yaml`, and that every obligation sentence is anchored, and reports catalog coverage. New library modules `scripts/document-schema-owners.mjs` and `scripts/normative-sentences.mjs`; validator snapshot exports inline the ownership map, so the exported runtime files are unchanged. Catalog exports use rule format `1.2.0` and include `uncheckedRequirements`.
-- Prepared the `v0.9.0-draft.3` snapshot dated 2026-10-29, with editorial improvements to the validation catalog overview and protocol-version guide, and review-stage Proposal 0030 implementation. Added readable records, rule-specific applicability and dialect metadata, catalog-local retirement, deterministic export and discovery/publication tooling, and offline publication tests. Named rulesets are removed; document validation behavior remains unchanged from Draft 2. Catalog hosting is verified separately.
-- Replaced rule-record diagnostic codes with checked fixture outcomes: `scripts/test-validation-rules.mjs` now verifies each citation's outcome, severity evidence, requirement-traced projection failures, and validator rule references, instead of candidate diagnostic-code coverage. `scripts/test-projection-fixtures.mjs` checks the new projection postcondition failure cases.
-- Added `scripts/test-conversion-fixtures.mjs` to `npm test`: it recomputes the version conversion cases in `conversion/` from the conversion rules and fails on any target error that no conversion rule explains. Validator snapshot exports now include `conversion/`, with the released source documents it converts, and draft preparation rewrites `$schema` identifiers there.
-- Prepared the `v0.9.0-draft.2` snapshot dated 2026-10-28.
-- Detailed the validator revision policy in `GOVERNANCE.md`: when a revision is allowed, when a correction must go into a draft snapshot or new version instead, how a revision is prepared (public issue, maintenance branch, complete changelog record in the tagged commit), and its downstream impact on normative tooling, including a required release announcement listing changed fixtures. Prompted by `v0.8.0-rev.20261021`, whose changelog record was completed only after tagging and is therefore not part of that tag or its validator snapshot.
-- Codified dated validator revisions as the correction path for stable-release semantic validation defects, and `release/<major>.<minor>.x` maintenance branches for stable-release corrections while a later version is in development.
-- Made repository tooling version-neutral: the candidate validator is `scripts/validate-document.mjs` (exporting `validateDocument`), and tests and repository validation derive the candidate version and paths from `specification-status.json`. Diagnostics for 0.8.0 documents are unchanged.
-- Initialized the MCP Description 0.9.0 community working draft in `spec/draft/` from the stable 0.8.0 release, with `schemas/mcp-description/0.9.0.json` and `schemas/draft.json` targeting the upcoming `v0.9.0-draft.1` snapshot. The candidate validator now validates 0.9.0 documents; frozen 0.7.0 and 0.8.0 artifacts are unchanged.
-- Added `scripts/test-validation-rules.mjs` to `npm test`: it checks the candidate validation rule registry against its schema, identifier and ownership rules, revision applicability, source tiers, the support-tier policy for gaps, fixtures, and candidate diagnostic codes, and reports diagnostic-code coverage.
-- Added `scripts/test-projection-fixtures.mjs` to `npm test`: it checks the native projection cases in `projection-fixtures/` without implementing projection. Validator snapshot exports now include `projection-fixtures/`.
-- Draft and release-candidate preparation keep the stable release's editorial-edition metadata in `specification-status.json`; they only clear an editorial edition of a release candidate.
-- Prepared the `v0.9.0-draft.1` snapshot dated 2026-10-26.
+- Released the stable 0.9.0 artifact tree and promoted Proposals 0024–0036 as durable decision records. Downstream default adoption remains a separate coordination step.
+- Simplified proposal tracking: inclusion in the versioned snapshot list means implemented in that specification version; Git history is the source of truth for changes, without separate capture-status or digest bookkeeping.
 
-## 2026-10-21
+## 2026-10-24 — Stable maintenance policy
 
-- Published validator revision `v0.8.0-rev.20261021` (selector `0.8.0-rev.20261021`), correcting one semantic validation defect of the stable 0.8.0 release. The `v0.8.0` tag, canonical schema bytes, `$id`, and normative text are unchanged, and selector `0.8.0` keeps its original behavior.
-  - Correction: `x-mcp-header` in a Tool `inputSchema` is checked only when the Tool's effective protocol scope includes MCP 2026-07-28. Selector `0.8.0` reported `field-not-supported-by-version` whenever the scope also included an earlier revision, and applied the MCP 2026-07-28 header-value rules to Tools scoped only to earlier revisions. In those revisions `x-mcp-header` is an unknown JSON Schema keyword and is preserved. MCP-specific annotations now apply only to protocol revisions that define them; unknown Tool-schema keywords remain preserved and governed by their JSON Schema dialect.
-  - Normative source: MCP Description 0.8.0, [Section 9.2](spec/0.8.0/sections/09-tools.md#92-input-and-output-schemas). `x-mcp-header` is defined for MCP 2026-07-28 `inputSchema` properties only; MCP 2025-11-25 schemas must be valid under their declared or default dialect, JSON Schema 2020-12, which permits unknown keywords; for earlier revisions, other keywords "MUST be preserved and MUST NOT be rejected".
-  - Regression fixtures: `spec/0.8.0/fixtures/expected-invalid/revision-inapplicable-mcp-header.json` moved to `expected-valid/` and extended with header values that are invalid only under MCP 2026-07-28 rules; new `spec/0.8.0/fixtures/expected-valid/custom-tool-schema-keywords.json` combines `x-mcp-header` and custom keywords in a Tool scoped to MCP 2025-11-25 and 2026-07-28. Both are invalid under selector `0.8.0` and valid under the revision. `scripts/test-views.mjs` checks that MCP 2026-07-28 header rules still reject invalid values and that custom keywords survive projection, merge, and reference resolution.
-  - The revision was prepared on `main`, before the maintenance-branch policy of 2026-10-24; later revisions are prepared on `release/0.8.x`.
-- Added dated stable-revision validator snapshot selectors and manifest-verified export regression coverage.
+- Established dated validator revisions and `release/<major>.<minor>.x` maintenance branches for correcting stable validation defects without changing frozen schemas or normative text.
 
-## 2026-10-20
+## 2026-10-21 — Validator maintenance
 
-- Distinguished deliberate `expected-warning` fixture diagnostics from other repository warnings in test output, and required exact diagnostic-code multiplicities for every warning fixture.
+- Published the first dated validator revision for 0.8.0 and added regression coverage for the corrected protocol-scoped Tool-schema behavior.
 
-## 2026-09-09
+## 2026-10-20 — Repository validation
 
-- Allowed reviewed editorial corrections to non-normative examples, conformance fixtures, and serialization fixtures when their purpose and conformance semantics remain unchanged and the repository test suite passes.
-- Kept normative requirements, canonical schemas, semantic validation behavior, and proposal provenance protected from editorial-edition changes, with regression coverage for stable and prerelease layouts.
-- Required stable-release preparation to receive an explicit release date and added review safeguards to the version-freezing workflow.
-- Documented the immutable editorial-edition and stable-release workflows in repository governance and maintainer guidance.
-- Adopted the pre-1.0 release policy used for MCP Description 0.8.0, permitting breaking changes in `0.x` minor releases.
+- Separated expected fixture warnings from repository warnings and required exact diagnostic-code counts for warning fixtures.
 
-Detailed release history is available in the [GitHub prereleases](https://github.com/mcpdesc/mcpdesc-specification/releases) and [tags](https://github.com/mcpdesc/mcpdesc-specification/tags).
+## 2026-09-09 — Release governance
+
+- Formalized stable artifact freezing and immutable editorial corrections, added release-date safeguards, and adopted the pre-1.0 policy allowing breaking changes in `0.x` minor releases.

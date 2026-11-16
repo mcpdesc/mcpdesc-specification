@@ -1,29 +1,10 @@
 {
   "stable": {
-    "version": "0.8.0",
+    "version": "0.9.0",
     "status": "current-stable-release",
     "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
-    "path": "spec/0.8.0",
-    "releaseTag": "v0.8.0",
-    "releaseDate": "2026-09-09"
-  },
-  "editorialEdition": {
-    "baseTag": "v0.8.0",
-    "iteration": 1,
-    "editionTag": "v0.8.0+editorial.1",
-    "editionDate": "2026-10-19",
-    "target": "stable"
-  },
-  "draft": {
-    "version": "0.9.0",
-    "status": "release-candidate",
-    "iteration": 4,
-    "snapshotTag": "v0.9.0-rc.4",
-    "snapshotDate": "2026-11-09",
-    "canonicalSource": "https://github.com/mcpdesc/mcpdesc-specification",
-    "branch": "release/0.9.0-rc.4",
-    "path": "spec/draft",
-    "released": false,
-    "baselineTag": "v0.9.0-rc.3"
+    "path": "spec/0.9.0",
+    "releaseTag": "v0.9.0",
+    "releaseDate": "2026-11-16"
   }
 }

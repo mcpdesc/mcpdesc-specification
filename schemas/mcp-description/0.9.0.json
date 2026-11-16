@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://mcpdesc.org/schema/mcp-description/0.9.0-rc.4.json",
+  "$id": "https://mcpdesc.org/schema/mcp-description/0.9.0.json",
   "title": "MCP Description (mcpdesc)",
-  "description": "MCP Description 0.9.0 Release Candidate 4 (v0.9.0-rc.4; prerelease).",
+  "description": "MCP Description 0.9.0.",
   "type": "object",
   "required": [
     "mcpdesc",
